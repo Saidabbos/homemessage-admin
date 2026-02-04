@@ -1,0 +1,13 @@
+.git
+.github
+.idea
+.vscode
+docker
+.env.example
+.env
+.editorconfig
+.gitattributes
+.gitignore
+*.md
+node_modules
+npm-debug.log
