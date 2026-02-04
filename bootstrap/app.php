@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
+        $middleware->replace(
+            \Illuminate\Auth\Middleware\Authenticate::class,
+            \App\Http\Middleware\Authenticate::class,
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

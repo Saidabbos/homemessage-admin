@@ -10,6 +10,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Default login redirect
+Route::get('/login', function () {
+    return redirect()->route('admin.login');
+})->name('login');
+
 // Admin Auth Routes
 Route::prefix('admin')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('admin.login');
