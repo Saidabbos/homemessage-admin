@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\DispatcherController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\SlotController;
+use App\Http\Controllers\Admin\MasterScheduleController;
 
 // Public routes
 Route::get('/', function () {
@@ -118,4 +120,27 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('profile', [ProfileController::class, 'index'])->name('admin.profile.index');
     Route::put('profile', [ProfileController::class, 'update'])->name('admin.profile.update');
     Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('admin.profile.password');
+
+    // Slots CRUD (time templates)
+    Route::resource('slots', SlotController::class, [
+        'names' => [
+            'index' => 'admin.slots.index',
+            'create' => 'admin.slots.create',
+            'store' => 'admin.slots.store',
+            'show' => 'admin.slots.show',
+            'edit' => 'admin.slots.edit',
+            'update' => 'admin.slots.update',
+            'destroy' => 'admin.slots.destroy',
+        ]
+    ]);
+    Route::post('slots/generate-defaults', [SlotController::class, 'generateDefaults'])
+        ->name('admin.slots.generate-defaults');
+
+    // Master Schedule (booking management)
+    Route::get('schedule', [MasterScheduleController::class, 'index'])->name('admin.schedule.index');
+    Route::get('schedule/{master}', [MasterScheduleController::class, 'show'])->name('admin.schedule.show');
+    Route::post('schedule/{master}/block-slot', [MasterScheduleController::class, 'blockSlot'])->name('admin.schedule.block-slot');
+    Route::post('schedule/{master}/unblock-slot', [MasterScheduleController::class, 'unblockSlot'])->name('admin.schedule.unblock-slot');
+    Route::post('schedule/{master}/block-day', [MasterScheduleController::class, 'blockDay'])->name('admin.schedule.block-day');
+    Route::post('schedule/{master}/unblock-day', [MasterScheduleController::class, 'unblockDay'])->name('admin.schedule.unblock-day');
 });
