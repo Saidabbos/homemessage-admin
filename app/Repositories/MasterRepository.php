@@ -32,4 +32,22 @@ class MasterRepository extends BaseRepository
 
         return $this->paginate($query->latest(), $perPage);
     }
+
+    /**
+     * Get featured masters for landing page
+     */
+    public function getFeaturedForLanding(int $limit = 4): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->query()
+            ->where('status', true)
+            ->take($limit)
+            ->get()
+            ->map(fn($master) => [
+                'id' => $master->id,
+                'name' => $master->first_name . ' ' . $master->last_name,
+                'bio' => $master->bio,
+                'photo' => $master->photo_url,
+                'rating' => $master->average_rating ?? 4.9,
+            ]);
+    }
 }

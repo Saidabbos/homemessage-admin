@@ -14,10 +14,10 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\SlotController;
 use App\Http\Controllers\Admin\MasterScheduleController;
 use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\PublicController;
+use App\Http\Controllers\Public\LandingController;
 
 // Public routes
-Route::get('/', [PublicController::class, 'landing'])->name('public.landing');
+Route::get('/', LandingController::class)->name('public.landing');
 
 // Default login redirect
 Route::get('/login', function () {
