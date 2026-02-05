@@ -28,7 +28,7 @@ class MasterController extends Controller
             ->when($request->service_type_id, function ($q, $serviceTypeId) {
                 $q->whereHas('serviceTypes', fn($q) => $q->where('service_types.id', $serviceTypeId));
             })
-            ->orderByDesc('rating')
+            ->orderBy('first_name')
             ->get()
             ->map(fn($master) => $this->formatMaster($master));
 
@@ -97,7 +97,6 @@ class MasterController extends Controller
             'last_name' => $master->last_name,
             'full_name' => $master->full_name,
             'photo' => $master->photo ? asset('storage/' . $master->photo) : null,
-            'rating' => (float) $master->rating,
             'experience_years' => $master->experience_years,
             'completed_orders' => $master->completed_orders_count ?? 0,
             'service_types' => $master->serviceTypes->map(fn($st) => [

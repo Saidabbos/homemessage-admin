@@ -16,8 +16,8 @@ class ServiceTypeController extends Controller
         $locale = app()->getLocale();
 
         $serviceTypes = ServiceType::query()
-            ->where('is_active', true)
-            ->orderBy('sort_order')
+            ->where('status', true)
+            ->orderBy('name')
             ->get()
             ->map(fn($st) => [
                 'id' => $st->id,
