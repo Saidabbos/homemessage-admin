@@ -18,6 +18,10 @@ class DatabaseSeeder extends Seeder
         // Seed roles and permissions
         $this->call(RoleAndPermissionSeeder::class);
 
+        // Seed service types and oils
+        $this->call(ServiceTypeSeeder::class);
+        $this->call(OilSeeder::class);
+
         // ========== CREATE ADMIN USER ==========
         $admin = User::firstOrCreate(
             ['email' => 'admin@example.com'],

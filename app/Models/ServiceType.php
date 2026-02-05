@@ -22,6 +22,8 @@ class ServiceType extends Model
 
     public $translatable = ['name', 'description'];
 
+    protected $appends = ['image_url'];
+
     protected function casts(): array
     {
         return [
@@ -39,6 +41,6 @@ class ServiceType extends Model
         if ($this->image && file_exists(public_path('storage/' . $this->image))) {
             return asset('storage/' . $this->image);
         }
-        return asset('images/placeholder.png');
+        return asset('images/placeholder.svg');
     }
 }

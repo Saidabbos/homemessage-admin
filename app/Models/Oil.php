@@ -23,6 +23,8 @@ class Oil extends Model
 
     public $translatable = ['name', 'description'];
 
+    protected $appends = ['image_url'];
+
     protected function casts(): array
     {
         return [
@@ -39,6 +41,6 @@ class Oil extends Model
         if ($this->image && file_exists(public_path('storage/' . $this->image))) {
             return asset('storage/' . $this->image);
         }
-        return asset('images/oil-placeholder.png');
+        return asset('images/oil-placeholder.svg');
     }
 }

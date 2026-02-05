@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ServiceTypeController;
 use App\Http\Controllers\Admin\OilController;
+use App\Http\Controllers\Admin\MasterController;
 
 // Public routes
 Route::get('/', function () {
@@ -50,6 +51,19 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
             'edit' => 'admin.oils.edit',
             'update' => 'admin.oils.update',
             'destroy' => 'admin.oils.destroy',
+        ]
+    ]);
+
+    // Masters CRUD
+    Route::resource('masters', MasterController::class, [
+        'names' => [
+            'index' => 'admin.masters.index',
+            'create' => 'admin.masters.create',
+            'store' => 'admin.masters.store',
+            'show' => 'admin.masters.show',
+            'edit' => 'admin.masters.edit',
+            'update' => 'admin.masters.update',
+            'destroy' => 'admin.masters.destroy',
         ]
     ]);
 });

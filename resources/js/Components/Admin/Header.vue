@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
+import LanguageSwitcher from '@/Components/Admin/LanguageSwitcher.vue';
 
 defineProps({
   user: Object,
@@ -147,6 +148,9 @@ const logout = () => {
           </a>
         </div>
       </div>
+
+      <!-- Language Switcher -->
+      <LanguageSwitcher />
 
       <!-- Fullscreen -->
       <button class="hidden md:block p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition">

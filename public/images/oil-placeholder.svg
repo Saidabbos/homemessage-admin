@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8f9fa"/>
+      <stop offset="100%" style="stop-color:#e9ecef"/>
+    </linearGradient>
+    <linearGradient id="bottle" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#adb5bd"/>
+      <stop offset="100%" style="stop-color:#6c757d"/>
+    </linearGradient>
+    <linearGradient id="oil" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffc107"/>
+      <stop offset="100%" style="stop-color:#fd7e14"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" fill="url(#bg2)"/>
+  <g transform="translate(100,100)">
+    <path d="M-8,-55 L8,-55 L8,-45 L12,-45 L12,-40 L-12,-40 L-12,-45 L-8,-45 Z" fill="#495057"/>
+    <path d="M-20,-40 C-25,-40 -28,-35 -28,5 L-28,35 C-28,45 -20,50 0,50 C20,50 28,45 28,35 L28,5 C28,-35 25,-40 20,-40 Z" fill="url(#bottle)"/>
+    <path d="M-22,-20 C-22,-20 -22,30 -22,32 C-22,40 -15,44 0,44 C15,44 22,40 22,32 L22,-20 Z" fill="url(#oil)" opacity="0.9"/>
+    <ellipse cx="0" cy="-20" rx="22" ry="6" fill="#ffc107" opacity="0.5"/>
+    <path d="M-15,-30 Q-10,-25 0,-25 Q10,-25 15,-30" stroke="#fff" stroke-width="2" fill="none" opacity="0.3"/>
+  </g>
+  <text x="100" y="175" text-anchor="middle" fill="#6c757d" font-family="system-ui, sans-serif" font-size="13" font-weight="500">Oil</text>
+</svg>

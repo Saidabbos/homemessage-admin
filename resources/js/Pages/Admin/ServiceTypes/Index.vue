@@ -1,16 +1,26 @@
 <script setup>
+import { computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Pagination from '@/Components/UI/Pagination.vue';
 
 defineOptions({ layout: AdminLayout });
 
+const { t, locale } = useI18n();
+
 defineProps({
   serviceTypes: Object,
 });
 
+const getTranslation = (item, field) => {
+  if (!item[field]) return '';
+  if (typeof item[field] === 'string') return item[field];
+  return item[field][locale.value] || item[field]['uz'] || Object.values(item[field])[0] || '';
+};
+
 const deleteServiceType = (id) => {
-  if (confirm('Haqiqatan ham bu massage turini o\'chirmoqchimisiz?')) {
+  if (confirm(t('common.confirmDelete'))) {
     router.delete(route('admin.service-types.destroy', id));
   }
 };
@@ -22,14 +32,14 @@ const deleteServiceType = (id) => {
     <div class="mb-4">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-2xl font-semibold text-[#1f2d3d]">Massage Turlari</h1>
-          <p class="text-sm text-[#6c757d] mt-1">Barcha xizmat turlarini boshqarish</p>
+          <h1 class="text-2xl font-semibold text-[#1f2d3d]">{{ t('serviceTypes.title') }}</h1>
+          <p class="text-sm text-[#6c757d] mt-1">{{ t('serviceTypes.subtitle') }}</p>
         </div>
         <nav class="mt-2 sm:mt-0">
           <ol class="flex items-center text-sm">
-            <li><Link href="/admin/dashboard" class="text-[#007bff]">Bosh sahifa</Link></li>
+            <li><Link href="/admin/dashboard" class="text-[#007bff]">{{ t('common.home') }}</Link></li>
             <li class="mx-2 text-[#6c757d]">/</li>
-            <li class="text-[#6c757d]">Massage Turlari</li>
+            <li class="text-[#6c757d]">{{ t('serviceTypes.title') }}</li>
           </ol>
         </nav>
       </div>
@@ -43,7 +53,7 @@ const deleteServiceType = (id) => {
           <svg class="w-5 h-5 mr-2 text-[#17a2b8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
           </svg>
-          Xizmatlar Ro'yxati
+          {{ t('serviceTypes.list') }}
         </h3>
         <Link
           href="/admin/service-types/create"
@@ -52,7 +62,7 @@ const deleteServiceType = (id) => {
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
           </svg>
-          Yangi Qo'shish
+          {{ t('common.addNew') }}
         </Link>
       </div>
 
@@ -64,12 +74,12 @@ const deleteServiceType = (id) => {
             <thead class="bg-[#f8f9fa] border-b border-gray-200">
               <tr>
                 <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">#</th>
-                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">Rasm</th>
-                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">Nomi</th>
-                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">Davomiyligi</th>
-                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">Narxi</th>
-                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">Status</th>
-                <th class="px-4 py-3 text-center font-semibold text-[#6c757d]">Amallar</th>
+                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('common.image') }}</th>
+                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('common.name') }}</th>
+                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('serviceTypes.duration') }}</th>
+                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('common.price') }}</th>
+                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('common.status') }}</th>
+                <th class="px-4 py-3 text-center font-semibold text-[#6c757d]">{{ t('common.actions') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -83,7 +93,7 @@ const deleteServiceType = (id) => {
                   />
                 </td>
                 <td class="px-4 py-3">
-                  <div class="font-medium text-[#1f2d3d]">{{ type.uz?.name || type.name }}</div>
+                  <div class="font-medium text-[#1f2d3d]">{{ getTranslation(type, 'name') }}</div>
                   <div class="text-xs text-[#6c757d]">{{ type.slug }}</div>
                 </td>
                 <td class="px-4 py-3">
@@ -103,14 +113,14 @@ const deleteServiceType = (id) => {
                     class="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-[#d4edda] text-[#155724]"
                   >
                     <span class="w-1.5 h-1.5 bg-[#28a745] rounded-full mr-1.5"></span>
-                    Faol
+                    {{ t('common.active') }}
                   </span>
                   <span
                     v-else
                     class="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-[#f8d7da] text-[#721c24]"
                   >
                     <span class="w-1.5 h-1.5 bg-[#dc3545] rounded-full mr-1.5"></span>
-                    Nofaol
+                    {{ t('common.inactive') }}
                   </span>
                 </td>
                 <td class="px-4 py-3">
@@ -118,7 +128,7 @@ const deleteServiceType = (id) => {
                     <Link
                       :href="route('admin.service-types.show', type.id)"
                       class="p-1.5 text-[#17a2b8] hover:bg-[#17a2b8] hover:text-white rounded transition"
-                      title="Ko'rish"
+                      :title="t('common.view')"
                     >
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -128,7 +138,7 @@ const deleteServiceType = (id) => {
                     <Link
                       :href="route('admin.service-types.edit', type.id)"
                       class="p-1.5 text-[#ffc107] hover:bg-[#ffc107] hover:text-[#1f2d3d] rounded transition"
-                      title="Tahrirlash"
+                      :title="t('common.edit')"
                     >
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -137,7 +147,7 @@ const deleteServiceType = (id) => {
                     <button
                       @click="deleteServiceType(type.id)"
                       class="p-1.5 text-[#dc3545] hover:bg-[#dc3545] hover:text-white rounded transition"
-                      title="O'chirish"
+                      :title="t('common.delete')"
                     >
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -157,8 +167,8 @@ const deleteServiceType = (id) => {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
             </svg>
           </div>
-          <h3 class="text-lg font-semibold text-[#1f2d3d] mb-2">Ma'lumot topilmadi</h3>
-          <p class="text-[#6c757d] mb-4">Hozircha hech qanday massage turi yaratilmadi</p>
+          <h3 class="text-lg font-semibold text-[#1f2d3d] mb-2">{{ t('common.noData') }}</h3>
+          <p class="text-[#6c757d] mb-4">{{ t('serviceTypes.emptyMessage') }}</p>
           <Link
             href="/admin/service-types/create"
             class="inline-flex items-center px-4 py-2 bg-[#007bff] text-white text-sm font-medium rounded hover:bg-[#0069d9] transition"
@@ -166,7 +176,7 @@ const deleteServiceType = (id) => {
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
-            Birinchi Xizmatni Qo'shish
+            {{ t('serviceTypes.addFirst') }}
           </Link>
         </div>
       </div>
@@ -175,7 +185,7 @@ const deleteServiceType = (id) => {
       <div v-if="serviceTypes.data.length > 0" class="px-4 py-3 bg-[#f8f9fa] border-t border-gray-200">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div class="text-sm text-[#6c757d]">
-            Jami: <strong>{{ serviceTypes.total }}</strong> ta yozuv
+            {{ t('common.total') }}: <strong>{{ serviceTypes.total }}</strong> {{ t('common.records') }}
           </div>
           <Pagination :links="serviceTypes.links" />
         </div>
