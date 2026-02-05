@@ -28,7 +28,7 @@ class OrderController extends Controller
         return Inertia::render('Admin/Orders/Index', [
             'orders' => $this->orderRepository->getFilteredPaginated($request->all()),
             'filters' => $request->only(['search', 'status', 'payment_status', 'master_id', 'date_from', 'date_to']),
-            'masters' => Master::where('is_active', true)->get(['id', 'first_name', 'last_name']),
+            'masters' => Master::where('status', true)->get(['id', 'first_name', 'last_name']),
             'statuses' => $this->getStatusOptions(),
             'paymentStatuses' => $this->getPaymentStatusOptions(),
             'statusCounts' => $this->orderRepository->getStatusCounts(),
@@ -45,7 +45,7 @@ class OrderController extends Controller
                 array_merge($request->all(), ['status' => Order::STATUS_NEW])
             ),
             'filters' => array_merge($request->only(['search', 'master_id']), ['status' => Order::STATUS_NEW]),
-            'masters' => Master::where('is_active', true)->get(['id', 'first_name', 'last_name']),
+            'masters' => Master::where('status', true)->get(['id', 'first_name', 'last_name']),
             'statuses' => $this->getStatusOptions(),
             'paymentStatuses' => $this->getPaymentStatusOptions(),
             'statusCounts' => $this->orderRepository->getStatusCounts(),

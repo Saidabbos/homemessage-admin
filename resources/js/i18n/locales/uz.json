@@ -299,6 +299,24 @@
     "confirmUnblock": "Haqiqatan ham bu slotni ochmoqchimisiz?",
     "confirmUnblockDay": "Haqiqatan ham bu kunning barcha sloatlarini ochmoqchimisiz?"
   },
+  "payments": {
+    "title": "To'lovlar",
+    "history": "To'lovlar tarixi",
+    "noPayments": "Hali to'lov yo'q",
+    "provider": "To'lov tizimi",
+    "transactionId": "Tranzaksiya ID",
+    "amount": "Summa",
+    "status": "Status",
+    "paidAt": "To'langan vaqt",
+    "statuses": {
+      "pending": "Kutilmoqda",
+      "processing": "Jarayonda",
+      "paid": "To'langan",
+      "cancelled": "Bekor qilingan",
+      "failed": "Xatolik",
+      "refunded": "Qaytarilgan"
+    }
+  },
   "orders": {
     "title": "Buyurtmalar",
     "subtitle": "Barcha buyurtmalarni boshqarish",

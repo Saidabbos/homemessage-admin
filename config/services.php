@@ -35,4 +35,36 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Payment Services
+    |--------------------------------------------------------------------------
+    */
+
+    'payme' => [
+        'merchant_id' => env('PAYME_MERCHANT_ID'),
+        'key' => env('PAYME_KEY'),
+        'test_mode' => env('PAYME_TEST_MODE', true),
+    ],
+
+    'click' => [
+        'merchant_id' => env('CLICK_MERCHANT_ID'),
+        'service_id' => env('CLICK_SERVICE_ID'),
+        'secret_key' => env('CLICK_SECRET_KEY'),
+        'test_mode' => env('CLICK_TEST_MODE', true),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Telegram Bot
+    |--------------------------------------------------------------------------
+    */
+
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'bot_username' => env('TELEGRAM_BOT_USERNAME'),
+        'webhook_url' => env('TELEGRAM_WEBHOOK_URL'),
+        'admin_chat_id' => env('TELEGRAM_ADMIN_CHAT_ID'),
+    ],
+
 ];

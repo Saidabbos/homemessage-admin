@@ -127,6 +127,27 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'payme' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/payme.log'),
+            'level' => 'debug',
+            'days' => 30,
+        ],
+
+        'click' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/click.log'),
+            'level' => 'debug',
+            'days' => 30,
+        ],
+
+        'telegram' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/telegram.log'),
+            'level' => 'debug',
+            'days' => 30,
+        ],
+
     ],
 
 ];

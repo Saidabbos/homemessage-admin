@@ -66,6 +66,7 @@ class OrderRepository
                 'confirmedBy',
                 'cancelledBy',
                 'logs.user',
+                'payments',
             ])
             ->find($id);
     }

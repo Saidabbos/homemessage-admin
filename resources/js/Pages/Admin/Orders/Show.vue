@@ -105,6 +105,42 @@ const getPaymentStatusClass = (status) => {
   return classes[status] || 'bg-gray-100 text-gray-600';
 };
 
+const getPaymentItemStatusClass = (status) => {
+  const classes = {
+    'PENDING': 'bg-yellow-100 text-yellow-800',
+    'PROCESSING': 'bg-blue-100 text-blue-800',
+    'PAID': 'bg-green-100 text-green-800',
+    'CANCELLED': 'bg-gray-100 text-gray-800',
+    'FAILED': 'bg-red-100 text-red-800',
+    'REFUNDED': 'bg-purple-100 text-purple-800',
+  };
+  return classes[status] || 'bg-gray-100 text-gray-600';
+};
+
+const getPaymentStatusLabel = (status) => {
+  const labels = {
+    'PENDING': 'Kutilmoqda',
+    'PROCESSING': 'Jarayonda',
+    'PAID': "To'langan",
+    'CANCELLED': 'Bekor qilingan',
+    'FAILED': 'Xatolik',
+    'REFUNDED': 'Qaytarilgan',
+  };
+  return labels[status] || status;
+};
+
+const getProviderLabel = (provider) => {
+  const labels = {
+    'payme': 'Payme',
+    'click': 'Click',
+  };
+  return labels[provider] || provider;
+};
+
+const formatAmount = (amount, currency = 'UZS') => {
+  return Number(amount).toLocaleString() + ' ' + currency;
+};
+
 const formatDate = (date) => {
   if (!date) return '-';
   return new Date(date).toLocaleDateString('uz-UZ');
@@ -291,15 +327,61 @@ const getStatusLabel = (status) => {
             <h3 class="font-semibold text-[#1f2d3d]">{{ t('orders.payment') }}</h3>
           </div>
           <div class="p-4">
-            <span
-              class="inline-flex px-3 py-1 text-sm font-medium rounded"
-              :class="getPaymentStatusClass(order.payment_status)"
-            >
-              {{ order.payment_status === 'NOT_PAID' ? "To'lanmagan" : order.payment_status === 'PAID' ? "To'langan" : 'Qaytarilgan' }}
-            </span>
-            <p v-if="order.paid_at" class="mt-2 text-sm text-[#6c757d]">
-              {{ t('orders.paidAt') }}: {{ formatDateTime(order.paid_at) }}
-            </p>
+            <!-- Order Payment Status -->
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-sm text-[#6c757d]">{{ t('orders.status') }}:</span>
+              <span
+                class="inline-flex px-3 py-1 text-sm font-medium rounded"
+                :class="getPaymentStatusClass(order.payment_status)"
+              >
+                {{ order.payment_status === 'NOT_PAID' ? "To'lanmagan" : order.payment_status === 'PAID' ? "To'langan" : 'Qaytarilgan' }}
+              </span>
+            </div>
+
+            <!-- Total Amount -->
+            <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
+              <span class="text-sm text-[#6c757d]">{{ t('orders.amount') }}:</span>
+              <span class="font-semibold text-[#1f2d3d]">{{ formatAmount(order.total_amount) }}</span>
+            </div>
+
+            <!-- Payment History -->
+            <div v-if="order.payments && order.payments.length > 0">
+              <p class="text-sm font-medium text-[#1f2d3d] mb-2">{{ t('payments.history') }}</p>
+              <div class="space-y-3">
+                <div
+                  v-for="payment in order.payments"
+                  :key="payment.id"
+                  class="p-3 bg-gray-50 rounded border border-gray-100"
+                >
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-medium text-[#6c757d]">{{ getProviderLabel(payment.provider) }}</span>
+                    <span
+                      class="inline-flex px-2 py-0.5 text-xs font-medium rounded"
+                      :class="getPaymentItemStatusClass(payment.status)"
+                    >
+                      {{ getPaymentStatusLabel(payment.status) }}
+                    </span>
+                  </div>
+                  <div class="text-sm font-semibold text-[#1f2d3d]">
+                    {{ formatAmount(payment.amount, payment.currency) }}
+                  </div>
+                  <div class="text-xs text-[#6c757d] mt-1">
+                    ID: {{ payment.transaction_id }}
+                  </div>
+                  <div v-if="payment.paid_at" class="text-xs text-green-600 mt-1">
+                    {{ t('orders.paidAt') }}: {{ formatDateTime(payment.paid_at) }}
+                  </div>
+                  <div v-if="payment.error_message" class="text-xs text-red-600 mt-1">
+                    {{ payment.error_message }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- No Payments Yet -->
+            <div v-else class="text-sm text-[#6c757d] italic">
+              {{ t('payments.noPayments') }}
+            </div>
           </div>
         </div>
 

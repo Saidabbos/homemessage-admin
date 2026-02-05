@@ -299,6 +299,24 @@
     "confirmUnblock": "Are you sure you want to unblock this slot?",
     "confirmUnblockDay": "Are you sure you want to unblock all slots for this day?"
   },
+  "payments": {
+    "title": "Payments",
+    "history": "Payment History",
+    "noPayments": "No payments yet",
+    "provider": "Payment Provider",
+    "transactionId": "Transaction ID",
+    "amount": "Amount",
+    "status": "Status",
+    "paidAt": "Paid At",
+    "statuses": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "paid": "Paid",
+      "cancelled": "Cancelled",
+      "failed": "Failed",
+      "refunded": "Refunded"
+    }
+  },
   "orders": {
     "title": "Orders",
     "subtitle": "Manage all orders",

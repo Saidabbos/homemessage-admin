@@ -120,6 +120,31 @@ class Order extends Model
         return $this->hasMany(OrderLog::class)->latest();
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class)->latest();
+    }
+
+    public function latestPayment()
+    {
+        return $this->hasOne(Payment::class)->latestOfMany();
+    }
+
+    public function qualityControl()
+    {
+        return $this->hasOne(QualityControl::class);
+    }
+
+    public function telegramMessages(): HasMany
+    {
+        return $this->hasMany(TelegramMessage::class)->latest();
+    }
+
+    public function auditLogs()
+    {
+        return $this->morphMany(AuditLog::class, 'auditable')->latest();
+    }
+
     // ==================== SCOPES ====================
 
     public function scopeStatus($query, string $status)
