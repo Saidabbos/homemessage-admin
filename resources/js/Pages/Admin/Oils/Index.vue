@@ -1,4 +1,5 @@
 <script setup>
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
@@ -8,9 +9,37 @@ defineOptions({ layout: AdminLayout });
 
 const { t, locale } = useI18n();
 
-defineProps({
+const props = defineProps({
   oils: Object,
+  filters: Object,
 });
+
+const search = ref(props.filters?.search || '');
+const status = ref(props.filters?.status || '');
+
+const applyFilters = () => {
+  router.get(route('admin.oils.index'), {
+    search: search.value || undefined,
+    status: status.value || undefined,
+  }, {
+    preserveState: true,
+    replace: true,
+  });
+};
+
+const resetFilters = () => {
+  search.value = '';
+  status.value = '';
+  router.get(route('admin.oils.index'));
+};
+
+let searchTimeout;
+watch(search, () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(applyFilters, 300);
+});
+
+watch(status, applyFilters);
 
 const getTranslation = (item, field) => {
   if (!item[field]) return '';
@@ -23,6 +52,8 @@ const deleteOil = (id) => {
     router.delete(route('admin.oils.destroy', id));
   }
 };
+
+const hasActiveFilters = () => search.value || status.value;
 </script>
 
 <template>
@@ -65,6 +96,37 @@ const deleteOil = (id) => {
         </Link>
       </div>
 
+      <!-- Filters -->
+      <div class="px-4 py-3 bg-[#f8f9fa] border-b border-gray-200">
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="flex-1">
+            <input
+              type="text"
+              v-model="search"
+              :placeholder="t('common.search') + '...'"
+              class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-[#007bff] focus:border-[#007bff]"
+            />
+          </div>
+          <div class="sm:w-40">
+            <select
+              v-model="status"
+              class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-[#007bff] focus:border-[#007bff]"
+            >
+              <option value="">{{ t('common.allStatuses') }}</option>
+              <option value="active">{{ t('common.active') }}</option>
+              <option value="inactive">{{ t('common.inactive') }}</option>
+            </select>
+          </div>
+          <button
+            v-if="hasActiveFilters()"
+            @click="resetFilters"
+            class="px-3 py-2 text-sm text-[#6c757d] hover:text-[#1f2d3d] transition"
+          >
+            {{ t('common.reset') }}
+          </button>
+        </div>
+      </div>
+
       <!-- Card Body -->
       <div class="p-0">
         <!-- Table -->
@@ -75,7 +137,6 @@ const deleteOil = (id) => {
                 <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">#</th>
                 <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('common.image') }}</th>
                 <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('translations.name') }}</th>
-                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('common.price') }}</th>
                 <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('common.status') }}</th>
                 <th class="px-4 py-3 text-center font-semibold text-[#6c757d]">{{ t('common.actions') }}</th>
               </tr>
@@ -93,9 +154,6 @@ const deleteOil = (id) => {
                 <td class="px-4 py-3">
                   <div class="font-medium text-[#1f2d3d]">{{ getTranslation(oil, 'name') }}</div>
                   <div class="text-xs text-[#6c757d]">{{ oil.slug }}</div>
-                </td>
-                <td class="px-4 py-3">
-                  <span class="font-medium text-[#1f2d3d]">+{{ oil.price?.toLocaleString() }} so'm</span>
                 </td>
                 <td class="px-4 py-3">
                   <span

@@ -22,7 +22,6 @@ class OilSeeder extends Seeder
                     'ru' => 'Обладает успокаивающими свойствами. Снижает стресс и улучшает сон.',
                     'en' => 'Has calming properties. Reduces stress and improves sleep.',
                 ],
-                'price' => 25000,
                 'status' => true,
             ],
             [
@@ -37,7 +36,6 @@ class OilSeeder extends Seeder
                     'ru' => 'Увлажняет и питает кожу. Обладает натуральными антибактериальными свойствами.',
                     'en' => 'Moisturizes and nourishes skin. Has natural antibacterial properties.',
                 ],
-                'price' => 20000,
                 'status' => true,
             ],
             [
@@ -52,7 +50,6 @@ class OilSeeder extends Seeder
                     'ru' => 'Облегчает дыхание. Уменьшает мышечные боли и бодрит.',
                     'en' => 'Eases breathing. Reduces muscle pain and invigorates.',
                 ],
-                'price' => 30000,
                 'status' => true,
             ],
             [
@@ -67,7 +64,6 @@ class OilSeeder extends Seeder
                     'ru' => 'Богато витамином E. Смягчает кожу и повышает её эластичность.',
                     'en' => 'Rich in Vitamin E. Softens skin and increases its elasticity.',
                 ],
-                'price' => 22000,
                 'status' => true,
             ],
             [
@@ -82,7 +78,6 @@ class OilSeeder extends Seeder
                     'ru' => 'Даёт охлаждающий эффект. Уменьшает головную боль и даёт энергию.',
                     'en' => 'Provides cooling effect. Reduces headaches and gives energy.',
                 ],
-                'price' => 28000,
                 'status' => true,
             ],
             [
@@ -97,7 +92,6 @@ class OilSeeder extends Seeder
                     'ru' => 'Одно из лучших масел для кожи. Быстро впитывается и не оставляет жирных следов.',
                     'en' => 'One of the best oils for skin. Absorbs quickly and leaves no greasy residue.',
                 ],
-                'price' => 35000,
                 'status' => true,
             ],
             [
@@ -112,7 +106,6 @@ class OilSeeder extends Seeder
                     'ru' => 'Улучшает кровообращение. Укрепляет память и повышает концентрацию.',
                     'en' => 'Improves blood circulation. Strengthens memory and increases concentration.',
                 ],
-                'price' => 32000,
                 'status' => true,
             ],
             [
@@ -127,7 +120,6 @@ class OilSeeder extends Seeder
                     'ru' => 'Премиальное масло из Марокко. Восстанавливает и омолаживает кожу.',
                     'en' => 'Premium oil from Morocco. Restores and rejuvenates skin.',
                 ],
-                'price' => 45000,
                 'status' => true,
             ],
         ];

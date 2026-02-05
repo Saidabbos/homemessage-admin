@@ -87,12 +87,6 @@ const getTranslation = (key, locale) => {
 
               <!-- Details -->
               <div class="flex-1 space-y-4">
-                <div class="bg-[#17a2b8] rounded p-4 text-white">
-                  <p class="text-sm opacity-80">{{ t('oils.additionalPrice') }}</p>
-                  <p class="text-2xl font-bold">+{{ oil.price?.toLocaleString() }}</p>
-                  <p class="text-sm opacity-80">so'm</p>
-                </div>
-
                 <div class="space-y-2 text-sm">
                   <div class="flex items-center justify-between py-2 border-b border-gray-100">
                     <span class="text-[#6c757d]">{{ t('common.slug') }}:</span>

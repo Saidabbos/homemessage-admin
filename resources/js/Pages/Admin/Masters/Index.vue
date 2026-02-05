@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { ref, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
@@ -9,9 +9,44 @@ defineOptions({ layout: AdminLayout });
 
 const { t, locale } = useI18n();
 
-defineProps({
+const props = defineProps({
   masters: Object,
+  serviceTypes: Array,
+  filters: Object,
 });
+
+const search = ref(props.filters?.search || '');
+const status = ref(props.filters?.status || '');
+const gender = ref(props.filters?.gender || '');
+const serviceType = ref(props.filters?.service_type || '');
+
+const applyFilters = () => {
+  router.get(route('admin.masters.index'), {
+    search: search.value || undefined,
+    status: status.value || undefined,
+    gender: gender.value || undefined,
+    service_type: serviceType.value || undefined,
+  }, {
+    preserveState: true,
+    replace: true,
+  });
+};
+
+const resetFilters = () => {
+  search.value = '';
+  status.value = '';
+  gender.value = '';
+  serviceType.value = '';
+  router.get(route('admin.masters.index'));
+};
+
+let searchTimeout;
+watch(search, () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(applyFilters, 300);
+});
+
+watch([status, gender, serviceType], applyFilters);
 
 const getTranslation = (item, field) => {
   if (!item[field]) return '';
@@ -24,6 +59,8 @@ const deleteMaster = (id) => {
     router.delete(route('admin.masters.destroy', id));
   }
 };
+
+const hasActiveFilters = () => search.value || status.value || gender.value || serviceType.value;
 </script>
 
 <template>
@@ -66,6 +103,58 @@ const deleteMaster = (id) => {
         </Link>
       </div>
 
+      <!-- Filters -->
+      <div class="px-4 py-3 bg-[#f8f9fa] border-b border-gray-200">
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="flex-1">
+            <input
+              type="text"
+              v-model="search"
+              :placeholder="t('common.search') + '...'"
+              class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-[#007bff] focus:border-[#007bff]"
+            />
+          </div>
+          <div class="sm:w-36">
+            <select
+              v-model="status"
+              class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-[#007bff] focus:border-[#007bff]"
+            >
+              <option value="">{{ t('common.allStatuses') }}</option>
+              <option value="active">{{ t('common.active') }}</option>
+              <option value="inactive">{{ t('common.inactive') }}</option>
+            </select>
+          </div>
+          <div class="sm:w-36">
+            <select
+              v-model="gender"
+              class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-[#007bff] focus:border-[#007bff]"
+            >
+              <option value="">{{ t('masters.gender') }}</option>
+              <option value="male">{{ t('masters.male') }}</option>
+              <option value="female">{{ t('masters.female') }}</option>
+            </select>
+          </div>
+          <div class="sm:w-48">
+            <select
+              v-model="serviceType"
+              class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-[#007bff] focus:border-[#007bff]"
+            >
+              <option value="">{{ t('masters.services') }}</option>
+              <option v-for="st in serviceTypes" :key="st.id" :value="st.id">
+                {{ getTranslation(st, 'name') }}
+              </option>
+            </select>
+          </div>
+          <button
+            v-if="hasActiveFilters()"
+            @click="resetFilters"
+            class="px-3 py-2 text-sm text-[#6c757d] hover:text-[#1f2d3d] transition"
+          >
+            {{ t('common.reset') }}
+          </button>
+        </div>
+      </div>
+
       <!-- Card Body -->
       <div class="p-0">
         <!-- Table -->
@@ -78,7 +167,6 @@ const deleteMaster = (id) => {
                 <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('masters.fullName') }}</th>
                 <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('masters.phone') }}</th>
                 <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('masters.experience') }}</th>
-                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('masters.rating') }}</th>
                 <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('common.status') }}</th>
                 <th class="px-4 py-3 text-center font-semibold text-[#6c757d]">{{ t('common.actions') }}</th>
               </tr>
@@ -102,14 +190,6 @@ const deleteMaster = (id) => {
                 </td>
                 <td class="px-4 py-3">
                   <span class="text-[#1f2d3d]">{{ master.experience_years }} {{ t('masters.years') }}</span>
-                </td>
-                <td class="px-4 py-3">
-                  <div class="flex items-center">
-                    <svg class="w-4 h-4 text-[#ffc107] mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                    </svg>
-                    <span class="font-medium text-[#1f2d3d]">{{ master.rating }}</span>
-                  </div>
                 </td>
                 <td class="px-4 py-3">
                   <span

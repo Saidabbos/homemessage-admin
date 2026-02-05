@@ -6,6 +6,11 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ServiceTypeController;
 use App\Http\Controllers\Admin\OilController;
 use App\Http\Controllers\Admin\MasterController;
+use App\Http\Controllers\Admin\StandardItemController;
+use App\Http\Controllers\Admin\DispatcherController;
+use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\ProfileController;
 
 // Public routes
 Route::get('/', function () {
@@ -66,4 +71,51 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
             'destroy' => 'admin.masters.destroy',
         ]
     ]);
+
+    // Standard Items CRUD
+    Route::resource('standard-items', StandardItemController::class, [
+        'names' => [
+            'index' => 'admin.standard-items.index',
+            'create' => 'admin.standard-items.create',
+            'store' => 'admin.standard-items.store',
+            'show' => 'admin.standard-items.show',
+            'edit' => 'admin.standard-items.edit',
+            'update' => 'admin.standard-items.update',
+            'destroy' => 'admin.standard-items.destroy',
+        ]
+    ]);
+
+    // Dispatchers CRUD
+    Route::resource('dispatchers', DispatcherController::class, [
+        'names' => [
+            'index' => 'admin.dispatchers.index',
+            'create' => 'admin.dispatchers.create',
+            'store' => 'admin.dispatchers.store',
+            'show' => 'admin.dispatchers.show',
+            'edit' => 'admin.dispatchers.edit',
+            'update' => 'admin.dispatchers.update',
+            'destroy' => 'admin.dispatchers.destroy',
+        ]
+    ]);
+
+    // Customers (without create/store - customers register via app)
+    Route::resource('customers', CustomerController::class, [
+        'except' => ['create', 'store'],
+        'names' => [
+            'index' => 'admin.customers.index',
+            'show' => 'admin.customers.show',
+            'edit' => 'admin.customers.edit',
+            'update' => 'admin.customers.update',
+            'destroy' => 'admin.customers.destroy',
+        ]
+    ]);
+
+    // Settings
+    Route::get('settings', [SettingController::class, 'index'])->name('admin.settings.index');
+    Route::put('settings', [SettingController::class, 'update'])->name('admin.settings.update');
+
+    // Profile
+    Route::get('profile', [ProfileController::class, 'index'])->name('admin.profile.index');
+    Route::put('profile', [ProfileController::class, 'update'])->name('admin.profile.update');
+    Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('admin.profile.password');
 });

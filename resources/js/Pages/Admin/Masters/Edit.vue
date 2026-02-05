@@ -11,6 +11,7 @@ const { t } = useI18n();
 const props = defineProps({
   master: Object,
   serviceTypes: Array,
+  oils: Array,
 });
 
 const activeTab = ref('uz');
@@ -22,12 +23,14 @@ const form = useForm({
   last_name: props.master.last_name,
   phone: props.master.phone,
   email: props.master.email || '',
+  password: '',
   photo: null,
   birth_date: props.master.birth_date || '',
   gender: props.master.gender,
   experience_years: props.master.experience_years,
   status: props.master.status,
   service_types: props.master.service_types || [],
+  oils: props.master.oils || [],
   uz: { bio: props.master.uz?.bio || '' },
   ru: { bio: props.master.ru?.bio || '' },
   en: { bio: props.master.en?.bio || '' },
@@ -119,7 +122,7 @@ const submit = () => {
                 <!-- Email -->
                 <div>
                   <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
-                    {{ t('masters.email') }}
+                    {{ t('masters.email') }} <span class="text-[#dc3545]">*</span>
                   </label>
                   <input
                     v-model="form.email"
@@ -127,6 +130,21 @@ const submit = () => {
                     class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#007bff] focus:border-transparent"
                   />
                   <p v-if="form.errors.email" class="mt-1 text-sm text-[#dc3545]">{{ form.errors.email }}</p>
+                </div>
+
+                <!-- Password -->
+                <div>
+                  <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
+                    {{ t('masters.password') }}
+                  </label>
+                  <input
+                    v-model="form.password"
+                    type="password"
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#007bff] focus:border-transparent"
+                    :placeholder="t('masters.newPassword')"
+                  />
+                  <p class="mt-1 text-xs text-[#6c757d]">{{ t('masters.passwordChangeHint') }}</p>
+                  <p v-if="form.errors.password" class="mt-1 text-sm text-[#dc3545]">{{ form.errors.password }}</p>
                 </div>
 
                 <!-- Birth Date -->
@@ -197,6 +215,28 @@ const submit = () => {
                       class="w-4 h-4 text-[#007bff] border-gray-300 rounded focus:ring-[#007bff]"
                     />
                     <span class="ml-2 text-sm text-[#1f2d3d]">{{ serviceType.name?.uz || serviceType.name }}</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Oils -->
+              <div class="mt-4">
+                <label class="block text-sm font-medium text-[#1f2d3d] mb-2">
+                  {{ t('masters.oils') }}
+                </label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  <label
+                    v-for="oil in oils"
+                    :key="oil.id"
+                    class="flex items-center p-2 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer"
+                  >
+                    <input
+                      v-model="form.oils"
+                      type="checkbox"
+                      :value="oil.id"
+                      class="w-4 h-4 text-[#17a2b8] border-gray-300 rounded focus:ring-[#17a2b8]"
+                    />
+                    <span class="ml-2 text-sm text-[#1f2d3d]">{{ oil.name?.uz || oil.name }}</span>
                   </label>
                 </div>
               </div>
@@ -284,28 +324,6 @@ const submit = () => {
                     @change="handlePhotoChange"
                   />
                 </label>
-              </div>
-            </div>
-          </div>
-
-          <!-- Stats -->
-          <div class="bg-white rounded shadow-sm mt-4">
-            <div class="px-4 py-3 border-b border-gray-200">
-              <h3 class="font-semibold text-[#1f2d3d]">{{ t('common.statistics') }}</h3>
-            </div>
-            <div class="p-4 space-y-3">
-              <div class="flex justify-between items-center">
-                <span class="text-[#6c757d]">{{ t('masters.rating') }}:</span>
-                <div class="flex items-center">
-                  <svg class="w-5 h-5 text-[#ffc107] mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                  </svg>
-                  <span class="font-semibold text-[#1f2d3d]">{{ master.rating }}</span>
-                </div>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-[#6c757d]">{{ t('masters.totalOrders') }}:</span>
-                <span class="font-semibold text-[#1f2d3d]">{{ master.total_orders }}</span>
               </div>
             </div>
           </div>

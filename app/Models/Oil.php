@@ -16,7 +16,6 @@ class Oil extends Model
         'slug',
         'name',
         'description',
-        'price',
         'image',
         'status',
     ];
@@ -28,7 +27,6 @@ class Oil extends Model
     protected function casts(): array
     {
         return [
-            'price' => 'decimal:2',
             'status' => 'boolean',
         ];
     }

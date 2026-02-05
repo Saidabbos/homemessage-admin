@@ -24,7 +24,6 @@ const tabs = [
 const form = useForm({
   _method: 'PUT',
   slug: props.oil.slug,
-  price: props.oil.price,
   image: null,
   status: props.oil.status,
   uz: {
@@ -229,28 +228,6 @@ const deleteOil = () => {
             <div class="p-4">
               <ImageUpload v-model="form.image" />
               <div v-if="form.errors.image" class="text-[#dc3545] text-xs mt-2">{{ form.errors.image }}</div>
-            </div>
-          </div>
-
-          <!-- Price Card -->
-          <div class="bg-white rounded shadow-sm">
-            <div class="px-4 py-3 border-b border-gray-200">
-              <h3 class="font-semibold text-[#1f2d3d] text-sm">{{ t('common.price') }}</h3>
-            </div>
-            <div class="p-4">
-              <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
-                {{ t('oils.additionalPrice') }} (so'm) <span class="text-[#dc3545]">*</span>
-              </label>
-              <input
-                type="number"
-                v-model="form.price"
-                min="0"
-                step="1000"
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
-                placeholder="0"
-              />
-              <p class="text-xs text-[#6c757d] mt-1">{{ t('oils.additionalPriceHint') }}</p>
-              <div v-if="form.errors.price" class="text-[#dc3545] text-xs mt-1">{{ form.errors.price }}</div>
             </div>
           </div>
 

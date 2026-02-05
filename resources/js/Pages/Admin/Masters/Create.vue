@@ -10,6 +10,7 @@ const { t } = useI18n();
 
 const props = defineProps({
   serviceTypes: Array,
+  oils: Array,
 });
 
 const activeTab = ref('uz');
@@ -20,12 +21,14 @@ const form = useForm({
   last_name: '',
   phone: '',
   email: '',
+  password: '',
   photo: null,
   birth_date: '',
   gender: 'female',
   experience_years: 0,
   status: true,
   service_types: [],
+  oils: [],
   uz: { bio: '' },
   ru: { bio: '' },
   en: { bio: '' },
@@ -120,7 +123,7 @@ const submit = () => {
                 <!-- Email -->
                 <div>
                   <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
-                    {{ t('masters.email') }}
+                    {{ t('masters.email') }} <span class="text-[#dc3545]">*</span>
                   </label>
                   <input
                     v-model="form.email"
@@ -129,6 +132,21 @@ const submit = () => {
                     placeholder="email@example.com"
                   />
                   <p v-if="form.errors.email" class="mt-1 text-sm text-[#dc3545]">{{ form.errors.email }}</p>
+                </div>
+
+                <!-- Password -->
+                <div>
+                  <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
+                    {{ t('masters.password') }} <span class="text-[#dc3545]">*</span>
+                  </label>
+                  <input
+                    v-model="form.password"
+                    type="password"
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#007bff] focus:border-transparent"
+                    :placeholder="t('masters.enterPassword')"
+                  />
+                  <p class="mt-1 text-xs text-[#6c757d]">{{ t('masters.passwordHint') }}</p>
+                  <p v-if="form.errors.password" class="mt-1 text-sm text-[#dc3545]">{{ form.errors.password }}</p>
                 </div>
 
                 <!-- Birth Date -->
@@ -201,6 +219,28 @@ const submit = () => {
                       class="w-4 h-4 text-[#007bff] border-gray-300 rounded focus:ring-[#007bff]"
                     />
                     <span class="ml-2 text-sm text-[#1f2d3d]">{{ serviceType.name?.uz || serviceType.name }}</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Oils -->
+              <div class="mt-4">
+                <label class="block text-sm font-medium text-[#1f2d3d] mb-2">
+                  {{ t('masters.oils') }}
+                </label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  <label
+                    v-for="oil in oils"
+                    :key="oil.id"
+                    class="flex items-center p-2 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer"
+                  >
+                    <input
+                      v-model="form.oils"
+                      type="checkbox"
+                      :value="oil.id"
+                      class="w-4 h-4 text-[#17a2b8] border-gray-300 rounded focus:ring-[#17a2b8]"
+                    />
+                    <span class="ml-2 text-sm text-[#1f2d3d]">{{ oil.name?.uz || oil.name }}</span>
                   </label>
                 </div>
               </div>

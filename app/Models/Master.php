@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Translatable\HasTranslations;
 
@@ -12,6 +13,7 @@ class Master extends Model
     use HasFactory, HasTranslations;
 
     protected $fillable = [
+        'user_id',
         'first_name',
         'last_name',
         'phone',
@@ -21,8 +23,6 @@ class Master extends Model
         'birth_date',
         'gender',
         'experience_years',
-        'rating',
-        'total_orders',
         'status',
     ];
 
@@ -35,8 +35,6 @@ class Master extends Model
         return [
             'birth_date' => 'date',
             'experience_years' => 'integer',
-            'rating' => 'decimal:1',
-            'total_orders' => 'integer',
             'status' => 'boolean',
         ];
     }
@@ -61,10 +59,26 @@ class Master extends Model
     }
 
     /**
+     * Get the user account for the master
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
      * Get the services that the master provides
      */
     public function serviceTypes(): BelongsToMany
     {
         return $this->belongsToMany(ServiceType::class, 'master_service_type');
+    }
+
+    /**
+     * Get the oils that the master brings
+     */
+    public function oils(): BelongsToMany
+    {
+        return $this->belongsToMany(Oil::class, 'master_oil');
     }
 }
