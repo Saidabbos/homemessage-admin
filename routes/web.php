@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ServiceTypeController;
+use App\Http\Controllers\Admin\OilController;
 
 // Public routes
 Route::get('/', function () {
@@ -36,6 +37,19 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
             'edit' => 'admin.service-types.edit',
             'update' => 'admin.service-types.update',
             'destroy' => 'admin.service-types.destroy',
+        ]
+    ]);
+
+    // Oils CRUD
+    Route::resource('oils', OilController::class, [
+        'names' => [
+            'index' => 'admin.oils.index',
+            'create' => 'admin.oils.create',
+            'store' => 'admin.oils.store',
+            'show' => 'admin.oils.show',
+            'edit' => 'admin.oils.edit',
+            'update' => 'admin.oils.update',
+            'destroy' => 'admin.oils.destroy',
         ]
     ]);
 });

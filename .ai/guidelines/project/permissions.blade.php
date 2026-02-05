@@ -1,228 +1,340 @@
-## Permissions & Roles System
+## Golden Touch - Permissions & Roles System
 
-This project uses **spatie/laravel-permission** for fine-grained access control.
+This project uses **spatie/laravel-permission** for access control in the admin panel.
 
-### Current Roles
+### Roles Overview
 
-| Role | Permissions | Use Case |
-|------|-------------|----------|
-| **admin** | All permissions | System administrators |
-| **editor** | Create/Edit/Delete Posts, Manage Categories | Content managers |
-| **writer** | Create/Edit Posts only | Content creators |
+| Role | Access | Description |
+|------|--------|-------------|
+| **admin** | Full system access | System configuration, user management, all reports |
+| **owner** | Operations oversight | View all orders, dispatchers, masters, reports |
+| **dispatcher** | Order management | Process orders, manage slots, send work orders |
+
+Note: **Clients** and **Therapists (Masters)** are separate entities, not User roles.
+
+---
 
 ### Current Permissions
 
-| Permission | Description |
-|------------|-------------|
-| `create posts` | Create new blog posts |
-| `edit posts` | Edit existing posts |
-| `delete posts` | Delete posts |
-| `view posts` | View published posts |
-| `create categories` | Create post categories |
-| `edit categories` | Edit categories |
-| `delete categories` | Delete categories |
+#### Order Management
+| Permission | Description | Roles |
+|------------|-------------|-------|
+| `view orders` | View order list and details | admin, owner, dispatcher |
+| `create orders` | Create orders manually | admin, dispatcher |
+| `edit orders` | Edit order details | admin, dispatcher |
+| `delete orders` | Delete/cancel orders | admin |
+| `confirm orders` | Fill confirmation form | admin, dispatcher |
+| `manage payments` | Create invoices, confirm payments | admin, dispatcher |
+| `send work orders` | Generate and send work orders to therapists | admin, dispatcher |
+| `fill qa` | Fill quality control forms | admin, dispatcher |
+| `export orders` | Export orders to CSV | admin, owner |
 
-### Adding New Permissions
+#### Slot Management
+| Permission | Description | Roles |
+|------------|-------------|-------|
+| `view slots` | View slot schedules | admin, owner, dispatcher |
+| `manage slots` | Create/edit/block slots | admin, dispatcher |
 
-```php
-// In seeder or artisan command
-Permission::create(['name' => 'publish posts']);
-Permission::create(['name' => 'manage users']);
+#### Therapist Management
+| Permission | Description | Roles |
+|------------|-------------|-------|
+| `view therapists` | View therapist list | admin, owner, dispatcher |
+| `manage therapists` | Create/edit/deactivate therapists | admin |
+| `regenerate tokens` | Regenerate public tokens | admin |
 
-// Or with guard
-Permission::create(['name' => 'moderate comments', 'guard_name' => 'web']);
-```
+#### Client Management
+| Permission | Description | Roles |
+|------------|-------------|-------|
+| `view clients` | View client list | admin, owner, dispatcher |
+| `manage clients` | Edit client details | admin, dispatcher |
 
-### Adding New Roles
+#### System Configuration
+| Permission | Description | Roles |
+|------------|-------------|-------|
+| `manage users` | Create/edit admin users | admin |
+| `manage roles` | Assign roles to users | admin |
+| `view reports` | Access analytics/reports | admin, owner |
+| `manage settings` | System configuration | admin |
 
-```php
-$role = Role::create(['name' => 'moderator']);
-$role->givePermissionTo(['create posts', 'edit posts', 'delete posts']);
-```
+---
 
-### Assigning Roles to Users
-
-```php
-// Single role
-$user->assignRole('editor');
-
-// Multiple roles
-$user->assignRole(['editor', 'moderator']);
-
-// Sync (replaces all)
-$user->syncRoles(['editor']);
-
-// Give without removing others
-$user->assignRole('moderator');
-```
-
-### Checking Permissions
+### Role-Permission Matrix
 
 ```php
-// Instance methods
-$user->hasRole('admin');                    // true/false
-$user->hasAnyRole(['admin', 'editor']);     // true/false
-$user->hasAllRoles(['admin', 'editor']);    // true/false
-$user->hasPermissionTo('create posts');     // true/false
-$user->can('delete posts');                 // true/false
+// RoleAndPermissionSeeder.php
 
-// Can shorthand
-auth()->user()->can('edit posts');
+$adminPermissions = Permission::all();
 
-// Collection methods
-$user->getRoleNames();      // ['admin', 'editor']
-$user->getAllPermissions(); // Collection of all permissions
-```
-
-### Middleware Protection
-
-```php
-// Protect routes with role
-Route::middleware('role:admin')->group(function () {
-    Route::get('/admin/users', [UserController::class, 'index']);
-});
-
-// Protect routes with permission
-Route::middleware('permission:edit posts')->group(function () {
-    Route::put('/posts/{post}', [PostController::class, 'update']);
-});
-
-// Multiple roles (OR logic)
-Route::middleware('role:admin|moderator')->group(function () {
-    Route::delete('/posts/{post}', [PostController::class, 'destroy']);
-});
-
-// Multiple permissions (AND logic)
-Route::middleware('permission:create posts,edit posts')->group(function () {
-    Route::post('/posts', [PostController::class, 'store']);
-});
-```
-
-### Blade Template Checks
-
-```blade
-{{-- Single role check --}}
-@role('admin')
-    <p>Admin content</p>
-@endrole
-
-{{-- Multiple roles (OR) --}}
-@hasrole('editor|admin')
-    <p>Editor or Admin</p>
-@endhasrole
-
-{{-- Permission check --}}
-@can('delete posts')
-    <button>Delete</button>
-@endcan
-
-{{-- Multiple permissions --}}
-@canany(['create posts', 'edit posts'])
-    <p>Can create or edit</p>
-@endcanany
-
-{{-- Cannot check --}}
-@cannot('delete posts')
-    <p>You cannot delete posts</p>
-@endcannot
-```
-
-### Authorization Policies
-
-```php
-class PostPolicy
-{
-    public function create(User $user): bool
-    {
-        return $user->can('create posts');
-    }
-
-    public function update(User $user, Post $post): bool
-    {
-        return $user->can('edit posts');
-    }
-
-    public function delete(User $user, Post $post): bool
-    {
-        return $user->can('delete posts');
-    }
-}
-
-// Register in AuthServiceProvider
-protected $policies = [
-    Post::class => PostPolicy::class,
+$ownerPermissions = [
+    'view orders', 'export orders',
+    'view slots',
+    'view therapists',
+    'view clients',
+    'view reports',
 ];
 
-// Use in controller
-$this->authorize('create', Post::class);
-$this->authorize('update', $post);
+$dispatcherPermissions = [
+    'view orders', 'create orders', 'edit orders', 'confirm orders',
+    'manage payments', 'send work orders', 'fill qa',
+    'view slots', 'manage slots',
+    'view therapists',
+    'view clients', 'manage clients',
+];
 ```
+
+---
+
+### Implementation Patterns
+
+#### Adding New Permissions
+```php
+// In seeder or artisan command
+use Spatie\Permission\Models\Permission;
+
+Permission::create(['name' => 'view analytics']);
+Permission::create(['name' => 'manage promotions']);
+```
+
+#### Adding New Roles
+```php
+use Spatie\Permission\Models\Role;
+
+$role = Role::create(['name' => 'supervisor']);
+$role->givePermissionTo([
+    'view orders', 'confirm orders', 'fill qa',
+    'view slots', 'view therapists', 'view clients',
+]);
+```
+
+#### Assigning Roles to Users
+```php
+// Single role
+$user->assignRole('dispatcher');
+
+// Multiple roles
+$user->assignRole(['dispatcher', 'owner']);
+
+// Sync (replaces all)
+$user->syncRoles(['dispatcher']);
+```
+
+---
+
+### Authorization in Controllers
+
+#### Using Middleware
+```php
+// routes/web.php
+Route::middleware(['auth', 'role:admin|dispatcher'])->prefix('admin')->group(function () {
+    Route::get('/orders', [OrderController::class, 'index']);
+});
+
+Route::middleware(['auth', 'permission:manage payments'])->group(function () {
+    Route::post('/orders/{order}/invoice', [OrderController::class, 'createInvoice']);
+});
+```
+
+#### Using authorize() in Controllers
+```php
+class OrderController extends Controller
+{
+    public function index()
+    {
+        $this->authorize('view orders');
+        return Order::with(['client', 'therapist'])->paginate();
+    }
+
+    public function confirmPayment(Order $order)
+    {
+        $this->authorize('manage payments');
+        // Process payment confirmation...
+    }
+
+    public function fillQA(Order $order, Request $request)
+    {
+        $this->authorize('fill qa');
+        // Fill quality assessment...
+    }
+}
+```
+
+#### Using Policies
+```php
+// app/Policies/OrderPolicy.php
+class OrderPolicy
+{
+    public function view(User $user, Order $order): bool
+    {
+        return $user->can('view orders');
+    }
+
+    public function confirm(User $user, Order $order): bool
+    {
+        return $user->can('confirm orders');
+    }
+
+    public function managePayment(User $user, Order $order): bool
+    {
+        return $user->can('manage payments');
+    }
+
+    public function sendWorkOrder(User $user, Order $order): bool
+    {
+        return $user->can('send work orders') &&
+               $order->payment_status === 'PAID' &&
+               $order->slot->status === 'RESERVED';
+    }
+
+    public function fillQA(User $user, Order $order): bool
+    {
+        return $user->can('fill qa') &&
+               $order->status === 'RESERVED';
+    }
+}
+```
+
+---
+
+### Blade/Vue Authorization
+
+#### In Blade Templates
+```blade
+@can('manage payments')
+    <button @click="createInvoice">Create Invoice</button>
+@endcan
+
+@role('admin')
+    <a href="/admin/settings">Settings</a>
+@endrole
+
+@canany(['confirm orders', 'manage payments'])
+    <div class="order-actions">...</div>
+@endcanany
+```
+
+#### In Vue Components (Inertia)
+```vue
+<script setup>
+// Permissions passed via HandleInertiaRequests middleware
+const page = usePage()
+const can = (permission) => page.props.auth.permissions.includes(permission)
+const hasRole = (role) => page.props.auth.roles.includes(role)
+</script>
+
+<template>
+    <button v-if="can('manage payments')" @click="createInvoice">
+        Create Invoice
+    </button>
+
+    <div v-if="hasRole('admin')" class="admin-section">
+        <!-- Admin only content -->
+    </div>
+</template>
+```
+
+#### In HandleInertiaRequests Middleware
+```php
+// app/Http/Middleware/HandleInertiaRequests.php
+public function share(Request $request): array
+{
+    return array_merge(parent::share($request), [
+        'auth' => [
+            'user' => $request->user(),
+            'permissions' => $request->user()?->getAllPermissions()->pluck('name') ?? [],
+            'roles' => $request->user()?->getRoleNames() ?? [],
+        ],
+    ]);
+}
+```
+
+---
 
 ### Common Operations
 
-#### Check if user can perform action
 ```php
-if (auth()->user()->can('edit posts')) {
-    // Allow editing
+// Check permission
+if (auth()->user()->can('manage payments')) {
+    // Allow payment management
 }
+
+// Check role
+if (auth()->user()->hasRole('admin')) {
+    // Admin-only operations
+}
+
+// Check any role
+if (auth()->user()->hasAnyRole(['admin', 'dispatcher'])) {
+    // Admin or dispatcher operations
+}
+
+// Get all user permissions
+$permissions = auth()->user()->getAllPermissions();
+
+// Get user roles
+$roles = auth()->user()->getRoleNames(); // ['dispatcher']
 ```
 
-#### Assign role to user
-```php
-$user->assignRole('editor');
-```
-
-#### Give permission directly to user
-```php
-$user->givePermissionTo('edit posts');
-```
-
-#### Remove role
-```php
-$user->removeRole('editor');
-```
-
-#### Revoke permission
-```php
-$user->revokePermissionTo('delete posts');
-```
-
-#### Sync roles (replace all)
-```php
-$user->syncRoles(['admin', 'editor']); // Only has these roles
-```
+---
 
 ### Database Tables
 
-**roles** table - Defines available roles
+**roles** table
 ```sql
-id | name | guard_name | created_at | updated_at
-1  | admin | web | ... | ...
+id | name       | guard_name | created_at | updated_at
+1  | admin      | web        | ...        | ...
+2  | owner      | web        | ...        | ...
+3  | dispatcher | web        | ...        | ...
 ```
 
-**permissions** table - Defines available permissions
+**permissions** table
 ```sql
-id | name | guard_name | created_at | updated_at
-1  | create posts | web | ... | ...
+id | name            | guard_name | created_at | updated_at
+1  | view orders     | web        | ...        | ...
+2  | manage payments | web        | ...        | ...
 ```
 
 **role_has_permissions** - Links roles to permissions
-```sql
-permission_id | role_id
-1 | 1 (admin has create posts)
-```
-
 **model_has_roles** - Links users to roles
-```sql
-model_id | model_type | role_id
-1 | App\\Models\\User | 1 (user 1 has admin role)
-```
+**model_has_permissions** - Direct user permissions (rarely used)
+
+---
 
 ### Best Practices
 
-1. **Use Seeder** - Initialize roles and permissions in seeder
-2. **Clear Cache** - After permission changes: `php artisan permission:cache-reset`
-3. **Policy over Middleware** - Use policies for model-specific authorization
-4. **Descriptive Names** - `create_blog_posts` not just `create`
-5. **Guard Names** - Specify guard if using multiple auth guards
-6. **Testing** - Always test permission checks in feature tests
+1. **Use descriptive names**: `manage payments` not just `payments`
+2. **Prefer roles for grouping**: Assign permissions to roles, not directly to users
+3. **Clear cache after changes**: `php artisan permission:cache-reset`
+4. **Use policies for complex logic**: When authorization depends on model state
+5. **Check in service layer**: Critical operations should verify permissions in services
+6. **Log permission denials**: For security auditing
+
+---
+
+### Testing Permissions
+
+```php
+// tests/Feature/OrderPermissionTest.php
+public function test_dispatcher_can_confirm_orders()
+{
+    $user = User::factory()->create();
+    $user->assignRole('dispatcher');
+
+    $order = Order::factory()->create();
+
+    $this->actingAs($user)
+        ->post("/admin/orders/{$order->id}/confirm", [...])
+        ->assertStatus(200);
+}
+
+public function test_owner_cannot_confirm_orders()
+{
+    $user = User::factory()->create();
+    $user->assignRole('owner');
+
+    $order = Order::factory()->create();
+
+    $this->actingAs($user)
+        ->post("/admin/orders/{$order->id}/confirm", [...])
+        ->assertStatus(403);
+}
+```

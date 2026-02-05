@@ -11,21 +11,34 @@ const flash = computed(() => page.props.flash);
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-[#f4f6f9]">
+    <!-- Sidebar -->
     <Sidebar />
 
-    <main class="flex-1 ml-[280px]">
+    <!-- Main Content Wrapper -->
+    <div class="ml-[250px] min-h-screen flex flex-col">
+      <!-- Header/Navbar -->
       <Header :user="auth.user" />
 
-      <div class="p-8">
+      <!-- Main Content -->
+      <main class="flex-1 p-4">
+        <!-- Flash Messages -->
         <FlashMessage
           v-if="flash.success || flash.error"
           :success="flash.success"
           :error="flash.error"
         />
 
+        <!-- Page Content -->
         <slot />
-      </div>
-    </main>
+      </main>
+
+      <!-- Footer -->
+      <footer class="py-4 px-6 bg-white border-t border-gray-200 text-center text-sm text-[#6c757d]">
+        <strong>Copyright &copy; 2024 <a href="#" class="text-[#007bff]">HomeMessage</a>.</strong>
+        Barcha huquqlar himoyalangan.
+        <span class="float-right hidden sm:inline">Version 1.0.0</span>
+      </footer>
+    </div>
   </div>
 </template>

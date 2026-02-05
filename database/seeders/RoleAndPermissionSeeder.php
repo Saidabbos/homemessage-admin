@@ -19,83 +19,83 @@ class RoleAndPermissionSeeder extends Seeder
 
         // ========== ADMIN PERMISSIONS ==========
         // These permissions are for content management (posts, categories)
-        Permission::create(['name' => 'create posts']);
-        Permission::create(['name' => 'edit posts']);
-        Permission::create(['name' => 'delete posts']);
-        Permission::create(['name' => 'view posts']);
-        Permission::create(['name' => 'create categories']);
-        Permission::create(['name' => 'edit categories']);
-        Permission::create(['name' => 'delete categories']);
+        Permission::firstOrCreate(['name' => 'create posts']);
+        Permission::firstOrCreate(['name' => 'edit posts']);
+        Permission::firstOrCreate(['name' => 'delete posts']);
+        Permission::firstOrCreate(['name' => 'view posts']);
+        Permission::firstOrCreate(['name' => 'create categories']);
+        Permission::firstOrCreate(['name' => 'edit categories']);
+        Permission::firstOrCreate(['name' => 'delete categories']);
 
         // ========== HOMESERVICE PERMISSIONS ==========
         // Service Management
-        Permission::create(['name' => 'create services']);
-        Permission::create(['name' => 'edit services']);
-        Permission::create(['name' => 'delete services']);
-        Permission::create(['name' => 'view services']);
-        Permission::create(['name' => 'manage service categories']);
+        Permission::firstOrCreate(['name' => 'create services']);
+        Permission::firstOrCreate(['name' => 'edit services']);
+        Permission::firstOrCreate(['name' => 'delete services']);
+        Permission::firstOrCreate(['name' => 'view services']);
+        Permission::firstOrCreate(['name' => 'manage service categories']);
 
         // Booking Management
-        Permission::create(['name' => 'create bookings']);
-        Permission::create(['name' => 'edit bookings']);
-        Permission::create(['name' => 'view bookings']);
-        Permission::create(['name' => 'cancel bookings']);
-        Permission::create(['name' => 'assign bookings']);
-        Permission::create(['name' => 'change booking status']);
-        Permission::create(['name' => 'view all bookings']);
+        Permission::firstOrCreate(['name' => 'create bookings']);
+        Permission::firstOrCreate(['name' => 'edit bookings']);
+        Permission::firstOrCreate(['name' => 'view bookings']);
+        Permission::firstOrCreate(['name' => 'cancel bookings']);
+        Permission::firstOrCreate(['name' => 'assign bookings']);
+        Permission::firstOrCreate(['name' => 'change booking status']);
+        Permission::firstOrCreate(['name' => 'view all bookings']);
 
         // Profile Management
-        Permission::create(['name' => 'edit own profile']);
-        Permission::create(['name' => 'view own profile']);
-        Permission::create(['name' => 'edit master profile']);
-        Permission::create(['name' => 'view master profile']);
+        Permission::firstOrCreate(['name' => 'edit own profile']);
+        Permission::firstOrCreate(['name' => 'view own profile']);
+        Permission::firstOrCreate(['name' => 'edit master profile']);
+        Permission::firstOrCreate(['name' => 'view master profile']);
 
         // Rating & Review
-        Permission::create(['name' => 'create ratings']);
-        Permission::create(['name' => 'view ratings']);
-        Permission::create(['name' => 'manage ratings']);
+        Permission::firstOrCreate(['name' => 'create ratings']);
+        Permission::firstOrCreate(['name' => 'view ratings']);
+        Permission::firstOrCreate(['name' => 'manage ratings']);
 
         // Payment & Transactions
-        Permission::create(['name' => 'view payments']);
-        Permission::create(['name' => 'process payments']);
-        Permission::create(['name' => 'refund payments']);
+        Permission::firstOrCreate(['name' => 'view payments']);
+        Permission::firstOrCreate(['name' => 'process payments']);
+        Permission::firstOrCreate(['name' => 'refund payments']);
 
         // User Management (Admin only)
-        Permission::create(['name' => 'manage users']);
-        Permission::create(['name' => 'manage masters']);
-        Permission::create(['name' => 'manage dispatchers']);
-        Permission::create(['name' => 'view user statistics']);
+        Permission::firstOrCreate(['name' => 'manage users']);
+        Permission::firstOrCreate(['name' => 'manage masters']);
+        Permission::firstOrCreate(['name' => 'manage dispatchers']);
+        Permission::firstOrCreate(['name' => 'view user statistics']);
 
         // System Management (Admin only)
-        Permission::create(['name' => 'view admin panel']);
-        Permission::create(['name' => 'manage settings']);
-        Permission::create(['name' => 'view reports']);
-        Permission::create(['name' => 'manage payments']);
+        Permission::firstOrCreate(['name' => 'view admin panel']);
+        Permission::firstOrCreate(['name' => 'manage settings']);
+        Permission::firstOrCreate(['name' => 'view reports']);
+        Permission::firstOrCreate(['name' => 'manage payments']);
 
         // ========== CREATE ROLES ==========
         // Admin role - Full system access
-        $admin = Role::create(['name' => 'admin']);
+        $admin = Role::firstOrCreate(['name' => 'admin']);
 
         // Dispatcher role - Manages bookings and assigns to masters
-        $dispatcher = Role::create(['name' => 'dispatcher']);
+        $dispatcher = Role::firstOrCreate(['name' => 'dispatcher']);
 
         // Master role - Service provider
-        $master = Role::create(['name' => 'master']);
+        $master = Role::firstOrCreate(['name' => 'master']);
 
         // Customer role - Booking services
-        $customer = Role::create(['name' => 'customer']);
+        $customer = Role::firstOrCreate(['name' => 'customer']);
 
         // Legacy roles (for backward compatibility)
-        $editor = Role::create(['name' => 'editor']);
-        $writer = Role::create(['name' => 'writer']);
+        $editor = Role::firstOrCreate(['name' => 'editor']);
+        $writer = Role::firstOrCreate(['name' => 'writer']);
 
         // ========== ASSIGN PERMISSIONS TO ROLES ==========
 
         // ADMIN - All permissions
-        $admin->givePermissionTo(Permission::all());
+        $admin->syncPermissions(Permission::all());
 
         // DISPATCHER - Manage bookings and assignments
-        $dispatcher->givePermissionTo([
+        $dispatcher->syncPermissions([
             'view bookings',
             'view all bookings',
             'change booking status',
@@ -108,7 +108,7 @@ class RoleAndPermissionSeeder extends Seeder
         ]);
 
         // MASTER - Manage own services and profile
-        $master->givePermissionTo([
+        $master->syncPermissions([
             'create services',
             'edit services',
             'view services',
@@ -124,7 +124,7 @@ class RoleAndPermissionSeeder extends Seeder
         ]);
 
         // CUSTOMER - Book services and manage own profile
-        $customer->givePermissionTo([
+        $customer->syncPermissions([
             'view services',
             'create bookings',
             'view bookings',
@@ -137,7 +137,7 @@ class RoleAndPermissionSeeder extends Seeder
         ]);
 
         // EDITOR - Content management (backward compatibility)
-        $editor->givePermissionTo([
+        $editor->syncPermissions([
             'create posts',
             'edit posts',
             'delete posts',
@@ -149,7 +149,7 @@ class RoleAndPermissionSeeder extends Seeder
         ]);
 
         // WRITER - Limited content creation (backward compatibility)
-        $writer->givePermissionTo([
+        $writer->syncPermissions([
             'create posts',
             'edit posts',
             'view posts',

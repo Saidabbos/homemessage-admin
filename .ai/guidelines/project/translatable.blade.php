@@ -327,3 +327,119 @@ Post::create([
 // Ensure fillable includes translatable columns
 protected $fillable = ['slug', 'published', 'title', 'content', 'description'];
 ```
+
+---
+
+## Frontend i18n (vue-i18n)
+
+Admin panel UI tarjimalari uchun **vue-i18n** ishlatiladi.
+
+### Setup
+
+```javascript
+// resources/js/i18n/index.js
+import { createI18n } from 'vue-i18n';
+import uz from './locales/uz.json';
+import ru from './locales/ru.json';
+import en from './locales/en.json';
+
+const i18n = createI18n({
+  legacy: false,
+  locale: localStorage.getItem('locale') || 'uz',
+  fallbackLocale: 'uz',
+  messages: { uz, ru, en },
+});
+
+export default i18n;
+```
+
+### Translation Files Structure
+
+```
+resources/js/i18n/locales/
+├── uz.json   # O'zbek
+├── ru.json   # Русский
+└── en.json   # English
+```
+
+### JSON Format
+```json
+{
+  "common": {
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "delete": "O'chirish"
+  },
+  "oils": {
+    "title": "Moy Turlari",
+    "new": "Yangi Moy Qo'shish"
+  }
+}
+```
+
+### Usage in Vue Components
+
+```vue
+<script setup>
+import { useI18n } from 'vue-i18n';
+const { t, locale } = useI18n();
+
+// Change language
+const changeLocale = (lang) => {
+  locale.value = lang;
+  localStorage.setItem('locale', lang);
+};
+</script>
+
+<template>
+  <h1>{{ t('oils.title') }}</h1>
+  <button>{{ t('common.save') }}</button>
+
+  <!-- Language switcher -->
+  <select v-model="locale">
+    <option value="uz">O'zbek</option>
+    <option value="ru">Русский</option>
+    <option value="en">English</option>
+  </select>
+</template>
+```
+
+### Adding New Translations
+
+1. **uz.json** ga qo'shing:
+```json
+"newSection": {
+  "title": "Yangi Bo'lim",
+  "description": "Tavsif"
+}
+```
+
+2. **ru.json** ga qo'shing:
+```json
+"newSection": {
+  "title": "Новый Раздел",
+  "description": "Описание"
+}
+```
+
+3. **en.json** ga qo'shing:
+```json
+"newSection": {
+  "title": "New Section",
+  "description": "Description"
+}
+```
+
+4. Component da ishlating:
+```vue
+{{ t('newSection.title') }}
+```
+
+### Spatie vs vue-i18n
+
+| Aspect | Spatie Translatable | vue-i18n |
+|--------|---------------------|----------|
+| Where | Backend (Laravel) | Frontend (Vue) |
+| What | Database content | UI labels/text |
+| Storage | MySQL JSON columns | JSON files |
+| Examples | Product names, descriptions | Button labels, menu items |
