@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\SlotController;
 use App\Http\Controllers\Admin\MasterScheduleController;
+use App\Http\Controllers\Admin\OrderController;
 
 // Public routes
 Route::get('/', function () {
@@ -143,4 +144,13 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::post('schedule/{master}/unblock-slot', [MasterScheduleController::class, 'unblockSlot'])->name('admin.schedule.unblock-slot');
     Route::post('schedule/{master}/block-day', [MasterScheduleController::class, 'blockDay'])->name('admin.schedule.block-day');
     Route::post('schedule/{master}/unblock-day', [MasterScheduleController::class, 'unblockDay'])->name('admin.schedule.unblock-day');
+
+    // Orders (view and manage only, no create)
+    Route::get('orders', [OrderController::class, 'index'])->name('admin.orders.index');
+    Route::get('orders/new', [OrderController::class, 'newOrders'])->name('admin.orders.new');
+    Route::get('orders/{order}', [OrderController::class, 'show'])->name('admin.orders.show');
+    Route::post('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('admin.orders.update-status');
+    Route::post('orders/{order}/slot', [OrderController::class, 'updateSlot'])->name('admin.orders.update-slot');
+    Route::post('orders/{order}/note', [OrderController::class, 'addNote'])->name('admin.orders.add-note');
+    Route::post('orders/{order}/cancel', [OrderController::class, 'cancel'])->name('admin.orders.cancel');
 });
