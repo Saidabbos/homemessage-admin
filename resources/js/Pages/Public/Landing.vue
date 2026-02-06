@@ -74,6 +74,7 @@ const scrollToSection = (index) => {
                 <div class="text-xl font-serif text-gold tracking-wider">GOLDEN TOUCH</div>
                 <div class="hidden md:flex items-center gap-8 text-sm text-gray-700">
                     <a href="#services" class="hover:text-gold transition-colors">Services</a>
+                    <a href="#masters" class="hover:text-gold transition-colors">Masters</a>
                     <a href="#about" class="hover:text-gold transition-colors">About</a>
                     <a href="#testimonials" class="hover:text-gold transition-colors">Testimonials</a>
                     <a href="#contact" class="hover:text-gold transition-colors">Contact</a>
@@ -155,6 +156,46 @@ const scrollToSection = (index) => {
                         <p class="service-desc">Premium skincare ritual for radiant, youthful glow and lasting results.</p>
                         <a href="#book" class="service-link">Learn More →</a>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Masters Section -->
+        <section id="masters" class="snap-section masters-section">
+            <div class="section-content">
+                <span class="section-badge">OUR THERAPISTS</span>
+                <h2 class="section-title">Meet Our Masters</h2>
+                <p class="section-subtitle">
+                    Expert therapists dedicated to your wellness journey
+                </p>
+                
+                <div class="masters-grid">
+                    <div 
+                        v-for="master in masters" 
+                        :key="master.id" 
+                        class="master-card glass-card"
+                    >
+                        <div class="master-photo">
+                            <img 
+                                :src="master.photo || '/images/master-placeholder.svg'" 
+                                :alt="master.name"
+                                class="master-img"
+                            />
+                        </div>
+                        <div class="master-info">
+                            <h3 class="master-name">{{ master.name }}</h3>
+                            <p class="master-bio">{{ master.bio || 'Professional massage therapist' }}</p>
+                            <div class="master-rating">
+                                <span class="rating-stars">★★★★★</span>
+                                <span class="rating-value">{{ master.rating }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty state -->
+                <div v-if="!masters || masters.length === 0" class="empty-state">
+                    <p>Hozircha masterlar mavjud emas</p>
                 </div>
             </div>
         </section>
@@ -628,6 +669,83 @@ const scrollToSection = (index) => {
 
 .service-link:hover {
     opacity: 0.7;
+}
+
+/* Masters Section */
+.masters-section {
+    background: linear-gradient(180deg, #f8f6f3 0%, #f5f0e8 100%);
+    padding: 6rem 2rem;
+}
+
+.masters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.master-card {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.master-photo {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #C9A55C;
+}
+
+.master-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.master-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #1a1a2e;
+    margin-bottom: 0.5rem;
+}
+
+.master-bio {
+    color: #6a6a7a;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.master-rating {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.rating-stars {
+    color: #C9A55C;
+    font-size: 0.875rem;
+}
+
+.rating-value {
+    color: #6a6a7a;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #6a6a7a;
 }
 
 /* Sanctuary Section */
