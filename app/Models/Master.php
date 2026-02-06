@@ -53,9 +53,20 @@ class Master extends Model
      */
     public function getPhotoUrlAttribute(): string
     {
-        if ($this->photo && file_exists(public_path('storage/' . $this->photo))) {
+        if (!$this->photo) {
+            return asset('images/master-placeholder.svg');
+        }
+
+        // Check if it's a direct public path (starts with /)
+        if (str_starts_with($this->photo, '/')) {
+            return asset(ltrim($this->photo, '/'));
+        }
+
+        // Check storage path
+        if (file_exists(public_path('storage/' . $this->photo))) {
             return asset('storage/' . $this->photo);
         }
+
         return asset('images/master-placeholder.svg');
     }
 
