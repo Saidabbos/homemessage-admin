@@ -50,4 +50,32 @@ class MasterRepository extends BaseRepository
                 'rating' => $master->average_rating ?? 4.9,
             ]);
     }
+
+    /**
+     * Get all active masters with service types
+     */
+    public function getActiveWithDetails(): \Illuminate\Support\Collection
+    {
+        return $this->query()
+            ->where('status', true)
+            ->with(['serviceTypes'])
+            ->withCount(['orders as completed_orders_count' => fn($q) => $q->where('status', 'COMPLETED')])
+            ->orderBy('first_name')
+            ->get()
+            ->map(fn($master) => [
+                'id' => $master->id,
+                'first_name' => $master->first_name,
+                'last_name' => $master->last_name,
+                'full_name' => $master->full_name,
+                'bio' => $master->bio,
+                'photo_url' => $master->photo_url,
+                'experience_years' => $master->experience_years,
+                'completed_orders' => $master->completed_orders_count ?? 0,
+                'service_types' => $master->serviceTypes->map(fn($st) => [
+                    'id' => $st->id,
+                    'name' => $st->getTranslation('name', app()->getLocale()),
+                    'price' => (float) $st->price,
+                ]),
+            ]);
+    }
 }

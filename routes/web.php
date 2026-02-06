@@ -15,9 +15,12 @@ use App\Http\Controllers\Admin\SlotController;
 use App\Http\Controllers\Admin\MasterScheduleController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Public\LandingController;
+use App\Http\Controllers\Public\MasterController as PublicMasterController;
 
 // Public routes
 Route::get('/', LandingController::class)->name('public.landing');
+Route::get('/masters', [PublicMasterController::class, 'index'])->name('public.masters.index');
+Route::get('/masters/{master}', [PublicMasterController::class, 'show'])->name('public.masters.show');
 
 // Default login redirect
 Route::get('/login', function () {

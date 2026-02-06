@@ -13,3 +13,4 @@ export { default as BaseCard } from './BaseCard.vue';
 export { default as BaseChip } from './BaseChip.vue';
 export { default as LoadingSpinner } from './LoadingSpinner.vue';
 export { default as ErrorMessage } from './ErrorMessage.vue';
+export { default as DateSelector } from './DateSelector.vue';

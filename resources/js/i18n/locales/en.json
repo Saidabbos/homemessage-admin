@@ -34,7 +34,11 @@
     "views": "Views",
     "popularity": "Popularity",
     "allStatuses": "All Statuses",
-    "reset": "Reset"
+    "reset": "Reset",
+    "all": "All",
+    "min": "min",
+    "sum": "UZS",
+    "loading": "Loading..."
   },
   "translations": {
     "title": "Translations",
@@ -413,6 +417,36 @@
       "quickLinks": "Quick Links",
       "contact": "Contact",
       "rights": "All rights reserved."
+    }
+  },
+  "public": {
+    "masters": {
+      "title": "Our Masters",
+      "empty": "No masters available yet",
+      "years": "years",
+      "orders": "orders"
+    },
+    "master": {
+      "detail": "About Master",
+      "yearsExp": "years experience",
+      "services": "Services",
+      "oils": "Oils"
+    },
+    "slots": {
+      "selectDate": "Select Date",
+      "available": "Available Times",
+      "empty": "No slots available for this day",
+      "error": "Failed to load slots",
+      "status": {
+        "free": "Free",
+        "pending": "Pending",
+        "reserved": "Reserved",
+        "blocked": "Blocked",
+        "unavailable": "Unavailable"
+      }
+    },
+    "date": {
+      "today": "Today"
     }
   }
 }
