@@ -32,11 +32,12 @@ class ServiceTypeRepository extends BaseRepository
     /**
      * Get active service types for landing page
      */
-    public function getActiveForLanding(): SupportCollection
+    public function getActiveForLanding(int $limit = 4): SupportCollection
     {
         return $this->query()
             ->where('status', true)
             ->orderBy('id')
+            ->limit($limit)
             ->get()
             ->map(fn($service) => [
                 'id' => $service->id,

@@ -297,29 +297,29 @@
     margin-bottom: 3rem;
 }
 
-/* Services Section */
+/* Services Section - Landing Page (scoped to avoid conflicts) */
 .services-section {
     background: var(--cream);
     padding: 6rem 2rem;
 }
 
-.services-grid {
+.services-section .services-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1.5rem;
     text-align: left;
 }
 
-.service-card {
+.services-section .service-card {
     padding: 2rem;
 }
 
-.service-icon {
+.services-section .service-icon {
     font-size: 2rem;
     margin-bottom: 1rem;
 }
 
-.service-name {
+.services-section .service-name {
     font-family: 'Playfair Display', serif;
     font-size: 1.25rem;
     font-weight: 500;
@@ -327,14 +327,14 @@
     margin-bottom: 0.75rem;
 }
 
-.service-desc {
+.services-section .service-desc {
     color: #6a6a7a;
     font-size: 0.9rem;
     line-height: 1.6;
     margin-bottom: 1rem;
 }
 
-.service-link {
+.services-section .service-link {
     color: #C9A55C;
     font-size: 0.875rem;
     font-weight: 500;
@@ -342,7 +342,7 @@
     transition: opacity 0.3s ease;
 }
 
-.service-link:hover {
+.services-section .service-link:hover {
     opacity: 0.7;
 }
 
@@ -352,7 +352,8 @@
     padding: 6rem 2rem;
 }
 
-.masters-grid {
+/* Masters Section - Landing Page (scoped to avoid conflicts with /masters page) */
+.masters-section .masters-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
@@ -360,12 +361,13 @@
     margin: 0 auto;
 }
 
-.master-card {
+.masters-section .master-card {
     text-align: center;
     padding: 1.5rem;
+    display: block !important;
 }
 
-.master-photo {
+.masters-section .master-photo {
     width: 120px;
     height: 120px;
     margin: 0 auto 1rem;
@@ -374,13 +376,13 @@
     border: 3px solid #C9A55C;
 }
 
-.master-img {
+.masters-section .master-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.master-name {
+.masters-section .master-name {
     font-family: 'Playfair Display', serif;
     font-size: 1.25rem;
     font-weight: 500;
@@ -388,7 +390,7 @@
     margin-bottom: 0.5rem;
 }
 
-.master-bio {
+.masters-section .master-bio {
     color: #6a6a7a;
     font-size: 0.9rem;
     line-height: 1.5;
@@ -399,19 +401,19 @@
     overflow: hidden;
 }
 
-.master-rating {
+.masters-section .master-rating {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
 }
 
-.rating-stars {
+.masters-section .rating-stars {
     color: #C9A55C;
     font-size: 0.875rem;
 }
 
-.rating-value {
+.masters-section .rating-value {
     color: #6a6a7a;
     font-size: 0.875rem;
     font-weight: 500;
