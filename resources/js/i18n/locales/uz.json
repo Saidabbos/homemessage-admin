@@ -34,7 +34,11 @@
     "views": "Ko'rishlar",
     "popularity": "Mashhurlik",
     "allStatuses": "Barcha holatlar",
-    "reset": "Tozalash"
+    "reset": "Tozalash",
+    "all": "Barchasi",
+    "min": "daqiqa",
+    "sum": "so'm",
+    "loading": "Yuklanmoqda..."
   },
   "translations": {
     "title": "Tarjimalar",
@@ -413,6 +417,36 @@
       "quickLinks": "Tezkor Havolalar",
       "contact": "Aloqa",
       "rights": "Barcha huquqlar himoyalangan."
+    }
+  },
+  "public": {
+    "masters": {
+      "title": "Bizning Masterlarimiz",
+      "empty": "Hozircha masterlar mavjud emas",
+      "years": "yil",
+      "orders": "buyurtma"
+    },
+    "master": {
+      "detail": "Master haqida",
+      "yearsExp": "yil tajriba",
+      "services": "Xizmatlar",
+      "oils": "Moy turlari"
+    },
+    "slots": {
+      "selectDate": "Sanani tanlang",
+      "available": "Bo'sh vaqtlar",
+      "empty": "Bu kunda bo'sh vaqt yo'q",
+      "error": "Vaqtlarni yuklashda xatolik",
+      "status": {
+        "free": "Bo'sh",
+        "pending": "Kutilmoqda",
+        "reserved": "Band",
+        "blocked": "Yopiq",
+        "unavailable": "Mavjud emas"
+      }
+    },
+    "date": {
+      "today": "Bugun"
     }
   }
 }
