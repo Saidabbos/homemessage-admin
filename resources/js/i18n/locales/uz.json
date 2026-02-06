@@ -360,5 +360,59 @@
     "allPaymentStatuses": "Barcha to'lov statuslari",
     "allMasters": "Barcha masterlar",
     "emptyMessage": "Buyurtmalar topilmadi"
+  },
+  "landing": {
+    "title": "Golden Touch - Premium Massaj Xizmati",
+    "brand": "GOLDEN TOUCH",
+    "nav": {
+      "services": "Xizmatlar",
+      "masters": "Masterlar",
+      "about": "Biz haqimizda",
+      "testimonials": "Fikrlar",
+      "bookNow": "Buyurtma"
+    },
+    "hero": {
+      "badge": "Premium Wellness Tajriba",
+      "title": "Ichki<br>Tinchlikni Toping",
+      "subtitle": "Tanangizni yangilash, ongingizni tinchlantirish va ruhingizni uyg'otish uchun mo'ljallangan hashamatli massaj xizmatlari.",
+      "cta": "Seansni Band Qiling",
+      "viewServices": "Xizmatlarni Ko'rish"
+    },
+    "services": {
+      "badge": "XIZMATLAR",
+      "title": "Bizning Xizmatlarimiz",
+      "subtitle": "Har bir seans sizning ehtiyojlaringizga moslashtirilgan",
+      "learnMore": "Batafsil"
+    },
+    "masters": {
+      "badge": "MUTAXASSISLAR",
+      "title": "Bizning Masterlarimiz",
+      "subtitle": "Sizning sog'lig'ingizga bag'ishlangan tajribali terapevtlar",
+      "defaultBio": "Professional massaj terapevti",
+      "empty": "Hozircha masterlar mavjud emas"
+    },
+    "sanctuary": {
+      "badge": "NEGA BIZ",
+      "title": "Sof Dam Olish<br>Maskani",
+      "description": "Har bir detal sizning qulayligingiz uchun mo'ljallangan dunyoga qadam qo'ying. Bizning usta terapevtlarimiz an'anaviy usullarni zamonaviy texnikalar bilan birlashtiradi.",
+      "imageAlt": "Spa muhiti"
+    },
+    "stats": {
+      "years": "Yillik tajriba",
+      "clients": "Mamnun mijozlar",
+      "rating": "O'rtacha baho"
+    },
+    "cta": {
+      "badge": "DAM OLISHGA TAYYORMISIZ?",
+      "title": "Sayohatingizni Boshlang",
+      "subtitle": "Bugun birinchi seansni band qiling",
+      "button": "Band Qilish"
+    },
+    "footer": {
+      "tagline": "Hashamat va tinchlik uyg'unligi. Biz sizning tanangizni tiklash va ongingizni tinchlantirish uchun premium massaj xizmatlarini taklif etamiz.",
+      "quickLinks": "Tezkor Havolalar",
+      "contact": "Aloqa",
+      "rights": "Barcha huquqlar himoyalangan."
+    }
   }
 }
