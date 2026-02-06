@@ -360,5 +360,59 @@
     "allPaymentStatuses": "All Payment Statuses",
     "allMasters": "All Masters",
     "emptyMessage": "No orders found"
+  },
+  "landing": {
+    "title": "Golden Touch - Premium Massage Service",
+    "brand": "GOLDEN TOUCH",
+    "nav": {
+      "services": "Services",
+      "masters": "Masters",
+      "about": "About",
+      "testimonials": "Testimonials",
+      "bookNow": "Book Now"
+    },
+    "hero": {
+      "badge": "Premium Wellness Experience",
+      "title": "Restore Your<br>Inner Peace",
+      "subtitle": "Luxury massage & spa treatments designed to rejuvenate your body, calm your mind, and awaken your spirit.",
+      "cta": "Book Your Session",
+      "viewServices": "View Services"
+    },
+    "services": {
+      "badge": "SPA SERVICES",
+      "title": "Tailored Treatments",
+      "subtitle": "Each session is crafted to your unique needs",
+      "learnMore": "Learn More"
+    },
+    "masters": {
+      "badge": "OUR THERAPISTS",
+      "title": "Meet Our Masters",
+      "subtitle": "Expert therapists dedicated to your wellness journey",
+      "defaultBio": "Professional massage therapist",
+      "empty": "No masters available yet"
+    },
+    "sanctuary": {
+      "badge": "WHY SERENITY",
+      "title": "A Sanctuary of<br>Pure Relaxation",
+      "description": "Step into a world where every detail is designed for your comfort. Our master therapists combine time-honored traditions with cutting-edge techniques.",
+      "imageAlt": "Spa environment"
+    },
+    "stats": {
+      "years": "Years Experience",
+      "clients": "Happy Clients",
+      "rating": "Avg. Rating"
+    },
+    "cta": {
+      "badge": "READY TO UNWIND?",
+      "title": "Begin Your Journey to Bliss",
+      "subtitle": "Book your first session today",
+      "button": "Reserve Your Spot"
+    },
+    "footer": {
+      "tagline": "Where luxury meets tranquility. We offer premium massage and spa treatments designed to restore your body and calm your mind.",
+      "quickLinks": "Quick Links",
+      "contact": "Contact",
+      "rights": "All rights reserved."
+    }
   }
 }
