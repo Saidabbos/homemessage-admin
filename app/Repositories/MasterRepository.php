@@ -36,7 +36,7 @@ class MasterRepository extends BaseRepository
     /**
      * Get featured masters for landing page
      */
-    public function getFeaturedForLanding(int $limit = 4): \Illuminate\Database\Eloquent\Collection
+    public function getFeaturedForLanding(int $limit = 4): \Illuminate\Support\Collection
     {
         return $this->query()
             ->where('status', true)

@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\ServiceType;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class ServiceTypeRepository extends BaseRepository
@@ -31,11 +32,11 @@ class ServiceTypeRepository extends BaseRepository
     /**
      * Get active service types for landing page
      */
-    public function getActiveForLanding(): Collection
+    public function getActiveForLanding(): SupportCollection
     {
         return $this->query()
             ->where('status', true)
-            ->orderBy('sort_order')
+            ->orderBy('id')
             ->get()
             ->map(fn($service) => [
                 'id' => $service->id,
