@@ -34,6 +34,18 @@ class ServiceTypeRepository extends BaseRepository
      */
     public function getActiveForLanding(int $limit = 4): SupportCollection
     {
+        // Service type emoji icons mapping
+        $icons = [
+            1 => '💆', // Klassik
+            2 => '🧘', // Relaks  
+            3 => '💪', // Sport
+            4 => '🙏', // Tailand
+            5 => '🪨', // Issiq tosh
+            6 => '🔙', // Orqa va bo'yin
+            7 => '🦶', // Oyoq
+            8 => '✨', // Anti-sellyulit
+        ];
+
         return $this->query()
             ->where('status', true)
             ->orderBy('id')
@@ -45,7 +57,8 @@ class ServiceTypeRepository extends BaseRepository
                 'description' => $service->description,
                 'price' => $service->price,
                 'duration' => $service->duration,
-                'icon' => $service->icon ?? 'spa',
+                'icon' => $icons[$service->id] ?? '💆',
+                'image' => $service->image,
             ]);
     }
 }
