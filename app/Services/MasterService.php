@@ -45,6 +45,10 @@ class MasterService
                 $master->oils()->attach($request->oils);
             }
 
+            if ($request->has('pressure_levels')) {
+                $master->pressureLevels()->attach($request->pressure_levels);
+            }
+
             return $master;
         });
     }
@@ -84,6 +88,7 @@ class MasterService
             // Sync relationships
             $master->serviceTypes()->sync($request->service_types ?? []);
             $master->oils()->sync($request->oils ?? []);
+            $master->pressureLevels()->sync($request->pressure_levels ?? []);
 
             return $master;
         });
@@ -112,7 +117,7 @@ class MasterService
      */
     public function getEditData(Master $master): array
     {
-        $master->load('user', 'serviceTypes', 'oils');
+        $master->load('user', 'serviceTypes', 'oils', 'pressureLevels');
 
         return [
             'id' => $master->id,
@@ -129,6 +134,7 @@ class MasterService
             'status' => $master->status,
             'service_types' => $master->serviceTypes->pluck('id')->toArray(),
             'oils' => $master->oils->pluck('id')->toArray(),
+            'pressure_levels' => $master->pressureLevels->pluck('id')->toArray(),
             'uz' => ['bio' => $master->getTranslation('bio', 'uz')],
             'ru' => ['bio' => $master->getTranslation('bio', 'ru')],
             'en' => ['bio' => $master->getTranslation('bio', 'en')],

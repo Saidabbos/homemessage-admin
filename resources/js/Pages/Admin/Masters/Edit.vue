@@ -12,6 +12,7 @@ const props = defineProps({
   master: Object,
   serviceTypes: Array,
   oils: Array,
+  pressureLevels: Array,
 });
 
 const activeTab = ref('uz');
@@ -31,6 +32,7 @@ const form = useForm({
   status: props.master.status,
   service_types: props.master.service_types || [],
   oils: props.master.oils || [],
+  pressure_levels: props.master.pressure_levels || [],
   uz: { bio: props.master.uz?.bio || '' },
   ru: { bio: props.master.ru?.bio || '' },
   en: { bio: props.master.en?.bio || '' },
@@ -237,6 +239,28 @@ const submit = () => {
                       class="w-4 h-4 text-[#17a2b8] border-gray-300 rounded focus:ring-[#17a2b8]"
                     />
                     <span class="ml-2 text-sm text-[#1f2d3d]">{{ oil.name?.uz || oil.name }}</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Pressure Levels -->
+              <div class="mt-4">
+                <label class="block text-sm font-medium text-[#1f2d3d] mb-2">
+                  Kuch Darajasi
+                </label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  <label
+                    v-for="pressureLevel in pressureLevels"
+                    :key="pressureLevel.id"
+                    class="flex items-center p-2 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer"
+                  >
+                    <input
+                      v-model="form.pressure_levels"
+                      type="checkbox"
+                      :value="pressureLevel.id"
+                      class="w-4 h-4 text-[#28a745] border-gray-300 rounded focus:ring-[#28a745]"
+                    />
+                    <span class="ml-2 text-sm text-[#1f2d3d]">{{ pressureLevel.name?.uz || pressureLevel.name }}</span>
                   </label>
                 </div>
               </div>

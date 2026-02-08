@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\Master\UpdateMasterRequest;
 use App\Models\Master;
 use App\Repositories\MasterRepository;
 use App\Repositories\OilRepository;
+use App\Repositories\PressureLevelRepository;
 use App\Repositories\ServiceTypeRepository;
 use App\Services\MasterService;
 use Illuminate\Http\Request;
@@ -19,7 +20,8 @@ class MasterController extends Controller
         protected MasterService $masterService,
         protected MasterRepository $masterRepository,
         protected ServiceTypeRepository $serviceTypeRepository,
-        protected OilRepository $oilRepository
+        protected OilRepository $oilRepository,
+        protected PressureLevelRepository $pressureLevelRepository
     ) {}
 
     public function index(Request $request)
@@ -36,6 +38,7 @@ class MasterController extends Controller
         return Inertia::render('Admin/Masters/Create', [
             'serviceTypes' => $this->serviceTypeRepository->getActive(),
             'oils' => $this->oilRepository->getActive(),
+            'pressureLevels' => $this->pressureLevelRepository->getActive(),
         ]);
     }
 
@@ -60,6 +63,7 @@ class MasterController extends Controller
             'master' => $this->masterService->getEditData($master),
             'serviceTypes' => $this->serviceTypeRepository->getActive(),
             'oils' => $this->oilRepository->getActive(),
+            'pressureLevels' => $this->pressureLevelRepository->getActive(),
         ]);
     }
 

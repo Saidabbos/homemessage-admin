@@ -28,6 +28,8 @@ class StoreMasterRequest extends FormRequest
             'service_types.*' => 'exists:service_types,id',
             'oils' => 'nullable|array',
             'oils.*' => 'exists:oils,id',
+            'pressure_levels' => 'nullable|array',
+            'pressure_levels.*' => 'exists:pressure_levels,id',
             'uz.bio' => 'nullable|string',
             'ru.bio' => 'nullable|string',
             'en.bio' => 'nullable|string',
