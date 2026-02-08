@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->bigInteger('telegram_id')->nullable()->unique()->after('locale');
+            $table->bigInteger('telegram_id')->nullable()->unique()->after('status');
             $table->string('telegram_username')->nullable()->after('telegram_id');
             $table->string('telegram_first_name')->nullable()->after('telegram_username');
             $table->string('telegram_photo_url')->nullable()->after('telegram_first_name');
