@@ -23,6 +23,9 @@ class MasterSeeder extends Seeder
                 'gender' => 'female',
                 'birth_date' => '1992-05-15',
                 'experience_years' => 8,
+                'shift_start' => '09:00',
+                'shift_end' => '21:00',
+                'pressure_levels' => ['light', 'medium', 'heavy'],
                 'bio' => [
                     'uz' => 'Professional massajchi. Klassik va relaks massaj bo\'yicha mutaxassis. 8 yillik tajriba.',
                     'ru' => 'Профессиональный массажист. Специалист по классическому и релакс массажу. 8 лет опыта.',
@@ -39,6 +42,9 @@ class MasterSeeder extends Seeder
                 'gender' => 'female',
                 'birth_date' => '1988-11-22',
                 'experience_years' => 12,
+                'shift_start' => '08:00',
+                'shift_end' => '22:00',
+                'pressure_levels' => ['light', 'medium', 'heavy'],
                 'bio' => [
                     'uz' => 'Tailand massaji bo\'yicha sertifikatlangan mutaxassis. Sharq texnikalarini mukammal biladi.',
                     'ru' => 'Сертифицированный специалист по тайскому массажу. Отлично владеет восточными техниками.',
@@ -55,6 +61,9 @@ class MasterSeeder extends Seeder
                 'gender' => 'male',
                 'birth_date' => '1990-03-08',
                 'experience_years' => 6,
+                'shift_start' => '10:00',
+                'shift_end' => '20:00',
+                'pressure_levels' => ['medium', 'heavy'],
                 'bio' => [
                     'uz' => 'Sport massaji mutaxassisi. Professional sportchilar bilan ishlagan tajribaga ega.',
                     'ru' => 'Специалист по спортивному массажу. Имеет опыт работы с профессиональными спортсменами.',
@@ -71,6 +80,9 @@ class MasterSeeder extends Seeder
                 'gender' => 'female',
                 'birth_date' => '1995-07-30',
                 'experience_years' => 4,
+                'shift_start' => '11:00',
+                'shift_end' => '19:00',
+                'pressure_levels' => ['light', 'medium'],
                 'bio' => [
                     'uz' => 'Anti-sellyulit va ariqlashtiruvchi massaj mutaxassisi. Zamonaviy texnikalarni qo\'llaydi.',
                     'ru' => 'Специалист по антицеллюлитному и моделирующему массажу. Применяет современные техники.',
@@ -87,6 +99,9 @@ class MasterSeeder extends Seeder
                 'gender' => 'male',
                 'birth_date' => '1985-12-10',
                 'experience_years' => 15,
+                'shift_start' => '08:00',
+                'shift_end' => '22:00',
+                'pressure_levels' => ['light', 'medium', 'heavy'],
                 'bio' => [
                     'uz' => 'Katta tajribaga ega professional. Barcha turdagi massajlarni bajaradi. VIP mijozlar bilan ishlaydi.',
                     'ru' => 'Профессионал с большим опытом. Выполняет все виды массажа. Работает с VIP клиентами.',
@@ -103,6 +118,9 @@ class MasterSeeder extends Seeder
                 'gender' => 'female',
                 'birth_date' => '1993-09-18',
                 'experience_years' => 5,
+                'shift_start' => '09:30',
+                'shift_end' => '20:30',
+                'pressure_levels' => ['light', 'medium'],
                 'bio' => [
                     'uz' => 'Relaksatsiya va stress bartaraf etish bo\'yicha mutaxassis. Aromaterapiya bilan ishlaydi.',
                     'ru' => 'Специалист по релаксации и снятию стресса. Работает с ароматерапией.',
@@ -139,6 +157,9 @@ class MasterSeeder extends Seeder
                     'gender' => $masterData['gender'],
                     'birth_date' => $masterData['birth_date'],
                     'experience_years' => $masterData['experience_years'],
+                    'shift_start' => $masterData['shift_start'] ?? '08:00',
+                    'shift_end' => $masterData['shift_end'] ?? '22:00',
+                    'pressure_levels' => $masterData['pressure_levels'] ?? ['light', 'medium', 'heavy'],
                     'bio' => $masterData['bio'],
                     'status' => true,
                 ]);
