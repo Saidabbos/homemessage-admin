@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Oil;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class OilService
 {
@@ -16,13 +17,19 @@ class OilService
      */
     public function create(array $data, Request $request): Oil
     {
+        Log::info('OilService: Creating new oil', ['slug' => $data['slug'] ?? 'unknown']);
+
         if ($request->hasFile('image')) {
             $data['image'] = $this->imageService->upload($request->file('image'), 'oils');
+            Log::info('OilService: Image uploaded');
         }
 
         $data['status'] = $request->has('status');
 
-        return Oil::create($data);
+        $oil = Oil::create($data);
+        Log::info('OilService: Oil created successfully', ['id' => $oil->id]);
+
+        return $oil;
     }
 
     /**
@@ -30,17 +37,21 @@ class OilService
      */
     public function update(Oil $oil, array $data, Request $request): Oil
     {
+        Log::info('OilService: Updating oil', ['id' => $oil->id]);
+
         if ($request->hasFile('image')) {
             $data['image'] = $this->imageService->replace(
                 $oil->image,
                 $request->file('image'),
                 'oils'
             );
+            Log::info('OilService: Image updated', ['id' => $oil->id]);
         }
 
         $data['status'] = $request->has('status');
 
         $oil->update($data);
+        Log::info('OilService: Oil updated successfully', ['id' => $oil->id]);
 
         return $oil;
     }
@@ -50,8 +61,12 @@ class OilService
      */
     public function delete(Oil $oil): void
     {
+        Log::info('OilService: Deleting oil', ['id' => $oil->id]);
+
         $this->imageService->delete($oil->image);
         $oil->delete();
+
+        Log::info('OilService: Oil deleted successfully', ['id' => $oil->id]);
     }
 
     /**

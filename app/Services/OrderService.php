@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderLog;
 use App\Repositories\OrderRepository;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderService
 {
@@ -18,7 +19,14 @@ class OrderService
      */
     public function updateStatus(Order $order, string $newStatus, ?string $comment = null): Order
     {
+        Log::info('OrderService: Status update requested', [
+            'order_id' => $order->id,
+            'current_status' => $order->status,
+            'new_status' => $newStatus,
+        ]);
+
         if (!$order->canChangeStatus()) {
+            Log::warning('OrderService: Status change not allowed', ['order_id' => $order->id]);
             throw new \Exception('Bu buyurtma statusini o\'zgartirish mumkin emas');
         }
 
@@ -42,6 +50,7 @@ class OrderService
                     'confirmed_by' => auth()->id(),
                     'confirmed_at' => now(),
                 ]);
+                Log::info('OrderService: Order confirmed', ['order_id' => $order->id, 'confirmed_by' => auth()->id()]);
             }
 
             if ($newStatus === Order::STATUS_CANCELLED) {
@@ -50,8 +59,15 @@ class OrderService
                     'cancelled_at' => now(),
                     'cancel_reason' => $comment,
                 ]);
+                Log::info('OrderService: Order cancelled', ['order_id' => $order->id, 'reason' => $comment]);
             }
         });
+
+        Log::info('OrderService: Status updated successfully', [
+            'order_id' => $order->id,
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus,
+        ]);
 
         return $order->fresh();
     }
@@ -66,7 +82,14 @@ class OrderService
         string $arrivalWindowEnd,
         ?string $comment = null
     ): Order {
+        Log::info('OrderService: Reschedule requested', [
+            'order_id' => $order->id,
+            'new_date' => $newDate,
+            'window' => "{$arrivalWindowStart}-{$arrivalWindowEnd}",
+        ]);
+
         if (!$order->canChangeSlot()) {
+            Log::warning('OrderService: Reschedule not allowed', ['order_id' => $order->id]);
             throw new \Exception('Bu buyurtma vaqtini o\'zgartirish mumkin emas');
         }
 
@@ -93,6 +116,12 @@ class OrderService
             );
         });
 
+        Log::info('OrderService: Order rescheduled successfully', [
+            'order_id' => $order->id,
+            'old' => "{$oldDate} {$oldWindow}",
+            'new' => "{$newDate} {$arrivalWindowStart}-{$arrivalWindowEnd}",
+        ]);
+
         return $order->fresh();
     }
 
@@ -101,6 +130,8 @@ class OrderService
      */
     public function addNote(Order $order, string $note): Order
     {
+        Log::info('OrderService: Adding note', ['order_id' => $order->id]);
+
         $order->update([
             'dispatcher_notes' => $order->dispatcher_notes
                 ? $order->dispatcher_notes . "\n\n---\n\n" . now()->format('d.m.Y H:i') . " - " . auth()->user()->name . ":\n" . $note
@@ -108,6 +139,8 @@ class OrderService
         ]);
 
         OrderLog::log($order, OrderLog::ACTION_NOTE_ADDED, null, null, $note);
+
+        Log::info('OrderService: Note added successfully', ['order_id' => $order->id]);
 
         return $order->fresh();
     }
@@ -117,6 +150,7 @@ class OrderService
      */
     public function cancel(Order $order, string $reason): Order
     {
+        Log::info('OrderService: Cancellation requested', ['order_id' => $order->id, 'reason' => $reason]);
         return $this->updateStatus($order, Order::STATUS_CANCELLED, $reason);
     }
 

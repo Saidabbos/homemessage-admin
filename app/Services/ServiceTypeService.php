@@ -6,6 +6,7 @@ use App\Models\ServiceType;
 use App\Models\ServiceTypeDuration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ServiceTypeService
 {
@@ -18,9 +19,12 @@ class ServiceTypeService
      */
     public function create(array $data, Request $request): ServiceType
     {
+        Log::info('ServiceTypeService: Creating new service type', ['slug' => $data['slug'] ?? 'unknown']);
+
         return DB::transaction(function () use ($data, $request) {
             if ($request->hasFile('image')) {
                 $data['image'] = $this->imageService->upload($request->file('image'), 'service-types');
+                Log::info('ServiceTypeService: Image uploaded');
             }
 
             $data['status'] = $request->has('status');
@@ -30,10 +34,13 @@ class ServiceTypeService
             unset($data['durations']);
 
             $serviceType = ServiceType::create($data);
+            Log::info('ServiceTypeService: Service type record created', ['id' => $serviceType->id]);
 
             // Create durations
             $this->syncDurations($serviceType, $durations);
+            Log::info('ServiceTypeService: Durations synced', ['count' => count($durations)]);
 
+            Log::info('ServiceTypeService: Service type created successfully', ['id' => $serviceType->id]);
             return $serviceType;
         });
     }
@@ -43,6 +50,8 @@ class ServiceTypeService
      */
     public function update(ServiceType $serviceType, array $data, Request $request): ServiceType
     {
+        Log::info('ServiceTypeService: Updating service type', ['id' => $serviceType->id]);
+
         return DB::transaction(function () use ($serviceType, $data, $request) {
             if ($request->hasFile('image')) {
                 $data['image'] = $this->imageService->replace(
@@ -50,6 +59,7 @@ class ServiceTypeService
                     $request->file('image'),
                     'service-types'
                 );
+                Log::info('ServiceTypeService: Image updated', ['id' => $serviceType->id]);
             }
 
             $data['status'] = $request->has('status');
@@ -62,7 +72,9 @@ class ServiceTypeService
 
             // Sync durations
             $this->syncDurations($serviceType, $durations);
+            Log::info('ServiceTypeService: Durations synced', ['id' => $serviceType->id, 'count' => count($durations)]);
 
+            Log::info('ServiceTypeService: Service type updated successfully', ['id' => $serviceType->id]);
             return $serviceType;
         });
     }
@@ -107,6 +119,7 @@ class ServiceTypeService
         $toDelete = array_diff($existingIds, $incomingIds);
         if (!empty($toDelete)) {
             ServiceTypeDuration::whereIn('id', $toDelete)->delete();
+            Log::info('ServiceTypeService: Deleted removed durations', ['deleted' => count($toDelete)]);
         }
 
         // Ensure at least one is_default
@@ -120,8 +133,12 @@ class ServiceTypeService
      */
     public function delete(ServiceType $serviceType): void
     {
+        Log::info('ServiceTypeService: Deleting service type', ['id' => $serviceType->id]);
+
         $this->imageService->delete($serviceType->image);
         $serviceType->delete(); // Cascade deletes durations
+
+        Log::info('ServiceTypeService: Service type deleted successfully', ['id' => $serviceType->id]);
     }
 
     /**
