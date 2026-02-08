@@ -5,9 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Master;
-use App\Models\Slot;
 use App\Repositories\OrderRepository;
-use App\Repositories\SlotRepository;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,7 +15,6 @@ class OrderController extends Controller
     public function __construct(
         protected OrderService $orderService,
         protected OrderRepository $orderRepository,
-        protected SlotRepository $slotRepository,
     ) {}
 
     /**
@@ -63,7 +60,6 @@ class OrderController extends Controller
         return Inertia::render('Admin/Orders/Show', [
             'order' => $order,
             'availableStatuses' => $this->orderService->getAvailableStatuses($order),
-            'slots' => $this->slotRepository->getActive(),
             'statusOptions' => $this->getStatusOptions(),
         ]);
     }
@@ -94,21 +90,23 @@ class OrderController extends Controller
     }
 
     /**
-     * Update order slot/time
+     * Reschedule order (change date/time)
      */
-    public function updateSlot(Request $request, Order $order)
+    public function reschedule(Request $request, Order $order)
     {
         $validated = $request->validate([
-            'slot_id' => 'required|exists:slots,id',
             'booking_date' => 'required|date',
+            'arrival_window_start' => 'required|date_format:H:i',
+            'arrival_window_end' => 'required|date_format:H:i|after:arrival_window_start',
             'comment' => 'nullable|string|max:500',
         ]);
 
         try {
-            $this->orderService->updateSlot(
+            $this->orderService->reschedule(
                 $order,
-                $validated['slot_id'],
                 $validated['booking_date'],
+                $validated['arrival_window_start'],
+                $validated['arrival_window_end'],
                 $validated['comment'] ?? null
             );
             return back()->with('success', 'Vaqt muvaffaqiyatli o\'zgartirildi');

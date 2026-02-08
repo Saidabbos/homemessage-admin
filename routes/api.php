@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\BookingSubmitController;
 use App\Http\Controllers\Api\MasterController;
 use App\Http\Controllers\Api\SlotController;
 use App\Http\Controllers\Api\OrderController;
@@ -28,7 +30,29 @@ Route::prefix('masters')->group(function () {
 // Service Types
 Route::get('/service-types', [ServiceTypeController::class, 'index']);
 
-// Slots
+/*
+|--------------------------------------------------------------------------
+| Booking API (v1) - 3-Step Wizard
+|--------------------------------------------------------------------------
+*/
+Route::prefix('v1')->group(function () {
+    // Step 1: Services
+    Route::get('/services', [BookingController::class, 'services']);
+    
+    // Step 2: Masters & Time
+    Route::get('/masters', [BookingController::class, 'masters']);
+    Route::get('/dates/availability', [BookingController::class, 'dateAvailability']);
+    Route::get('/slots', [BookingController::class, 'slots']);
+    Route::get('/slots/masters', [BookingController::class, 'slotMasters']);
+    
+    // Price calculation
+    Route::get('/booking/calculate-price', [BookingController::class, 'calculatePrice']);
+    
+    // Booking submission
+    Route::post('/bookings', [BookingSubmitController::class, 'store']);
+});
+
+// Legacy Slots (deprecated)
 Route::prefix('slots')->group(function () {
     Route::get('/available', [SlotController::class, 'available']);
     Route::get('/by-date', [SlotController::class, 'byDate']);

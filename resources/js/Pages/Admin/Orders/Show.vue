@@ -11,13 +11,12 @@ const { t } = useI18n();
 const props = defineProps({
   order: Object,
   availableStatuses: Array,
-  slots: Array,
   statusOptions: Array,
 });
 
 // Modals
 const showStatusModal = ref(false);
-const showSlotModal = ref(false);
+const showRescheduleModal = ref(false);
 const showNoteModal = ref(false);
 const showCancelModal = ref(false);
 
@@ -27,9 +26,10 @@ const statusForm = useForm({
   comment: '',
 });
 
-const slotForm = useForm({
-  slot_id: props.order.slot_id,
+const rescheduleForm = useForm({
   booking_date: props.order.booking_date?.split('T')[0] || '',
+  arrival_window_start: props.order.arrival_window_start?.substring(0, 5) || '',
+  arrival_window_end: props.order.arrival_window_end?.substring(0, 5) || '',
   comment: '',
 });
 
@@ -57,10 +57,10 @@ const submitStatus = () => {
   });
 };
 
-const submitSlot = () => {
-  slotForm.post(route('admin.orders.update-slot', props.order.id), {
+const submitReschedule = () => {
+  rescheduleForm.post(route('admin.orders.reschedule', props.order.id), {
     onSuccess: () => {
-      showSlotModal.value = false;
+      showRescheduleModal.value = false;
     },
   });
 };
@@ -151,13 +151,25 @@ const formatDateTime = (date) => {
   return new Date(date).toLocaleString('uz-UZ');
 };
 
-const formatTime = (time) => {
-  if (!time) return '';
-  return time.substring(0, 5);
+const formatArrivalWindow = (order) => {
+  if (!order.arrival_window_start || !order.arrival_window_end) return '-';
+  const start = order.arrival_window_start?.substring(0, 5);
+  const end = order.arrival_window_end?.substring(0, 5);
+  return `${start} – ${end}`;
 };
 
 const getStatusLabel = (status) => {
   return props.statusOptions?.find(s => s.value === status)?.label || status;
+};
+
+const getLogActionLabel = (action) => {
+  const labels = {
+    'status_changed': 'Status o\'zgartirildi',
+    'rescheduled': 'Vaqt o\'zgartirildi',
+    'note_added': 'Izoh qo\'shildi',
+    'created': 'Buyurtma yaratildi',
+  };
+  return labels[action] || action;
 };
 </script>
 
@@ -229,7 +241,7 @@ const getStatusLabel = (status) => {
             <h3 class="font-semibold text-[#1f2d3d]">{{ t('orders.bookingInfo') }}</h3>
             <button
               v-if="order.status !== 'CANCELLED' && order.status !== 'COMPLETED'"
-              @click="showSlotModal = true"
+              @click="showRescheduleModal = true"
               class="text-sm text-[#007bff] hover:underline"
             >
               {{ t('orders.changeTime') }}
@@ -242,18 +254,24 @@ const getStatusLabel = (status) => {
                 <p class="font-medium text-[#1f2d3d]">{{ formatDate(order.booking_date) }}</p>
               </div>
               <div>
-                <p class="text-sm text-[#6c757d]">{{ t('orders.time') }}</p>
-                <p class="font-medium text-[#1f2d3d]">
-                  {{ formatTime(order.slot?.start_time) }} - {{ formatTime(order.slot?.end_time) }}
-                </p>
+                <p class="text-sm text-[#6c757d]">Kelish oynasi</p>
+                <p class="font-medium text-[#1f2d3d]">{{ formatArrivalWindow(order) }}</p>
               </div>
               <div>
                 <p class="text-sm text-[#6c757d]">{{ t('orders.service') }}</p>
                 <p class="font-medium text-[#1f2d3d]">{{ order.service_type?.name?.uz || order.service_type?.name }}</p>
               </div>
               <div>
+                <p class="text-sm text-[#6c757d]">Davomiylik</p>
+                <p class="font-medium text-[#1f2d3d]">{{ order.duration?.duration || '-' }} daqiqa</p>
+              </div>
+              <div>
                 <p class="text-sm text-[#6c757d]">{{ t('orders.oil') }}</p>
                 <p class="font-medium text-[#1f2d3d]">{{ order.oil?.name?.uz || order.oil?.name || '-' }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-[#6c757d]">Odamlar soni</p>
+                <p class="font-medium text-[#1f2d3d]">{{ order.people_count || 1 }} kishi</p>
               </div>
               <div>
                 <p class="text-sm text-[#6c757d]">{{ t('orders.master') }}</p>
@@ -327,7 +345,6 @@ const getStatusLabel = (status) => {
             <h3 class="font-semibold text-[#1f2d3d]">{{ t('orders.payment') }}</h3>
           </div>
           <div class="p-4">
-            <!-- Order Payment Status -->
             <div class="flex items-center justify-between mb-3">
               <span class="text-sm text-[#6c757d]">{{ t('orders.status') }}:</span>
               <span
@@ -338,13 +355,11 @@ const getStatusLabel = (status) => {
               </span>
             </div>
 
-            <!-- Total Amount -->
             <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
               <span class="text-sm text-[#6c757d]">{{ t('orders.amount') }}:</span>
               <span class="font-semibold text-[#1f2d3d]">{{ formatAmount(order.total_amount) }}</span>
             </div>
 
-            <!-- Payment History -->
             <div v-if="order.payments && order.payments.length > 0">
               <p class="text-sm font-medium text-[#1f2d3d] mb-2">{{ t('payments.history') }}</p>
               <div class="space-y-3">
@@ -378,7 +393,6 @@ const getStatusLabel = (status) => {
               </div>
             </div>
 
-            <!-- No Payments Yet -->
             <div v-else class="text-sm text-[#6c757d] italic">
               {{ t('payments.noPayments') }}
             </div>
@@ -395,13 +409,7 @@ const getStatusLabel = (status) => {
               <div v-for="log in order.logs" :key="log.id" class="flex gap-3">
                 <div class="w-2 h-2 mt-2 rounded-full bg-[#007bff] flex-shrink-0"></div>
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-[#1f2d3d]">
-                    {{ log.action === 'status_changed' ? 'Status o\'zgartirildi' :
-                       log.action === 'slot_changed' ? 'Vaqt o\'zgartirildi' :
-                       log.action === 'note_added' ? 'Izoh qo\'shildi' :
-                       log.action === 'created' ? 'Buyurtma yaratildi' :
-                       log.action }}
-                  </p>
+                  <p class="text-sm font-medium text-[#1f2d3d]">{{ getLogActionLabel(log.action) }}</p>
                   <p v-if="log.old_value || log.new_value" class="text-xs text-[#6c757d]">
                     {{ log.old_value }} → {{ log.new_value }}
                   </p>
@@ -455,25 +463,18 @@ const getStatusLabel = (status) => {
           </div>
         </div>
         <div class="px-4 py-3 border-t border-gray-200 flex justify-end gap-3">
-          <button
-            @click="showStatusModal = false"
-            class="px-4 py-2 text-[#6c757d] hover:text-[#1f2d3d] text-sm font-medium transition"
-          >
+          <button @click="showStatusModal = false" class="px-4 py-2 text-[#6c757d] hover:text-[#1f2d3d] text-sm font-medium transition">
             {{ t('common.cancel') }}
           </button>
-          <button
-            @click="submitStatus"
-            :disabled="statusForm.processing"
-            class="px-4 py-2 bg-[#007bff] text-white text-sm font-medium rounded hover:bg-[#0069d9] transition disabled:opacity-50"
-          >
+          <button @click="submitStatus" :disabled="statusForm.processing" class="px-4 py-2 bg-[#007bff] text-white text-sm font-medium rounded hover:bg-[#0069d9] transition disabled:opacity-50">
             {{ t('common.save') }}
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Slot Change Modal -->
-    <div v-if="showSlotModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <!-- Reschedule Modal -->
+    <div v-if="showRescheduleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
         <div class="px-4 py-3 border-b border-gray-200">
           <h3 class="font-semibold text-[#1f2d3d]">{{ t('orders.changeTime') }}</h3>
@@ -482,43 +483,43 @@ const getStatusLabel = (status) => {
           <div>
             <label class="block text-sm font-medium text-[#1f2d3d] mb-1">{{ t('orders.date') }}</label>
             <input
-              v-model="slotForm.booking_date"
+              v-model="rescheduleForm.booking_date"
               type="date"
               class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-[#007bff] focus:border-[#007bff]"
             />
           </div>
-          <div>
-            <label class="block text-sm font-medium text-[#1f2d3d] mb-1">{{ t('orders.time') }}</label>
-            <select
-              v-model="slotForm.slot_id"
-              class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-[#007bff] focus:border-[#007bff]"
-            >
-              <option v-for="slot in slots" :key="slot.id" :value="slot.id">
-                {{ formatTime(slot.start_time) }} - {{ formatTime(slot.end_time) }}
-              </option>
-            </select>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-[#1f2d3d] mb-1">Kelish boshlanishi</label>
+              <input
+                v-model="rescheduleForm.arrival_window_start"
+                type="time"
+                class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-[#007bff] focus:border-[#007bff]"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-[#1f2d3d] mb-1">Kelish tugashi</label>
+              <input
+                v-model="rescheduleForm.arrival_window_end"
+                type="time"
+                class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-[#007bff] focus:border-[#007bff]"
+              />
+            </div>
           </div>
           <div>
             <label class="block text-sm font-medium text-[#1f2d3d] mb-1">{{ t('orders.comment') }}</label>
             <textarea
-              v-model="slotForm.comment"
+              v-model="rescheduleForm.comment"
               rows="2"
               class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-[#007bff] focus:border-[#007bff]"
             ></textarea>
           </div>
         </div>
         <div class="px-4 py-3 border-t border-gray-200 flex justify-end gap-3">
-          <button
-            @click="showSlotModal = false"
-            class="px-4 py-2 text-[#6c757d] hover:text-[#1f2d3d] text-sm font-medium transition"
-          >
+          <button @click="showRescheduleModal = false" class="px-4 py-2 text-[#6c757d] hover:text-[#1f2d3d] text-sm font-medium transition">
             {{ t('common.cancel') }}
           </button>
-          <button
-            @click="submitSlot"
-            :disabled="slotForm.processing"
-            class="px-4 py-2 bg-[#007bff] text-white text-sm font-medium rounded hover:bg-[#0069d9] transition disabled:opacity-50"
-          >
+          <button @click="submitReschedule" :disabled="rescheduleForm.processing" class="px-4 py-2 bg-[#007bff] text-white text-sm font-medium rounded hover:bg-[#0069d9] transition disabled:opacity-50">
             {{ t('common.save') }}
           </button>
         </div>
@@ -540,17 +541,10 @@ const getStatusLabel = (status) => {
           ></textarea>
         </div>
         <div class="px-4 py-3 border-t border-gray-200 flex justify-end gap-3">
-          <button
-            @click="showNoteModal = false"
-            class="px-4 py-2 text-[#6c757d] hover:text-[#1f2d3d] text-sm font-medium transition"
-          >
+          <button @click="showNoteModal = false" class="px-4 py-2 text-[#6c757d] hover:text-[#1f2d3d] text-sm font-medium transition">
             {{ t('common.cancel') }}
           </button>
-          <button
-            @click="submitNote"
-            :disabled="noteForm.processing || !noteForm.note"
-            class="px-4 py-2 bg-[#007bff] text-white text-sm font-medium rounded hover:bg-[#0069d9] transition disabled:opacity-50"
-          >
+          <button @click="submitNote" :disabled="noteForm.processing || !noteForm.note" class="px-4 py-2 bg-[#007bff] text-white text-sm font-medium rounded hover:bg-[#0069d9] transition disabled:opacity-50">
             {{ t('common.save') }}
           </button>
         </div>
@@ -576,17 +570,10 @@ const getStatusLabel = (status) => {
           </div>
         </div>
         <div class="px-4 py-3 border-t border-gray-200 flex justify-end gap-3">
-          <button
-            @click="showCancelModal = false"
-            class="px-4 py-2 text-[#6c757d] hover:text-[#1f2d3d] text-sm font-medium transition"
-          >
+          <button @click="showCancelModal = false" class="px-4 py-2 text-[#6c757d] hover:text-[#1f2d3d] text-sm font-medium transition">
             {{ t('common.cancel') }}
           </button>
-          <button
-            @click="submitCancel"
-            :disabled="cancelForm.processing || !cancelForm.reason"
-            class="px-4 py-2 bg-[#dc3545] text-white text-sm font-medium rounded hover:bg-[#c82333] transition disabled:opacity-50"
-          >
+          <button @click="submitCancel" :disabled="cancelForm.processing || !cancelForm.reason" class="px-4 py-2 bg-[#dc3545] text-white text-sm font-medium rounded hover:bg-[#c82333] transition disabled:opacity-50">
             {{ t('orders.confirmCancel') }}
           </button>
         </div>

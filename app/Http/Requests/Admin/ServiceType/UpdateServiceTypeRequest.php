@@ -17,8 +17,6 @@ class UpdateServiceTypeRequest extends FormRequest
 
         return [
             'slug' => 'required|alpha_dash|unique:service_types,slug,' . $serviceTypeId,
-            'duration' => 'required|integer|min:15|max:480',
-            'price' => 'required|numeric|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'boolean',
             'en.name' => 'required|string|max:255',
@@ -27,6 +25,25 @@ class UpdateServiceTypeRequest extends FormRequest
             'uz.description' => 'nullable|string',
             'ru.name' => 'required|string|max:255',
             'ru.description' => 'nullable|string',
+            // Durations validation
+            'durations' => 'required|array|min:1',
+            'durations.*.id' => 'nullable|integer|exists:service_type_durations,id',
+            'durations.*.duration' => 'required|integer|min:15|max:480',
+            'durations.*.price' => 'required|numeric|min:0',
+            'durations.*.is_default' => 'boolean',
+            'durations.*.status' => 'boolean',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'durations.required' => 'Kamida bitta davomiylik kiritilishi kerak',
+            'durations.min' => 'Kamida bitta davomiylik kiritilishi kerak',
+            'durations.*.duration.required' => 'Davomiylik kiritilishi shart',
+            'durations.*.duration.min' => 'Davomiylik kamida 15 daqiqa bo\'lishi kerak',
+            'durations.*.price.required' => 'Narx kiritilishi shart',
+            'durations.*.price.min' => 'Narx 0 dan katta bo\'lishi kerak',
         ];
     }
 

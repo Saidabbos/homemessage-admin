@@ -11,7 +11,7 @@ class OrderRepository
     public function getFilteredPaginated(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
         return $this->applyFilters(Order::query(), $filters)
-            ->with(['customer', 'master', 'slot', 'serviceType', 'oil'])
+            ->with(['customer', 'master', 'serviceType', 'duration', 'oil'])
             ->latest()
             ->paginate($perPage)
             ->withQueryString();
@@ -21,7 +21,7 @@ class OrderRepository
     {
         return Order::query()
             ->where('status', Order::STATUS_NEW)
-            ->with(['customer', 'master', 'slot', 'serviceType'])
+            ->with(['customer', 'master', 'serviceType', 'duration'])
             ->latest()
             ->paginate($perPage);
     }
@@ -30,7 +30,7 @@ class OrderRepository
     {
         return Order::query()
             ->active()
-            ->with(['customer', 'master', 'slot', 'serviceType'])
+            ->with(['customer', 'master', 'serviceType', 'duration'])
             ->latest()
             ->get();
     }
@@ -39,8 +39,8 @@ class OrderRepository
     {
         return Order::query()
             ->forDate($date)
-            ->with(['customer', 'master', 'slot', 'serviceType'])
-            ->orderBy('slot_id')
+            ->with(['customer', 'master', 'serviceType', 'duration'])
+            ->orderBy('arrival_window_start')
             ->get();
     }
 
@@ -49,8 +49,8 @@ class OrderRepository
         return Order::query()
             ->forMaster($masterId)
             ->when($date, fn($q) => $q->forDate($date))
-            ->with(['customer', 'slot', 'serviceType'])
-            ->latest()
+            ->with(['customer', 'serviceType', 'duration'])
+            ->orderBy('arrival_window_start')
             ->get();
     }
 
@@ -60,8 +60,8 @@ class OrderRepository
             ->with([
                 'customer',
                 'master',
-                'slot',
                 'serviceType',
+                'duration',
                 'oil',
                 'confirmedBy',
                 'cancelledBy',

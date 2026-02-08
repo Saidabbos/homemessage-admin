@@ -26,10 +26,14 @@ class Order extends Model
         'order_number',
         'customer_id',
         'master_id',
-        'slot_id',
         'service_type_id',
+        'duration_id',
         'oil_id',
+        'people_count',
+        'pressure_level',
         'booking_date',
+        'arrival_window_start',
+        'arrival_window_end',
         'status',
         'payment_status',
         'total_amount',
@@ -50,11 +54,35 @@ class Order extends Model
 
     protected $casts = [
         'booking_date' => 'date',
+        'people_count' => 'integer',
         'total_amount' => 'decimal:2',
         'paid_at' => 'datetime',
         'confirmed_at' => 'datetime',
         'cancelled_at' => 'datetime',
     ];
+
+    /**
+     * Arrival window display (10:00–10:30)
+     */
+    public function getArrivalWindowDisplayAttribute(): ?string
+    {
+        if (!$this->arrival_window_start || !$this->arrival_window_end) {
+            return null;
+        }
+        
+        $start = substr($this->arrival_window_start, 0, 5);
+        $end = substr($this->arrival_window_end, 0, 5);
+        
+        return "{$start}–{$end}";
+    }
+
+    /**
+     * Booking time (alias for arrival_window_display)
+     */
+    public function getBookingTimeAttribute(): ?string
+    {
+        return $this->arrival_window_display;
+    }
 
     /**
      * Generate order number: HM-YYYYMMDD-XXX
@@ -90,14 +118,14 @@ class Order extends Model
         return $this->belongsTo(Master::class);
     }
 
-    public function slot(): BelongsTo
-    {
-        return $this->belongsTo(Slot::class);
-    }
-
     public function serviceType(): BelongsTo
     {
         return $this->belongsTo(ServiceType::class);
+    }
+
+    public function duration(): BelongsTo
+    {
+        return $this->belongsTo(ServiceTypeDuration::class, 'duration_id');
     }
 
     public function oil(): BelongsTo
@@ -172,6 +200,18 @@ class Order extends Model
         return $query->where('master_id', $masterId);
     }
 
+    /**
+     * Orders that overlap with a given time range on a date
+     */
+    public function scopeOverlappingWindow($query, $date, $windowStart, $windowEnd)
+    {
+        return $query->whereDate('booking_date', $date)
+            ->where(function ($q) use ($windowStart, $windowEnd) {
+                $q->where('arrival_window_start', '<', $windowEnd)
+                  ->where('arrival_window_end', '>', $windowStart);
+            });
+    }
+
     // ==================== HELPERS ====================
 
     public function isNew(): bool
@@ -232,13 +272,6 @@ class Order extends Model
         };
     }
 
-    public function getBookingTimeAttribute(): ?string
-    {
-        return $this->slot?->start_time
-            ? substr($this->slot->start_time, 0, 5) . ' - ' . substr($this->slot->end_time, 0, 5)
-            : null;
-    }
-
     public function getFullAddressAttribute(): string
     {
         $parts = array_filter([
@@ -249,5 +282,13 @@ class Order extends Model
         ]);
 
         return implode(', ', $parts);
+    }
+
+    /**
+     * Get selected duration in minutes
+     */
+    public function getDurationMinutesAttribute(): int
+    {
+        return $this->duration?->duration ?? 60;
     }
 }

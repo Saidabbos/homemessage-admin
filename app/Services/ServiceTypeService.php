@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\ServiceType;
+use App\Models\ServiceTypeDuration;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ServiceTypeService
 {
@@ -12,37 +14,105 @@ class ServiceTypeService
     ) {}
 
     /**
-     * Create a new service type
+     * Create a new service type with durations
      */
     public function create(array $data, Request $request): ServiceType
     {
-        if ($request->hasFile('image')) {
-            $data['image'] = $this->imageService->upload($request->file('image'), 'service-types');
-        }
+        return DB::transaction(function () use ($data, $request) {
+            if ($request->hasFile('image')) {
+                $data['image'] = $this->imageService->upload($request->file('image'), 'service-types');
+            }
 
-        $data['status'] = $request->has('status');
+            $data['status'] = $request->has('status');
 
-        return ServiceType::create($data);
+            // Remove durations from main data
+            $durations = $data['durations'] ?? [];
+            unset($data['durations']);
+
+            $serviceType = ServiceType::create($data);
+
+            // Create durations
+            $this->syncDurations($serviceType, $durations);
+
+            return $serviceType;
+        });
     }
 
     /**
-     * Update an existing service type
+     * Update an existing service type with durations
      */
     public function update(ServiceType $serviceType, array $data, Request $request): ServiceType
     {
-        if ($request->hasFile('image')) {
-            $data['image'] = $this->imageService->replace(
-                $serviceType->image,
-                $request->file('image'),
-                'service-types'
-            );
+        return DB::transaction(function () use ($serviceType, $data, $request) {
+            if ($request->hasFile('image')) {
+                $data['image'] = $this->imageService->replace(
+                    $serviceType->image,
+                    $request->file('image'),
+                    'service-types'
+                );
+            }
+
+            $data['status'] = $request->has('status');
+
+            // Remove durations from main data
+            $durations = $data['durations'] ?? [];
+            unset($data['durations']);
+
+            $serviceType->update($data);
+
+            // Sync durations
+            $this->syncDurations($serviceType, $durations);
+
+            return $serviceType;
+        });
+    }
+
+    /**
+     * Sync durations for a service type
+     */
+    protected function syncDurations(ServiceType $serviceType, array $durations): void
+    {
+        // Get existing duration IDs
+        $existingIds = $serviceType->durations()->pluck('id')->toArray();
+        $incomingIds = [];
+
+        foreach ($durations as $index => $durationData) {
+            if (isset($durationData['id']) && $durationData['id']) {
+                // Update existing
+                $duration = ServiceTypeDuration::find($durationData['id']);
+                if ($duration && $duration->service_type_id === $serviceType->id) {
+                    $duration->update([
+                        'duration' => $durationData['duration'],
+                        'price' => $durationData['price'],
+                        'is_default' => $durationData['is_default'] ?? false,
+                        'status' => $durationData['status'] ?? true,
+                        'sort_order' => $index,
+                    ]);
+                    $incomingIds[] = $duration->id;
+                }
+            } else {
+                // Create new
+                $duration = $serviceType->durations()->create([
+                    'duration' => $durationData['duration'],
+                    'price' => $durationData['price'],
+                    'is_default' => $durationData['is_default'] ?? false,
+                    'status' => $durationData['status'] ?? true,
+                    'sort_order' => $index,
+                ]);
+                $incomingIds[] = $duration->id;
+            }
         }
 
-        $data['status'] = $request->has('status');
+        // Delete removed durations
+        $toDelete = array_diff($existingIds, $incomingIds);
+        if (!empty($toDelete)) {
+            ServiceTypeDuration::whereIn('id', $toDelete)->delete();
+        }
 
-        $serviceType->update($data);
-
-        return $serviceType;
+        // Ensure at least one is_default
+        if (!$serviceType->durations()->where('is_default', true)->exists()) {
+            $serviceType->durations()->orderBy('sort_order')->first()?->update(['is_default' => true]);
+        }
     }
 
     /**
@@ -51,7 +121,7 @@ class ServiceTypeService
     public function delete(ServiceType $serviceType): void
     {
         $this->imageService->delete($serviceType->image);
-        $serviceType->delete();
+        $serviceType->delete(); // Cascade deletes durations
     }
 
     /**
@@ -59,14 +129,16 @@ class ServiceTypeService
      */
     public function getEditData(ServiceType $serviceType): array
     {
+        $serviceType->load('durations');
+
         return [
             'id' => $serviceType->id,
             'slug' => $serviceType->slug,
-            'duration' => $serviceType->duration,
-            'price' => $serviceType->price,
             'image' => $serviceType->image,
             'image_url' => $serviceType->image_url,
             'status' => $serviceType->status,
+            'created_at' => $serviceType->created_at,
+            'updated_at' => $serviceType->updated_at,
             'en' => [
                 'name' => $serviceType->getTranslation('name', 'en'),
                 'description' => $serviceType->getTranslation('description', 'en'),
@@ -79,6 +151,13 @@ class ServiceTypeService
                 'name' => $serviceType->getTranslation('name', 'ru'),
                 'description' => $serviceType->getTranslation('description', 'ru'),
             ],
+            'durations' => $serviceType->durations->map(fn ($d) => [
+                'id' => $d->id,
+                'duration' => $d->duration,
+                'price' => (int) $d->price,
+                'is_default' => $d->is_default,
+                'status' => $d->status,
+            ])->toArray(),
         ];
     }
 }

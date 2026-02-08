@@ -24,6 +24,9 @@ class Master extends Model
         'birth_date',
         'gender',
         'experience_years',
+        'shift_start',
+        'shift_end',
+        'pressure_levels',
         'status',
     ];
 
@@ -36,8 +39,38 @@ class Master extends Model
         return [
             'birth_date' => 'date',
             'experience_years' => 'integer',
+            'pressure_levels' => 'array',
             'status' => 'boolean',
         ];
+    }
+
+    /**
+     * Ish vaqti boshlanishi (default: 08:00)
+     */
+    public function getShiftStartAttribute($value): string
+    {
+        return $value ?? '08:00';
+    }
+
+    /**
+     * Ish vaqti tugashi (default: 22:00)
+     */
+    public function getShiftEndAttribute($value): string
+    {
+        return $value ?? '22:00';
+    }
+
+    /**
+     * Master berilgan pressure levelni qo'llab-quvvatlaydimi?
+     */
+    public function supportsPressureLevel(string $level): bool
+    {
+        // Agar pressure_levels null bo'lsa, barcha levellarni qo'llaydi
+        if (empty($this->pressure_levels)) {
+            return true;
+        }
+
+        return in_array($level, $this->pressure_levels);
     }
 
     /**

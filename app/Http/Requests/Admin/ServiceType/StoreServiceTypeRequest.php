@@ -15,8 +15,6 @@ class StoreServiceTypeRequest extends FormRequest
     {
         return [
             'slug' => 'required|unique:service_types|alpha_dash',
-            'duration' => 'required|integer|min:15|max:480',
-            'price' => 'required|numeric|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'boolean',
             'en.name' => 'required|string|max:255',
@@ -25,6 +23,12 @@ class StoreServiceTypeRequest extends FormRequest
             'uz.description' => 'nullable|string',
             'ru.name' => 'required|string|max:255',
             'ru.description' => 'nullable|string',
+            // Durations validation
+            'durations' => 'required|array|min:1',
+            'durations.*.duration' => 'required|integer|min:15|max:480',
+            'durations.*.price' => 'required|numeric|min:0',
+            'durations.*.is_default' => 'boolean',
+            'durations.*.status' => 'boolean',
         ];
     }
 
@@ -33,11 +37,14 @@ class StoreServiceTypeRequest extends FormRequest
         return [
             'slug.required' => 'Slug majburiy',
             'slug.unique' => 'Bu slug oldin ishlatilgan',
-            'duration.required' => 'Davomiyligi majburiy',
-            'price.required' => 'Narx majburiy',
             'en.name.required' => 'English nomi majburiy',
             'uz.name.required' => 'Uzbek nomi majburiy',
             'ru.name.required' => 'Russian nomi majburiy',
+            'durations.required' => 'Kamida bitta davomiylik kiritilishi kerak',
+            'durations.min' => 'Kamida bitta davomiylik kiritilishi kerak',
+            'durations.*.duration.required' => 'Davomiylik kiritilishi shart',
+            'durations.*.duration.min' => 'Davomiylik kamida 15 daqiqa bo\'lishi kerak',
+            'durations.*.price.required' => 'Narx kiritilishi shart',
         ];
     }
 

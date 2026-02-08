@@ -84,9 +84,11 @@ const formatDate = (date) => {
   return new Date(date).toLocaleDateString('uz-UZ');
 };
 
-const formatTime = (slot) => {
-  if (!slot) return '-';
-  return `${slot.start_time?.substring(0, 5)} - ${slot.end_time?.substring(0, 5)}`;
+const formatArrivalWindow = (order) => {
+  if (!order.arrival_window_start || !order.arrival_window_end) return '-';
+  const start = order.arrival_window_start?.substring(0, 5);
+  const end = order.arrival_window_end?.substring(0, 5);
+  return `${start} – ${end}`;
 };
 </script>
 
@@ -204,7 +206,7 @@ const formatTime = (slot) => {
               </td>
               <td class="px-4 py-3">
                 <div class="font-medium">{{ formatDate(order.booking_date) }}</div>
-                <div class="text-xs text-[#6c757d]">{{ formatTime(order.slot) }}</div>
+                <div class="text-xs text-[#6c757d]">{{ formatArrivalWindow(order) }}</div>
               </td>
               <td class="px-4 py-3">
                 {{ order.service_type?.name?.uz || order.service_type?.name }}

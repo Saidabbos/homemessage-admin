@@ -129,40 +129,6 @@ const toggleMenu = (menu) => {
 
         <li>
           <Link
-            href="/admin/slots"
-            :class="[
-              'flex items-center px-3 py-2 rounded text-sm transition-colors',
-              isActive('admin.slots')
-                ? 'bg-[#007bff] text-white'
-                : 'hover:bg-[#495057]'
-            ]"
-          >
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            Vaqt Slotlari
-          </Link>
-        </li>
-
-        <li>
-          <Link
-            href="/admin/schedule"
-            :class="[
-              'flex items-center px-3 py-2 rounded text-sm transition-colors',
-              isActive('admin.schedule')
-                ? 'bg-[#007bff] text-white'
-                : 'hover:bg-[#495057]'
-            ]"
-          >
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-            Jadval
-          </Link>
-        </li>
-
-        <li>
-          <Link
             href="/admin/orders"
             :class="[
               'flex items-center px-3 py-2 rounded text-sm transition-colors',

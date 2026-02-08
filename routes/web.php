@@ -11,8 +11,6 @@ use App\Http\Controllers\Admin\DispatcherController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ProfileController;
-use App\Http\Controllers\Admin\SlotController;
-use App\Http\Controllers\Admin\MasterScheduleController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Public\LandingController;
 use App\Http\Controllers\Public\MasterController as PublicMasterController;
@@ -21,6 +19,16 @@ use App\Http\Controllers\Public\MasterController as PublicMasterController;
 Route::get('/', LandingController::class)->name('public.landing');
 Route::get('/masters', [PublicMasterController::class, 'index'])->name('public.masters.index');
 Route::get('/masters/{master}', [PublicMasterController::class, 'show'])->name('public.masters.show');
+
+// Booking routes
+Route::get('/booking', function () {
+    return inertia('Public/Booking/Index');
+})->name('public.booking');
+Route::get('/booking/success', function () {
+    return inertia('Public/Booking/Success', [
+        'orderNumber' => request('order'),
+    ]);
+})->name('public.booking.success');
 
 // Default login redirect
 Route::get('/login', function () {
@@ -124,35 +132,12 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::put('profile', [ProfileController::class, 'update'])->name('admin.profile.update');
     Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('admin.profile.password');
 
-    // Slots CRUD (time templates)
-    Route::resource('slots', SlotController::class, [
-        'names' => [
-            'index' => 'admin.slots.index',
-            'create' => 'admin.slots.create',
-            'store' => 'admin.slots.store',
-            'show' => 'admin.slots.show',
-            'edit' => 'admin.slots.edit',
-            'update' => 'admin.slots.update',
-            'destroy' => 'admin.slots.destroy',
-        ]
-    ]);
-    Route::post('slots/generate-defaults', [SlotController::class, 'generateDefaults'])
-        ->name('admin.slots.generate-defaults');
-
-    // Master Schedule (booking management)
-    Route::get('schedule', [MasterScheduleController::class, 'index'])->name('admin.schedule.index');
-    Route::get('schedule/{master}', [MasterScheduleController::class, 'show'])->name('admin.schedule.show');
-    Route::post('schedule/{master}/block-slot', [MasterScheduleController::class, 'blockSlot'])->name('admin.schedule.block-slot');
-    Route::post('schedule/{master}/unblock-slot', [MasterScheduleController::class, 'unblockSlot'])->name('admin.schedule.unblock-slot');
-    Route::post('schedule/{master}/block-day', [MasterScheduleController::class, 'blockDay'])->name('admin.schedule.block-day');
-    Route::post('schedule/{master}/unblock-day', [MasterScheduleController::class, 'unblockDay'])->name('admin.schedule.unblock-day');
-
     // Orders (view and manage only, no create)
     Route::get('orders', [OrderController::class, 'index'])->name('admin.orders.index');
     Route::get('orders/new', [OrderController::class, 'newOrders'])->name('admin.orders.new');
     Route::get('orders/{order}', [OrderController::class, 'show'])->name('admin.orders.show');
     Route::post('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('admin.orders.update-status');
-    Route::post('orders/{order}/slot', [OrderController::class, 'updateSlot'])->name('admin.orders.update-slot');
+    Route::post('orders/{order}/reschedule', [OrderController::class, 'reschedule'])->name('admin.orders.reschedule');
     Route::post('orders/{order}/note', [OrderController::class, 'addNote'])->name('admin.orders.add-note');
     Route::post('orders/{order}/cancel', [OrderController::class, 'cancel'])->name('admin.orders.cancel');
 });
