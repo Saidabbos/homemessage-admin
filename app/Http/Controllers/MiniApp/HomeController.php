@@ -106,12 +106,29 @@ class HomeController extends Controller
             'user_id' => Auth::id(),
         ]);
 
-        $request->validate([
-            'telegram_id' => 'required|integer',
-            'telegram_username' => 'nullable|string',
-            'telegram_first_name' => 'nullable|string',
-            'telegram_photo_url' => 'nullable|string',
-        ]);
+        // Try to extract user from initData if telegram_id not provided
+        $telegramId = $request->telegram_id;
+        $telegramUsername = $request->telegram_username;
+        $telegramFirstName = $request->telegram_first_name;
+        $telegramPhotoUrl = $request->telegram_photo_url;
+
+        if (!$telegramId && $request->init_data) {
+            $parsed = $this->parseInitData($request->init_data);
+            Log::info('MiniApp: Parsed initData', ['parsed' => $parsed]);
+            
+            if (isset($parsed['user'])) {
+                $user = json_decode($parsed['user'], true);
+                $telegramId = $user['id'] ?? null;
+                $telegramUsername = $user['username'] ?? null;
+                $telegramFirstName = $user['first_name'] ?? null;
+                $telegramPhotoUrl = $user['photo_url'] ?? null;
+            }
+        }
+
+        if (!$telegramId) {
+            Log::warning('MiniApp: No telegram_id available');
+            return response()->json(['error' => 'No Telegram ID provided'], 400);
+        }
 
         $user = Auth::user();
         
@@ -120,13 +137,13 @@ class HomeController extends Controller
         }
 
         // Check if this Telegram ID is already linked to another account
-        $existingUser = User::where('telegram_id', $request->telegram_id)
+        $existingUser = User::where('telegram_id', $telegramId)
             ->where('id', '!=', $user->id)
             ->first();
 
         if ($existingUser) {
             Log::warning('MiniApp: Telegram ID already linked to another account', [
-                'telegram_id' => $request->telegram_id,
+                'telegram_id' => $telegramId,
                 'current_user' => $user->id,
                 'existing_user' => $existingUser->id,
             ]);
@@ -134,18 +151,28 @@ class HomeController extends Controller
         }
 
         $user->update([
-            'telegram_id' => $request->telegram_id,
-            'telegram_username' => $request->telegram_username,
-            'telegram_first_name' => $request->telegram_first_name,
-            'telegram_photo_url' => $request->telegram_photo_url,
+            'telegram_id' => $telegramId,
+            'telegram_username' => $telegramUsername,
+            'telegram_first_name' => $telegramFirstName,
+            'telegram_photo_url' => $telegramPhotoUrl,
         ]);
 
         Log::info('MiniApp: Telegram account linked', [
             'user_id' => $user->id,
-            'telegram_id' => $request->telegram_id,
+            'telegram_id' => $telegramId,
         ]);
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Parse Telegram initData string
+     */
+    protected function parseInitData(string $initData): array
+    {
+        $result = [];
+        parse_str($initData, $result);
+        return $result;
     }
 
     /**

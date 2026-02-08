@@ -64,15 +64,20 @@ const verifyOtp = async () => {
         preserveScroll: true,
         onSuccess: async () => {
             // Link Telegram account if available
-            const tgData = tgUser.value || window.Telegram?.WebApp?.initDataUnsafe?.user;
-            console.log('Telegram user data:', tgData);
+            const webapp = window.Telegram?.WebApp;
+            const tgData = tgUser.value || webapp?.initDataUnsafe?.user;
+            const initData = webapp?.initData;
             
-            if (tgData?.id) {
+            console.log('Telegram WebApp:', webapp);
+            console.log('Telegram user data:', tgData);
+            console.log('Telegram initData:', initData);
+            
+            // Try to link if we have user data or initData
+            if (tgData?.id || initData) {
                 try {
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content 
-                        || document.querySelector('input[name="_token"]')?.value;
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
                     
-                    await fetch('/app/link-telegram', {
+                    const response = await fetch('/app/link-telegram', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -80,16 +85,19 @@ const verifyOtp = async () => {
                             'Accept': 'application/json',
                         },
                         body: JSON.stringify({
-                            telegram_id: tgData.id,
-                            telegram_username: tgData.username || null,
-                            telegram_first_name: tgData.first_name || null,
-                            telegram_photo_url: tgData.photo_url || null,
+                            telegram_id: tgData?.id || null,
+                            telegram_username: tgData?.username || null,
+                            telegram_first_name: tgData?.first_name || null,
+                            telegram_photo_url: tgData?.photo_url || null,
+                            init_data: initData || null,
                         }),
                     });
-                    console.log('Telegram account linked successfully');
+                    console.log('Link response:', await response.json());
                 } catch (e) {
                     console.log('Telegram link failed:', e);
                 }
+            } else {
+                console.log('No Telegram data available to link');
             }
             window.location.href = '/app';
         },
