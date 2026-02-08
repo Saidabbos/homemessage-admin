@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ServiceTypeController;
@@ -16,7 +17,17 @@ use App\Http\Controllers\Public\LandingController;
 use App\Http\Controllers\Public\MasterController as PublicMasterController;
 
 // Public routes
-Route::get('/', LandingController::class)->name('public.landing');
+Route::get('/', function () {
+    return Inertia::render('Public/ModernLanding', [
+        'serviceTypes' => app(\App\Repositories\ServiceTypeRepository::class)->getActiveForLanding(),
+        'masters' => app(\App\Repositories\MasterRepository::class)->getFeaturedForLanding(4),
+        'stats' => [
+            'years' => 12,
+            'clients' => '5K',
+            'rating' => 4.9,
+        ],
+    ]);
+})->name('public.landing');
 Route::get('/masters', [PublicMasterController::class, 'index'])->name('public.masters.index');
 Route::get('/masters/{master}', [PublicMasterController::class, 'show'])->name('public.masters.show');
 
