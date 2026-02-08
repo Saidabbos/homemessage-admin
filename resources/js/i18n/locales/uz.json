@@ -393,7 +393,14 @@
       "title": "Bizning Masterlarimiz",
       "subtitle": "Sizning sog'lig'ingizga bag'ishlangan tajribali terapevtlar",
       "defaultBio": "Professional massaj terapevti",
-      "empty": "Hozircha masterlar mavjud emas"
+      "empty": "Hozircha masterlar mavjud emas",
+      "viewProfile": "Profil"
+    },
+    "testimonials": {
+      "badge": "FIKRLAR",
+      "title": "Mijozlarimiz Nima Deydi",
+      "subtitle": "Haqiqiy fikrlar, haqiqiy natijalar",
+      "verified": "Tekshirilgan buyurtma"
     },
     "sanctuary": {
       "badge": "NEGA BIZ",
@@ -498,6 +505,10 @@
     "next_steps": "Keyingi qadamlar",
     "next_step_1": "Operator 15 daqiqa ichida qo'ng'iroq qiladi",
     "next_step_2": "Master belgilangan vaqtda keladi",
-    "next_step_3": "To'lovni naqd yoki karta orqali amalga oshiring"
+    "next_step_3": "To'lovni naqd yoki karta orqali amalga oshiring",
+    "select_oil": "Yog' turini tanlang",
+    "oil_coconut": "Kokos yog'i",
+    "oil_lavender": "Lavender yog'i",
+    "no_preference": "Farq yo'q"
   }
 }

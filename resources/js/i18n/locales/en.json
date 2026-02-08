@@ -393,7 +393,14 @@
       "title": "Meet Our Masters",
       "subtitle": "Expert therapists dedicated to your wellness journey",
       "defaultBio": "Professional massage therapist",
-      "empty": "No masters available yet"
+      "empty": "No masters available yet",
+      "viewProfile": "View Profile"
+    },
+    "testimonials": {
+      "badge": "CLIENT TESTIMONIALS",
+      "title": "What Our Clients Say",
+      "subtitle": "Real stories, real results",
+      "verified": "Verified booking"
     },
     "sanctuary": {
       "badge": "WHY SERENITY",
@@ -498,6 +505,10 @@
     "next_steps": "Next steps",
     "next_step_1": "Operator will call within 15 minutes",
     "next_step_2": "Master will arrive at the appointed time",
-    "next_step_3": "Pay with cash or card"
+    "next_step_3": "Pay with cash or card",
+    "select_oil": "Select oil type",
+    "oil_coconut": "Coconut oil",
+    "oil_lavender": "Lavender oil",
+    "no_preference": "No preference"
   }
 }
