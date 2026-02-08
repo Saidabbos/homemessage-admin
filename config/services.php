@@ -88,6 +88,7 @@ return [
         'base_url' => env('ESKIZ_BASE_URL', 'https://notify.eskiz.uz/api'),
         'token_cache_key' => 'eskiz_auth_token',
         'token_ttl' => 86400, // 24 hours
+        'skip_send' => env('ESKIZ_SKIP_SEND', false),
     ],
 
 ];

@@ -21,6 +21,12 @@ class SmsService
      */
     public function sendOtp(string $phone, string $code, string $locale = 'uz'): bool
     {
+        // Skip SMS if disabled (for testing while Eskiz pending moderation)
+        if (config('services.eskiz.skip_send', false)) {
+            Log::info('SmsService: SMS skipped (testing mode)', ['phone' => $phone, 'code' => $code]);
+            return true;
+        }
+
         $token = $this->getAuthToken();
 
         if (!$token) {
