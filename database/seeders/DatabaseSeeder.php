@@ -30,6 +30,10 @@ class DatabaseSeeder extends Seeder
         // Seed masters with user accounts
         $this->call(MasterSeeder::class);
 
+        // Seed images for service types and masters
+        $this->call(ServiceTypeImageSeeder::class);
+        $this->call(MasterImageSeeder::class);
+
         // ========== CREATE ADMIN USER ==========
         $admin = User::firstOrCreate(
             ['email' => 'admin@example.com'],
