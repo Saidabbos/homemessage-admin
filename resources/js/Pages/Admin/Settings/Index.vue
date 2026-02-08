@@ -13,6 +13,13 @@ const props = defineProps({
 });
 
 const activeTab = ref('general');
+const activeLanguage = ref('uz');
+
+const languageTabs = [
+  { key: 'uz', label: "O'zbek", flag: '🇺🇿' },
+  { key: 'ru', label: 'Русский', flag: '🇷🇺' },
+  { key: 'en', label: 'English', flag: '🇬🇧' },
+];
 
 const form = useForm({
   // General
@@ -32,8 +39,19 @@ const form = useForm({
   instagram_link: props.settings?.social?.instagram_link || '',
   facebook_link: props.settings?.social?.facebook_link || '',
   // Hero Section - Translatable
-  hero_title: props.settings?.hero?.hero_title || { uz: '', ru: '', en: '' },
-  hero_subtitle: props.settings?.hero?.hero_subtitle || { uz: '', ru: '', en: '' },
+  uz: {
+    hero_title: props.settings?.hero?.hero_title?.uz || '',
+    hero_subtitle: props.settings?.hero?.hero_subtitle?.uz || '',
+  },
+  ru: {
+    hero_title: props.settings?.hero?.hero_title?.ru || '',
+    hero_subtitle: props.settings?.hero?.hero_subtitle?.ru || '',
+  },
+  en: {
+    hero_title: props.settings?.hero?.hero_title?.en || '',
+    hero_subtitle: props.settings?.hero?.hero_subtitle?.en || '',
+  },
+  // Hero Section - Non-translatable
   hero_badge: props.settings?.hero?.hero_badge || '',
   hero_cta_text: props.settings?.hero?.hero_cta_text || '',
   hero_view_services_text: props.settings?.hero?.hero_view_services_text || '',
@@ -64,6 +82,7 @@ const tabs = [
   { id: 'booking', label: 'settings.booking' },
   { id: 'social', label: 'settings.social' },
   { id: 'hero', label: 'settings.hero' },
+  { id: 'translation', label: 'translations.title' },
 ];
 </script>
 
@@ -322,7 +341,7 @@ const tabs = [
           </div>
         </div>
 
-        <!-- Hero Section Settings -->
+        <!-- Hero Section Settings (Image & Non-translatable) -->
         <div v-show="activeTab === 'hero'" class="p-6 space-y-6">
           <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded text-sm text-[#1f2d3d]">
             <p class="font-medium mb-1">{{ t('settings.heroInfo') }}</p>
@@ -375,84 +394,8 @@ const tabs = [
             <div v-if="form.errors.hero_image" class="text-[#dc3545] text-xs mt-2">{{ form.errors.hero_image }}</div>
           </div>
 
-          <!-- Translatable Fields -->
-          <div class="grid grid-cols-1 gap-6">
-            <!-- Hero Title (Translatable) -->
-            <div class="border border-gray-300 rounded-lg p-4">
-              <label class="block text-sm font-medium text-[#1f2d3d] mb-3">
-                {{ t('settings.heroTitle') }}
-              </label>
-              <div class="space-y-3">
-                <div>
-                  <label class="block text-xs font-medium text-[#6c757d] mb-1">🇺🇿 Uzbek</label>
-                  <input
-                    type="text"
-                    v-model="form.hero_title.uz"
-                    class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
-                    placeholder="Premium massaj xizmati..."
-                  />
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-[#6c757d] mb-1">🇷🇺 Русский</label>
-                  <input
-                    type="text"
-                    v-model="form.hero_title.ru"
-                    class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
-                    placeholder="Премиум массаж..."
-                  />
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-[#6c757d] mb-1">🇬🇧 English</label>
-                  <input
-                    type="text"
-                    v-model="form.hero_title.en"
-                    class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
-                    placeholder="Premium massage service..."
-                  />
-                </div>
-              </div>
-              <p class="text-xs text-[#6c757d] mt-2">{{ t('settings.heroTitleHint') }}</p>
-              <div v-if="form.errors['hero_title.uz']" class="text-[#dc3545] text-xs mt-1">{{ form.errors['hero_title.uz'] }}</div>
-            </div>
-
-            <!-- Hero Subtitle (Translatable) -->
-            <div class="border border-gray-300 rounded-lg p-4">
-              <label class="block text-sm font-medium text-[#1f2d3d] mb-3">
-                {{ t('settings.heroSubtitle') }}
-              </label>
-              <div class="space-y-3">
-                <div>
-                  <label class="block text-xs font-medium text-[#6c757d] mb-1">🇺🇿 Uzbek</label>
-                  <textarea
-                    v-model="form.hero_subtitle.uz"
-                    rows="2"
-                    class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
-                    placeholder="Uyingizga premium massaj xizmati..."
-                  ></textarea>
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-[#6c757d] mb-1">🇷🇺 Русский</label>
-                  <textarea
-                    v-model="form.hero_subtitle.ru"
-                    rows="2"
-                    class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
-                    placeholder="Премиум массаж в вашем доме..."
-                  ></textarea>
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-[#6c757d] mb-1">🇬🇧 English</label>
-                  <textarea
-                    v-model="form.hero_subtitle.en"
-                    rows="2"
-                    class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
-                    placeholder="Premium massage service at your home..."
-                  ></textarea>
-                </div>
-              </div>
-              <p class="text-xs text-[#6c757d] mt-2">{{ t('settings.heroSubtitleHint') }}</p>
-              <div v-if="form.errors['hero_subtitle.uz']" class="text-[#dc3545] text-xs mt-1">{{ form.errors['hero_subtitle.uz'] }}</div>
-            </div>
-
+          <!-- Non-translatable Fields -->
+          <div class="grid grid-cols-1 gap-4">
             <!-- Hero Badge -->
             <div>
               <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
@@ -496,6 +439,130 @@ const tabs = [
               />
               <p class="text-xs text-[#6c757d] mt-1">{{ t('settings.heroViewServicesTextHint') }}</p>
               <div v-if="form.errors.hero_view_services_text" class="text-[#dc3545] text-xs mt-1">{{ form.errors.hero_view_services_text }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Translation Settings (Hero Section Translatable Fields) -->
+        <div v-show="activeTab === 'translation'" class="p-6 space-y-4">
+          <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded text-sm text-[#1f2d3d]">
+            <p class="font-medium mb-1">{{ t('translations.title') }}</p>
+            <p class="text-[#6c757d]">{{ t('settings.heroInfoText') }}</p>
+          </div>
+
+          <!-- Language Tabs -->
+          <div class="bg-white rounded shadow-sm">
+            <div class="border-b border-gray-200">
+              <ul class="flex flex-wrap -mb-px">
+                <li v-for="tab in languageTabs" :key="tab.key" class="mr-1">
+                  <button
+                    type="button"
+                    @click="activeLanguage = tab.key"
+                    :class="[
+                      'inline-flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition',
+                      activeLanguage === tab.key
+                        ? 'border-[#007bff] text-[#007bff]'
+                        : 'border-transparent text-[#6c757d] hover:text-[#1f2d3d] hover:border-gray-300'
+                    ]"
+                  >
+                    <span>{{ tab.flag }}</span>
+                    <span>{{ tab.label }}</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Uzbek Translation -->
+            <div v-show="activeLanguage === 'uz'" class="p-6 space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
+                  {{ t('settings.heroTitle') }}
+                </label>
+                <input
+                  type="text"
+                  v-model="form.uz.hero_title"
+                  class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
+                  placeholder="Premium massaj xizmati..."
+                />
+                <p class="text-xs text-[#6c757d] mt-1">{{ t('settings.heroTitleHint') }}</p>
+                <div v-if="form.errors['uz.hero_title']" class="text-[#dc3545] text-xs mt-1">{{ form.errors['uz.hero_title'] }}</div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
+                  {{ t('settings.heroSubtitle') }}
+                </label>
+                <textarea
+                  v-model="form.uz.hero_subtitle"
+                  rows="4"
+                  class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
+                  placeholder="Uyingizga premium massaj xizmati..."
+                ></textarea>
+                <p class="text-xs text-[#6c757d] mt-1">{{ t('settings.heroSubtitleHint') }}</p>
+                <div v-if="form.errors['uz.hero_subtitle']" class="text-[#dc3545] text-xs mt-1">{{ form.errors['uz.hero_subtitle'] }}</div>
+              </div>
+            </div>
+
+            <!-- Russian Translation -->
+            <div v-show="activeLanguage === 'ru'" class="p-6 space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
+                  {{ t('settings.heroTitle') }}
+                </label>
+                <input
+                  type="text"
+                  v-model="form.ru.hero_title"
+                  class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
+                  placeholder="Премиум массаж..."
+                />
+                <p class="text-xs text-[#6c757d] mt-1">{{ t('settings.heroTitleHint') }}</p>
+                <div v-if="form.errors['ru.hero_title']" class="text-[#dc3545] text-xs mt-1">{{ form.errors['ru.hero_title'] }}</div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
+                  {{ t('settings.heroSubtitle') }}
+                </label>
+                <textarea
+                  v-model="form.ru.hero_subtitle"
+                  rows="4"
+                  class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
+                  placeholder="Премиум массаж в вашем доме..."
+                ></textarea>
+                <p class="text-xs text-[#6c757d] mt-1">{{ t('settings.heroSubtitleHint') }}</p>
+                <div v-if="form.errors['ru.hero_subtitle']" class="text-[#dc3545] text-xs mt-1">{{ form.errors['ru.hero_subtitle'] }}</div>
+              </div>
+            </div>
+
+            <!-- English Translation -->
+            <div v-show="activeLanguage === 'en'" class="p-6 space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
+                  {{ t('settings.heroTitle') }}
+                </label>
+                <input
+                  type="text"
+                  v-model="form.en.hero_title"
+                  class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
+                  placeholder="Premium massage service..."
+                />
+                <p class="text-xs text-[#6c757d] mt-1">{{ t('settings.heroTitleHint') }}</p>
+                <div v-if="form.errors['en.hero_title']" class="text-[#dc3545] text-xs mt-1">{{ form.errors['en.hero_title'] }}</div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
+                  {{ t('settings.heroSubtitle') }}
+                </label>
+                <textarea
+                  v-model="form.en.hero_subtitle"
+                  rows="4"
+                  class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
+                  placeholder="Premium massage service at your home..."
+                ></textarea>
+                <p class="text-xs text-[#6c757d] mt-1">{{ t('settings.heroSubtitleHint') }}</p>
+                <div v-if="form.errors['en.hero_subtitle']" class="text-[#dc3545] text-xs mt-1">{{ form.errors['en.hero_subtitle'] }}</div>
+              </div>
             </div>
           </div>
         </div>

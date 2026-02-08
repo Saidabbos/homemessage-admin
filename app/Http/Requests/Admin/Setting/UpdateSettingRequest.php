@@ -33,13 +33,13 @@ class UpdateSettingRequest extends FormRequest
             'instagram_link' => 'nullable|url|max:255',
             'facebook_link' => 'nullable|url|max:255',
 
-            // Hero Section - Translatable
-            'hero_title.uz' => 'nullable|string|max:255',
-            'hero_title.ru' => 'nullable|string|max:255',
-            'hero_title.en' => 'nullable|string|max:255',
-            'hero_subtitle.uz' => 'nullable|string|max:500',
-            'hero_subtitle.ru' => 'nullable|string|max:500',
-            'hero_subtitle.en' => 'nullable|string|max:500',
+            // Hero Section - Translatable (nested under language keys)
+            'uz.hero_title' => 'nullable|string|max:255',
+            'ru.hero_title' => 'nullable|string|max:255',
+            'en.hero_title' => 'nullable|string|max:255',
+            'uz.hero_subtitle' => 'nullable|string|max:500',
+            'ru.hero_subtitle' => 'nullable|string|max:500',
+            'en.hero_subtitle' => 'nullable|string|max:500',
             'hero_badge' => 'nullable|string|max:100',
             'hero_cta_text' => 'nullable|string|max:100',
             'hero_view_services_text' => 'nullable|string|max:100',

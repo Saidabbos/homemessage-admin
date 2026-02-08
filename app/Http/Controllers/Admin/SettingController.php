@@ -46,15 +46,15 @@ class SettingController extends Controller
 
         // Hero section settings - Translatable
         Setting::set('hero_title', [
-            'uz' => $validated['hero_title']['uz'] ?? '',
-            'ru' => $validated['hero_title']['ru'] ?? '',
-            'en' => $validated['hero_title']['en'] ?? '',
+            'uz' => $validated['uz']['hero_title'] ?? '',
+            'ru' => $validated['ru']['hero_title'] ?? '',
+            'en' => $validated['en']['hero_title'] ?? '',
         ], 'hero', 'json');
 
         Setting::set('hero_subtitle', [
-            'uz' => $validated['hero_subtitle']['uz'] ?? '',
-            'ru' => $validated['hero_subtitle']['ru'] ?? '',
-            'en' => $validated['hero_subtitle']['en'] ?? '',
+            'uz' => $validated['uz']['hero_subtitle'] ?? '',
+            'ru' => $validated['ru']['hero_subtitle'] ?? '',
+            'en' => $validated['en']['hero_subtitle'] ?? '',
         ], 'hero', 'json');
 
         Setting::set('hero_badge', $validated['hero_badge'] ?? '', 'hero', 'text');
