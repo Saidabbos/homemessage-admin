@@ -19,6 +19,10 @@ let countdownInterval = null;
 const form = useForm({
     phone: '+998',
     code: '',
+    telegram_id: null,
+    telegram_username: null,
+    telegram_first_name: null,
+    telegram_photo_url: null,
 });
 
 onMounted(() => {
@@ -60,39 +64,20 @@ const sendOtp = async () => {
 const verifyOtp = async () => {
     if (!canVerify.value) return;
 
+    // Include Telegram data in the form submission (before Inertia redirect)
+    const webapp = window.Telegram?.WebApp;
+    const tgData = tgUser.value || webapp?.initDataUnsafe?.user;
+    
+    if (tgData) {
+        form.telegram_id = tgData.id || null;
+        form.telegram_username = tgData.username || null;
+        form.telegram_first_name = tgData.first_name || null;
+        form.telegram_photo_url = tgData.photo_url || null;
+        console.log('Including Telegram data in form:', tgData);
+    }
+
     form.post('/auth/otp/verify', {
         preserveScroll: true,
-        onSuccess: async () => {
-            // Always try to link Telegram - send whatever we have
-            const webapp = window.Telegram?.WebApp;
-            const initData = webapp?.initData || '';
-            const user = webapp?.initDataUnsafe?.user;
-            
-            try {
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-                
-                await fetch('/app/link-telegram', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        telegram_id: user?.id || null,
-                        telegram_username: user?.username || null,
-                        telegram_first_name: user?.first_name || null,
-                        telegram_photo_url: user?.photo_url || null,
-                        init_data: initData,
-                        raw_user: user ? JSON.stringify(user) : null,
-                    }),
-                });
-            } catch (e) {
-                // Ignore errors
-            }
-            
-            window.location.href = '/app';
-        },
     });
 };
 
