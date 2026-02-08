@@ -25,6 +25,11 @@ class User extends Authenticatable
         'phone',
         'password',
         'status',
+        'locale',
+        'telegram_id',
+        'telegram_username',
+        'telegram_first_name',
+        'telegram_photo_url',
     ];
 
     /**

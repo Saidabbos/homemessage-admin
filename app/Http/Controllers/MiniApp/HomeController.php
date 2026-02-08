@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\MiniApp;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Repositories\ServiceTypeRepository;
-use App\Services\OtpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -14,17 +14,30 @@ class HomeController extends Controller
 {
     public function __construct(
         protected ServiceTypeRepository $serviceTypeRepository,
-        protected OtpService $otpService,
     ) {}
 
     /**
-     * Mini App home - redirect to login if not authenticated
+     * Mini App home - auto-login via Telegram or redirect to login
      */
-    public function index()
+    public function index(Request $request)
     {
         Log::info('MiniApp: Home page accessed');
 
-        // Show login if not authenticated
+        // Try Telegram auto-login if not authenticated
+        if (!Auth::check()) {
+            $telegramUser = $this->getTelegramUser($request);
+            
+            if ($telegramUser && isset($telegramUser['id'])) {
+                $user = User::where('telegram_id', $telegramUser['id'])->first();
+                
+                if ($user) {
+                    Auth::login($user, true);
+                    Log::info('MiniApp: Auto-login via Telegram', ['user_id' => $user->id, 'telegram_id' => $telegramUser['id']]);
+                }
+            }
+        }
+
+        // Show login if still not authenticated
         if (!Auth::check()) {
             return redirect()->route('miniapp.login');
         }
@@ -51,15 +64,106 @@ class HomeController extends Controller
     /**
      * Mini App login page
      */
-    public function login()
+    public function login(Request $request)
     {
         Log::info('MiniApp: Login page accessed');
+
+        // Try Telegram auto-login
+        if (!Auth::check()) {
+            $telegramUser = $this->getTelegramUser($request);
+            
+            if ($telegramUser && isset($telegramUser['id'])) {
+                $user = User::where('telegram_id', $telegramUser['id'])->first();
+                
+                if ($user) {
+                    Auth::login($user, true);
+                    Log::info('MiniApp: Auto-login via Telegram from login page', ['user_id' => $user->id]);
+                    return redirect()->route('miniapp.home');
+                }
+            }
+        }
 
         // Redirect to home if already authenticated
         if (Auth::check()) {
             return redirect()->route('miniapp.home');
         }
 
-        return Inertia::render('MiniApp/Login');
+        // Pass Telegram data to frontend for linking after OTP
+        $telegramUser = $this->getTelegramUser($request);
+
+        return Inertia::render('MiniApp/Login', [
+            'telegramUser' => $telegramUser,
+        ]);
+    }
+
+    /**
+     * Link Telegram account after OTP verification
+     */
+    public function linkTelegram(Request $request)
+    {
+        $request->validate([
+            'telegram_id' => 'required|integer',
+            'telegram_username' => 'nullable|string',
+            'telegram_first_name' => 'nullable|string',
+            'telegram_photo_url' => 'nullable|string',
+        ]);
+
+        $user = Auth::user();
+        
+        if (!$user) {
+            return response()->json(['error' => 'Not authenticated'], 401);
+        }
+
+        // Check if this Telegram ID is already linked to another account
+        $existingUser = User::where('telegram_id', $request->telegram_id)
+            ->where('id', '!=', $user->id)
+            ->first();
+
+        if ($existingUser) {
+            Log::warning('MiniApp: Telegram ID already linked to another account', [
+                'telegram_id' => $request->telegram_id,
+                'current_user' => $user->id,
+                'existing_user' => $existingUser->id,
+            ]);
+            return response()->json(['error' => 'Telegram account already linked'], 409);
+        }
+
+        $user->update([
+            'telegram_id' => $request->telegram_id,
+            'telegram_username' => $request->telegram_username,
+            'telegram_first_name' => $request->telegram_first_name,
+            'telegram_photo_url' => $request->telegram_photo_url,
+        ]);
+
+        Log::info('MiniApp: Telegram account linked', [
+            'user_id' => $user->id,
+            'telegram_id' => $request->telegram_id,
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Extract Telegram user data from request
+     */
+    protected function getTelegramUser(Request $request): ?array
+    {
+        // Try to get from query params (Telegram WebApp passes initData)
+        $initData = $request->query('tgWebAppData') ?? $request->query('initData');
+        
+        if ($initData) {
+            parse_str($initData, $parsed);
+            if (isset($parsed['user'])) {
+                return json_decode($parsed['user'], true);
+            }
+        }
+
+        // Try from header (custom implementation)
+        $telegramUser = $request->header('X-Telegram-User');
+        if ($telegramUser) {
+            return json_decode($telegramUser, true);
+        }
+
+        return null;
     }
 }

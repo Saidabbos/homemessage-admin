@@ -29,6 +29,7 @@ Route::get('/masters/{master}', [PublicMasterController::class, 'show'])->name('
 Route::prefix('app')->group(function () {
     Route::get('/', [MiniAppHomeController::class, 'index'])->name('miniapp.home');
     Route::get('/login', [MiniAppHomeController::class, 'login'])->name('miniapp.login');
+    Route::post('/link-telegram', [MiniAppHomeController::class, 'linkTelegram'])->name('miniapp.link-telegram')->middleware('auth');
 });
 
 // Default login redirect

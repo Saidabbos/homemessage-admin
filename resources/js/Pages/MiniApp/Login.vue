@@ -1,12 +1,17 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, router } from '@inertiajs/vue3';
 import MiniAppLayout from '@/Layouts/MiniAppLayout.vue';
+import axios from 'axios';
 
 defineOptions({ layout: MiniAppLayout });
 
+const props = defineProps({
+    telegramUser: Object,
+});
+
 const tg = ref(null);
-const telegramUser = ref(null);
+const tgUser = ref(null);
 const step = ref('phone'); // phone | otp
 const countdown = ref(0);
 let countdownInterval = null;
@@ -19,7 +24,7 @@ const form = useForm({
 onMounted(() => {
     if (window.Telegram?.WebApp) {
         tg.value = window.Telegram.WebApp;
-        telegramUser.value = tg.value.initDataUnsafe?.user;
+        tgUser.value = tg.value.initDataUnsafe?.user;
     }
 });
 
@@ -52,7 +57,20 @@ const verifyOtp = async () => {
 
     form.post('/auth/otp/verify', {
         preserveScroll: true,
-        onSuccess: () => {
+        onSuccess: async () => {
+            // Link Telegram account if available
+            if (tgUser.value?.id) {
+                try {
+                    await axios.post('/app/link-telegram', {
+                        telegram_id: tgUser.value.id,
+                        telegram_username: tgUser.value.username || null,
+                        telegram_first_name: tgUser.value.first_name || null,
+                        telegram_photo_url: tgUser.value.photo_url || null,
+                    });
+                } catch (e) {
+                    console.log('Telegram link failed:', e);
+                }
+            }
             window.location.href = '/app';
         },
     });
