@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Master;
+use App\Models\PressureLevel;
 use App\Models\ServiceType;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -148,6 +149,8 @@ class MasterSeeder extends Seeder
             $master = Master::where('user_id', $user->id)->first();
 
             if (!$master) {
+                $pressureLevelsData = $masterData['pressure_levels'] ?? ['light', 'medium', 'heavy'];
+
                 $master = Master::create([
                     'user_id' => $user->id,
                     'first_name' => $masterData['first_name'],
@@ -159,7 +162,7 @@ class MasterSeeder extends Seeder
                     'experience_years' => $masterData['experience_years'],
                     'shift_start' => $masterData['shift_start'] ?? '08:00',
                     'shift_end' => $masterData['shift_end'] ?? '22:00',
-                    'pressure_levels' => $masterData['pressure_levels'] ?? ['light', 'medium', 'heavy'],
+                    'pressure_levels' => $pressureLevelsData,
                     'bio' => $masterData['bio'],
                     'status' => true,
                 ]);
@@ -168,6 +171,12 @@ class MasterSeeder extends Seeder
                 $validServices = array_intersect($masterData['services'], $serviceTypes);
                 if (!empty($validServices)) {
                     $master->serviceTypes()->attach($validServices);
+                }
+
+                // Attach pressure levels via relationship
+                $pressureLevels = PressureLevel::whereIn('slug', $pressureLevelsData)->get();
+                if ($pressureLevels->isNotEmpty()) {
+                    $master->pressureLevels()->attach($pressureLevels->pluck('id')->toArray());
                 }
             }
         }
