@@ -18,11 +18,17 @@ use App\Http\Controllers\Public\LandingController;
 use App\Http\Controllers\Public\MasterController as PublicMasterController;
 use App\Http\Controllers\Public\CustomerAuthController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
+use App\Http\Controllers\MiniApp\HomeController as MiniAppHomeController;
 
 // Public routes
 Route::get('/', LandingController::class)->name('public.landing');
 Route::get('/masters', [PublicMasterController::class, 'index'])->name('public.masters.index');
 Route::get('/masters/{master}', [PublicMasterController::class, 'show'])->name('public.masters.show');
+
+// Telegram Mini App routes
+Route::prefix('app')->group(function () {
+    Route::get('/', [MiniAppHomeController::class, 'index'])->name('miniapp.home');
+});
 
 // Default login redirect
 Route::get('/login', function () {

@@ -2,8 +2,11 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title inertia>{{ config('app.name', 'HomeMessage Admin') }}</title>
+    @if(request()->is('app*'))
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    @endif
     @routes
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @inertiaHead
