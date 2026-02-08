@@ -86,14 +86,12 @@ const getTranslation = (key, locale) => {
               <div class="flex-1 space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                   <div class="bg-[#17a2b8] rounded p-4 text-white">
-                    <p class="text-sm opacity-80">Narxi</p>
-                    <p class="text-2xl font-bold">{{ serviceType.price?.toLocaleString() }}</p>
-                    <p class="text-sm opacity-80">so'm</p>
+                    <p class="text-sm opacity-80">Narx oralig'i</p>
+                    <p class="text-lg font-bold">{{ serviceType.price_range }}</p>
                   </div>
                   <div class="bg-[#28a745] rounded p-4 text-white">
-                    <p class="text-sm opacity-80">Davomiyligi</p>
-                    <p class="text-2xl font-bold">{{ serviceType.duration }}</p>
-                    <p class="text-sm opacity-80">daqiqa</p>
+                    <p class="text-sm opacity-80">Davomiyliklar</p>
+                    <p class="text-lg font-bold">{{ serviceType.duration_list }}</p>
                   </div>
                 </div>
 
@@ -117,6 +115,52 @@ const getTranslation = (key, locale) => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Durations Card -->
+        <div class="bg-white rounded shadow-sm">
+          <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="font-semibold text-[#1f2d3d] flex items-center">
+              <svg class="w-4 h-4 mr-2 text-[#17a2b8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Davomiylik va Narxlar
+            </h3>
+          </div>
+          <div class="p-0 overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-[#f8f9fa] border-b border-gray-200">
+                <tr>
+                  <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">Davomiylik</th>
+                  <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">Narx</th>
+                  <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">Asosiy</th>
+                  <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">Holat</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr v-for="duration in serviceType.durations" :key="duration.id" class="hover:bg-[#f8f9fa]">
+                  <td class="px-4 py-3 font-medium text-[#1f2d3d]">{{ duration.duration }} min</td>
+                  <td class="px-4 py-3 font-medium text-[#1f2d3d]">{{ duration.price?.toLocaleString() }} so'm</td>
+                  <td class="px-4 py-3">
+                    <span v-if="duration.is_default" class="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-[#d4edda] text-[#155724]">
+                      ✓ Asosiy
+                    </span>
+                    <span v-else class="text-[#6c757d] text-sm">-</span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span v-if="duration.status" class="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-[#d4edda] text-[#155724]">
+                      <span class="w-1.5 h-1.5 bg-[#28a745] rounded-full mr-1.5"></span>
+                      Faol
+                    </span>
+                    <span v-else class="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-[#f8d7da] text-[#721c24]">
+                      <span class="w-1.5 h-1.5 bg-[#dc3545] rounded-full mr-1.5"></span>
+                      Nofaol
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 

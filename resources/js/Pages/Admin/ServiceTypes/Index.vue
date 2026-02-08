@@ -137,8 +137,8 @@ const hasActiveFilters = () => search.value || status.value;
                 <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">#</th>
                 <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('common.image') }}</th>
                 <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('common.name') }}</th>
-                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('serviceTypes.duration') }}</th>
-                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('common.price') }}</th>
+                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">Davomiyliklar</th>
+                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">Narx oralig'i</th>
                 <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('common.status') }}</th>
                 <th class="px-4 py-3 text-center font-semibold text-[#6c757d]">{{ t('common.actions') }}</th>
               </tr>
@@ -162,11 +162,11 @@ const hasActiveFilters = () => search.value || status.value;
                     <svg class="w-4 h-4 mr-1 text-[#6c757d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    {{ type.duration }} min
+                    {{ type.duration_list }}
                   </span>
                 </td>
                 <td class="px-4 py-3">
-                  <span class="font-medium text-[#1f2d3d]">{{ type.price?.toLocaleString() }} so'm</span>
+                  <span class="font-medium text-[#1f2d3d]">{{ type.price_range }}</span>
                 </td>
                 <td class="px-4 py-3">
                   <span

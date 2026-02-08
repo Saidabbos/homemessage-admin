@@ -21,7 +21,7 @@ class ServiceType extends Model
 
     public $translatable = ['name', 'description'];
 
-    protected $appends = ['image_url'];
+    protected $appends = ['image_url', 'price_range', 'duration_list'];
 
     protected function casts(): array
     {
@@ -91,6 +91,18 @@ class ServiceType extends Model
 
         $maxFormatted = number_format($max, 0, '', ' ');
         return "{$minFormatted} - {$maxFormatted} UZS";
+    }
+
+    /**
+     * Get available durations formatted (e.g., "30, 60, 90, 120 min")
+     */
+    public function getDurationListAttribute(): string
+    {
+        $durations = $this->activeDurations()
+            ->pluck('duration')
+            ->join(', ');
+
+        return $durations ? "{$durations} min" : '-';
     }
 
     /**

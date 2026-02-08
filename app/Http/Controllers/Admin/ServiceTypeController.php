@@ -42,7 +42,7 @@ class ServiceTypeController extends Controller
     public function show(ServiceType $serviceType)
     {
         return Inertia::render('Admin/ServiceTypes/Show', [
-            'serviceType' => $serviceType,
+            'serviceType' => $serviceType->load('durations'),
         ]);
     }
 

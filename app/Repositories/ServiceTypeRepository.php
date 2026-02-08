@@ -16,7 +16,7 @@ class ServiceTypeRepository extends BaseRepository
 
     public function getFilteredPaginated(array $filters, int $perPage = 10): LengthAwarePaginator
     {
-        $query = $this->query();
+        $query = $this->query()->with('durations');
 
         $this->applySearch($query, $filters['search'] ?? null, ['name', 'slug']);
         $this->applyStatusFilter($query, $filters['status'] ?? null);
@@ -37,7 +37,7 @@ class ServiceTypeRepository extends BaseRepository
         // Service type emoji icons mapping
         $icons = [
             1 => '💆', // Klassik
-            2 => '🧘', // Relaks  
+            2 => '🧘', // Relaks
             3 => '💪', // Sport
             4 => '🙏', // Tailand
             5 => '🪨', // Issiq tosh
@@ -48,6 +48,7 @@ class ServiceTypeRepository extends BaseRepository
 
         return $this->query()
             ->where('status', true)
+            ->with('durations')
             ->orderBy('id')
             ->limit($limit)
             ->get()
@@ -55,8 +56,9 @@ class ServiceTypeRepository extends BaseRepository
                 'id' => $service->id,
                 'name' => $service->name,
                 'description' => $service->description,
-                'price' => $service->price,
-                'duration' => $service->duration,
+                'price_range' => $service->price_range,
+                'duration_list' => $service->duration_list,
+                'default_duration' => $service->defaultDuration()?->duration,
                 'icon' => $icons[$service->id] ?? '💆',
                 'image' => $service->image,
             ]);
