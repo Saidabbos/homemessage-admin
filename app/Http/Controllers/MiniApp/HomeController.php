@@ -198,4 +198,18 @@ class HomeController extends Controller
 
         return null;
     }
+
+    /**
+     * Logout from Mini App
+     */
+    public function logout(Request $request)
+    {
+        Log::info('MiniApp: Logout', ['user_id' => Auth::id()]);
+        
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        return redirect()->route('miniapp.login');
+    }
 }
