@@ -13,14 +13,14 @@ class ServiceTypeImageSeeder extends Seeder
      * Using locally generated placeholder images
      */
     private array $images = [
-        'classic' => ['Klassik Massaj', 'FF6B6B'],
-        'relax' => ['Relaks Massaj', '4ECDC4'],
-        'thai' => ['Tailand Massaji', 'FFE66D'],
-        'sport' => ['Sport Massaji', '95E1D3'],
-        'hot-stone' => ['Issiq Tosh', 'F38181'],
-        'foot' => ['Oyoq Massaji', 'AA96DA'],
-        'back-neck' => ['Orqa va Bo\'yin', 'FCBAD3'],
-        'anti-cellulite' => ['Anti-Sellyulit', 'A8E6CF'],
+        'classic-massage' => ['Klassik Massaj', 'FF6B6B'],
+        'relaxing-massage' => ['Relaks Massaj', '4ECDC4'],
+        'thai-massage' => ['Tailand Massaji', 'FFE66D'],
+        'sport-massage' => ['Sport Massaji', '95E1D3'],
+        'hot-stone-massage' => ['Issiq Tosh', 'F38181'],
+        'foot-massage' => ['Oyoq Massaji', 'AA96DA'],
+        'back-neck-massage' => ['Orqa va Bo\'yin', 'FCBAD3'],
+        'anti-cellulite-massage' => ['Anti-Sellyulit', 'A8E6CF'],
     ];
 
     public function run(): void
@@ -29,7 +29,7 @@ class ServiceTypeImageSeeder extends Seeder
         Storage::disk('public')->makeDirectory('service-types', 0755, true);
 
         foreach ($this->images as $slug => [$name, $color]) {
-            $filename = "service-types/{$slug}-massage.jpg";
+            $filename = "service-types/{$slug}.jpg";
 
             try {
                 // Generate placeholder image

@@ -1,3 +1,8 @@
-Storage::put('public/test-image.jpg', 'test content');
-echo "Test file exists: ";
-echo Storage::exists('public/test-image.jpg') ? "YES\n" : "NO\n";
+$service = \App\Models\ServiceType::where('slug', 'classic-massage')->first();
+echo "Service: " . $service->getTranslation('name', 'uz') . "\n";
+echo "Image path: " . $service->image . "\n";
+echo "Image URL: " . $service->image_url . "\n";
+$master = \App\Models\Master::where('first_name', 'Dilnoza')->first();
+echo "\nMaster: " . $master->full_name . "\n";
+echo "Photo path: " . $master->photo . "\n";
+echo "Photo URL: " . $master->photo_url . "\n";
