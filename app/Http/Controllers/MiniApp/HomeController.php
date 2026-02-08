@@ -102,7 +102,9 @@ class HomeController extends Controller
     public function linkTelegram(Request $request)
     {
         Log::info('MiniApp: Link Telegram request received', [
-            'all_data' => $request->all(),
+            'telegram_id' => $request->telegram_id,
+            'init_data' => $request->init_data ? substr($request->init_data, 0, 200) : null,
+            'raw_user' => $request->raw_user,
             'user_id' => Auth::id(),
         ]);
 
@@ -112,12 +114,26 @@ class HomeController extends Controller
         $telegramFirstName = $request->telegram_first_name;
         $telegramPhotoUrl = $request->telegram_photo_url;
 
+        // Try parsing initData
         if (!$telegramId && $request->init_data) {
             $parsed = $this->parseInitData($request->init_data);
             Log::info('MiniApp: Parsed initData', ['parsed' => $parsed]);
             
             if (isset($parsed['user'])) {
-                $user = json_decode($parsed['user'], true);
+                $user = json_decode(urldecode($parsed['user']), true);
+                Log::info('MiniApp: Decoded user from initData', ['user' => $user]);
+                $telegramId = $user['id'] ?? null;
+                $telegramUsername = $user['username'] ?? null;
+                $telegramFirstName = $user['first_name'] ?? null;
+                $telegramPhotoUrl = $user['photo_url'] ?? null;
+            }
+        }
+
+        // Try raw_user as fallback
+        if (!$telegramId && $request->raw_user) {
+            $user = json_decode($request->raw_user, true);
+            if ($user) {
+                Log::info('MiniApp: Using raw_user', ['user' => $user]);
                 $telegramId = $user['id'] ?? null;
                 $telegramUsername = $user['username'] ?? null;
                 $telegramFirstName = $user['first_name'] ?? null;
@@ -126,8 +142,8 @@ class HomeController extends Controller
         }
 
         if (!$telegramId) {
-            Log::warning('MiniApp: No telegram_id available');
-            return response()->json(['error' => 'No Telegram ID provided'], 400);
+            Log::warning('MiniApp: No telegram_id available after all attempts');
+            return response()->json(['error' => 'No Telegram ID provided', 'debug' => 'All extraction methods failed'], 400);
         }
 
         $user = Auth::user();

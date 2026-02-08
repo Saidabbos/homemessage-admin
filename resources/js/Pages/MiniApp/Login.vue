@@ -63,42 +63,34 @@ const verifyOtp = async () => {
     form.post('/auth/otp/verify', {
         preserveScroll: true,
         onSuccess: async () => {
-            // Link Telegram account if available
+            // Always try to link Telegram - send whatever we have
             const webapp = window.Telegram?.WebApp;
-            const tgData = tgUser.value || webapp?.initDataUnsafe?.user;
-            const initData = webapp?.initData;
+            const initData = webapp?.initData || '';
+            const user = webapp?.initDataUnsafe?.user;
             
-            console.log('Telegram WebApp:', webapp);
-            console.log('Telegram user data:', tgData);
-            console.log('Telegram initData:', initData);
-            
-            // Try to link if we have user data or initData
-            if (tgData?.id || initData) {
-                try {
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-                    
-                    const response = await fetch('/app/link-telegram', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Accept': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            telegram_id: tgData?.id || null,
-                            telegram_username: tgData?.username || null,
-                            telegram_first_name: tgData?.first_name || null,
-                            telegram_photo_url: tgData?.photo_url || null,
-                            init_data: initData || null,
-                        }),
-                    });
-                    console.log('Link response:', await response.json());
-                } catch (e) {
-                    console.log('Telegram link failed:', e);
-                }
-            } else {
-                console.log('No Telegram data available to link');
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                
+                await fetch('/app/link-telegram', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        telegram_id: user?.id || null,
+                        telegram_username: user?.username || null,
+                        telegram_first_name: user?.first_name || null,
+                        telegram_photo_url: user?.photo_url || null,
+                        init_data: initData,
+                        raw_user: user ? JSON.stringify(user) : null,
+                    }),
+                });
+            } catch (e) {
+                // Ignore errors
             }
+            
             window.location.href = '/app';
         },
     });
