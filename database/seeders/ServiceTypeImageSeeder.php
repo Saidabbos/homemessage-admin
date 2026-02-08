@@ -4,14 +4,13 @@ namespace Database\Seeders;
 
 use App\Models\ServiceType;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
 class ServiceTypeImageSeeder extends Seeder
 {
     /**
      * Service type images mapping
-     * Using placeholder images that are descriptive
+     * Using locally generated placeholder images
      */
     private array $images = [
         'classic' => ['Klassik Massaj', 'FF6B6B'],
@@ -27,25 +26,78 @@ class ServiceTypeImageSeeder extends Seeder
     public function run(): void
     {
         // Ensure storage directory exists
-        Storage::makeDirectory('service-types', 0755, true);
+        Storage::disk('public')->makeDirectory('service-types', 0755, true);
 
         foreach ($this->images as $slug => [$name, $color]) {
             $filename = "service-types/{$slug}-massage.jpg";
 
-            // Try to download placeholder image
             try {
-                $placeholderUrl = "https://via.placeholder.com/400x300/{$color}/FFFFFF?text=" . urlencode($name);
-                $imageContent = @file_get_contents($placeholderUrl);
+                // Generate placeholder image
+                $imageContent = $this->generatePlaceholderImage($name, $color, 400, 300);
 
-                if ($imageContent !== false) {
-                    Storage::put("public/{$filename}", $imageContent);
+                if ($imageContent && strlen($imageContent) > 0) {
+                    Storage::disk('public')->put($filename, $imageContent);
+                    // Only update if successfully stored
+                    ServiceType::where('slug', $slug)->update(['image' => $filename]);
+                } else {
+                    echo "Warning: Failed to generate image for {$slug}\n";
                 }
             } catch (\Exception $e) {
-                // Silently fail - image will use placeholder
+                echo "Error generating image for {$slug}: " . $e->getMessage() . "\n";
             }
-
-            // Update the service type with the image path
-            ServiceType::where('slug', $slug)->update(['image' => $filename]);
         }
+    }
+
+    /**
+     * Generate a simple placeholder image using GD library
+     */
+    private function generatePlaceholderImage(string $text, string $hexColor, int $width, int $height): ?string
+    {
+        if (!extension_loaded('gd')) {
+            return null;
+        }
+
+        // Create image
+        $image = imagecreatetruecolor($width, $height);
+        if (!$image) {
+            return null;
+        }
+
+        // Parse color
+        $rgb = $this->hexToRgb($hexColor);
+        $bgColor = imagecolorallocate($image, $rgb['r'], $rgb['g'], $rgb['b']);
+        $textColor = imagecolorallocate($image, 255, 255, 255);
+
+        // Fill background
+        imagefilledrectangle($image, 0, 0, $width - 1, $height - 1, $bgColor);
+
+        // Add text (font 5 is a built-in font, no file needed)
+        $textWidth = strlen($text) * imagefontwidth(5);
+        $textHeight = imagefontheight(5);
+        $x = max(10, ($width - $textWidth) / 2);
+        $y = ($height - $textHeight) / 2;
+
+        imagestring($image, 5, (int)$x, (int)$y, $text, $textColor);
+
+        // Capture as JPEG
+        ob_start();
+        imagejpeg($image, null, 85);
+        $content = ob_get_clean();
+        imagedestroy($image);
+
+        return $content ?: null;
+    }
+
+    /**
+     * Convert hex color to RGB
+     */
+    private function hexToRgb(string $hex): array
+    {
+        $hex = str_replace('#', '', $hex);
+        return [
+            'r' => intval(substr($hex, 0, 2), 16),
+            'g' => intval(substr($hex, 2, 2), 16),
+            'b' => intval(substr($hex, 4, 2), 16),
+        ];
     }
 }

@@ -1,0 +1,3 @@
+Storage::put('public/test-image.jpg', 'test content');
+echo "Test file exists: ";
+echo Storage::exists('public/test-image.jpg') ? "YES\n" : "NO\n";
