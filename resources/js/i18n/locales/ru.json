@@ -478,6 +478,7 @@
     "step_payment": "Оплата",
     "select_service": "Выберите услугу",
     "select_master": "Мастер и время",
+    "search_master": "Поиск по имени...",
     "confirm_order": "Подтверждение",
     "select_date": "Выберите дату",
     "select_time": "Выберите время",

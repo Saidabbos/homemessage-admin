@@ -1,142 +1,98 @@
 <template>
   <div class="step-master-time">
-    <!-- Service Summary -->
-    <section class="summary-card" @click="$emit('back')">
-      <div class="summary-card__content">
-        <span class="summary-card__label">{{ serviceName }}</span>
-        <span class="summary-card__details">
-          {{ serviceParams.duration }} min • {{ serviceParams.people_count }} kishi • {{ pressureLabel }}
-        </span>
-      </div>
-      <button class="summary-card__edit">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-        </svg>
-        O'zgartirish
-      </button>
-    </section>
+    <div class="form-area">
+      <!-- Master Selection -->
+      <section class="form-section">
+        <h3 class="section-label">{{ $t('booking.select_master') }}</h3>
 
-    <!-- Master Selection -->
-    <section class="section">
-      <h2 class="section__title">{{ $t('booking.select_master') }}</h2>
-      <div class="masters-carousel">
-        <!-- All Masters Option -->
-        <MasterCard
-          :master="{ id: null, name: $t('booking.all_masters'), first_name: $t('booking.auto_select') }"
-          :selected="master === null"
-          :is-all="true"
-          @click="$emit('update:master', null)"
-        />
-        
-        <!-- Individual Masters -->
-        <MasterCard
-          v-for="m in masters"
-          :key="m.id"
-          :master="m"
-          :selected="master?.id === m.id"
-          @click="$emit('update:master', m)"
-        />
-      </div>
-    </section>
-
-    <!-- Date Selection -->
-    <section class="section">
-      <h2 class="section__title">{{ $t('booking.select_date') }}</h2>
-      <div class="dates-row" v-if="!loading.dates">
-        <DateChip
-          v-for="d in dates"
-          :key="d.date"
-          :date="d"
-          :selected="date === d.date"
-          :disabled="!d.has_slots"
-          @click="d.has_slots && $emit('update:date', d.date)"
-        />
-      </div>
-      <div v-else class="loading-inline">
-        <LoadingSpinner size="small" />
-      </div>
-    </section>
-
-    <!-- Slot Selection -->
-    <section class="section">
-      <h2 class="section__title">{{ $t('booking.select_time') }}</h2>
-      
-      <div v-if="loading.slots" class="loading-inline">
-        <LoadingSpinner size="small" />
-      </div>
-      
-      <div v-else-if="slots.length === 0" class="empty-state">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="8" x2="12" y2="12" />
-          <line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
-        <p>{{ $t('booking.no_slots') }}</p>
-      </div>
-      
-      <div v-else class="slots-grid">
-        <SlotCard
-          v-for="s in slots"
-          :key="s.window_start"
-          :slot-data="s"
-          :selected="slot?.window_start === s.window_start"
-          @click="$emit('update:slot', s)"
-        />
-      </div>
-    </section>
-
-    <!-- Reminder -->
-    <section class="reminder-card">
-      <h3 class="reminder-card__title">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          <polyline points="14 2 14 8 20 8" />
-          <line x1="16" y1="13" x2="8" y2="13" />
-          <line x1="16" y1="17" x2="8" y2="17" />
-          <polyline points="10 9 9 9 8 9" />
-        </svg>
-        {{ $t('booking.reminder_title') }}
-      </h3>
-      <ul class="reminder-card__list">
-        <li>{{ $t('booking.reminder_1') }}</li>
-        <li>{{ $t('booking.reminder_2') }}</li>
-        <li>{{ $t('booking.reminder_3') }}</li>
-      </ul>
-    </section>
-
-    <!-- Sticky Footer -->
-    <div class="sticky-footer">
-      <div class="footer-summary">
-        <div class="footer-summary__slot" v-if="slot">
-          {{ formatDate(date) }}, {{ slot.display }}
+        <!-- Search Input -->
+        <div class="search-input">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+          <input
+            type="text"
+            :placeholder="$t('booking.search_master')"
+            class="search-field"
+            @input="searchQuery = $event.target.value"
+          />
         </div>
-        <div class="footer-summary__master" v-if="selectedMasterName">
-          {{ selectedMasterName }}
+
+        <!-- Masters Grid -->
+        <div class="masters-grid">
+          <button
+            v-for="m in filteredMasters"
+            :key="m.id"
+            class="master-card"
+            :class="{ 'master-card--selected': master?.id === m.id }"
+            @click="$emit('update:master', m)"
+          >
+            <div class="master-avatar">
+              <div class="avatar-placeholder">
+                {{ getInitials(m.full_name) }}
+              </div>
+            </div>
+            <p class="master-name">{{ m.full_name }}</p>
+            <p class="master-specialty">{{ m.specialty || 'Massaj' }}</p>
+          </button>
         </div>
-      </div>
-      <div class="footer-price">{{ formatPrice(totalPrice) }}</div>
-      <BaseButton
-        variant="primary"
-        :disabled="!canProceed"
-        @click="$emit('next')"
-      >
-        {{ $t('booking.next') }}
-      </BaseButton>
+      </section>
+
+      <!-- Date Selection -->
+      <section class="form-section">
+        <h3 class="section-label">{{ $t('booking.select_date') }}</h3>
+
+        <div class="dates-row" v-if="!loading.dates">
+          <button
+            v-for="d in dates"
+            :key="d.date"
+            class="date-chip"
+            :class="{ 'date-chip--selected': date === d.date, 'date-chip--disabled': !d.has_slots }"
+            :disabled="!d.has_slots"
+            @click="$emit('update:date', d.date)"
+          >
+            <span class="date-day">{{ getDayNumber(d.date) }}</span>
+            <span class="date-label">{{ getDayLabel(d.date) }}</span>
+          </button>
+        </div>
+        <div v-else class="loading-placeholder">{{ $t('common.loading') }}</div>
+      </section>
+
+      <!-- Slot Selection -->
+      <section class="form-section">
+        <h3 class="section-label">{{ $t('booking.select_time') }}</h3>
+
+        <div v-if="loading.slots" class="loading-placeholder">{{ $t('common.loading') }}</div>
+
+        <div v-else-if="slots.length === 0" class="empty-state">
+          <p>{{ $t('booking.no_slots') }}</p>
+        </div>
+
+        <div v-else class="slots-grid">
+          <button
+            v-for="s in slots"
+            :key="s.window_start"
+            class="slot-card"
+            :class="{ 'slot-card--selected': slot?.window_start === s.window_start }"
+            @click="$emit('update:slot', s)"
+          >
+            {{ s.window_start }} - {{ s.window_end }}
+          </button>
+        </div>
+      </section>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import BaseButton from '@/Components/Public/BaseButton.vue'
-import LoadingSpinner from '@/Components/Public/LoadingSpinner.vue'
-import MasterCard from './MasterCard.vue'
-import DateChip from './DateChip.vue'
-import SlotCard from './SlotCard.vue'
 
 const { t } = useI18n()
+
+// Search state
+const searchQuery = ref('')
 
 const props = defineProps({
   serviceParams: {
@@ -204,6 +160,17 @@ const canProceed = computed(() => {
   return props.date && props.slot
 })
 
+const filteredMasters = computed(() => {
+  if (!searchQuery.value) {
+    return props.masters
+  }
+  const query = searchQuery.value.toLowerCase()
+  return props.masters.filter(m =>
+    m.full_name.toLowerCase().includes(query) ||
+    (m.specialty && m.specialty.toLowerCase().includes(query))
+  )
+})
+
 // Methods
 function formatDate(dateStr) {
   if (!dateStr) return ''
@@ -214,183 +181,301 @@ function formatDate(dateStr) {
 function formatPrice(price) {
   return new Intl.NumberFormat('uz-UZ').format(price) + ' so\'m'
 }
+
+function getDayNumber(dateStr) {
+  if (!dateStr) return ''
+  const date = new Date(dateStr + 'T00:00:00')
+  return date.getDate()
+}
+
+function getDayLabel(dateStr) {
+  if (!dateStr) return ''
+  const date = new Date(dateStr + 'T00:00:00')
+  const days = ['Yak', 'Dsh', 'Shs', 'Chra', 'Psh', 'Jma', 'Sha']
+  return days[date.getDay()]
+}
+
+function getInitials(name) {
+  if (!name) return '?'
+  return name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
 </script>
 
 <style scoped>
 .step-master-time {
-  padding-bottom: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
 }
 
-.summary-card {
-  background: white;
+.form-area {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-label {
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1B2B5A;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.loading-placeholder {
+  padding: 20px;
+  text-align: center;
+  color: rgba(27, 43, 90, 0.6);
+  font-size: 13px;
+}
+
+.empty-state {
+  padding: 20px;
+  text-align: center;
+  color: rgba(27, 43, 90, 0.6);
+  font-size: 13px;
+}
+
+.empty-state p {
+  margin: 0;
+}
+
+/* Search Input */
+.search-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   border-radius: 12px;
-  padding: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  cursor: pointer;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  padding: 10px 14px;
 }
 
-.summary-card__label {
-  font-weight: 600;
-  color: #2d3748;
-  display: block;
+.search-icon {
+  width: 16px;
+  height: 16px;
+  color: rgba(27, 43, 90, 0.4);
+  flex-shrink: 0;
 }
 
-.summary-card__details {
-  font-size: 0.75rem;
-  color: #718096;
-}
-
-.summary-card__edit {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.75rem;
-  color: #4299e1;
-  background: none;
+.search-field {
+  flex: 1;
   border: none;
-  cursor: pointer;
+  background: transparent;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  color: #1B2B5A;
+  padding: 0;
+  outline: none;
 }
 
-.summary-card__edit svg {
-  width: 14px;
-  height: 14px;
+.search-field::placeholder {
+  color: rgba(27, 43, 90, 0.4);
 }
 
-.section {
-  margin-bottom: 1.5rem;
+/* Masters Grid */
+.masters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 10px;
 }
 
-.section__title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #2d3748;
-  margin-bottom: 0.75rem;
-}
-
-.masters-carousel {
+.master-card {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(16px);
+  padding: 12px 8px;
   display: flex;
-  gap: 0.75rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-  -webkit-overflow-scrolling: touch;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Manrope', sans-serif;
+  min-height: 110px;
+  justify-content: flex-start;
 }
 
-.masters-carousel::-webkit-scrollbar {
-  display: none;
+.master-card:hover {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.7);
 }
 
+.master-card--selected {
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px solid #C8A951;
+  box-shadow: 0 2px 8px rgba(200, 169, 81, 0.3);
+}
+
+.master-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: rgba(200, 169, 81, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-placeholder {
+  font-size: 16px;
+  font-weight: 600;
+  color: #C8A951;
+}
+
+.master-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1B2B5A;
+  margin: 0;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.master-specialty {
+  font-size: 10px;
+  color: rgba(27, 43, 90, 0.6);
+  margin: 0;
+  text-align: center;
+}
+
+/* Dates Row */
 .dates-row {
   display: flex;
-  gap: 0.5rem;
+  gap: 6px;
   overflow-x: auto;
-  padding-bottom: 0.5rem;
+  overflow-y: hidden;
+  padding-bottom: 4px;
   -webkit-overflow-scrolling: touch;
 }
 
 .dates-row::-webkit-scrollbar {
-  display: none;
+  height: 4px;
 }
 
+.dates-row::-webkit-scrollbar-thumb {
+  background: rgba(200, 169, 81, 0.3);
+  border-radius: 2px;
+}
+
+.date-chip {
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Manrope', sans-serif;
+  flex-shrink: 0;
+  min-width: fit-content;
+}
+
+.date-chip:hover:not(.date-chip--disabled) {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.date-chip--selected {
+  background: #C8A951;
+  border-color: #C8A951;
+  box-shadow: 0 2px 8px rgba(200, 169, 81, 0.3);
+}
+
+.date-chip--selected .date-day,
+.date-chip--selected .date-label {
+  color: white;
+}
+
+.date-chip--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.date-day {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1B2B5A;
+}
+
+.date-label {
+  font-size: 10px;
+  color: rgba(27, 43, 90, 0.6);
+  font-weight: 500;
+}
+
+/* Slots Grid */
 .slots-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
 }
 
-@media (max-width: 480px) {
-  .slots-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.loading-inline {
-  display: flex;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 2rem;
-  color: #a0aec0;
-}
-
-.empty-state svg {
-  width: 48px;
-  height: 48px;
-  margin-bottom: 0.5rem;
-}
-
-.reminder-card {
-  background: #ebf8ff;
+.slot-card {
   border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.reminder-card__title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #2b6cb0;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  padding: 12px;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.reminder-card__title svg {
-  width: 18px;
-  height: 18px;
-}
-
-.reminder-card__list {
-  font-size: 0.75rem;
-  color: #2c5282;
-  padding-left: 1.5rem;
-  margin: 0;
-}
-
-.reminder-card__list li {
-  margin-bottom: 0.25rem;
-}
-
-.sticky-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: white;
-  padding: 1rem;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  z-index: 50;
-}
-
-.footer-summary {
-  flex: 1;
-}
-
-.footer-summary__slot {
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
   font-weight: 600;
-  color: #2d3748;
-  font-size: 0.875rem;
+  color: #1B2B5A;
+  min-height: 50px;
+  text-align: center;
 }
 
-.footer-summary__master {
-  font-size: 0.75rem;
-  color: #718096;
+.slot-card:hover {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.7);
 }
 
-.footer-price {
-  font-weight: 700;
-  font-size: 1rem;
-  color: #2d3748;
-  white-space: nowrap;
+.slot-card--selected {
+  background: #C8A951;
+  border-color: #C8A951;
+  color: white;
+  box-shadow: 0 2px 8px rgba(200, 169, 81, 0.3);
+}
+
+@media (max-width: 768px) {
+  .masters-grid {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  }
+
+  .date-chip {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  .slot-card {
+    font-size: 12px;
+    min-height: 45px;
+  }
 }
 </style>

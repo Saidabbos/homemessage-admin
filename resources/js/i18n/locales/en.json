@@ -478,6 +478,7 @@
     "step_payment": "Payment",
     "select_service": "Select service",
     "select_master": "Master & Time",
+    "search_master": "Search by name...",
     "confirm_order": "Confirm",
     "select_date": "Select date",
     "select_time": "Select time",

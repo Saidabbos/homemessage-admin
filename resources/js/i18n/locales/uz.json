@@ -478,6 +478,7 @@
     "step_payment": "To'lov",
     "select_service": "Xizmatni tanlang",
     "select_master": "Master va vaqt",
+    "search_master": "Ism bo'yicha qidirish...",
     "confirm_order": "Tasdiqlash",
     "select_date": "Sana tanlang",
     "select_time": "Vaqt tanlang",
