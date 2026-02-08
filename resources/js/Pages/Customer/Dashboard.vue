@@ -6,7 +6,7 @@
         <div class="flex items-center justify-between">
           <div>
             <h1 class="text-3xl font-bold">{{ t('customer.welcome') }}, {{ customer.name }}!</h1>
-            <p class="text-purple-200 mt-1">Golden Touch</p>
+            <p class="text-purple-200 mt-1">Home Massage</p>
           </div>
           <div class="text-right">
             <p class="text-sm text-purple-200">{{ t('customer.memberSince') }}</p>

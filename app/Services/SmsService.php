@@ -118,9 +118,9 @@ class SmsService
     protected function buildMessage(string $code, string $locale = 'uz'): string
     {
         $messages = [
-            'uz' => "Golden Touch tasdiqlash kodi: {$code}\nKodni hech kimga bermang.",
-            'ru' => "Код подтверждения Golden Touch: {$code}\nНе сообщайте этот код никому.",
-            'en' => "Golden Touch verification code: {$code}\nDo not share this code.",
+            'uz' => "Home Massage tasdiqlash kodi: {$code}\nKodni hech kimga bermang.",
+            'ru' => "Код подтверждения Home Massage: {$code}\nНе сообщайте этот код никому.",
+            'en' => "Home Massage verification code: {$code}\nDo not share this code.",
         ];
 
         return $messages[$locale] ?? $messages['uz'];

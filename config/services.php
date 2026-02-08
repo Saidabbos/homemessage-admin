@@ -84,7 +84,7 @@ return [
     'eskiz' => [
         'email' => env('ESKIZ_EMAIL'),
         'password' => env('ESKIZ_PASSWORD'),
-        'sender' => env('ESKIZ_SENDER', 'GoldenTouch'),
+        'sender' => env('ESKIZ_SENDER', 'HomeMassage'),
         'base_url' => env('ESKIZ_BASE_URL', 'https://notify.eskiz.uz/api'),
         'token_cache_key' => 'eskiz_auth_token',
         'token_ttl' => 86400, // 24 hours

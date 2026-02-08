@@ -3,7 +3,7 @@
     <div class="w-full max-w-sm">
       <!-- Header -->
       <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-white mb-2">Golden Touch</h1>
+        <h1 class="text-3xl font-bold text-white mb-2">Home Massage</h1>
         <p class="text-purple-200">{{ t('auth.otp.sent') }}</p>
       </div>
 
@@ -138,7 +138,7 @@
 
       <!-- Footer -->
       <p class="text-center text-gray-400 text-xs mt-6">
-        © 2026 Golden Touch
+        © 2026 Home Massage
       </p>
     </div>
   </div>

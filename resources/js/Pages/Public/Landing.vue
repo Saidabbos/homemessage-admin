@@ -19,7 +19,7 @@ const props = defineProps({
         <nav class="bg-white shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-16">
-                    <div class="text-2xl font-bold text-slate-900">Golden Touch</div>
+                    <div class="text-2xl font-bold text-slate-900">Home Massage</div>
                     <div class="flex gap-4">
                         <Link href="/admin/login" class="px-4 py-2 text-slate-600 hover:text-slate-900">
                             {{ t('common.login') }}
@@ -33,7 +33,7 @@ const props = defineProps({
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
             <div class="text-center">
                 <h1 class="text-5xl font-bold text-slate-900 mb-6">
-                    Welcome to Golden Touch
+                    Welcome to Home Massage
                 </h1>
                 <p class="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
                     Premium massage booking system. Experience relaxation and wellness.
@@ -72,7 +72,7 @@ const props = defineProps({
         <!-- Footer -->
         <footer class="bg-slate-900 text-white py-8 mt-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <p>&copy; 2026 Golden Touch. All rights reserved.</p>
+                <p>&copy; 2026 Home Massage. All rights reserved.</p>
             </div>
         </footer>
     </div>
