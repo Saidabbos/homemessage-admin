@@ -15,32 +15,9 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Public\LandingController;
 use App\Http\Controllers\Public\MasterController as PublicMasterController;
-use App\Models\Setting;
 
 // Public routes
-Route::get('/', function () {
-    $locale = app()->getLocale(); // Get current locale (uz, ru, en)
-    $heroTitle = Setting::get('hero_title', null);
-    $heroSubtitle = Setting::get('hero_subtitle', null);
-
-    return Inertia::render('Public/ModernLanding', [
-        'serviceTypes' => app(\App\Repositories\ServiceTypeRepository::class)->getActiveForLanding(),
-        'masters' => app(\App\Repositories\MasterRepository::class)->getFeaturedForLanding(4),
-        'stats' => [
-            'years' => 12,
-            'clients' => '5K',
-            'rating' => 4.9,
-        ],
-        'hero' => [
-            'title' => is_array($heroTitle) ? ($heroTitle[$locale] ?? $heroTitle['uz'] ?? 'Premium massaj xizmati') : 'Premium massaj xizmati',
-            'subtitle' => is_array($heroSubtitle) ? ($heroSubtitle[$locale] ?? $heroSubtitle['uz'] ?? 'Uyingizga premium massaj xizmati. Tanangiz va ruhingizga haqiqiy dam olish.') : 'Uyingizga premium massaj xizmati. Tanangiz va ruhingizga haqiqiy dam olish.',
-            'badge' => Setting::get('hero_badge', '✦ Premium xizmat'),
-            'cta_text' => Setting::get('hero_cta_text', 'Seansni Band Qiling'),
-            'view_services_text' => Setting::get('hero_view_services_text', 'Xizmatlarga o\'tish'),
-            'image' => Setting::get('hero_image', 'https://images.unsplash.com/photo-1709689769810-225b90f51653?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080'),
-        ],
-    ]);
-})->name('public.landing');
+Route::get('/', LandingController::class)->name('public.landing');
 Route::get('/masters', [PublicMasterController::class, 'index'])->name('public.masters.index');
 Route::get('/masters/{master}', [PublicMasterController::class, 'show'])->name('public.masters.show');
 
