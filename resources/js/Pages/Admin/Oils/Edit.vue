@@ -41,7 +41,7 @@ const form = useForm({
 });
 
 const submit = () => {
-  form.post(route('admin.oils.update', props.oil.id));
+  form.patch(route('admin.oils.update', props.oil.id));
 };
 
 const deleteOil = () => {

@@ -20,7 +20,7 @@ const form = useForm({
 });
 
 const submit = () => {
-  form.post(route('admin.customers.update', props.customer.id));
+  form.patch(route('admin.customers.update', props.customer.id));
 };
 
 const deleteCustomer = () => {

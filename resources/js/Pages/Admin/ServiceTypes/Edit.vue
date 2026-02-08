@@ -65,7 +65,7 @@ const formatPrice = (value) => {
 };
 
 const submit = () => {
-  form.post(route('admin.service-types.update', props.serviceType.id), {
+  form.patch(route('admin.service-types.update', props.serviceType.id), {
     preserveScroll: true,
   });
 };

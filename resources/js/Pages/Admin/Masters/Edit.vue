@@ -45,7 +45,7 @@ const handlePhotoChange = (e) => {
 };
 
 const submit = () => {
-  form.post(route('admin.masters.update', props.master.id));
+  form.patch(route('admin.masters.update', props.master.id));
 };
 </script>
 

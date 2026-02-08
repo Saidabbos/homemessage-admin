@@ -26,7 +26,7 @@ const form = useForm({
 });
 
 const submit = () => {
-  form.post(route('admin.standard-items.update', props.item.id));
+  form.patch(route('admin.standard-items.update', props.item.id));
 };
 
 const deleteItem = () => {

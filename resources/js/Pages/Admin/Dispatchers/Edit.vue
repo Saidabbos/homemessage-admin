@@ -21,7 +21,7 @@ const form = useForm({
 });
 
 const submit = () => {
-  form.post(route('admin.dispatchers.update', props.dispatcher.id));
+  form.patch(route('admin.dispatchers.update', props.dispatcher.id));
 };
 
 const deleteDispatcher = () => {
