@@ -59,14 +59,29 @@ const verifyOtp = async () => {
         preserveScroll: true,
         onSuccess: async () => {
             // Link Telegram account if available
-            if (tgUser.value?.id) {
+            const tgData = tgUser.value || window.Telegram?.WebApp?.initDataUnsafe?.user;
+            console.log('Telegram user data:', tgData);
+            
+            if (tgData?.id) {
                 try {
-                    await axios.post('/app/link-telegram', {
-                        telegram_id: tgUser.value.id,
-                        telegram_username: tgUser.value.username || null,
-                        telegram_first_name: tgUser.value.first_name || null,
-                        telegram_photo_url: tgUser.value.photo_url || null,
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content 
+                        || document.querySelector('input[name="_token"]')?.value;
+                    
+                    await fetch('/app/link-telegram', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            telegram_id: tgData.id,
+                            telegram_username: tgData.username || null,
+                            telegram_first_name: tgData.first_name || null,
+                            telegram_photo_url: tgData.photo_url || null,
+                        }),
                     });
+                    console.log('Telegram account linked successfully');
                 } catch (e) {
                     console.log('Telegram link failed:', e);
                 }
