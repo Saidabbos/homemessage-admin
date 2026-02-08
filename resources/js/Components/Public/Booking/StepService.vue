@@ -19,6 +19,12 @@
               @click="selectService(service)"
             >
               <div class="service-card-content">
+                <div class="service-icon">
+                  <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M8 12h8M12 8v8"></path>
+                  </svg>
+                </div>
                 <p class="service-name">{{ service.name }}</p>
               </div>
             </button>
@@ -216,27 +222,30 @@ function selectOil(oil) {
 
 /* Service Type Grid */
 .service-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   gap: 10px;
 }
 
 .service-card {
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(16px);
-  padding: 14px 8px;
+  padding: 16px 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-height: 60px;
+  min-height: 100px;
+  aspect-ratio: 1;
+  flex-direction: column;
+  font-family: 'Manrope', sans-serif;
 }
 
 .service-card:hover {
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.5);
   border-color: rgba(255, 255, 255, 0.7);
 }
 
@@ -244,18 +253,44 @@ function selectOil(oil) {
   background: rgba(255, 255, 255, 0.5);
   border: 2px solid #C8A951;
   box-shadow: 0 2px 8px rgba(200, 169, 81, 0.3);
+  color: #C8A951;
 }
 
 .service-card-content {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.service-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1B2B5A;
+}
+
+.service-card--selected .service-icon {
+  color: #C8A951;
+}
+
+.icon-svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 2;
 }
 
 .service-name {
   font-family: 'Manrope', sans-serif;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: #1B2B5A;
   margin: 0;
+  line-height: 1.2;
 }
 
 /* Options Grid */
