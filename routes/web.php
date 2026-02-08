@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\PressureLevelController;
 use App\Http\Controllers\Public\LandingController;
 use App\Http\Controllers\Public\MasterController as PublicMasterController;
 
@@ -86,6 +87,19 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
             'edit' => 'admin.standard-items.edit',
             'update' => 'admin.standard-items.update',
             'destroy' => 'admin.standard-items.destroy',
+        ]
+    ]);
+
+    // Pressure Levels CRUD
+    Route::resource('pressure-levels', PressureLevelController::class, [
+        'names' => [
+            'index' => 'admin.pressure-levels.index',
+            'create' => 'admin.pressure-levels.create',
+            'store' => 'admin.pressure-levels.store',
+            'show' => 'admin.pressure-levels.show',
+            'edit' => 'admin.pressure-levels.edit',
+            'update' => 'admin.pressure-levels.update',
+            'destroy' => 'admin.pressure-levels.destroy',
         ]
     ]);
 

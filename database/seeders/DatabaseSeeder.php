@@ -18,10 +18,11 @@ class DatabaseSeeder extends Seeder
         // Seed roles and permissions
         $this->call(RoleAndPermissionSeeder::class);
 
-        // Seed service types, oils, and standard items
+        // Seed service types, oils, standard items, and pressure levels
         $this->call(ServiceTypeSeeder::class);
         $this->call(OilSeeder::class);
         $this->call(StandardItemSeeder::class);
+        $this->call(PressureLevelSeeder::class);
 
         // Seed settings
         $this->call(SettingSeeder::class);

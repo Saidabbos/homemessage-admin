@@ -134,4 +134,12 @@ class Master extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    /**
+     * Get the pressure levels this master supports
+     */
+    public function pressureLevels(): BelongsToMany
+    {
+        return $this->belongsToMany(PressureLevel::class, 'master_pressure_level');
+    }
 }
