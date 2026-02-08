@@ -46,8 +46,15 @@ class CustomerAuthController extends Controller
             $locale
         );
 
-        $statusCode = $result['success'] ? 200 : ($result['error'] === 'rate_limit_exceeded' ? 429 : 422);
+        // Return Inertia-compatible response
+        if ($request->header('X-Inertia')) {
+            if (!$result['success']) {
+                return back()->withErrors(['phone' => $result['message']]);
+            }
+            return back()->with('success', $result['message']);
+        }
 
+        $statusCode = $result['success'] ? 200 : ($result['error'] === 'rate_limit_exceeded' ? 429 : 422);
         return response()->json($result, $statusCode);
     }
 
@@ -62,6 +69,10 @@ class CustomerAuthController extends Controller
         $result = $this->otpService->verifyOtp($phone, $code);
 
         if (!$result['success']) {
+            // Return Inertia-compatible response
+            if ($request->header('X-Inertia')) {
+                return back()->withErrors(['code' => $result['message']]);
+            }
             return response()->json($result, 422);
         }
 
@@ -70,6 +81,15 @@ class CustomerAuthController extends Controller
 
         // Create session
         Auth::login($user, true); // remember = true
+
+        // Return Inertia-compatible response
+        if ($request->header('X-Inertia')) {
+            // Redirect based on where request came from
+            $redirect = str_contains($request->header('referer', ''), '/app') 
+                ? route('miniapp.home') 
+                : route('customer.dashboard');
+            return redirect($redirect);
+        }
 
         return response()->json([
             'success' => true,
