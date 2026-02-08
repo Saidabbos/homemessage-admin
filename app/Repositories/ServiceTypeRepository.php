@@ -30,6 +30,18 @@ class ServiceTypeRepository extends BaseRepository
     }
 
     /**
+     * Get active service types with durations for Mini App
+     */
+    public function getActiveWithDurations(): Collection
+    {
+        return $this->query()
+            ->where('status', true)
+            ->with(['durations' => fn($q) => $q->where('status', true)->orderBy('sort_order')])
+            ->orderBy('id')
+            ->get();
+    }
+
+    /**
      * Get active service types for landing page
      */
     public function getActiveForLanding(int $limit = 4): SupportCollection
