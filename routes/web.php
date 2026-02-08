@@ -21,16 +21,6 @@ Route::get('/', LandingController::class)->name('public.landing');
 Route::get('/masters', [PublicMasterController::class, 'index'])->name('public.masters.index');
 Route::get('/masters/{master}', [PublicMasterController::class, 'show'])->name('public.masters.show');
 
-// Booking routes
-Route::get('/booking', function () {
-    return inertia('Public/Booking/Index');
-})->name('public.booking');
-Route::get('/booking/success', function () {
-    return inertia('Public/Booking/Success', [
-        'orderNumber' => request('order'),
-    ]);
-})->name('public.booking.success');
-
 // Default login redirect
 Route::get('/login', function () {
     return redirect()->route('admin.login');
