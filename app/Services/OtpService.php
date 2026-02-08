@@ -53,7 +53,7 @@ class OtpService
 
         // Generate OTP code
         $code = $this->generateCode();
-        Log::info('OtpService: OTP code generated', ['phone' => $phone]);
+        Log::info('OtpService: OTP code generated', ['phone' => $phone, 'code' => $code]);
 
         // Store OTP with hashed code
         $otpRecord = $this->otpRepository->create([
