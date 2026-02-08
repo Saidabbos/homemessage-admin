@@ -4,14 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Master;
-use App\Repositories\SlotRepository;
+use App\Services\SlotCalculationService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class MasterController extends Controller
 {
     public function __construct(
-        protected SlotRepository $slotRepository
+        protected SlotCalculationService $slotService
     ) {}
 
     /**
@@ -62,27 +63,51 @@ class MasterController extends Controller
     }
 
     /**
-     * Get master's available slots for a date range
+     * GET /api/masters/{master}/slots
+     * Get available slots for a specific master on a specific date
      */
     public function slots(Request $request, Master $master): JsonResponse
     {
+        // Validate master is active
+        if (!$master->status) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Master is not active',
+            ], 404);
+        }
+
+        // Validate request parameters
         $validated = $request->validate([
-            'date' => 'sometimes|date|after_or_equal:today',
-            'days' => 'sometimes|integer|min:1|max:14',
+            'date' => 'required|date|after_or_equal:today',
+            'duration' => 'required|integer|in:60,90,120',
+            'people_count' => 'integer|min:1|max:4',
         ]);
 
-        $startDate = $validated['date'] ?? now()->toDateString();
-        $days = $validated['days'] ?? 7;
+        $date = Carbon::parse($validated['date']);
+        $duration = (int) $validated['duration'];
+        $peopleCount = (int) ($validated['people_count'] ?? 1);
 
-        $slots = $this->slotRepository->getAvailableSlotsForMaster(
-            $master->id,
-            $startDate,
-            $days
+        // Get slots from SlotCalculationService
+        $slots = $this->slotService->getSlotsForMaster(
+            $master,
+            $date,
+            $duration,
+            $peopleCount
         );
 
         return response()->json([
             'success' => true,
-            'data' => $slots,
+            'data' => [
+                'date' => $date->toDateString(),
+                'master' => [
+                    'id' => $master->id,
+                    'name' => $master->full_name,
+                    'shift_start' => substr($master->shift_start ?? '08:00', 0, 5),
+                    'shift_end' => substr($master->shift_end ?? '22:00', 0, 5),
+                ],
+                'slots' => $slots,
+                'slots_count' => count($slots),
+            ],
         ]);
     }
 
