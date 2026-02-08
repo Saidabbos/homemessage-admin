@@ -1,26 +1,70 @@
 <template>
   <div class="stepper">
-    <div
-      v-for="(step, index) in steps"
-      :key="step.id"
-      class="step"
-      :class="{
-        'step--done': step.id < currentStep,
-        'step--active': step.id === currentStep,
-        'step--todo': step.id > currentStep,
-      }"
-      @click="handleClick(step.id)"
-    >
-      <div class="step__indicator">
-        <svg v-if="step.id < currentStep" class="step__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <!-- Step 1 Indicator -->
+    <div class="step-wrapper">
+      <div
+        class="step-indicator"
+        :class="{
+          'step-indicator--done': currentStep > 1,
+          'step-indicator--active': currentStep === 1,
+          'step-indicator--pending': currentStep < 1,
+        }"
+      >
+        <svg v-if="currentStep > 1" class="step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
           <polyline points="20 6 9 17 4 12" />
         </svg>
-        <span v-else class="step__number">{{ step.id }}</span>
+        <span v-else class="step-number">1</span>
       </div>
-      <span class="step__name">{{ step.name }}</span>
-      
-      <!-- Connector line -->
-      <div v-if="index < steps.length - 1" class="step__connector" />
+    </div>
+
+    <!-- Connector Line 1 -->
+    <div
+      class="connector-line"
+      :class="{
+        'connector-line--active': currentStep > 1,
+      }"
+    ></div>
+
+    <!-- Step 2 Indicator -->
+    <div class="step-wrapper">
+      <div
+        class="step-indicator"
+        :class="{
+          'step-indicator--done': currentStep > 2,
+          'step-indicator--active': currentStep === 2,
+          'step-indicator--pending': currentStep < 2,
+        }"
+      >
+        <svg v-if="currentStep > 2" class="step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+        <span v-else class="step-number">2</span>
+      </div>
+    </div>
+
+    <!-- Connector Line 2 -->
+    <div
+      class="connector-line"
+      :class="{
+        'connector-line--active': currentStep > 2,
+      }"
+    ></div>
+
+    <!-- Step 3 Indicator -->
+    <div class="step-wrapper">
+      <div
+        class="step-indicator"
+        :class="{
+          'step-indicator--done': currentStep > 3,
+          'step-indicator--active': currentStep === 3,
+          'step-indicator--pending': currentStep < 3,
+        }"
+      >
+        <svg v-if="currentStep > 3" class="step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+        <span v-else class="step-number">3</span>
+      </div>
     </div>
   </div>
 </template>
@@ -47,25 +91,17 @@ function handleClick(stepId) {
 <style scoped>
 .stepper {
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 0;
-}
-
-.step {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  position: relative;
-  flex: 1;
-  cursor: pointer;
+  gap: 10px;
 }
 
-.step--todo {
-  cursor: default;
+.step-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.step__indicator {
+.step-indicator {
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -74,78 +110,63 @@ function handleClick(stepId) {
   justify-content: center;
   font-weight: 600;
   font-size: 14px;
+  font-family: 'Manrope', sans-serif;
   transition: all 0.3s ease;
-  position: relative;
-  z-index: 1;
+  flex-shrink: 0;
 }
 
-.step--done .step__indicator {
-  background: #48bb78;
+.step-indicator--active {
+  background: #C8A951;
+  color: #1B2B5A;
+  box-shadow: 0 0 0 0px rgba(200, 169, 81, 0.3);
+}
+
+.step-indicator--done {
+  background: #C8A951;
   color: white;
 }
 
-.step--active .step__indicator {
-  background: #4299e1;
-  color: white;
-  box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.2);
+.step-indicator--pending {
+  background: rgba(27, 43, 90, 0.1);
+  color: rgba(27, 43, 90, 0.3);
 }
 
-.step--todo .step__indicator {
-  background: #e2e8f0;
-  color: #a0aec0;
+.step-number {
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.step__check {
+.step-check {
   width: 16px;
   height: 16px;
 }
 
-.step__number {
-  font-size: 14px;
-}
-
-.step__name {
-  margin-top: 8px;
-  font-size: 12px;
-  color: #718096;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.step--active .step__name {
-  color: #4299e1;
-  font-weight: 600;
-}
-
-.step--done .step__name {
-  color: #48bb78;
-}
-
-.step__connector {
-  position: absolute;
-  top: 16px;
-  left: calc(50% + 16px);
-  width: calc(100% - 32px);
+.connector-line {
+  width: 48px;
   height: 2px;
-  background: #e2e8f0;
-  z-index: 0;
+  background: rgba(27, 43, 90, 0.1);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
-.step--done .step__connector,
-.step--active .step__connector {
-  background: #48bb78;
+.connector-line--active {
+  background: #C8A951;
 }
 
 /* Mobile adjustments */
-@media (max-width: 480px) {
-  .step__name {
-    font-size: 10px;
+@media (max-width: 1024px) {
+  .stepper {
+    gap: 8px;
   }
-  
-  .step__indicator {
+
+  .step-indicator {
     width: 28px;
     height: 28px;
     font-size: 12px;
+  }
+
+  .connector-line {
+    width: 36px;
   }
 }
 </style>
