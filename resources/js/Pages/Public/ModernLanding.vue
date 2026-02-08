@@ -9,6 +9,7 @@ const props = defineProps({
     serviceTypes: Array,
     masters: Array,
     stats: Object,
+    hero: Object,
 })
 
 // State
@@ -87,20 +88,20 @@ onMounted(() => {
 
             <div class="relative z-10 text-center max-w-3xl mx-auto">
                 <div class="mb-6 inline-block px-4 py-2 rounded-full bg-[#C9A55C]/15 text-[#C9A55C] text-sm font-semibold tracking-wider font-manrope">
-                    ✦ {{ t('landing.hero.badge') }}
+                    {{ hero?.badge || '✦ Premium xizmat' }}
                 </div>
                 <h1 class="text-6xl md:text-7xl font-playfair font-light text-[#1B2B5A] mb-6 leading-tight">
-                    {{ t('landing.hero.title') }}
+                    {{ hero?.title || t('landing.hero.title') }}
                 </h1>
                 <p class="text-lg text-[#1B2B5A]/70 mb-8 leading-relaxed font-manrope">
-                    {{ t('landing.hero.subtitle') }}
+                    {{ hero?.subtitle || t('landing.hero.subtitle') }}
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
                     <a href="/booking" class="px-8 py-3 bg-gradient-to-r from-[#C9A55C] to-[#D4B76A] text-white rounded-full font-medium hover:shadow-xl transition">
-                        {{ t('landing.hero.cta') }} →
+                        {{ hero?.cta_text || t('landing.hero.cta') }} →
                     </a>
                     <a href="#services" class="px-8 py-3 border border-[#1B2B5A]/20 text-[#1B2B5A] rounded-full font-medium hover:bg-white/50 transition">
-                        {{ t('landing.hero.viewServices') }}
+                        {{ hero?.view_services_text || t('landing.hero.viewServices') }}
                     </a>
                 </div>
             </div>

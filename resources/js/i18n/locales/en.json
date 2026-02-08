@@ -230,7 +230,20 @@
     "maxBookingDaysHint": "How many days in advance a booking can be made",
     "cancellationHours": "Cancellation Hours",
     "cancellationHoursHint": "How many hours before appointment a booking can be cancelled",
-    "autoConfirmBooking": "Auto-confirm bookings"
+    "autoConfirmBooking": "Auto-confirm bookings",
+    "hero": "Hero Section",
+    "heroInfo": "Landing page hero section",
+    "heroInfoText": "Manage the text and content of the hero section",
+    "heroTitle": "Hero Title",
+    "heroTitleHint": "Main heading of the landing page",
+    "heroSubtitle": "Hero Subtitle",
+    "heroSubtitleHint": "Displayed under the main heading",
+    "heroBadge": "Hero Badge",
+    "heroBadgeHint": "Displayed above the heading",
+    "heroCtaText": "CTA Button Text",
+    "heroCtaTextHint": "Text for the main call-to-action button",
+    "heroViewServicesText": "View Services Button Text",
+    "heroViewServicesTextHint": "Text for the secondary button"
   },
   "profile": {
     "title": "Profile",

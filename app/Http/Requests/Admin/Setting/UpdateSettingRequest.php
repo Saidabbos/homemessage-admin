@@ -32,6 +32,13 @@ class UpdateSettingRequest extends FormRequest
             'telegram_link' => 'nullable|url|max:255',
             'instagram_link' => 'nullable|url|max:255',
             'facebook_link' => 'nullable|url|max:255',
+
+            // Hero Section
+            'hero_title' => 'nullable|string|max:255',
+            'hero_subtitle' => 'nullable|string|max:500',
+            'hero_badge' => 'nullable|string|max:100',
+            'hero_cta_text' => 'nullable|string|max:100',
+            'hero_view_services_text' => 'nullable|string|max:100',
         ];
     }
 }

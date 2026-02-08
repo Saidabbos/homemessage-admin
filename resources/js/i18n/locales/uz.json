@@ -230,7 +230,20 @@
     "maxBookingDaysHint": "Qancha kun oldinga buyurtma berish mumkin",
     "cancellationHours": "Bekor qilish vaqti (soat)",
     "cancellationHoursHint": "Buyurtmadan qancha soat oldin bekor qilish mumkin",
-    "autoConfirmBooking": "Buyurtmalarni avtomatik tasdiqlash"
+    "autoConfirmBooking": "Buyurtmalarni avtomatik tasdiqlash",
+    "hero": "Hero Section",
+    "heroInfo": "Landing page hero sectioni",
+    "heroInfoText": "Bosh sayfanin hero sectioni sozlamalarini boshqarish",
+    "heroTitle": "Hero sarkazi",
+    "heroTitleHint": "Bosh sayfanin asosiy sarlavhasi",
+    "heroSubtitle": "Hero qoshimcha matn",
+    "heroSubtitleHint": "Hero sarkazi ostida ko'rsatiladi",
+    "heroBadge": "Hero badge",
+    "heroBadgeHint": "Sarkazi ustiga badge shaklida ko'rsatiladi",
+    "heroCtaText": "CTA tugmasi matni",
+    "heroCtaTextHint": "Asosiy tugmaning matni (masalan 'Seansni Band Qiling')",
+    "heroViewServicesText": "Xizmatlarga o'tish tugmasi",
+    "heroViewServicesTextHint": "Ikkinchi tugmaning matni"
   },
   "profile": {
     "title": "Profil",

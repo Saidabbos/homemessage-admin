@@ -230,7 +230,20 @@
     "maxBookingDaysHint": "На сколько дней вперёд можно бронировать",
     "cancellationHours": "Время отмены (часов)",
     "cancellationHoursHint": "За сколько часов до визита можно отменить бронирование",
-    "autoConfirmBooking": "Автоматически подтверждать бронирования"
+    "autoConfirmBooking": "Автоматически подтверждать бронирования",
+    "hero": "Hero Section",
+    "heroInfo": "Герой секция главной страницы",
+    "heroInfoText": "Управление текстом и содержанием героя секции",
+    "heroTitle": "Заголовок героя",
+    "heroTitleHint": "Основной заголовок главной страницы",
+    "heroSubtitle": "Подзаголовок героя",
+    "heroSubtitleHint": "Отображается под основным заголовком",
+    "heroBadge": "Значок героя",
+    "heroBadgeHint": "Отображается над заголовком",
+    "heroCtaText": "Текст основной кнопки",
+    "heroCtaTextHint": "Текст кнопки вызова действия (например 'Забронировать')",
+    "heroViewServicesText": "Текст кнопки просмотра услуг",
+    "heroViewServicesTextHint": "Текст вторичной кнопки"
   },
   "profile": {
     "title": "Профиль",

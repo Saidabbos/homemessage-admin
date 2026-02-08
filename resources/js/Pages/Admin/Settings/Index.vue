@@ -31,6 +31,12 @@ const form = useForm({
   telegram_link: props.settings?.social?.telegram_link || '',
   instagram_link: props.settings?.social?.instagram_link || '',
   facebook_link: props.settings?.social?.facebook_link || '',
+  // Hero Section
+  hero_title: props.settings?.hero?.hero_title || '',
+  hero_subtitle: props.settings?.hero?.hero_subtitle || '',
+  hero_badge: props.settings?.hero?.hero_badge || '',
+  hero_cta_text: props.settings?.hero?.hero_cta_text || '',
+  hero_view_services_text: props.settings?.hero?.hero_view_services_text || '',
 });
 
 const submit = () => {
@@ -41,6 +47,7 @@ const tabs = [
   { id: 'general', label: 'settings.general' },
   { id: 'booking', label: 'settings.booking' },
   { id: 'social', label: 'settings.social' },
+  { id: 'hero', label: 'settings.hero' },
 ];
 </script>
 
@@ -295,6 +302,90 @@ const tabs = [
                 placeholder="https://facebook.com/pagename"
               />
               <div v-if="form.errors.facebook_link" class="text-[#dc3545] text-xs mt-1">{{ form.errors.facebook_link }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Section Settings -->
+        <div v-show="activeTab === 'hero'" class="p-6 space-y-4">
+          <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded text-sm text-[#1f2d3d]">
+            <p class="font-medium mb-1">{{ t('settings.heroInfo') }}</p>
+            <p class="text-[#6c757d]">{{ t('settings.heroInfoText') }}</p>
+          </div>
+          <div class="grid grid-cols-1 gap-4">
+            <!-- Hero Title -->
+            <div>
+              <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
+                {{ t('settings.heroTitle') }}
+              </label>
+              <input
+                type="text"
+                v-model="form.hero_title"
+                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
+                placeholder="Premium massaj xizmati..."
+              />
+              <p class="text-xs text-[#6c757d] mt-1">{{ t('settings.heroTitleHint') }}</p>
+              <div v-if="form.errors.hero_title" class="text-[#dc3545] text-xs mt-1">{{ form.errors.hero_title }}</div>
+            </div>
+
+            <!-- Hero Subtitle -->
+            <div>
+              <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
+                {{ t('settings.heroSubtitle') }}
+              </label>
+              <textarea
+                v-model="form.hero_subtitle"
+                rows="3"
+                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
+                placeholder="Uyingizga premium massaj xizmati..."
+              ></textarea>
+              <p class="text-xs text-[#6c757d] mt-1">{{ t('settings.heroSubtitleHint') }}</p>
+              <div v-if="form.errors.hero_subtitle" class="text-[#dc3545] text-xs mt-1">{{ form.errors.hero_subtitle }}</div>
+            </div>
+
+            <!-- Hero Badge -->
+            <div>
+              <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
+                {{ t('settings.heroBadge') }}
+              </label>
+              <input
+                type="text"
+                v-model="form.hero_badge"
+                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
+                placeholder="✦ Premium xizmat"
+              />
+              <p class="text-xs text-[#6c757d] mt-1">{{ t('settings.heroBadgeHint') }}</p>
+              <div v-if="form.errors.hero_badge" class="text-[#dc3545] text-xs mt-1">{{ form.errors.hero_badge }}</div>
+            </div>
+
+            <!-- Hero CTA Text -->
+            <div>
+              <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
+                {{ t('settings.heroCtaText') }}
+              </label>
+              <input
+                type="text"
+                v-model="form.hero_cta_text"
+                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
+                placeholder="Seansni Band Qiling"
+              />
+              <p class="text-xs text-[#6c757d] mt-1">{{ t('settings.heroCtaTextHint') }}</p>
+              <div v-if="form.errors.hero_cta_text" class="text-[#dc3545] text-xs mt-1">{{ form.errors.hero_cta_text }}</div>
+            </div>
+
+            <!-- Hero View Services Text -->
+            <div>
+              <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
+                {{ t('settings.heroViewServicesText') }}
+              </label>
+              <input
+                type="text"
+                v-model="form.hero_view_services_text"
+                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
+                placeholder="Xizmatlarga o'tish"
+              />
+              <p class="text-xs text-[#6c757d] mt-1">{{ t('settings.heroViewServicesTextHint') }}</p>
+              <div v-if="form.errors.hero_view_services_text" class="text-[#dc3545] text-xs mt-1">{{ form.errors.hero_view_services_text }}</div>
             </div>
           </div>
         </div>

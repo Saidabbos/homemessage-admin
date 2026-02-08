@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Public\LandingController;
 use App\Http\Controllers\Public\MasterController as PublicMasterController;
+use App\Models\Setting;
 
 // Public routes
 Route::get('/', function () {
@@ -25,6 +26,13 @@ Route::get('/', function () {
             'years' => 12,
             'clients' => '5K',
             'rating' => 4.9,
+        ],
+        'hero' => [
+            'title' => Setting::get('hero_title', 'Premium massaj xizmati'),
+            'subtitle' => Setting::get('hero_subtitle', 'Uyingizga premium massaj xizmati. Tanangiz va ruhingizga haqiqiy dam olish.'),
+            'badge' => Setting::get('hero_badge', '✦ Premium xizmat'),
+            'cta_text' => Setting::get('hero_cta_text', 'Seansni Band Qiling'),
+            'view_services_text' => Setting::get('hero_view_services_text', 'Xizmatlarga o\'tish'),
         ],
     ]);
 })->name('public.landing');

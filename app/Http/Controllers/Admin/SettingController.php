@@ -39,6 +39,13 @@ class SettingController extends Controller
         Setting::set('instagram_link', $validated['instagram_link'] ?? '', 'social', 'text');
         Setting::set('facebook_link', $validated['facebook_link'] ?? '', 'social', 'text');
 
+        // Hero section settings
+        Setting::set('hero_title', $validated['hero_title'] ?? '', 'hero', 'text');
+        Setting::set('hero_subtitle', $validated['hero_subtitle'] ?? '', 'hero', 'text');
+        Setting::set('hero_badge', $validated['hero_badge'] ?? '', 'hero', 'text');
+        Setting::set('hero_cta_text', $validated['hero_cta_text'] ?? '', 'hero', 'text');
+        Setting::set('hero_view_services_text', $validated['hero_view_services_text'] ?? '', 'hero', 'text');
+
         return redirect()->route('admin.settings.index')
             ->with('success', 'Sozlamalar muvaffaqiyatli saqlandi');
     }
