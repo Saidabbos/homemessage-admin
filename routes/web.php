@@ -26,7 +26,7 @@ Route::get('/masters/{master}', [PublicMasterController::class, 'show'])->name('
 
 // Default login redirect
 Route::get('/login', function () {
-    return redirect()->route('admin.login');
+    return redirect()->route('customer.login');
 })->name('login');
 
 // Customer Auth Routes (Public)
