@@ -31,4 +31,12 @@ class UserRepository extends BaseRepository
     {
         return $this->getByRolePaginated('customer', $filters, $perPage);
     }
+
+    /**
+     * Find user by phone number
+     */
+    public function findByPhone(string $phone): ?User
+    {
+        return $this->query()->where('phone', $phone)->first();
+    }
 }

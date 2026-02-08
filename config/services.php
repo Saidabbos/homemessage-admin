@@ -65,14 +65,29 @@ return [
         'bot_username' => env('TELEGRAM_BOT_USERNAME'),
         'webhook_url' => env('TELEGRAM_WEBHOOK_URL'),
         'admin_chat_id' => env('TELEGRAM_ADMIN_CHAT_ID'),
-        
+
         // OPS group (for new order notifications)
         'ops_bot_token' => env('TELEGRAM_OPS_BOT_TOKEN', env('TELEGRAM_BOT_TOKEN')),
         'ops_group_id' => env('TELEGRAM_OPS_GROUP_ID', env('TELEGRAM_ADMIN_CHAT_ID')),
-        
+
         // Therapist group
         'therapist_bot_token' => env('TELEGRAM_THERAPIST_BOT_TOKEN'),
         'therapist_group_id' => env('TELEGRAM_THERAPIST_GROUP_ID'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | SMS Provider (Eskiz.uz)
+    |--------------------------------------------------------------------------
+    */
+
+    'eskiz' => [
+        'email' => env('ESKIZ_EMAIL'),
+        'password' => env('ESKIZ_PASSWORD'),
+        'sender' => env('ESKIZ_SENDER', 'GoldenTouch'),
+        'base_url' => env('ESKIZ_BASE_URL', 'https://notify.eskiz.uz/api'),
+        'token_cache_key' => 'eskiz_auth_token',
+        'token_ttl' => 86400, // 24 hours
     ],
 
 ];

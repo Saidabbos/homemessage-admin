@@ -37,6 +37,11 @@ abstract class BaseRepository
         return $this->model->all();
     }
 
+    public function create(array $data): Model
+    {
+        return $this->model->create($data);
+    }
+
     public function paginate(Builder $query, int $perPage = 10): LengthAwarePaginator
     {
         return $query->paginate($perPage)->withQueryString();

@@ -125,4 +125,23 @@ return [
         'login' => 'admin.login',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | OTP (One-Time Password) Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for SMS-based OTP authentication used in the customer
+    | portal for phone number-based login.
+    |
+    */
+
+    'otp' => [
+        'length' => 6, // OTP code length (6 digits)
+        'expires_minutes' => 3, // OTP validity duration in minutes
+        'max_verify_attempts' => 5, // Max failed verification attempts
+        'verify_block_minutes' => 15, // Block duration after max attempts
+        'max_send_per_hour' => 5, // Max SMS sends per hour per phone
+        'send_cooldown_seconds' => 60, // Cooldown between sends (60 seconds)
+    ],
+
 ];

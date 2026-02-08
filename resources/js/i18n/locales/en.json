@@ -524,7 +524,7 @@
     "payment_method": "Payment method",
     "accept_offer": "I accept the terms of the offer",
     "offer_link": "View offer",
-    "select_oil": "Select oil",
+    "select_oil": "Select oil type",
     "oil_coconut": "Coconut oil",
     "oil_lavender": "Lavender oil",
     "no_preference": "No preference",
@@ -536,10 +536,44 @@
     "next_steps": "Next steps",
     "next_step_1": "Operator will call within 15 minutes",
     "next_step_2": "Master will arrive at the appointed time",
-    "next_step_3": "Pay with cash or card",
-    "select_oil": "Select oil type",
-    "oil_coconut": "Coconut oil",
-    "oil_lavender": "Lavender oil",
-    "no_preference": "No preference"
+    "next_step_3": "Pay with cash or card"
+  },
+  "auth": {
+    "login": "Login",
+    "phone": "Phone Number",
+    "sendOtp": "Send Code",
+    "verifyCode": "Verify Code",
+    "otpCode": "SMS Code",
+    "resend": "Resend",
+    "otp": {
+      "phone_required": "Phone number is required",
+      "phone_invalid": "Invalid phone number format (+998XXXXXXXXX)",
+      "code_required": "Verification code is required",
+      "code_invalid": "Invalid verification code (6 digits)",
+      "sent": "Verification code sent",
+      "otpExpired": "Verification code has expired",
+      "otpInvalid": "Invalid code",
+      "invalid_code": "Invalid code",
+      "otp_not_found": "No active verification code found",
+      "otp_expired": "Verification code has expired",
+      "too_many_attempts": "Too many attempts. Your account is locked for 15 minutes",
+      "max_attempts_blocked": "Too many incorrect attempts. Please wait 15 minutes",
+      "rate_limit_exceeded": "Code sending is limited. Maximum 5 times per hour",
+      "sms_failed": "SMS sending failed. Please try again",
+      "verified": "Phone number verified",
+      "login_success": "You have successfully logged in",
+      "logout_success": "You have logged out",
+      "cooldown": "Please wait"
+    }
+  },
+  "customer": {
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "logout": "Logout",
+    "welcome": "Welcome",
+    "phone": "Phone Number",
+    "locale": "Language",
+    "status": "Status",
+    "memberSince": "Member since"
   }
 }

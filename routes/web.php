@@ -16,6 +16,8 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PressureLevelController;
 use App\Http\Controllers\Public\LandingController;
 use App\Http\Controllers\Public\MasterController as PublicMasterController;
+use App\Http\Controllers\Public\CustomerAuthController;
+use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 
 // Public routes
 Route::get('/', LandingController::class)->name('public.landing');
@@ -26,6 +28,19 @@ Route::get('/masters/{master}', [PublicMasterController::class, 'show'])->name('
 Route::get('/login', function () {
     return redirect()->route('admin.login');
 })->name('login');
+
+// Customer Auth Routes (Public)
+Route::prefix('auth')->group(function () {
+    Route::get('/login', [CustomerAuthController::class, 'showLogin'])->name('customer.login');
+    Route::post('/otp/send', [CustomerAuthController::class, 'sendOtp'])->name('customer.otp.send');
+    Route::post('/otp/verify', [CustomerAuthController::class, 'verifyOtp'])->name('customer.otp.verify');
+});
+
+// Customer Protected Routes
+Route::prefix('customer')->middleware(['auth', 'role:customer'])->group(function () {
+    Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('customer.dashboard');
+    Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
+});
 
 // Admin Auth Routes
 Route::prefix('admin')->group(function () {
