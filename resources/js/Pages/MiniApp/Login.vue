@@ -25,6 +25,11 @@ onMounted(() => {
     if (window.Telegram?.WebApp) {
         tg.value = window.Telegram.WebApp;
         tgUser.value = tg.value.initDataUnsafe?.user;
+        console.log('Telegram WebApp detected:', tg.value);
+        console.log('Telegram User:', tgUser.value);
+        console.log('initDataUnsafe:', tg.value.initDataUnsafe);
+    } else {
+        console.log('Telegram WebApp NOT detected');
     }
 });
 

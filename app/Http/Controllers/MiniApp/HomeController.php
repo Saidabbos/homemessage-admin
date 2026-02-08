@@ -101,6 +101,11 @@ class HomeController extends Controller
      */
     public function linkTelegram(Request $request)
     {
+        Log::info('MiniApp: Link Telegram request received', [
+            'all_data' => $request->all(),
+            'user_id' => Auth::id(),
+        ]);
+
         $request->validate([
             'telegram_id' => 'required|integer',
             'telegram_username' => 'nullable|string',
