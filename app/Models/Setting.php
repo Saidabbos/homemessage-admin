@@ -16,8 +16,9 @@ class Setting extends Model
 
     /**
      * Get a setting value by key
+     * For translatable fields, pass locale as second parameter or returns all translations
      */
-    public static function get(string $key, mixed $default = null): mixed
+    public static function get(string $key, mixed $default = null, ?string $locale = null): mixed
     {
         $setting = Cache::remember("setting.{$key}", 3600, function () use ($key) {
             return static::where('key', $key)->first();
@@ -27,12 +28,19 @@ class Setting extends Model
             return $default;
         }
 
-        return match ($setting->type) {
+        $value = match ($setting->type) {
             'boolean' => filter_var($setting->value, FILTER_VALIDATE_BOOLEAN),
             'number' => (int) $setting->value,
             'json' => json_decode($setting->value, true),
             default => $setting->value,
         };
+
+        // If it's translatable and specific locale requested
+        if ($setting->type === 'json' && is_array($value) && $locale) {
+            return $value[$locale] ?? $default;
+        }
+
+        return $value;
     }
 
     /**

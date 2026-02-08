@@ -31,16 +31,32 @@ const form = useForm({
   telegram_link: props.settings?.social?.telegram_link || '',
   instagram_link: props.settings?.social?.instagram_link || '',
   facebook_link: props.settings?.social?.facebook_link || '',
-  // Hero Section
-  hero_title: props.settings?.hero?.hero_title || '',
-  hero_subtitle: props.settings?.hero?.hero_subtitle || '',
+  // Hero Section - Translatable
+  hero_title: props.settings?.hero?.hero_title || { uz: '', ru: '', en: '' },
+  hero_subtitle: props.settings?.hero?.hero_subtitle || { uz: '', ru: '', en: '' },
   hero_badge: props.settings?.hero?.hero_badge || '',
   hero_cta_text: props.settings?.hero?.hero_cta_text || '',
   hero_view_services_text: props.settings?.hero?.hero_view_services_text || '',
+  hero_image: null,
+  hero_image_preview: props.settings?.hero?.hero_image ? `/storage/${props.settings.hero.hero_image}` : null,
 });
 
+const handleImageChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    form.hero_image = file;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      form.hero_image_preview = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
 const submit = () => {
-  form.put(route('admin.settings.update'));
+  form.put(route('admin.settings.update'), {
+    forceFormData: true,
+  });
 };
 
 const tabs = [
@@ -307,40 +323,134 @@ const tabs = [
         </div>
 
         <!-- Hero Section Settings -->
-        <div v-show="activeTab === 'hero'" class="p-6 space-y-4">
+        <div v-show="activeTab === 'hero'" class="p-6 space-y-6">
           <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded text-sm text-[#1f2d3d]">
             <p class="font-medium mb-1">{{ t('settings.heroInfo') }}</p>
             <p class="text-[#6c757d]">{{ t('settings.heroInfoText') }}</p>
           </div>
-          <div class="grid grid-cols-1 gap-4">
-            <!-- Hero Title -->
-            <div>
-              <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
+
+          <!-- Hero Image Upload -->
+          <div class="border border-gray-300 rounded-lg p-6 bg-gray-50">
+            <label class="block text-sm font-medium text-[#1f2d3d] mb-3">
+              {{ t('settings.heroImage') || 'Hero Background Image' }}
+            </label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Image Preview -->
+              <div>
+                <div v-if="form.hero_image_preview" class="relative overflow-hidden rounded-lg border border-gray-300 bg-white">
+                  <img :src="form.hero_image_preview" alt="Hero preview" class="w-full h-64 object-cover" />
+                  <button
+                    type="button"
+                    @click="form.hero_image = null; form.hero_image_preview = null"
+                    class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded text-xs font-medium hover:bg-red-600"
+                  >
+                    O'chirish
+                  </button>
+                </div>
+                <div v-else class="rounded-lg border-2 border-dashed border-gray-300 bg-gray-100 h-64 flex items-center justify-center text-[#6c757d]">
+                  Rasm tanlanmagan
+                </div>
+              </div>
+
+              <!-- Upload Section -->
+              <div>
+                <label class="block mb-3">
+                  <div class="border-2 border-dashed border-[#007bff] rounded-lg p-6 bg-blue-50 text-center cursor-pointer hover:bg-blue-100 transition">
+                    <svg class="w-8 h-8 mx-auto mb-2 text-[#007bff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <p class="font-medium text-[#1f2d3d] text-sm">{{ t('settings.clickOrDrag') || 'Rasm tanlang yoki suriting' }}</p>
+                    <p class="text-xs text-[#6c757d] mt-1">PNG, JPG, WebP. Max 5MB</p>
+                  </div>
+                  <input
+                    type="file"
+                    @change="handleImageChange"
+                    accept="image/*"
+                    class="hidden"
+                  />
+                </label>
+                <p class="text-xs text-[#6c757d] mt-3">{{ t('settings.heroImageHint') || 'Rasm yuklanmasa, joriy default rasm qoʻllaniladi' }}</p>
+              </div>
+            </div>
+            <div v-if="form.errors.hero_image" class="text-[#dc3545] text-xs mt-2">{{ form.errors.hero_image }}</div>
+          </div>
+
+          <!-- Translatable Fields -->
+          <div class="grid grid-cols-1 gap-6">
+            <!-- Hero Title (Translatable) -->
+            <div class="border border-gray-300 rounded-lg p-4">
+              <label class="block text-sm font-medium text-[#1f2d3d] mb-3">
                 {{ t('settings.heroTitle') }}
               </label>
-              <input
-                type="text"
-                v-model="form.hero_title"
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
-                placeholder="Premium massaj xizmati..."
-              />
-              <p class="text-xs text-[#6c757d] mt-1">{{ t('settings.heroTitleHint') }}</p>
-              <div v-if="form.errors.hero_title" class="text-[#dc3545] text-xs mt-1">{{ form.errors.hero_title }}</div>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs font-medium text-[#6c757d] mb-1">🇺🇿 Uzbek</label>
+                  <input
+                    type="text"
+                    v-model="form.hero_title.uz"
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
+                    placeholder="Premium massaj xizmati..."
+                  />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-[#6c757d] mb-1">🇷🇺 Русский</label>
+                  <input
+                    type="text"
+                    v-model="form.hero_title.ru"
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
+                    placeholder="Премиум массаж..."
+                  />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-[#6c757d] mb-1">🇬🇧 English</label>
+                  <input
+                    type="text"
+                    v-model="form.hero_title.en"
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
+                    placeholder="Premium massage service..."
+                  />
+                </div>
+              </div>
+              <p class="text-xs text-[#6c757d] mt-2">{{ t('settings.heroTitleHint') }}</p>
+              <div v-if="form.errors['hero_title.uz']" class="text-[#dc3545] text-xs mt-1">{{ form.errors['hero_title.uz'] }}</div>
             </div>
 
-            <!-- Hero Subtitle -->
-            <div>
-              <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
+            <!-- Hero Subtitle (Translatable) -->
+            <div class="border border-gray-300 rounded-lg p-4">
+              <label class="block text-sm font-medium text-[#1f2d3d] mb-3">
                 {{ t('settings.heroSubtitle') }}
               </label>
-              <textarea
-                v-model="form.hero_subtitle"
-                rows="3"
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
-                placeholder="Uyingizga premium massaj xizmati..."
-              ></textarea>
-              <p class="text-xs text-[#6c757d] mt-1">{{ t('settings.heroSubtitleHint') }}</p>
-              <div v-if="form.errors.hero_subtitle" class="text-[#dc3545] text-xs mt-1">{{ form.errors.hero_subtitle }}</div>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs font-medium text-[#6c757d] mb-1">🇺🇿 Uzbek</label>
+                  <textarea
+                    v-model="form.hero_subtitle.uz"
+                    rows="2"
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
+                    placeholder="Uyingizga premium massaj xizmati..."
+                  ></textarea>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-[#6c757d] mb-1">🇷🇺 Русский</label>
+                  <textarea
+                    v-model="form.hero_subtitle.ru"
+                    rows="2"
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
+                    placeholder="Премиум массаж в вашем доме..."
+                  ></textarea>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-[#6c757d] mb-1">🇬🇧 English</label>
+                  <textarea
+                    v-model="form.hero_subtitle.en"
+                    rows="2"
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#007bff] focus:border-[#007bff] text-sm"
+                    placeholder="Premium massage service at your home..."
+                  ></textarea>
+                </div>
+              </div>
+              <p class="text-xs text-[#6c757d] mt-2">{{ t('settings.heroSubtitleHint') }}</p>
+              <div v-if="form.errors['hero_subtitle.uz']" class="text-[#dc3545] text-xs mt-1">{{ form.errors['hero_subtitle.uz'] }}</div>
             </div>
 
             <!-- Hero Badge -->

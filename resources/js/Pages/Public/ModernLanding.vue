@@ -83,7 +83,10 @@ onMounted(() => {
 
         <!-- HERO SECTION -->
         <section class="relative pt-32 pb-20 px-6 overflow-hidden min-h-screen flex items-center justify-center">
-            <div class="absolute inset-0 opacity-20" style="background-image: url('https://images.unsplash.com/photo-1709689769810-225b90f51653?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080'); background-size: cover;"></div>
+            <div class="absolute inset-0 opacity-20" :style="{
+                backgroundImage: `url('${hero?.image ? '/storage/' + hero.image : 'https://images.unsplash.com/photo-1709689769810-225b90f51653?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080'}')`,
+                backgroundSize: 'cover'
+            }"></div>
             <div class="absolute inset-0 bg-gradient-to-b from-[#EDE8DF]/85 via-transparent to-[#E0DCD3]/85"></div>
 
             <div class="relative z-10 text-center max-w-3xl mx-auto">

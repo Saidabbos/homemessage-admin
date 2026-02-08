@@ -5,10 +5,15 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Setting\UpdateSettingRequest;
 use App\Models\Setting;
+use App\Services\ImageService;
 use Inertia\Inertia;
 
 class SettingController extends Controller
 {
+    public function __construct(
+        protected ImageService $imageService
+    ) {}
+
     public function index()
     {
         return Inertia::render('Admin/Settings/Index', [
@@ -39,12 +44,29 @@ class SettingController extends Controller
         Setting::set('instagram_link', $validated['instagram_link'] ?? '', 'social', 'text');
         Setting::set('facebook_link', $validated['facebook_link'] ?? '', 'social', 'text');
 
-        // Hero section settings
-        Setting::set('hero_title', $validated['hero_title'] ?? '', 'hero', 'text');
-        Setting::set('hero_subtitle', $validated['hero_subtitle'] ?? '', 'hero', 'text');
+        // Hero section settings - Translatable
+        Setting::set('hero_title', [
+            'uz' => $validated['hero_title']['uz'] ?? '',
+            'ru' => $validated['hero_title']['ru'] ?? '',
+            'en' => $validated['hero_title']['en'] ?? '',
+        ], 'hero', 'json');
+
+        Setting::set('hero_subtitle', [
+            'uz' => $validated['hero_subtitle']['uz'] ?? '',
+            'ru' => $validated['hero_subtitle']['ru'] ?? '',
+            'en' => $validated['hero_subtitle']['en'] ?? '',
+        ], 'hero', 'json');
+
         Setting::set('hero_badge', $validated['hero_badge'] ?? '', 'hero', 'text');
         Setting::set('hero_cta_text', $validated['hero_cta_text'] ?? '', 'hero', 'text');
         Setting::set('hero_view_services_text', $validated['hero_view_services_text'] ?? '', 'hero', 'text');
+
+        // Hero image upload
+        if ($request->hasFile('hero_image')) {
+            $oldImage = Setting::get('hero_image');
+            $imagePath = $this->imageService->replace($oldImage, $request->file('hero_image'), 'hero');
+            Setting::set('hero_image', $imagePath, 'hero', 'text');
+        }
 
         return redirect()->route('admin.settings.index')
             ->with('success', 'Sozlamalar muvaffaqiyatli saqlandi');
