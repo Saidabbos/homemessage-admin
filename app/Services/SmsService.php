@@ -124,9 +124,9 @@ class SmsService
     protected function buildMessage(string $code, string $locale = 'uz'): string
     {
         $messages = [
-            'uz' => "Home Massage tasdiqlash kodi: {$code}\nKodni hech kimga bermang.",
-            'ru' => "Код подтверждения Home Massage: {$code}\nНе сообщайте этот код никому.",
-            'en' => "Home Massage verification code: {$code}\nDo not share this code.",
+            'uz' => "Home massage: Platformada kirish uchun tasdiqlash kodi: {$code}",
+            'ru' => "Home massage: Код для входа на платформу: {$code}",
+            'en' => "Home massage: Platform login verification code: {$code}",
         ];
 
         return $messages[$locale] ?? $messages['uz'];
