@@ -221,6 +221,41 @@ class HomeController extends Controller
     }
 
     /**
+     * Auto-login via Telegram ID (called from frontend)
+     */
+    public function autoLogin(Request $request)
+    {
+        $telegramId = $request->input('telegram_id');
+        
+        Log::info('MiniApp: Auto-login attempt', [
+            'telegram_id' => $telegramId,
+            'has_init_data' => !empty($request->input('init_data')),
+        ]);
+
+        if (!$telegramId) {
+            return response()->json(['success' => false, 'error' => 'No Telegram ID'], 400);
+        }
+
+        // Find user by telegram_id
+        $user = User::where('telegram_id', $telegramId)->first();
+
+        if (!$user) {
+            Log::info('MiniApp: No user found for telegram_id', ['telegram_id' => $telegramId]);
+            return response()->json(['success' => false, 'error' => 'User not found'], 404);
+        }
+
+        // Login the user
+        Auth::login($user, true);
+        
+        Log::info('MiniApp: Auto-login successful', [
+            'user_id' => $user->id,
+            'telegram_id' => $telegramId,
+        ]);
+
+        return response()->json(['success' => true, 'redirect' => route('miniapp.home')]);
+    }
+
+    /**
      * Logout from Mini App
      */
     public function logout(Request $request)

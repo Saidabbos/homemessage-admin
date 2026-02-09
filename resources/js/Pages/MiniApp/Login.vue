@@ -25,13 +25,45 @@ const form = useForm({
     telegram_photo_url: null,
 });
 
-onMounted(() => {
+const isAutoLogging = ref(false);
+
+onMounted(async () => {
     if (window.Telegram?.WebApp) {
         tg.value = window.Telegram.WebApp;
         tgUser.value = tg.value.initDataUnsafe?.user;
         console.log('Telegram WebApp detected:', tg.value);
         console.log('Telegram User:', tgUser.value);
-        console.log('initDataUnsafe:', tg.value.initDataUnsafe);
+        
+        // Try auto-login if we have Telegram user data
+        if (tgUser.value?.id) {
+            isAutoLogging.value = true;
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                const response = await fetch('/app/auto-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        telegram_id: tgUser.value.id,
+                        init_data: tg.value.initData,
+                    }),
+                });
+                
+                const result = await response.json();
+                console.log('Auto-login result:', result);
+                
+                if (result.success) {
+                    window.location.href = '/app';
+                    return;
+                }
+            } catch (e) {
+                console.log('Auto-login failed:', e);
+            }
+            isAutoLogging.value = false;
+        }
     } else {
         console.log('Telegram WebApp NOT detected');
     }
@@ -105,6 +137,12 @@ const formatPhone = (e) => {
 
 <template>
     <div class="login-page">
+        <!-- Auto-login loading overlay -->
+        <div v-if="isAutoLogging" class="auto-login-overlay">
+            <div class="auto-login-spinner"></div>
+            <p>Kirish...</p>
+        </div>
+
         <!-- Floating circles background -->
         <div class="bg-circles">
             <div class="circle circle-1"></div>
@@ -491,5 +529,36 @@ const formatPhone = (e) => {
 .footer a {
     color: rgba(255, 255, 255, 0.6);
     text-decoration: underline;
+}
+
+/* Auto-login overlay */
+.auto-login-overlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.auto-login-overlay p {
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 16px;
+    font-size: 16px;
+}
+
+.auto-login-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #FF6B4A;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 </style>

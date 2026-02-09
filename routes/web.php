@@ -29,6 +29,7 @@ Route::get('/masters/{master}', [PublicMasterController::class, 'show'])->name('
 Route::prefix('app')->group(function () {
     Route::get('/', [MiniAppHomeController::class, 'index'])->name('miniapp.home');
     Route::get('/login', [MiniAppHomeController::class, 'login'])->name('miniapp.login');
+    Route::post('/auto-login', [MiniAppHomeController::class, 'autoLogin'])->name('miniapp.auto-login');
     Route::post('/link-telegram', [MiniAppHomeController::class, 'linkTelegram'])->name('miniapp.link-telegram')->middleware('auth');
     Route::post('/logout', [MiniAppHomeController::class, 'logout'])->name('miniapp.logout')->middleware('auth');
 });
