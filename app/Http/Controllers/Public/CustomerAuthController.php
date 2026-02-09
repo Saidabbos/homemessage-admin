@@ -79,6 +79,21 @@ class CustomerAuthController extends Controller
         // Login or register customer
         $user = $this->customerAuthService->loginOrRegister($phone, $request->validated('locale', 'uz'));
 
+        // Link Telegram account if data provided
+        $telegramId = $request->input('telegram_id');
+        if ($telegramId && !$user->telegram_id) {
+            $user->update([
+                'telegram_id' => $telegramId,
+                'telegram_username' => $request->input('telegram_username'),
+                'telegram_first_name' => $request->input('telegram_first_name'),
+                'telegram_photo_url' => $request->input('telegram_photo_url'),
+            ]);
+            \Illuminate\Support\Facades\Log::info('CustomerAuth: Telegram linked', [
+                'user_id' => $user->id,
+                'telegram_id' => $telegramId,
+            ]);
+        }
+
         // Create session
         Auth::login($user, true); // remember = true
 
