@@ -239,7 +239,6 @@ const pressureLevels = [
     { value: 'any', label: "Farqi yo'q" },
 ];
 
-// Selected service summary for bottom bar
 const selectedServiceSummary = computed(() => {
     if (booking.value.services.length === 0) return '';
     const firstService = getServiceById(booking.value.services[0]?.service_id);
@@ -250,10 +249,17 @@ const selectedServiceSummary = computed(() => {
 
 <template>
     <div class="bk-page">
+        <!-- Background circles -->
+        <div class="bg-circles">
+            <div class="circle c1"></div>
+            <div class="circle c2"></div>
+            <div class="circle c3"></div>
+        </div>
+
         <!-- Header -->
-        <header class="bk-header">
-            <button class="bk-back" @click="step > 1 ? prevStep() : router.visit('/app')">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <header class="bk-header glass">
+            <button class="bk-back glass-btn" @click="step > 1 ? prevStep() : router.visit('/app')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M19 12H5M12 19l-7-7 7-7"/>
                 </svg>
             </button>
@@ -272,14 +278,14 @@ const selectedServiceSummary = computed(() => {
                 <div 
                     v-for="service in services" 
                     :key="service.id"
-                    class="service-card"
+                    class="service-card glass"
                     :class="{ selected: isServiceSelected(service.id) }"
                     @click="toggleService(service.id)"
                 >
                     <div class="service-img">
                         <img v-if="service.image_url" :src="service.image_url" :alt="service.name" />
                         <div v-else class="service-img-placeholder">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                                 <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
                             </svg>
                         </div>
@@ -290,21 +296,21 @@ const selectedServiceSummary = computed(() => {
                         <span class="service-price">{{ formatPrice(service.durations?.[0]?.price || 0) }} - {{ formatPrice(service.durations?.[service.durations.length - 1]?.price || 0) }} UZS</span>
                     </div>
                     <div v-if="isServiceSelected(service.id)" class="service-check">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                             <polyline points="20,6 9,17 4,12"/>
                         </svg>
                     </div>
                 </div>
             </div>
 
-            <!-- Duration Selection (for selected service) -->
+            <!-- Duration Selection -->
             <div v-if="booking.services.length > 0" class="section">
                 <h3 class="section-title">Davomiyligi</h3>
                 <div class="chip-row">
                     <button 
                         v-for="dur in getServiceById(booking.services[0]?.service_id)?.durations" 
                         :key="dur.id"
-                        class="chip"
+                        class="chip glass"
                         :class="{ selected: booking.services[0]?.duration_id === dur.id }"
                         @click="setDuration(booking.services[0].service_id, dur.id)"
                     >
@@ -320,7 +326,7 @@ const selectedServiceSummary = computed(() => {
                     <button 
                         v-for="level in pressureLevels" 
                         :key="level.value"
-                        class="chip"
+                        class="chip glass"
                         :class="{ selected: booking.pressure_level === level.value }"
                         @click="booking.pressure_level = level.value"
                     >
@@ -332,14 +338,14 @@ const selectedServiceSummary = computed(() => {
             <!-- People Count -->
             <div class="section">
                 <h3 class="section-title">Kishilar soni</h3>
-                <div class="people-control">
-                    <button class="people-btn" :disabled="booking.people_count <= 1" @click="removePerson">
+                <div class="people-control glass">
+                    <button class="people-btn glass-btn" :disabled="booking.people_count <= 1" @click="removePerson">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="5" y1="12" x2="19" y2="12"/>
                         </svg>
                     </button>
                     <span class="people-num">{{ booking.people_count }} kishi</span>
-                    <button class="people-btn" :disabled="booking.people_count >= 5" @click="addPerson">
+                    <button class="people-btn glass-btn" :disabled="booking.people_count >= 5" @click="addPerson">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="12" y1="5" x2="12" y2="19"/>
                             <line x1="5" y1="12" x2="19" y2="12"/>
@@ -358,7 +364,7 @@ const selectedServiceSummary = computed(() => {
                     <button 
                         v-for="d in availableDates" 
                         :key="d.value"
-                        class="date-chip"
+                        class="date-chip glass"
                         :class="{ selected: booking.date === d.value }"
                         @click="booking.date = d.value"
                     >
@@ -381,7 +387,7 @@ const selectedServiceSummary = computed(() => {
                     <button 
                         v-for="slot in availableSlots" 
                         :key="slot.start"
-                        class="slot-chip"
+                        class="slot-chip glass"
                         :class="{ selected: booking.slot === slot.start }"
                         @click="booking.slot = slot.start"
                     >
@@ -398,7 +404,7 @@ const selectedServiceSummary = computed(() => {
                     <div 
                         v-for="master in filteredMasters" 
                         :key="master.id"
-                        class="master-card"
+                        class="master-card glass"
                         :class="{ selected: isMasterSelected(master.id) }"
                     >
                         <div class="master-photo">
@@ -421,7 +427,7 @@ const selectedServiceSummary = computed(() => {
 
         <!-- Step 3: Confirmation -->
         <div v-if="step === 3" class="bk-content">
-            <div class="confirm-box">
+            <div class="confirm-box glass">
                 <h3 class="confirm-title">Buyurtma tafsilotlari</h3>
                 
                 <div class="confirm-row">
@@ -455,7 +461,7 @@ const selectedServiceSummary = computed(() => {
                 <h3 class="section-title">Qo'shimcha izoh</h3>
                 <textarea 
                     v-model="booking.notes"
-                    class="notes-input"
+                    class="notes-input glass"
                     placeholder="Masalan: 5-qavat, 25-xonadon"
                     rows="3"
                 ></textarea>
@@ -465,7 +471,7 @@ const selectedServiceSummary = computed(() => {
         </div>
 
         <!-- Bottom Bar -->
-        <div class="bk-bottom">
+        <div class="bk-bottom glass">
             <div v-if="step === 1 && booking.services.length > 0" class="bottom-summary">
                 <div class="summary-text">
                     <span class="summary-label">Tanlangan:</span>
@@ -507,7 +513,7 @@ const selectedServiceSummary = computed(() => {
             </button>
             <button 
                 v-else
-                class="bk-btn confirm"
+                class="bk-btn"
                 :disabled="submitting"
                 @click="submitBooking"
             >
@@ -521,8 +527,49 @@ const selectedServiceSummary = computed(() => {
 /* Base */
 .bk-page {
     min-height: 100vh;
-    background: #F8F6F3;
-    padding-bottom: 140px;
+    padding-bottom: 160px;
+    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Background circles */
+.bg-circles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.circle {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(184, 163, 105, 0.3), rgba(107, 139, 164, 0.2));
+    filter: blur(60px);
+    animation: float 8s ease-in-out infinite;
+}
+
+.c1 { width: 200px; height: 200px; top: -50px; right: -50px; }
+.c2 { width: 150px; height: 150px; bottom: 200px; left: -40px; animation-delay: -2s; }
+.c3 { width: 100px; height: 100px; top: 40%; right: 10%; animation-delay: -4s; }
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
+    50% { transform: translateY(-30px) scale(1.1); opacity: 0.8; }
+}
+
+/* Glass effect */
+.glass {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.glass-btn {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 /* Header */
@@ -531,11 +578,10 @@ const selectedServiceSummary = computed(() => {
     align-items: center;
     gap: 12px;
     padding: 16px;
-    background: #fff;
-    border-bottom: 1px solid #E5E5E5;
     position: sticky;
     top: 0;
     z-index: 100;
+    border-radius: 0 0 20px 20px;
 }
 
 .bk-back {
@@ -544,29 +590,35 @@ const selectedServiceSummary = computed(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #F5F5F5;
-    border: none;
     border-radius: 12px;
-    color: #333;
+    color: #fff;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.bk-back:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
 }
 
 .bk-title {
     flex: 1;
     font-size: 18px;
     font-weight: 600;
-    color: #333;
+    color: #fff;
     margin: 0;
 }
 
 .bk-step {
     font-size: 14px;
-    color: #999;
+    color: rgba(255, 255, 255, 0.5);
 }
 
 /* Content */
 .bk-content {
     padding: 16px;
+    position: relative;
+    z-index: 1;
 }
 
 /* Section */
@@ -577,7 +629,7 @@ const selectedServiceSummary = computed(() => {
 .section-title {
     font-size: 14px;
     font-weight: 600;
-    color: #666;
+    color: rgba(255, 255, 255, 0.6);
     margin: 0 0 12px;
 }
 
@@ -592,27 +644,41 @@ const selectedServiceSummary = computed(() => {
 .service-card {
     display: flex;
     gap: 12px;
-    padding: 12px;
-    background: #fff;
-    border: 2px solid transparent;
-    border-radius: 16px;
+    padding: 14px;
+    border-radius: 20px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
+    overflow: hidden;
+}
+
+.service-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(184, 163, 105, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.service-card:hover::before,
+.service-card.selected::before {
+    opacity: 1;
 }
 
 .service-card.selected {
-    border-color: #B8A369;
-    background: #FFFDF8;
+    border-color: rgba(184, 163, 105, 0.5);
+    box-shadow: 0 0 30px rgba(184, 163, 105, 0.2);
+    transform: scale(1.02);
 }
 
 .service-img {
     width: 72px;
     height: 72px;
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
     flex-shrink: 0;
-    background: #F5F5F5;
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .service-img img {
@@ -627,7 +693,7 @@ const selectedServiceSummary = computed(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #CCC;
+    color: rgba(255, 255, 255, 0.3);
 }
 
 .service-info {
@@ -638,13 +704,13 @@ const selectedServiceSummary = computed(() => {
 .service-name {
     font-size: 16px;
     font-weight: 600;
-    color: #333;
+    color: #fff;
     margin: 0 0 4px;
 }
 
 .service-desc {
     font-size: 13px;
-    color: #888;
+    color: rgba(255, 255, 255, 0.5);
     margin: 0 0 6px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -659,40 +725,52 @@ const selectedServiceSummary = computed(() => {
 
 .service-check {
     position: absolute;
-    top: 8px;
-    right: 8px;
+    top: 10px;
+    right: 10px;
     width: 24px;
     height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #B8A369;
+    background: linear-gradient(135deg, #B8A369, #D4C89A);
     border-radius: 50%;
-    color: #fff;
+    color: #1a2a3a;
+    animation: popIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
 }
 
 /* Chips */
 .chip-row {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
 .chip {
-    padding: 10px 20px;
-    background: #fff;
-    border: 2px solid #E5E5E5;
-    border-radius: 24px;
+    padding: 12px 20px;
+    border-radius: 30px;
     font-size: 14px;
-    color: #333;
+    color: #fff;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chip:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
 }
 
 .chip.selected {
-    border-color: #B8A369;
-    background: #B8A369;
-    color: #fff;
+    background: linear-gradient(135deg, #B8A369, #D4C89A);
+    border-color: transparent;
+    color: #1a2a3a;
+    font-weight: 600;
+    box-shadow: 0 4px 20px rgba(184, 163, 105, 0.4);
 }
 
 /* People Control */
@@ -702,31 +780,35 @@ const selectedServiceSummary = computed(() => {
     gap: 24px;
     justify-content: center;
     padding: 16px;
-    background: #fff;
-    border-radius: 16px;
+    border-radius: 20px;
 }
 
 .people-btn {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #F5F5F5;
-    border: 1px solid #E5E5E5;
     border-radius: 50%;
-    color: #333;
+    color: #fff;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.people-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
 }
 
 .people-btn:disabled {
     opacity: 0.3;
+    cursor: not-allowed;
 }
 
 .people-num {
     font-size: 20px;
     font-weight: 600;
-    color: #333;
+    color: #fff;
     min-width: 80px;
     text-align: center;
 }
@@ -734,77 +816,85 @@ const selectedServiceSummary = computed(() => {
 /* Date Selection */
 .date-row {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     overflow-x: auto;
     padding-bottom: 8px;
     -webkit-overflow-scrolling: touch;
 }
 
-.date-row::-webkit-scrollbar {
-    display: none;
-}
+.date-row::-webkit-scrollbar { display: none; }
 
 .date-chip {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 10px 16px;
-    background: #fff;
-    border: 2px solid #E5E5E5;
-    border-radius: 12px;
+    padding: 12px 18px;
+    border-radius: 16px;
     cursor: pointer;
-    transition: all 0.2s;
-    min-width: 64px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 70px;
+}
+
+.date-chip:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .date-chip.selected {
-    border-color: #B8A369;
-    background: #B8A369;
+    background: linear-gradient(135deg, #B8A369, #D4C89A);
+    border-color: transparent;
+    box-shadow: 0 4px 20px rgba(184, 163, 105, 0.4);
 }
 
 .date-day {
     font-size: 11px;
-    color: #888;
+    color: rgba(255, 255, 255, 0.5);
     text-transform: uppercase;
 }
 
 .date-chip.selected .date-day {
-    color: rgba(255,255,255,0.8);
+    color: rgba(26, 42, 58, 0.7);
 }
 
 .date-num {
     font-size: 14px;
     font-weight: 600;
-    color: #333;
-    margin-top: 2px;
+    color: #fff;
+    margin-top: 4px;
 }
 
 .date-chip.selected .date-num {
-    color: #fff;
+    color: #1a2a3a;
 }
 
 /* Slots */
 .slots-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    gap: 10px;
 }
 
 .slot-chip {
-    padding: 12px 8px;
-    background: #fff;
-    border: 2px solid #E5E5E5;
-    border-radius: 12px;
+    padding: 14px 8px;
+    border-radius: 14px;
     font-size: 13px;
-    color: #333;
+    color: #fff;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+}
+
+.slot-chip:hover {
+    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .slot-chip.selected {
-    border-color: #B8A369;
-    background: #B8A369;
-    color: #fff;
+    background: linear-gradient(135deg, #B8A369, #D4C89A);
+    border-color: transparent;
+    color: #1a2a3a;
+    font-weight: 600;
+    box-shadow: 0 4px 20px rgba(184, 163, 105, 0.4);
 }
 
 /* Master List */
@@ -816,25 +906,26 @@ const selectedServiceSummary = computed(() => {
     -webkit-overflow-scrolling: touch;
 }
 
-.master-list::-webkit-scrollbar {
-    display: none;
-}
+.master-list::-webkit-scrollbar { display: none; }
 
 .master-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     padding: 16px;
-    background: #fff;
-    border: 2px solid transparent;
-    border-radius: 16px;
-    min-width: 100px;
-    transition: all 0.2s;
+    border-radius: 20px;
+    min-width: 110px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.master-card:hover {
+    transform: translateY(-5px);
 }
 
 .master-card.selected {
-    border-color: #B8A369;
+    border-color: rgba(184, 163, 105, 0.5);
+    box-shadow: 0 8px 30px rgba(184, 163, 105, 0.3);
 }
 
 .master-photo {
@@ -842,10 +933,11 @@ const selectedServiceSummary = computed(() => {
     height: 64px;
     border-radius: 50%;
     overflow: hidden;
-    background: linear-gradient(135deg, #B8A369, #D4C89A);
+    background: linear-gradient(135deg, #B8A369, #6B8BA4);
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .master-photo img {
@@ -863,76 +955,83 @@ const selectedServiceSummary = computed(() => {
 .master-name {
     font-size: 14px;
     font-weight: 600;
-    color: #333;
+    color: #fff;
+    text-align: center;
 }
 
 .master-exp {
     font-size: 12px;
-    color: #888;
-    background: #F5F5F5;
-    padding: 2px 8px;
-    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 10px;
+    border-radius: 12px;
 }
 
 .master-btn {
-    padding: 8px 16px;
-    background: #B8A369;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #B8A369, #D4C89A);
     border: none;
     border-radius: 20px;
     font-size: 13px;
-    font-weight: 500;
-    color: #fff;
+    font-weight: 600;
+    color: #1a2a3a;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.master-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(184, 163, 105, 0.4);
 }
 
 .master-btn.active {
-    background: #8B7B4D;
+    background: rgba(184, 163, 105, 0.3);
+    color: #B8A369;
 }
 
 /* Confirmation */
 .confirm-box {
-    background: #fff;
-    border-radius: 16px;
-    padding: 20px;
+    border-radius: 24px;
+    padding: 24px;
     margin-bottom: 24px;
 }
 
 .confirm-title {
     font-size: 16px;
     font-weight: 600;
-    color: #333;
-    margin: 0 0 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #E5E5E5;
+    color: #fff;
+    margin: 0 0 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .confirm-row {
     display: flex;
     justify-content: space-between;
-    padding: 8px 0;
+    padding: 10px 0;
 }
 
 .confirm-label {
     font-size: 14px;
-    color: #888;
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .confirm-value {
     font-size: 14px;
     font-weight: 500;
-    color: #333;
+    color: #fff;
 }
 
 .confirm-total {
     display: flex;
     justify-content: space-between;
-    padding-top: 12px;
+    padding-top: 16px;
     margin-top: 12px;
-    border-top: 1px solid #E5E5E5;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .confirm-price {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     color: #B8A369;
 }
@@ -941,24 +1040,28 @@ const selectedServiceSummary = computed(() => {
 .notes-input {
     width: 100%;
     padding: 16px;
-    background: #fff;
-    border: 1px solid #E5E5E5;
-    border-radius: 12px;
+    border-radius: 16px;
     font-size: 14px;
-    color: #333;
+    color: #fff;
     resize: none;
     outline: none;
+    transition: all 0.3s ease;
+}
+
+.notes-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
 }
 
 .notes-input:focus {
-    border-color: #B8A369;
+    border-color: rgba(184, 163, 105, 0.5);
+    box-shadow: 0 0 20px rgba(184, 163, 105, 0.2);
 }
 
 /* Empty/Loading states */
 .empty-hint {
     padding: 24px;
     text-align: center;
-    color: #999;
+    color: rgba(255, 255, 255, 0.4);
     font-size: 14px;
 }
 
@@ -971,7 +1074,7 @@ const selectedServiceSummary = computed(() => {
 .spinner {
     width: 32px;
     height: 32px;
-    border: 3px solid #E5E5E5;
+    border: 3px solid rgba(255, 255, 255, 0.1);
     border-top-color: #B8A369;
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -983,10 +1086,11 @@ const selectedServiceSummary = computed(() => {
 
 /* Error */
 .error-msg {
-    padding: 12px 16px;
-    background: #FEE2E2;
-    border-radius: 12px;
-    color: #DC2626;
+    padding: 14px 18px;
+    background: rgba(220, 38, 38, 0.2);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    border-radius: 14px;
+    color: #FCA5A5;
     font-size: 14px;
     margin-top: 16px;
 }
@@ -998,18 +1102,17 @@ const selectedServiceSummary = computed(() => {
     left: 0;
     right: 0;
     padding: 16px;
-    background: #fff;
-    border-top: 1px solid #E5E5E5;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+    border-radius: 24px 24px 0 0;
+    z-index: 100;
 }
 
 .bottom-summary {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 12px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #E5E5E5;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .summary-text {
@@ -1020,18 +1123,18 @@ const selectedServiceSummary = computed(() => {
 
 .summary-label {
     font-size: 12px;
-    color: #888;
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .summary-value {
     font-size: 14px;
     font-weight: 500;
-    color: #333;
+    color: #fff;
 }
 
 .summary-detail {
     font-size: 12px;
-    color: #888;
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .summary-price {
@@ -1040,35 +1143,38 @@ const selectedServiceSummary = computed(() => {
 
 .price-label {
     font-size: 12px;
-    color: #888;
+    color: rgba(255, 255, 255, 0.4);
     display: block;
 }
 
 .price-value {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
     color: #B8A369;
 }
 
 .bk-btn {
     width: 100%;
-    padding: 16px;
-    background: #B8A369;
+    padding: 18px;
+    background: linear-gradient(135deg, #B8A369, #D4C89A);
     border: none;
-    border-radius: 12px;
+    border-radius: 16px;
     font-size: 16px;
     font-weight: 600;
-    color: #fff;
+    color: #1a2a3a;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 20px rgba(184, 163, 105, 0.4);
+}
+
+.bk-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(184, 163, 105, 0.5);
 }
 
 .bk-btn:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
-}
-
-.bk-btn.confirm {
-    background: #B8A369;
+    transform: none;
 }
 </style>

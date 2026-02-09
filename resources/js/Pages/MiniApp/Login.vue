@@ -111,6 +111,13 @@ const formatPhone = (e) => {
 
 <template>
     <div class="login-page">
+        <!-- Background circles -->
+        <div class="bg-circles">
+            <div class="circle c1"></div>
+            <div class="circle c2"></div>
+            <div class="circle c3"></div>
+        </div>
+
         <!-- Auto-login loading -->
         <div v-if="isAutoLogging" class="auto-login">
             <div class="spinner"></div>
@@ -119,7 +126,7 @@ const formatPhone = (e) => {
 
         <!-- Logo -->
         <div class="login-header">
-            <div class="logo">
+            <div class="logo glass">
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                     <path d="M9 22V12h6v10"/>
@@ -130,12 +137,12 @@ const formatPhone = (e) => {
         </div>
 
         <!-- Form Card -->
-        <div class="form-card">
+        <div class="form-card glass">
             <!-- Phone Step -->
             <div v-if="step === 'phone'" class="form-content">
                 <div class="input-group">
                     <label class="input-label">Telefon raqamingiz</label>
-                    <div class="input-wrapper">
+                    <div class="input-wrapper glass">
                         <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
                         </svg>
@@ -164,14 +171,16 @@ const formatPhone = (e) => {
                 <div class="input-group">
                     <label class="input-label">SMS kod</label>
                     <p class="input-hint">{{ form.phone }} raqamiga yuborildi</p>
-                    <input
-                        type="text"
-                        class="otp-input"
-                        v-model="form.code"
-                        placeholder="••••••"
-                        maxlength="6"
-                        inputmode="numeric"
-                    />
+                    <div class="otp-wrapper glass">
+                        <input
+                            type="text"
+                            class="otp-input"
+                            v-model="form.code"
+                            placeholder="••••••"
+                            maxlength="6"
+                            inputmode="numeric"
+                        />
+                    </div>
                     <p v-if="form.errors.code" class="error-text">{{ form.errors.code }}</p>
                 </div>
 
@@ -210,14 +219,49 @@ const formatPhone = (e) => {
     padding: 24px;
     display: flex;
     flex-direction: column;
-    background: #F8F6F3;
+    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Background circles */
+.bg-circles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.circle {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(184, 163, 105, 0.3), rgba(107, 139, 164, 0.2));
+    filter: blur(60px);
+    animation: float 8s ease-in-out infinite;
+}
+
+.c1 { width: 200px; height: 200px; top: -50px; right: -50px; }
+.c2 { width: 150px; height: 150px; bottom: 100px; left: -40px; animation-delay: -2s; }
+.c3 { width: 100px; height: 100px; top: 50%; right: 20%; animation-delay: -4s; }
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
+    50% { transform: translateY(-30px) scale(1.1); opacity: 0.8; }
+}
+
+/* Glass effect */
+.glass {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 /* Auto-login */
 .auto-login {
     position: fixed;
     inset: 0;
-    background: #F8F6F3;
+    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -226,14 +270,14 @@ const formatPhone = (e) => {
 }
 
 .auto-login p {
-    color: #666;
+    color: rgba(255, 255, 255, 0.6);
     margin-top: 16px;
 }
 
 .spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid #E5E5E5;
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
     border-top-color: #B8A369;
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -247,39 +291,58 @@ const formatPhone = (e) => {
 .login-header {
     text-align: center;
     margin: 48px 0 32px;
+    position: relative;
+    z-index: 1;
+    animation: fadeInDown 0.5s ease;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .logo {
-    width: 72px;
-    height: 72px;
+    width: 80px;
+    height: 80px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #B8A369;
-    border-radius: 20px;
-    color: #fff;
+    border-radius: 24px;
+    color: #B8A369;
     margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 30px rgba(184, 163, 105, 0.3);
 }
 
 .title {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 700;
-    color: #333;
+    color: #fff;
     margin: 0 0 8px;
 }
 
 .subtitle {
     font-size: 14px;
-    color: #888;
+    color: rgba(255, 255, 255, 0.5);
     margin: 0;
 }
 
 /* Form Card */
 .form-card {
-    background: #fff;
-    border-radius: 20px;
-    padding: 24px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    border-radius: 28px;
+    padding: 28px;
+    position: relative;
+    z-index: 1;
+    animation: fadeInUp 0.5s ease 0.2s both;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .form-content {
@@ -291,87 +354,111 @@ const formatPhone = (e) => {
 .input-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .input-label {
     font-size: 14px;
     font-weight: 600;
-    color: #333;
+    color: #fff;
 }
 
 .input-hint {
     font-size: 13px;
-    color: #888;
+    color: rgba(255, 255, 255, 0.5);
     margin: 0;
 }
 
 .input-wrapper {
     position: relative;
+    display: flex;
+    align-items: center;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+}
+
+.input-wrapper:focus-within {
+    border-color: rgba(184, 163, 105, 0.5);
+    box-shadow: 0 0 20px rgba(184, 163, 105, 0.2);
 }
 
 .input-icon {
     position: absolute;
     left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #888;
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .input-field {
     width: 100%;
-    padding: 16px 16px 16px 48px;
-    font-size: 16px;
-    border: 1px solid #E5E5E5;
-    border-radius: 12px;
-    background: #F8F6F3;
-    color: #333;
+    padding: 18px 18px 18px 52px;
+    font-size: 17px;
+    border: none;
+    background: transparent;
+    color: #fff;
     outline: none;
 }
 
-.input-field:focus {
-    border-color: #B8A369;
+.input-field::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.otp-wrapper {
+    border-radius: 16px;
+    transition: all 0.3s ease;
+}
+
+.otp-wrapper:focus-within {
+    border-color: rgba(184, 163, 105, 0.5);
+    box-shadow: 0 0 20px rgba(184, 163, 105, 0.2);
 }
 
 .otp-input {
     width: 100%;
     padding: 20px;
     text-align: center;
-    letter-spacing: 12px;
-    font-size: 24px;
+    letter-spacing: 16px;
+    font-size: 28px;
     font-weight: 600;
-    border: 1px solid #E5E5E5;
-    border-radius: 12px;
-    background: #F8F6F3;
-    color: #333;
+    border: none;
+    background: transparent;
+    color: #fff;
     outline: none;
 }
 
-.otp-input:focus {
-    border-color: #B8A369;
+.otp-input::placeholder {
+    color: rgba(255, 255, 255, 0.2);
+    letter-spacing: 10px;
 }
 
 .error-text {
-    color: #DC2626;
+    color: #FCA5A5;
     font-size: 13px;
     margin: 0;
 }
 
 .submit-btn {
     width: 100%;
-    padding: 16px;
+    padding: 18px;
     font-size: 16px;
     font-weight: 600;
-    background: #B8A369;
-    color: #fff;
+    background: linear-gradient(135deg, #B8A369, #D4C89A);
+    color: #1a2a3a;
     border: none;
-    border-radius: 12px;
+    border-radius: 16px;
     cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 20px rgba(184, 163, 105, 0.4);
+}
+
+.submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(184, 163, 105, 0.5);
 }
 
 .submit-btn:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
+    transform: none;
 }
 
 .secondary-actions {
@@ -385,9 +472,10 @@ const formatPhone = (e) => {
     padding: 8px;
     font-size: 14px;
     background: transparent;
-    color: #888;
+    color: rgba(255, 255, 255, 0.6);
     border: none;
     cursor: pointer;
+    transition: color 0.3s ease;
 }
 
 .link-btn:hover:not(:disabled) {
@@ -395,12 +483,12 @@ const formatPhone = (e) => {
 }
 
 .link-btn:disabled {
-    color: #CCC;
+    color: rgba(255, 255, 255, 0.3);
     cursor: not-allowed;
 }
 
 .divider {
-    color: #CCC;
+    color: rgba(255, 255, 255, 0.3);
 }
 
 /* Footer */
@@ -409,6 +497,8 @@ const formatPhone = (e) => {
     padding-top: 24px;
     text-align: center;
     font-size: 12px;
-    color: #888;
+    color: rgba(255, 255, 255, 0.3);
+    position: relative;
+    z-index: 1;
 }
 </style>
