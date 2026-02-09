@@ -13,45 +13,89 @@ const props = defineProps({
 // Wizard state
 const step = ref(1); // 1: Service, 2: Master & Time, 3: Confirm
 
-// Booking data
+// Booking data - each person can select their own service
 const booking = ref({
-    service_id: null,
-    duration_id: null,
+    people: [
+        { service_id: null, duration_id: null }
+    ],
     master_id: null,
     date: null,
     slot: null,
-    people_count: 1,
     pressure_level: 'medium',
     notes: '',
 });
 
-// Selected objects (for display)
-const selectedService = computed(() => 
-    props.services?.find(s => s.id === booking.value.service_id)
-);
+// Helper to get people count
+const peopleCount = computed(() => booking.value.people.length);
 
-const selectedDuration = computed(() => 
-    selectedService.value?.durations?.find(d => d.id === booking.value.duration_id)
-);
+// Add/remove person
+const addPerson = () => {
+    if (booking.value.people.length < 5) {
+        // Copy last person's selection as default
+        const lastPerson = booking.value.people[booking.value.people.length - 1];
+        booking.value.people.push({
+            service_id: lastPerson.service_id,
+            duration_id: lastPerson.duration_id,
+        });
+    }
+};
+
+const removePerson = () => {
+    if (booking.value.people.length > 1) {
+        booking.value.people.pop();
+    }
+};
+
+// Get selected service for a person
+const getPersonService = (index) => {
+    const person = booking.value.people[index];
+    return props.services?.find(s => s.id === person?.service_id);
+};
+
+const getPersonDuration = (index) => {
+    const person = booking.value.people[index];
+    const service = getPersonService(index);
+    return service?.durations?.find(d => d.id === person?.duration_id);
+};
+
+// Selected objects for first person (backward compatibility)
+const selectedService = computed(() => getPersonService(0));
+const selectedDuration = computed(() => getPersonDuration(0));
+
+// Total price calculation
+const totalPrice = computed(() => {
+    return booking.value.people.reduce((sum, person, index) => {
+        const duration = getPersonDuration(index);
+        return sum + (duration?.price || 0);
+    }, 0);
+});
+
+// All unique service IDs selected
+const selectedServiceIds = computed(() => {
+    return [...new Set(booking.value.people.map(p => p.service_id).filter(Boolean))];
+});
 
 const selectedMaster = computed(() => 
     props.masters?.find(m => m.id === booking.value.master_id)
 );
 
-// Filtered masters based on selected service
+// Filtered masters based on all selected services
 const filteredMasters = computed(() => {
-    if (!booking.value.service_id) return props.masters || [];
+    if (selectedServiceIds.value.length === 0) return props.masters || [];
+    // Master must support ALL selected services
     return (props.masters || []).filter(m => 
-        m.service_type_ids?.includes(booking.value.service_id)
+        selectedServiceIds.value.every(serviceId => 
+            m.service_type_ids?.includes(serviceId)
+        )
     );
 });
 
-// Reset master when service changes
-watch(() => booking.value.service_id, () => {
+// Reset master when services change
+watch(selectedServiceIds, () => {
     booking.value.master_id = null;
     booking.value.date = null;
     booking.value.slot = null;
-});
+}, { deep: true });
 
 // All unique durations across all services
 const allDurations = computed(() => {
@@ -99,10 +143,18 @@ const availableDates = computed(() => {
 const availableSlots = ref([]);
 const loadingSlots = ref(false);
 
+// Calculate total duration from all people
+const totalDuration = computed(() => {
+    return booking.value.people.reduce((sum, person, index) => {
+        const duration = getPersonDuration(index);
+        return sum + (duration?.duration || 0);
+    }, 0);
+});
+
 watch(
-    [() => booking.value.master_id, () => booking.value.date, () => booking.value.duration_id, () => booking.value.people_count], 
-    async ([masterId, date, durationId]) => {
-        if (masterId && date && durationId) {
+    [() => booking.value.master_id, () => booking.value.date, totalDuration], 
+    async ([masterId, date, duration]) => {
+        if (masterId && date && duration > 0) {
             booking.value.slot = null; // Reset slot when params change
             await loadSlots();
         } else {
@@ -114,8 +166,8 @@ watch(
 const loadSlots = async () => {
     loadingSlots.value = true;
     try {
-        const duration = selectedDuration.value?.duration || 60;
-        const response = await fetch(`/api/masters/${booking.value.master_id}/slots?date=${booking.value.date}&duration=${duration}&people_count=${booking.value.people_count}`);
+        const duration = totalDuration.value || 60;
+        const response = await fetch(`/api/masters/${booking.value.master_id}/slots?date=${booking.value.date}&duration=${duration}&people_count=${peopleCount.value}`);
         const data = await response.json();
         availableSlots.value = data.data?.slots || data.slots || [];
     } catch (e) {
@@ -138,7 +190,7 @@ const formatPrice = (price) => {
 
 // Step navigation
 const canProceedStep1 = computed(() => 
-    booking.value.service_id && booking.value.duration_id
+    booking.value.people.every(p => p.service_id && p.duration_id)
 );
 
 const canProceedStep2 = computed(() => 
@@ -171,12 +223,19 @@ const submitBooking = async () => {
                 'Accept': 'application/json',
             },
             body: JSON.stringify({
-                service_type_id: booking.value.service_id,
-                duration_id: booking.value.duration_id,
+                // Send people array with their service selections
+                people: booking.value.people.map((person, index) => ({
+                    service_type_id: person.service_id,
+                    duration_id: person.duration_id,
+                })),
+                // For backward compatibility, also send first person's service
+                service_type_id: booking.value.people[0]?.service_id,
+                duration_id: booking.value.people[0]?.duration_id,
                 master_id: booking.value.master_id,
                 date: booking.value.date,
                 arrival_window_start: booking.value.slot,
-                people_count: booking.value.people_count,
+                people_count: peopleCount.value,
+                total_duration: totalDuration.value,
                 pressure_level: booking.value.pressure_level,
                 notes: booking.value.notes,
             }),
@@ -196,14 +255,17 @@ const submitBooking = async () => {
     submitting.value = false;
 };
 
-// Select service
-const selectService = (serviceId) => {
-    booking.value.service_id = serviceId;
-    // Auto-select default duration
-    const service = props.services?.find(s => s.id === serviceId);
-    const defaultDuration = service?.durations?.find(d => d.is_default) || service?.durations?.[0];
-    if (defaultDuration) {
-        booking.value.duration_id = defaultDuration.id;
+// Select service for a specific person
+const selectServiceForPerson = (personIndex, serviceId) => {
+    const person = booking.value.people[personIndex];
+    if (person) {
+        person.service_id = serviceId;
+        // Auto-select default duration
+        const service = props.services?.find(s => s.id === serviceId);
+        const defaultDuration = service?.durations?.find(d => d.is_default) || service?.durations?.[0];
+        if (defaultDuration) {
+            person.duration_id = defaultDuration.id;
+        }
     }
 };
 
@@ -247,50 +309,74 @@ const pressureLevels = [
 
         <!-- Step 1: Service Selection -->
         <div v-if="step === 1" class="step-content">
-            <!-- Services slider -->
-            <h3 class="section-label">Massaj turi</h3>
-            <div class="services-slider">
-                <div 
-                    v-for="service in services" 
-                    :key="service.id"
-                    class="service-slide"
-                    :class="{ selected: booking.service_id === service.id }"
-                    @click="selectService(service.id)"
-                >
-                    <div class="slide-image" v-if="service.image_url">
-                        <img :src="service.image_url" :alt="service.name" />
-                    </div>
-                    <div class="slide-image slide-placeholder" v-else>
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
-                        </svg>
-                    </div>
-                    <span class="slide-name">{{ service.name }}</span>
-                    <div class="slide-check" v-if="booking.service_id === service.id">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                            <polyline points="20,6 9,17 4,12"/>
-                        </svg>
-                    </div>
+            <!-- People count control -->
+            <div class="people-section">
+                <h3 class="section-label">Necha kishi?</h3>
+                <div class="people-selector">
+                    <button 
+                        class="people-btn"
+                        :disabled="peopleCount <= 1"
+                        @click="removePerson"
+                    >-</button>
+                    <span class="people-count">{{ peopleCount }}</span>
+                    <button 
+                        class="people-btn"
+                        :disabled="peopleCount >= 5"
+                        @click="addPerson"
+                    >+</button>
                 </div>
             </div>
 
-            <!-- Duration filter -->
-            <div class="duration-section">
-                <h3 class="section-label">Davomiylik</h3>
-                <div class="duration-chips">
-                    <button 
-                        v-for="dur in allDurations" 
-                        :key="dur"
-                        class="duration-chip"
-                        :class="{ selected: selectedDurationMinutes === dur }"
-                        @click="filterByDuration(dur)"
+            <!-- Service selection for each person -->
+            <div v-for="(person, index) in booking.people" :key="index" class="person-service-card">
+                <div class="person-header">
+                    <span class="person-number">{{ index + 1 }}-kishi</span>
+                    <span v-if="getPersonDuration(index)" class="person-price">
+                        {{ formatPrice(getPersonDuration(index).price) }}
+                    </span>
+                </div>
+
+                <!-- Service slider for this person -->
+                <div class="services-slider">
+                    <div 
+                        v-for="service in services" 
+                        :key="service.id"
+                        class="service-slide"
+                        :class="{ selected: person.service_id === service.id }"
+                        @click="selectServiceForPerson(index, service.id)"
                     >
-                        {{ dur }} min
+                        <div class="slide-image" v-if="service.image_url">
+                            <img :src="service.image_url" :alt="service.name" />
+                        </div>
+                        <div class="slide-image slide-placeholder" v-else>
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                            </svg>
+                        </div>
+                        <span class="slide-name">{{ service.name }}</span>
+                        <div class="slide-check" v-if="person.service_id === service.id">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20,6 9,17 4,12"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Duration for this person -->
+                <div v-if="getPersonService(index)" class="duration-chips">
+                    <button 
+                        v-for="dur in getPersonService(index).durations" 
+                        :key="dur.id"
+                        class="duration-chip"
+                        :class="{ selected: person.duration_id === dur.id }"
+                        @click="person.duration_id = dur.id"
+                    >
+                        {{ dur.duration }} min
                     </button>
                 </div>
             </div>
 
-            <!-- Pressure level filter -->
+            <!-- Pressure level -->
             <div class="pressure-section">
                 <h3 class="section-label">Bosim kuchi</h3>
                 <div class="pressure-chips">
@@ -307,29 +393,11 @@ const pressureLevels = [
                 </div>
             </div>
 
-            <!-- People count -->
-            <div class="people-section">
-                <h3 class="section-label">Necha kishi?</h3>
-                <div class="people-selector">
-                    <button 
-                        class="people-btn"
-                        :disabled="booking.people_count <= 1"
-                        @click="booking.people_count--"
-                    >-</button>
-                    <span class="people-count">{{ booking.people_count }}</span>
-                    <button 
-                        class="people-btn"
-                        :disabled="booking.people_count >= 5"
-                        @click="booking.people_count++"
-                    >+</button>
-                </div>
-            </div>
-
-            <!-- Selected service info -->
-            <div v-if="selectedService && selectedDuration" class="selected-info">
+            <!-- Total info -->
+            <div v-if="canProceedStep1" class="selected-info">
                 <div class="info-row">
-                    <span>{{ selectedService.name }} ({{ selectedDuration.duration }} min) × {{ booking.people_count }}</span>
-                    <span class="info-price">{{ formatPrice(selectedDuration.price * booking.people_count) }}</span>
+                    <span>Jami: {{ peopleCount }} kishi, {{ totalDuration }} min</span>
+                    <span class="info-price">{{ formatPrice(totalPrice) }}</span>
                 </div>
             </div>
         </div>
@@ -404,15 +472,18 @@ const pressureLevels = [
             <div class="summary-card">
                 <h3 class="summary-title">Buyurtma ma'lumotlari</h3>
                 
-                <div class="summary-row">
-                    <span class="label">Xizmat:</span>
-                    <span class="value">{{ selectedService?.name }}</span>
+                <!-- Services for each person -->
+                <div v-for="(person, index) in booking.people" :key="index" class="person-summary">
+                    <div class="summary-row">
+                        <span class="label">{{ index + 1 }}-kishi:</span>
+                        <span class="value">
+                            {{ getPersonService(index)?.name }} 
+                            ({{ getPersonDuration(index)?.duration }} min)
+                        </span>
+                    </div>
                 </div>
-                
-                <div class="summary-row">
-                    <span class="label">Davomiylik:</span>
-                    <span class="value">{{ selectedDuration?.duration }} daqiqa</span>
-                </div>
+
+                <div class="summary-divider"></div>
                 
                 <div class="summary-row">
                     <span class="label">Master:</span>
@@ -430,8 +501,8 @@ const pressureLevels = [
                 </div>
                 
                 <div class="summary-row">
-                    <span class="label">Kishilar:</span>
-                    <span class="value">{{ booking.people_count }}</span>
+                    <span class="label">Jami vaqt:</span>
+                    <span class="value">{{ totalDuration }} daqiqa</span>
                 </div>
                 
                 <div class="summary-row">
@@ -443,7 +514,7 @@ const pressureLevels = [
                 
                 <div class="summary-row total">
                     <span class="label">Jami:</span>
-                    <span class="value">{{ formatPrice((selectedDuration?.price || 0) * booking.people_count) }} so'm</span>
+                    <span class="value">{{ formatPrice(totalPrice) }} so'm</span>
                 </div>
             </div>
 
@@ -656,6 +727,38 @@ const pressureLevels = [
     background: #FF6B4A;
     border-radius: 50%;
     color: #fff;
+}
+
+/* Person service card */
+.person-service-card {
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+}
+
+.person-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.person-number {
+    font-size: 14px;
+    font-weight: 600;
+    color: #FF6B4A;
+}
+
+.person-price {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.person-summary {
+    margin-bottom: 4px;
 }
 
 /* Selected service info */
