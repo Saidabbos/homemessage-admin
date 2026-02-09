@@ -322,7 +322,7 @@ const pressureLevels = [
         <!-- Step 2: Master & Time Selection -->
         <div v-if="step === 2" class="step-content">
             <!-- Master selection -->
-            <div class="masters-section">
+            <div class="ma-section">
                 <h3 class="section-label">Master tanlang</h3>
                 <div class="ma-scroll">
                     <div 
