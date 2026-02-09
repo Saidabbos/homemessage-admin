@@ -328,8 +328,8 @@ const pressureLevels = [
             <!-- Selected service info -->
             <div v-if="selectedService && selectedDuration" class="selected-info">
                 <div class="info-row">
-                    <span>{{ selectedService.name }} ({{ selectedDuration.duration }} min)</span>
-                    <span class="info-price">{{ formatPrice(selectedDuration.price) }}</span>
+                    <span>{{ selectedService.name }} ({{ selectedDuration.duration }} min) × {{ booking.people_count }}</span>
+                    <span class="info-price">{{ formatPrice(selectedDuration.price * booking.people_count) }}</span>
                 </div>
             </div>
         </div>
