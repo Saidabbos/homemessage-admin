@@ -38,6 +38,31 @@ const selectedMaster = computed(() =>
     props.masters?.find(m => m.id === booking.value.master_id)
 );
 
+// All unique durations across all services
+const allDurations = computed(() => {
+    const durations = new Set();
+    props.services?.forEach(s => {
+        s.durations?.forEach(d => durations.add(d.duration));
+    });
+    return Array.from(durations).sort((a, b) => a - b);
+});
+
+// Selected duration in minutes (for filter display)
+const selectedDurationMinutes = computed(() => selectedDuration.value?.duration);
+
+// Filter by duration - select first service that has this duration
+const filterByDuration = (durationMinutes) => {
+    // Find a service with this duration
+    for (const service of props.services || []) {
+        const dur = service.durations?.find(d => d.duration === durationMinutes);
+        if (dur) {
+            booking.value.service_id = service.id;
+            booking.value.duration_id = dur.id;
+            return;
+        }
+    }
+};
+
 // Available dates (next 14 days)
 const availableDates = computed(() => {
     const dates = [];
@@ -207,48 +232,68 @@ const pressureLevels = [
 
         <!-- Step 1: Service Selection -->
         <div v-if="step === 1" class="step-content">
-            <div class="services-list">
+            <!-- Services slider -->
+            <h3 class="section-label">Massaj turi</h3>
+            <div class="services-slider">
                 <div 
                     v-for="service in services" 
                     :key="service.id"
-                    class="service-card"
+                    class="service-slide"
                     :class="{ selected: booking.service_id === service.id }"
                     @click="selectService(service.id)"
                 >
-                    <div class="service-image" v-if="service.image_url">
+                    <div class="slide-image" v-if="service.image_url">
                         <img :src="service.image_url" :alt="service.name" />
                     </div>
-                    <div class="service-content">
-                        <h3>{{ service.name }}</h3>
-                        <p>{{ service.description }}</p>
+                    <div class="slide-image slide-placeholder" v-else>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                        </svg>
                     </div>
-                    <div class="check-icon" v-if="booking.service_id === service.id">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <span class="slide-name">{{ service.name }}</span>
+                    <div class="slide-check" v-if="booking.service_id === service.id">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                             <polyline points="20,6 9,17 4,12"/>
                         </svg>
                     </div>
                 </div>
             </div>
 
-            <!-- Duration selection -->
-            <div v-if="selectedService" class="duration-section">
+            <!-- Duration filter -->
+            <div class="duration-section">
                 <h3 class="section-label">Davomiylik</h3>
                 <div class="duration-chips">
                     <button 
-                        v-for="dur in selectedService.durations" 
-                        :key="dur.id"
+                        v-for="dur in allDurations" 
+                        :key="dur"
                         class="duration-chip"
-                        :class="{ selected: booking.duration_id === dur.id }"
-                        @click="booking.duration_id = dur.id"
+                        :class="{ selected: selectedDurationMinutes === dur }"
+                        @click="filterByDuration(dur)"
                     >
-                        {{ dur.duration }} min
-                        <span class="price">{{ formatPrice(dur.price) }}</span>
+                        {{ dur }} min
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pressure level filter -->
+            <div class="pressure-section">
+                <h3 class="section-label">Bosim kuchi</h3>
+                <div class="pressure-chips">
+                    <button 
+                        v-for="level in pressureLevels" 
+                        :key="level.value"
+                        class="pressure-chip"
+                        :class="{ selected: booking.pressure_level === level.value }"
+                        @click="booking.pressure_level = level.value"
+                    >
+                        <span class="pressure-icon">{{ level.icon }}</span>
+                        {{ level.label }}
                     </button>
                 </div>
             </div>
 
             <!-- People count -->
-            <div v-if="selectedService" class="people-section">
+            <div class="people-section">
                 <h3 class="section-label">Necha kishi?</h3>
                 <div class="people-selector">
                     <button 
@@ -265,20 +310,11 @@ const pressureLevels = [
                 </div>
             </div>
 
-            <!-- Pressure level -->
-            <div v-if="selectedService" class="pressure-section">
-                <h3 class="section-label">Bosim kuchi</h3>
-                <div class="pressure-chips">
-                    <button 
-                        v-for="level in pressureLevels" 
-                        :key="level.value"
-                        class="pressure-chip"
-                        :class="{ selected: booking.pressure_level === level.value }"
-                        @click="booking.pressure_level = level.value"
-                    >
-                        <span class="pressure-icon">{{ level.icon }}</span>
-                        {{ level.label }}
-                    </button>
+            <!-- Selected service info -->
+            <div v-if="selectedService && selectedDuration" class="selected-info">
+                <div class="info-row">
+                    <span>{{ selectedService.name }} ({{ selectedDuration.duration }} min)</span>
+                    <span class="info-price">{{ formatPrice(selectedDuration.price) }}</span>
                 </div>
             </div>
         </div>
@@ -521,66 +557,116 @@ const pressureLevels = [
     font-size: 14px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.7);
-    margin: 24px 0 12px;
+    margin: 20px 0 12px;
 }
 
-/* Service cards */
-.services-list {
+.section-label:first-child {
+    margin-top: 0;
+}
+
+/* Services slider */
+.services-slider {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.services-slider::-webkit-scrollbar {
+    display: none;
+}
+
+.service-slide {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-}
-
-.service-card {
-    display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+    min-width: 100px;
     padding: 12px;
     background: rgba(255, 255, 255, 0.08);
     border: 2px solid transparent;
     border-radius: 16px;
     cursor: pointer;
     transition: all 0.2s ease;
+    position: relative;
 }
 
-.service-card.selected {
+.service-slide.selected {
     border-color: #FF6B4A;
-    background: rgba(255, 107, 74, 0.1);
+    background: rgba(255, 107, 74, 0.15);
 }
 
-.service-image {
-    width: 60px;
-    height: 60px;
+.slide-image {
+    width: 64px;
+    height: 64px;
     border-radius: 12px;
     overflow: hidden;
-    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.1);
 }
 
-.service-image img {
+.slide-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.service-content {
-    flex: 1;
-    min-width: 0;
+.slide-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.4);
 }
 
-.service-content h3 {
-    font-size: 16px;
-    font-weight: 600;
+.slide-name {
+    font-size: 12px;
+    font-weight: 500;
     color: #fff;
-    margin: 0 0 4px;
-}
-
-.service-content p {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.6);
-    margin: 0;
+    text-align: center;
+    max-width: 90px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.slide-check {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FF6B4A;
+    border-radius: 50%;
+    color: #fff;
+}
+
+/* Selected service info */
+.selected-info {
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(255, 107, 74, 0.1);
+    border: 1px solid rgba(255, 107, 74, 0.3);
+    border-radius: 16px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+    font-size: 15px;
+}
+
+.info-price {
+    font-weight: 700;
+    color: #FF6B4A;
 }
 
 .check-icon {
