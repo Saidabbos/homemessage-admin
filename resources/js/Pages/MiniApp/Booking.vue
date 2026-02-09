@@ -13,9 +13,10 @@ const props = defineProps({
 // Wizard state
 const step = ref(1); // 1: Service, 2: Master & Time, 3: Confirm
 
-// Booking data - per-person services
+// Booking data - multi-select services (limited by people count)
 const booking = ref({
-    people: [{ service_id: null, duration_id: null }], // Each person picks a service
+    services: [], // Array of { service_id, duration_id }
+    people_count: 1,
     master_id: null,
     date: null,
     slot: null,
@@ -23,54 +24,45 @@ const booking = ref({
     notes: '',
 });
 
-// People count
-const peopleCount = computed(() => booking.value.people.length);
-
-// Add person
+// People count controls
 const addPerson = () => {
-    if (booking.value.people.length < 5) {
-        booking.value.people.push({ service_id: null, duration_id: null });
+    if (booking.value.people_count < 5) {
+        booking.value.people_count++;
     }
 };
 
-// Remove person
 const removePerson = () => {
-    if (booking.value.people.length > 1) {
-        booking.value.people.pop();
+    if (booking.value.people_count > 1) {
+        booking.value.people_count--;
+        // Remove extra services if needed
+        while (booking.value.services.length > booking.value.people_count) {
+            booking.value.services.pop();
+        }
     }
 };
 
-// Select service for a person
-const selectServiceForPerson = (personIndex, serviceId) => {
-    const person = booking.value.people[personIndex];
-    if (person) {
-        person.service_id = serviceId;
-        // Auto-select default duration
-        const service = props.services?.find(s => s.id === serviceId);
-        const defaultDuration = service?.durations?.find(d => d.is_default) || service?.durations?.[0];
-        person.duration_id = defaultDuration?.id || null;
+// Toggle service selection (limited by people count)
+const toggleService = (serviceId) => {
+    const index = booking.value.services.findIndex(s => s.service_id === serviceId);
+    if (index >= 0) {
+        // Deselect
+        booking.value.services.splice(index, 1);
+    } else {
+        // Can only select up to people_count services
+        if (booking.value.services.length < booking.value.people_count) {
+            const service = props.services?.find(s => s.id === serviceId);
+            const defaultDuration = service?.durations?.find(d => d.is_default) || service?.durations?.[0];
+            booking.value.services.push({
+                service_id: serviceId,
+                duration_id: defaultDuration?.id || null,
+            });
+        }
     }
 };
 
-// Set duration for a person
-const setDurationForPerson = (personIndex, durationId) => {
-    const person = booking.value.people[personIndex];
-    if (person) {
-        person.duration_id = durationId;
-    }
-};
-
-// Get service for a person
-const getPersonService = (index) => {
-    const person = booking.value.people[index];
-    return props.services?.find(s => s.id === person?.service_id);
-};
-
-// Get duration for a person
-const getPersonDuration = (index) => {
-    const person = booking.value.people[index];
-    const service = getPersonService(index);
-    return service?.durations?.find(d => d.id === person?.duration_id);
+// Check if service is selected
+const isServiceSelected = (serviceId) => {
+    return booking.value.services.some(s => s.service_id === serviceId);
 };
 
 // Get service object by id
@@ -78,28 +70,44 @@ const getServiceById = (serviceId) => {
     return props.services?.find(s => s.id === serviceId);
 };
 
+// Get selected duration for a service
+const getSelectedDuration = (serviceId) => {
+    const sel = booking.value.services.find(s => s.service_id === serviceId);
+    const service = getServiceById(serviceId);
+    return service?.durations?.find(d => d.id === sel?.duration_id);
+};
+
+// Set duration for a service
+const setDuration = (serviceId, durationId) => {
+    const sel = booking.value.services.find(s => s.service_id === serviceId);
+    if (sel) {
+        sel.duration_id = durationId;
+    }
+};
+
 // Total price calculation
 const totalPrice = computed(() => {
-    return booking.value.people.reduce((sum, person, index) => {
-        const duration = getPersonDuration(index);
+    return booking.value.services.reduce((sum, sel) => {
+        const duration = getSelectedDuration(sel.service_id);
         return sum + (duration?.price || 0);
     }, 0);
 });
 
 // Total duration calculation
 const totalDuration = computed(() => {
-    const baseTotal = booking.value.people.reduce((sum, person, index) => {
-        const duration = getPersonDuration(index);
+    const baseTotal = booking.value.services.reduce((sum, sel) => {
+        const duration = getSelectedDuration(sel.service_id);
         return sum + (duration?.duration || 0);
     }, 0);
     // Buffer between people
     const buffer = 10;
-    return baseTotal + buffer * (peopleCount.value - 1);
+    const peopleCount = booking.value.services.length || 1;
+    return baseTotal + buffer * (peopleCount - 1);
 });
 
 // All unique service IDs selected
 const selectedServiceIds = computed(() => {
-    return [...new Set(booking.value.people.map(p => p.service_id).filter(Boolean))];
+    return booking.value.services.map(s => s.service_id);
 });
 
 const selectedMaster = computed(() => 
@@ -161,7 +169,7 @@ const loadSlots = async () => {
     loadingSlots.value = true;
     try {
         const duration = totalDuration.value || 60;
-        const response = await fetch(`/api/masters/${booking.value.master_id}/slots?date=${booking.value.date}&duration=${duration}&people_count=${peopleCount.value}`);
+        const response = await fetch(`/api/masters/${booking.value.master_id}/slots?date=${booking.value.date}&duration=${duration}&people_count=${booking.value.people_count}`);
         const data = await response.json();
         availableSlots.value = data.data?.slots || data.slots || [];
     } catch (e) {
@@ -182,10 +190,10 @@ const formatPrice = (price) => {
     return (price / 1000).toFixed(0) + 'K';
 };
 
-// Step navigation
+// Step navigation - must select exactly people_count services
 const canProceedStep1 = computed(() => 
-    booking.value.people.length > 0 && 
-    booking.value.people.every(p => p.service_id && p.duration_id)
+    booking.value.services.length === booking.value.people_count && 
+    booking.value.services.every(s => s.service_id && s.duration_id)
 );
 
 const canProceedStep2 = computed(() => 
@@ -218,18 +226,18 @@ const submitBooking = async () => {
                 'Accept': 'application/json',
             },
             body: JSON.stringify({
-                // Send people array with their services
-                people: booking.value.people.map(p => ({
-                    service_type_id: p.service_id,
-                    duration_id: p.duration_id,
+                // Send services array
+                services: booking.value.services.map(s => ({
+                    service_type_id: s.service_id,
+                    duration_id: s.duration_id,
                 })),
-                // For backward compatibility, also send first person's service
-                service_type_id: booking.value.people[0]?.service_id,
-                duration_id: booking.value.people[0]?.duration_id,
+                // For backward compatibility
+                service_type_id: booking.value.services[0]?.service_id,
+                duration_id: booking.value.services[0]?.duration_id,
                 master_id: booking.value.master_id,
                 date: booking.value.date,
                 arrival_window_start: booking.value.slot,
-                people_count: peopleCount.value,
+                people_count: booking.value.people_count,
                 total_duration: totalDuration.value,
                 pressure_level: booking.value.pressure_level,
                 notes: booking.value.notes,
@@ -296,64 +304,77 @@ const pressureLevels = [
                 <div class="people-selector">
                     <button 
                         class="people-btn"
-                        :disabled="peopleCount <= 1"
+                        :disabled="booking.people_count <= 1"
                         @click="removePerson"
                     >-</button>
-                    <span class="people-count">{{ peopleCount }}</span>
+                    <span class="people-count">{{ booking.people_count }}</span>
                     <button 
                         class="people-btn"
-                        :disabled="peopleCount >= 5"
+                        :disabled="booking.people_count >= 5"
                         @click="addPerson"
                     >+</button>
                 </div>
             </div>
 
-            <!-- Per-person service selection -->
-            <div v-for="(person, index) in booking.people" :key="index" class="person-card">
-                <div class="person-header">
-                    <span class="person-number">{{ index + 1 }}-kishi</span>
-                    <span v-if="getPersonDuration(index)" class="person-price">
-                        {{ formatPrice(getPersonDuration(index).price) }}
-                    </span>
-                </div>
+            <!-- Service selection hint -->
+            <h3 class="section-label">
+                Xizmatlarni tanlang 
+                <span class="selection-hint">({{ booking.services.length }}/{{ booking.people_count }})</span>
+            </h3>
 
-                <!-- Service slider for this person -->
-                <div class="services-slider">
-                    <div 
-                        v-for="service in services" 
-                        :key="service.id"
-                        class="service-slide"
-                        :class="{ selected: person.service_id === service.id }"
-                        @click="selectServiceForPerson(index, service.id)"
-                    >
-                        <div class="slide-image" v-if="service.image_url">
-                            <img :src="service.image_url" :alt="service.name" />
-                        </div>
-                        <div class="slide-image slide-placeholder" v-else>
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
-                            </svg>
-                        </div>
-                        <span class="slide-name">{{ service.name }}</span>
-                        <div class="slide-check" v-if="person.service_id === service.id">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                <polyline points="20,6 9,17 4,12"/>
-                            </svg>
-                        </div>
+            <!-- Single slider with multi-select -->
+            <div class="services-slider">
+                <div 
+                    v-for="service in services" 
+                    :key="service.id"
+                    class="service-slide"
+                    :class="{ 
+                        selected: isServiceSelected(service.id),
+                        disabled: !isServiceSelected(service.id) && booking.services.length >= booking.people_count
+                    }"
+                    @click="toggleService(service.id)"
+                >
+                    <div class="slide-image" v-if="service.image_url">
+                        <img :src="service.image_url" :alt="service.name" />
+                    </div>
+                    <div class="slide-image slide-placeholder" v-else>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                        </svg>
+                    </div>
+                    <span class="slide-name">{{ service.name }}</span>
+                    <div class="slide-check" v-if="isServiceSelected(service.id)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <polyline points="20,6 9,17 4,12"/>
+                        </svg>
                     </div>
                 </div>
+            </div>
 
-                <!-- Duration for this person -->
-                <div v-if="getPersonService(index)" class="duration-chips">
-                    <button 
-                        v-for="dur in getPersonService(index).durations" 
-                        :key="dur.id"
-                        class="duration-chip"
-                        :class="{ selected: person.duration_id === dur.id }"
-                        @click="setDurationForPerson(index, dur.id)"
-                    >
-                        {{ dur.duration }} min
-                    </button>
+            <!-- Selected services with duration pickers -->
+            <div v-if="booking.services.length > 0" class="selected-services">
+                <div 
+                    v-for="(sel, index) in booking.services" 
+                    :key="sel.service_id"
+                    class="service-duration-card"
+                >
+                    <div class="service-duration-header">
+                        <span class="service-name">{{ index + 1 }}. {{ getServiceById(sel.service_id)?.name }}</span>
+                        <span v-if="getSelectedDuration(sel.service_id)" class="service-price">
+                            {{ formatPrice(getSelectedDuration(sel.service_id).price) }}
+                        </span>
+                    </div>
+                    <div class="duration-chips">
+                        <button 
+                            v-for="dur in getServiceById(sel.service_id)?.durations" 
+                            :key="dur.id"
+                            class="duration-chip"
+                            :class="{ selected: sel.duration_id === dur.id }"
+                            @click="setDuration(sel.service_id, dur.id)"
+                        >
+                            {{ dur.duration }} min
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -377,7 +398,7 @@ const pressureLevels = [
             <!-- Total info -->
             <div v-if="canProceedStep1" class="selected-info">
                 <div class="info-row">
-                    <span>{{ peopleCount }} kishi, {{ totalDuration }} min</span>
+                    <span>{{ booking.people_count }} kishi, {{ totalDuration }} min</span>
                     <span class="info-price">{{ formatPrice(totalPrice) }}</span>
                 </div>
             </div>
@@ -453,13 +474,13 @@ const pressureLevels = [
             <div class="summary-card">
                 <h3 class="summary-title">Buyurtma ma'lumotlari</h3>
                 
-                <!-- Per-person services -->
-                <div v-for="(person, index) in booking.people" :key="index" class="person-summary">
+                <!-- Selected services -->
+                <div v-for="(sel, index) in booking.services" :key="sel.service_id" class="service-summary">
                     <div class="summary-row">
                         <span class="label">{{ index + 1 }}-kishi:</span>
                         <span class="value">
-                            {{ getPersonService(index)?.name }} 
-                            ({{ getPersonDuration(index)?.duration }} min)
+                            {{ getServiceById(sel.service_id)?.name }} 
+                            ({{ getSelectedDuration(sel.service_id)?.duration }} min)
                         </span>
                     </div>
                 </div>
@@ -666,6 +687,16 @@ const pressureLevels = [
 .service-slide.selected {
     border-color: #FF6B4A;
     background: rgba(255, 107, 74, 0.15);
+}
+
+.service-slide.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.selection-hint {
+    font-weight: 400;
+    color: #FF6B4A;
 }
 
 .slide-image {
