@@ -122,11 +122,16 @@ class SlotController extends Controller
             }
         }
 
-        // Format result
+        // Format result with display (window format: "09:00–09:30")
         $result = array_map(function ($start) {
+            $startTime = Carbon::parse($start);
+            $endTime = $startTime->copy()->addMinutes(30);
             return [
                 'start' => $start,
                 'label' => $start,
+                'display' => $start . '–' . $endTime->format('H:i'),
+                'window_start' => $start,
+                'window_end' => $endTime->format('H:i'),
             ];
         }, array_values($commonSlots ?? []));
 
