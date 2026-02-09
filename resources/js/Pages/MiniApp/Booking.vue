@@ -63,11 +63,11 @@ const filterByDuration = (durationMinutes) => {
     }
 };
 
-// Available dates (next 14 days)
+// Available dates (next 7 days)
 const availableDates = computed(() => {
     const dates = [];
     const today = new Date();
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 7; i++) {
         const date = new Date(today);
         date.setDate(today.getDate() + i);
         dates.push({
