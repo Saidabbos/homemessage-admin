@@ -89,6 +89,9 @@ class SlotCalculationService
             
             if ($availability['available']) {
                 $slots[] = [
+                    'start' => $windowStart->format('H:i'),
+                    'end' => $windowEnd->format('H:i'),
+                    'label' => $windowStart->format('H:i'),
                     'window_start' => $windowStart->format('H:i'),
                     'window_end' => $windowEnd->format('H:i'),
                     'display' => $windowStart->format('H:i') . '–' . $windowEnd->format('H:i'),
