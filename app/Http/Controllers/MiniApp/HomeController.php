@@ -21,11 +21,16 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
-        Log::info('MiniApp: Home page accessed');
+        Log::info('MiniApp: Home page accessed', [
+            'auth_check' => Auth::check(),
+            'user_id' => Auth::id(),
+            'session_id' => session()->getId(),
+        ]);
 
         // Try Telegram auto-login if not authenticated
         if (!Auth::check()) {
             $telegramUser = $this->getTelegramUser($request);
+            Log::info('MiniApp: Telegram user from request', ['telegram_user' => $telegramUser]);
             
             if ($telegramUser && isset($telegramUser['id'])) {
                 $user = User::where('telegram_id', $telegramUser['id'])->first();
