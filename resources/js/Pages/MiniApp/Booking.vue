@@ -11,48 +11,42 @@ const props = defineProps({
 });
 
 // Wizard state
-const step = ref(1); // 1: Service, 2: Master & Time, 3: Confirm
+const step = ref(1);
 
-// Booking data - multi-select services and masters (limited by people count)
+// Booking data
 const booking = ref({
-    services: [], // Array of { service_id, duration_id }
+    services: [],
     people_count: 1,
-    master_ids: [], // Array of master ids (one per person)
+    master_ids: [],
     date: null,
     slot: null,
     pressure_level: 'medium',
     notes: '',
 });
 
-// People count controls
+// People count
 const addPerson = () => {
-    if (booking.value.people_count < 5) {
-        booking.value.people_count++;
-    }
+    if (booking.value.people_count < 5) booking.value.people_count++;
 };
 
 const removePerson = () => {
     if (booking.value.people_count > 1) {
         booking.value.people_count--;
-        // Remove extra services if needed
         while (booking.value.services.length > booking.value.people_count) {
             booking.value.services.pop();
         }
-        // Remove extra masters if needed
         while (booking.value.master_ids.length > booking.value.people_count) {
             booking.value.master_ids.pop();
         }
     }
 };
 
-// Toggle service selection (limited by people count)
+// Service selection
 const toggleService = (serviceId) => {
     const index = booking.value.services.findIndex(s => s.service_id === serviceId);
     if (index >= 0) {
-        // Deselect
         booking.value.services.splice(index, 1);
     } else {
-        // Can only select up to people_count services
         if (booking.value.services.length < booking.value.people_count) {
             const service = props.services?.find(s => s.id === serviceId);
             const defaultDuration = service?.durations?.find(d => d.is_default) || service?.durations?.[0];
@@ -64,32 +58,21 @@ const toggleService = (serviceId) => {
     }
 };
 
-// Check if service is selected
-const isServiceSelected = (serviceId) => {
-    return booking.value.services.some(s => s.service_id === serviceId);
-};
+const isServiceSelected = (serviceId) => booking.value.services.some(s => s.service_id === serviceId);
+const getServiceById = (serviceId) => props.services?.find(s => s.id === serviceId);
 
-// Get service object by id
-const getServiceById = (serviceId) => {
-    return props.services?.find(s => s.id === serviceId);
-};
-
-// Get selected duration for a service
 const getSelectedDuration = (serviceId) => {
     const sel = booking.value.services.find(s => s.service_id === serviceId);
     const service = getServiceById(serviceId);
     return service?.durations?.find(d => d.id === sel?.duration_id);
 };
 
-// Set duration for a service
 const setDuration = (serviceId, durationId) => {
     const sel = booking.value.services.find(s => s.service_id === serviceId);
-    if (sel) {
-        sel.duration_id = durationId;
-    }
+    if (sel) sel.duration_id = durationId;
 };
 
-// Total price calculation
+// Computed
 const totalPrice = computed(() => {
     return booking.value.services.reduce((sum, sel) => {
         const duration = getSelectedDuration(sel.service_id);
@@ -97,132 +80,96 @@ const totalPrice = computed(() => {
     }, 0);
 });
 
-// Total duration calculation
 const totalDuration = computed(() => {
     const baseTotal = booking.value.services.reduce((sum, sel) => {
         const duration = getSelectedDuration(sel.service_id);
         return sum + (duration?.duration || 0);
     }, 0);
-    // Buffer between people
     const buffer = 10;
     const peopleCount = booking.value.services.length || 1;
     return baseTotal + buffer * (peopleCount - 1);
 });
 
-// All unique service IDs selected
-const selectedServiceIds = computed(() => {
-    return booking.value.services.map(s => s.service_id);
-});
+const selectedServiceIds = computed(() => booking.value.services.map(s => s.service_id));
 
-// Get selected masters
 const selectedMasters = computed(() => 
     booking.value.master_ids.map(id => props.masters?.find(m => m.id === id)).filter(Boolean)
 );
 
-// For backward compatibility
-const selectedMaster = computed(() => selectedMasters.value[0]);
-
-// Filtered masters based on all selected services
 const filteredMasters = computed(() => {
     if (selectedServiceIds.value.length === 0) return props.masters || [];
-    // Master must support ALL selected services
     return (props.masters || []).filter(m => 
-        selectedServiceIds.value.every(serviceId => 
-            m.service_type_ids?.includes(serviceId)
-        )
+        selectedServiceIds.value.every(serviceId => m.service_type_ids?.includes(serviceId))
     );
 });
 
-// Toggle master selection (limited by people count)
+// Master selection
 const toggleMaster = (masterId) => {
     const index = booking.value.master_ids.indexOf(masterId);
     if (index >= 0) {
-        // Deselect
         booking.value.master_ids.splice(index, 1);
     } else {
-        // Can only select up to people_count masters
         if (booking.value.master_ids.length < booking.value.people_count) {
             booking.value.master_ids.push(masterId);
         }
     }
-    // Reset slot when masters change
     booking.value.slot = null;
 };
 
-// Check if master is selected
-const isMasterSelected = (masterId) => {
-    return booking.value.master_ids.includes(masterId);
-};
+const isMasterSelected = (masterId) => booking.value.master_ids.includes(masterId);
 
-// Reset masters when services change
-watch(selectedServiceIds, () => {
-    booking.value.master_ids = [];
-    booking.value.date = null;
-    booking.value.slot = null;
-}, { deep: true });
-
-// Available dates (next 7 days)
+// Available dates (7 days)
 const availableDates = computed(() => {
     const dates = [];
-    const today = new Date();
+    const dayNames = ['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan'];
+    const monthNames = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn', 'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
+    
     for (let i = 0; i < 7; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() + i);
+        const d = new Date();
+        d.setDate(d.getDate() + i);
         dates.push({
-            value: date.toISOString().split('T')[0],
-            label: formatDate(date),
-            dayName: date.toLocaleDateString('uz-UZ', { weekday: 'short' }),
-            day: date.getDate(),
+            value: d.toISOString().split('T')[0],
+            dayName: dayNames[d.getDay()],
+            day: d.getDate(),
+            month: monthNames[d.getMonth()],
+            display: `${d.getDate()}-${monthNames[d.getMonth()]}`,
         });
     }
     return dates;
 });
 
-// Slots for selected master and date
+// Slots
 const availableSlots = ref([]);
 const loadingSlots = ref(false);
 
-watch(
-    [() => booking.value.master_ids.length, () => booking.value.date, totalDuration], 
-    async ([mastersCount, date, duration]) => {
-        // Load slots when all masters are selected
-        if (mastersCount === booking.value.people_count && date && duration > 0) {
-            booking.value.slot = null; // Reset slot when params change
-            await loadSlots();
-        } else {
-            availableSlots.value = [];
-        }
-    }
-);
-
 const loadSlots = async () => {
+    if (!booking.value.date || booking.value.master_ids.length !== booking.value.people_count) {
+        availableSlots.value = [];
+        return;
+    }
+    
     loadingSlots.value = true;
     try {
-        // Get slots that are available for ALL selected masters
-        const duration = totalDuration.value || 60;
+        const duration = getSelectedDuration(booking.value.services[0]?.service_id)?.duration || 60;
         const masterIds = booking.value.master_ids.join(',');
         const response = await fetch(`/api/slots/multi-master?date=${booking.value.date}&duration=${duration}&master_ids=${masterIds}`);
         const data = await response.json();
         availableSlots.value = data.data?.slots || data.slots || [];
     } catch (e) {
         console.error('Failed to load slots:', e);
-        availableSlots.value = [];
     }
     loadingSlots.value = false;
 };
 
-const formatDate = (date) => {
-    return date.toLocaleDateString('uz-UZ', { 
-        month: 'short', 
-        day: 'numeric' 
-    });
-};
+watch([() => booking.value.date, () => booking.value.master_ids.length], () => {
+    booking.value.slot = null;
+    loadSlots();
+});
 
-const formatPrice = (price) => {
-    return (price / 1000).toFixed(0) + 'K';
-};
+// Format
+const formatPrice = (price) => new Intl.NumberFormat('uz-UZ').format(price);
 
-// Step navigation - must select exactly people_count services
+// Step navigation
 const canProceedStep1 = computed(() => 
     booking.value.services.length === booking.value.people_count && 
     booking.value.services.every(s => s.service_id && s.duration_id)
@@ -234,7 +181,6 @@ const canProceedStep2 = computed(() =>
     booking.value.slot
 );
 
-// Format slot window display (e.g., "09:00" → "09:00–09:30")
 const slotDisplay = computed(() => {
     if (!booking.value.slot) return '';
     const [hours, minutes] = booking.value.slot.split(':').map(Number);
@@ -244,15 +190,10 @@ const slotDisplay = computed(() => {
     return `${booking.value.slot}–${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
 });
 
-const nextStep = () => {
-    if (step.value < 3) step.value++;
-};
+const nextStep = () => { if (step.value < 3) step.value++; };
+const prevStep = () => { if (step.value > 1) step.value--; };
 
-const prevStep = () => {
-    if (step.value > 1) step.value--;
-};
-
-// Submit booking
+// Submit
 const submitting = ref(false);
 const submitError = ref(null);
 
@@ -261,41 +202,27 @@ const submitBooking = async () => {
     submitError.value = null;
     
     try {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
         const response = await fetch('/api/miniapp/orders', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({
-                // Send services array
-                services: booking.value.services.map(s => ({
-                    service_type_id: s.service_id,
-                    duration_id: s.duration_id,
-                })),
-                // For backward compatibility
-                service_type_id: booking.value.services[0]?.service_id,
-                duration_id: booking.value.services[0]?.duration_id,
-                // Send all master IDs
+                services: booking.value.services,
                 master_ids: booking.value.master_ids,
-                master_id: booking.value.master_ids[0], // backward compat
-                date: booking.value.date,
+                master_id: booking.value.master_ids[0],
+                booking_date: booking.value.date,
                 arrival_window_start: booking.value.slot,
-                people_count: booking.value.people_count,
-                total_duration: totalDuration.value,
                 pressure_level: booking.value.pressure_level,
+                people_count: booking.value.people_count,
                 notes: booking.value.notes,
             }),
         });
         
-        const result = await response.json();
+        const data = await response.json();
         
-        if (result.success) {
-            router.visit('/app/booking-success');
+        if (data.success && data.data?.order) {
+            router.visit(`/app/booking/success?order=${data.data.order.id}`);
         } else {
-            submitError.value = result.message || 'Xatolik yuz berdi';
+            submitError.value = data.message || 'Xatolik yuz berdi';
         }
     } catch (e) {
         console.error('Booking failed:', e);
@@ -306,90 +233,63 @@ const submitBooking = async () => {
 
 // Pressure levels
 const pressureLevels = [
-    { value: 'light', label: 'Yengil', icon: '○' },
-    { value: 'medium', label: "O'rtacha", icon: '◐' },
-    { value: 'strong', label: 'Kuchli', icon: '●' },
+    { value: 'light', label: 'Yengil' },
+    { value: 'medium', label: "O'rtacha" },
+    { value: 'strong', label: 'Kuchli' },
+    { value: 'any', label: "Farqi yo'q" },
 ];
+
+// Selected service summary for bottom bar
+const selectedServiceSummary = computed(() => {
+    if (booking.value.services.length === 0) return '';
+    const firstService = getServiceById(booking.value.services[0]?.service_id);
+    const firstDuration = getSelectedDuration(booking.value.services[0]?.service_id);
+    return `${firstService?.name}, ${firstDuration?.duration || 60} daq`;
+});
 </script>
 
 <template>
-    <div class="booking-page">
-        <!-- Background -->
-        <div class="bg-gradient"></div>
-        
-        <!-- Progress bar -->
-        <div class="progress-bar">
-            <div class="progress-fill" :style="{ width: (step / 3 * 100) + '%' }"></div>
-        </div>
-
+    <div class="bk-page">
         <!-- Header -->
-        <header class="booking-header">
-            <button v-if="step > 1" class="back-btn" @click="prevStep">
+        <header class="bk-header">
+            <button class="bk-back" @click="step > 1 ? prevStep() : router.visit('/app')">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M19 12H5M12 19l-7-7 7-7"/>
                 </svg>
             </button>
-            <button v-else class="back-btn" @click="router.visit('/app')">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-            </button>
-            <h1 class="header-title">
+            <h1 class="bk-title">
                 <span v-if="step === 1">Xizmat tanlang</span>
-                <span v-else-if="step === 2">Vaqt tanlang</span>
+                <span v-else-if="step === 2">Vaqt va usta tanlang</span>
                 <span v-else>Tasdiqlash</span>
             </h1>
-            <div class="step-indicator">{{ step }}/3</div>
+            <span class="bk-step">{{ step }}/3</span>
         </header>
 
         <!-- Step 1: Service Selection -->
-        <div v-if="step === 1" class="step-content">
-            <!-- People count control -->
-            <div class="people-section">
-                <h3 class="section-label">Necha kishi?</h3>
-                <div class="people-selector">
-                    <button 
-                        class="people-btn"
-                        :disabled="booking.people_count <= 1"
-                        @click="removePerson"
-                    >-</button>
-                    <span class="people-count">{{ booking.people_count }}</span>
-                    <button 
-                        class="people-btn"
-                        :disabled="booking.people_count >= 5"
-                        @click="addPerson"
-                    >+</button>
-                </div>
-            </div>
-
-            <!-- Service selection hint -->
-            <h3 class="section-label">
-                Xizmatlarni tanlang 
-                <span class="selection-hint">({{ booking.services.length }}/{{ booking.people_count }})</span>
-            </h3>
-
-            <!-- Single slider with multi-select -->
-            <div class="services-slider">
+        <div v-if="step === 1" class="bk-content">
+            <!-- Service Cards -->
+            <div class="service-list">
                 <div 
                     v-for="service in services" 
                     :key="service.id"
-                    class="service-slide"
-                    :class="{ 
-                        selected: isServiceSelected(service.id),
-                        disabled: !isServiceSelected(service.id) && booking.services.length >= booking.people_count
-                    }"
+                    class="service-card"
+                    :class="{ selected: isServiceSelected(service.id) }"
                     @click="toggleService(service.id)"
                 >
-                    <div class="slide-image" v-if="service.image_url">
-                        <img :src="service.image_url" :alt="service.name" />
+                    <div class="service-img">
+                        <img v-if="service.image_url" :src="service.image_url" :alt="service.name" />
+                        <div v-else class="service-img-placeholder">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                            </svg>
+                        </div>
                     </div>
-                    <div class="slide-image slide-placeholder" v-else>
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
-                        </svg>
+                    <div class="service-info">
+                        <h3 class="service-name">{{ service.name }}</h3>
+                        <p class="service-desc">{{ service.description }}</p>
+                        <span class="service-price">{{ formatPrice(service.durations?.[0]?.price || 0) }} - {{ formatPrice(service.durations?.[service.durations.length - 1]?.price || 0) }} UZS</span>
                     </div>
-                    <span class="slide-name">{{ service.name }}</span>
-                    <div class="slide-check" v-if="isServiceSelected(service.id)">
+                    <div v-if="isServiceSelected(service.id)" class="service-check">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                             <polyline points="20,6 9,17 4,12"/>
                         </svg>
@@ -397,102 +297,64 @@ const pressureLevels = [
                 </div>
             </div>
 
-            <!-- Selected services with duration pickers -->
-            <div v-if="booking.services.length > 0" class="selected-services">
-                <div 
-                    v-for="(sel, index) in booking.services" 
-                    :key="sel.service_id"
-                    class="service-duration-card"
-                >
-                    <div class="service-duration-header">
-                        <span class="service-name">{{ index + 1 }}. {{ getServiceById(sel.service_id)?.name }}</span>
-                        <span v-if="getSelectedDuration(sel.service_id)" class="service-price">
-                            {{ formatPrice(getSelectedDuration(sel.service_id).price) }}
-                        </span>
-                    </div>
-                    <div class="duration-chips">
-                        <button 
-                            v-for="dur in getServiceById(sel.service_id)?.durations" 
-                            :key="dur.id"
-                            class="duration-chip"
-                            :class="{ selected: sel.duration_id === dur.id }"
-                            @click="setDuration(sel.service_id, dur.id)"
-                        >
-                            {{ dur.duration }} min
-                        </button>
-                    </div>
+            <!-- Duration Selection (for selected service) -->
+            <div v-if="booking.services.length > 0" class="section">
+                <h3 class="section-title">Davomiyligi</h3>
+                <div class="chip-row">
+                    <button 
+                        v-for="dur in getServiceById(booking.services[0]?.service_id)?.durations" 
+                        :key="dur.id"
+                        class="chip"
+                        :class="{ selected: booking.services[0]?.duration_id === dur.id }"
+                        @click="setDuration(booking.services[0].service_id, dur.id)"
+                    >
+                        {{ dur.duration }} min
+                    </button>
                 </div>
             </div>
 
-            <!-- Pressure level -->
-            <div class="pressure-section">
-                <h3 class="section-label">Bosim kuchi</h3>
-                <div class="pressure-chips">
+            <!-- Pressure Level -->
+            <div class="section">
+                <h3 class="section-title">Kuch darajasi</h3>
+                <div class="chip-row">
                     <button 
                         v-for="level in pressureLevels" 
                         :key="level.value"
-                        class="pressure-chip"
+                        class="chip"
                         :class="{ selected: booking.pressure_level === level.value }"
                         @click="booking.pressure_level = level.value"
                     >
-                        <span class="pressure-icon">{{ level.icon }}</span>
                         {{ level.label }}
                     </button>
                 </div>
             </div>
 
-            <!-- Total info -->
-            <div v-if="canProceedStep1" class="selected-info">
-                <div class="info-row">
-                    <span>{{ booking.people_count }} kishi, {{ totalDuration }} min</span>
-                    <span class="info-price">{{ formatPrice(totalPrice) }}</span>
+            <!-- People Count -->
+            <div class="section">
+                <h3 class="section-title">Kishilar soni</h3>
+                <div class="people-control">
+                    <button class="people-btn" :disabled="booking.people_count <= 1" @click="removePerson">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </button>
+                    <span class="people-num">{{ booking.people_count }} kishi</span>
+                    <button class="people-btn" :disabled="booking.people_count >= 5" @click="addPerson">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Step 2: Master & Time Selection -->
-        <div v-if="step === 2" class="step-content">
-            <!-- Master selection (multi) -->
-            <div class="ma-section">
-                <h3 class="section-label">
-                    Masterlarni tanlang 
-                    <span class="selection-hint">({{ booking.master_ids.length }}/{{ booking.people_count }})</span>
-                </h3>
-                <div v-if="filteredMasters.length === 0" class="no-masters">
-                    Bu xizmat uchun master topilmadi
-                </div>
-                <div v-else-if="filteredMasters.length < booking.people_count" class="no-masters">
-                    Yetarli master topilmadi ({{ filteredMasters.length }} / {{ booking.people_count }} kerak)
-                </div>
-                <div v-else class="ma-scroll">
-                    <div 
-                        v-for="master in filteredMasters" 
-                        :key="master.id"
-                        class="ma-card"
-                        :class="{ 
-                            selected: isMasterSelected(master.id),
-                            disabled: !isMasterSelected(master.id) && booking.master_ids.length >= booking.people_count
-                        }"
-                        @click="toggleMaster(master.id)"
-                    >
-                        <div class="ma-avatar">
-                            <img v-if="master.photo_url" :src="master.photo_url" :alt="master.name" />
-                            <span v-else>{{ master.name?.charAt(0) }}</span>
-                        </div>
-                        <span class="ma-name">{{ master.name }}</span>
-                        <div class="ma-check" v-if="isMasterSelected(master.id)">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                <polyline points="20,6 9,17 4,12"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Date selection -->
-            <div class="date-section">
-                <h3 class="section-label">Sana</h3>
-                <div class="dates-scroll">
+        <div v-if="step === 2" class="bk-content">
+            <!-- Date Selection -->
+            <div class="section">
+                <h3 class="section-title">Sana tanlang</h3>
+                <div class="date-row">
                     <button 
                         v-for="d in availableDates" 
                         :key="d.value"
@@ -500,21 +362,21 @@ const pressureLevels = [
                         :class="{ selected: booking.date === d.value }"
                         @click="booking.date = d.value"
                     >
-                        <span class="day-name">{{ d.dayName }}</span>
-                        <span class="day-num">{{ d.day }}</span>
+                        <span class="date-day">{{ d.dayName }}</span>
+                        <span class="date-num">{{ d.display }}</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Time slots (shown when all masters selected) -->
-            <div v-if="booking.master_ids.length === booking.people_count && booking.date" class="slots-section">
-                <h3 class="section-label">Kelish oynasi (barcha masterlar uchun)</h3>
-                <div v-if="loadingSlots" class="loading-slots">
+            <!-- Time Slots -->
+            <div class="section">
+                <h3 class="section-title">Vaqt tanlang</h3>
+                <div v-if="!booking.date" class="empty-hint">Avval sanani tanlang</div>
+                <div v-else-if="booking.master_ids.length !== booking.people_count" class="empty-hint">Avval ustani tanlang</div>
+                <div v-else-if="loadingSlots" class="loading">
                     <div class="spinner"></div>
                 </div>
-                <div v-else-if="availableSlots.length === 0" class="no-slots">
-                    Bu kunga barcha masterlar uchun mos vaqt yo'q
-                </div>
+                <div v-else-if="availableSlots.length === 0" class="empty-hint">Bu kunga vaqt yo'q</div>
                 <div v-else class="slots-grid">
                     <button 
                         v-for="slot in availableSlots" 
@@ -527,63 +389,70 @@ const pressureLevels = [
                     </button>
                 </div>
             </div>
+
+            <!-- Master Selection -->
+            <div class="section">
+                <h3 class="section-title">Ustani tanlang</h3>
+                <div v-if="filteredMasters.length === 0" class="empty-hint">Bu xizmat uchun usta topilmadi</div>
+                <div v-else class="master-list">
+                    <div 
+                        v-for="master in filteredMasters" 
+                        :key="master.id"
+                        class="master-card"
+                        :class="{ selected: isMasterSelected(master.id) }"
+                    >
+                        <div class="master-photo">
+                            <img v-if="master.photo_url" :src="master.photo_url" :alt="master.name" />
+                            <span v-else class="master-initial">{{ master.name?.charAt(0) }}</span>
+                        </div>
+                        <span class="master-name">{{ master.name }}</span>
+                        <span class="master-exp">{{ master.experience || 3 }} yil</span>
+                        <button 
+                            class="master-btn"
+                            :class="{ active: isMasterSelected(master.id) }"
+                            @click="toggleMaster(master.id)"
+                        >
+                            {{ isMasterSelected(master.id) ? 'Tanlangan' : 'Tanlash' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Step 3: Confirmation -->
-        <div v-if="step === 3" class="step-content">
-            <div class="summary-card">
-                <h3 class="summary-title">Buyurtma ma'lumotlari</h3>
+        <div v-if="step === 3" class="bk-content">
+            <div class="confirm-box">
+                <h3 class="confirm-title">Buyurtma tafsilotlari</h3>
                 
-                <!-- Selected services -->
-                <div v-for="(sel, index) in booking.services" :key="sel.service_id" class="service-summary">
-                    <div class="summary-row">
-                        <span class="label">{{ index + 1 }}-kishi:</span>
-                        <span class="value">
-                            {{ getServiceById(sel.service_id)?.name }} 
-                            ({{ getSelectedDuration(sel.service_id)?.duration }} min)
-                        </span>
-                    </div>
-                </div>
-
-                <div class="summary-divider"></div>
-                
-                <!-- All selected masters -->
-                <div class="summary-row">
-                    <span class="label">Masterlar:</span>
-                    <span class="value">{{ selectedMasters.map(m => m.name).join(', ') }}</span>
+                <div class="confirm-row">
+                    <span class="confirm-label">Sana:</span>
+                    <span class="confirm-value">{{ booking.date }}</span>
                 </div>
                 
-                <div class="summary-row">
-                    <span class="label">Sana:</span>
-                    <span class="value">{{ booking.date }}</span>
+                <div class="confirm-row">
+                    <span class="confirm-label">Vaqt:</span>
+                    <span class="confirm-value">{{ slotDisplay }}</span>
                 </div>
                 
-                <div class="summary-row">
-                    <span class="label">Kelish oynasi:</span>
-                    <span class="value">{{ slotDisplay }}</span>
+                <div class="confirm-row">
+                    <span class="confirm-label">Usta:</span>
+                    <span class="confirm-value">{{ selectedMasters.map(m => m.name).join(', ') }}</span>
                 </div>
                 
-                <div class="summary-row">
-                    <span class="label">Jami vaqt:</span>
-                    <span class="value">{{ totalDuration }} daqiqa</span>
+                <div class="confirm-row">
+                    <span class="confirm-label">Xizmat:</span>
+                    <span class="confirm-value">{{ selectedServiceSummary }}</span>
                 </div>
                 
-                <div class="summary-row">
-                    <span class="label">Bosim:</span>
-                    <span class="value">{{ pressureLevels.find(p => p.value === booking.pressure_level)?.label }}</span>
-                </div>
-
-                <div class="summary-divider"></div>
-                
-                <div class="summary-row total">
-                    <span class="label">Jami:</span>
-                    <span class="value">{{ formatPrice(totalPrice) }} so'm</span>
+                <div class="confirm-total">
+                    <span class="confirm-label">Jami:</span>
+                    <span class="confirm-price">{{ formatPrice(totalPrice) }} UZS</span>
                 </div>
             </div>
 
             <!-- Notes -->
-            <div class="notes-section">
-                <h3 class="section-label">Qo'shimcha izoh</h3>
+            <div class="section">
+                <h3 class="section-title">Qo'shimcha izoh</h3>
                 <textarea 
                     v-model="booking.notes"
                     class="notes-input"
@@ -592,17 +461,37 @@ const pressureLevels = [
                 ></textarea>
             </div>
 
-            <!-- Error message -->
-            <div v-if="submitError" class="error-message">
-                {{ submitError }}
-            </div>
+            <div v-if="submitError" class="error-msg">{{ submitError }}</div>
         </div>
 
-        <!-- Bottom action -->
-        <div class="bottom-action">
+        <!-- Bottom Bar -->
+        <div class="bk-bottom">
+            <div v-if="step === 1 && booking.services.length > 0" class="bottom-summary">
+                <div class="summary-text">
+                    <span class="summary-label">Tanlangan:</span>
+                    <span class="summary-value">{{ selectedServiceSummary }}</span>
+                </div>
+                <div class="summary-price">
+                    <span class="price-label">Narxi:</span>
+                    <span class="price-value">{{ formatPrice(totalPrice) }} UZS</span>
+                </div>
+            </div>
+            
+            <div v-if="step === 2 && booking.slot" class="bottom-summary">
+                <div class="summary-text">
+                    <span class="summary-label">Tanlangan:</span>
+                    <span class="summary-value">{{ selectedServiceSummary }}</span>
+                    <span class="summary-detail">{{ slotDisplay }}, {{ selectedMasters[0]?.name }}</span>
+                </div>
+                <div class="summary-price">
+                    <span class="price-label">Narxi:</span>
+                    <span class="price-value">{{ formatPrice(totalPrice) }} UZS</span>
+                </div>
+            </div>
+
             <button 
                 v-if="step === 1"
-                class="action-btn"
+                class="bk-btn"
                 :disabled="!canProceedStep1"
                 @click="nextStep"
             >
@@ -610,7 +499,7 @@ const pressureLevels = [
             </button>
             <button 
                 v-else-if="step === 2"
-                class="action-btn"
+                class="bk-btn"
                 :disabled="!canProceedStep2"
                 @click="nextStep"
             >
@@ -618,181 +507,157 @@ const pressureLevels = [
             </button>
             <button 
                 v-else
-                class="action-btn confirm"
+                class="bk-btn confirm"
                 :disabled="submitting"
                 @click="submitBooking"
             >
-                <span v-if="submitting">Yuborilmoqda...</span>
-                <span v-else>Buyurtma berish</span>
+                {{ submitting ? 'Yuborilmoqda...' : 'Buyurtma berish' }}
             </button>
         </div>
     </div>
 </template>
 
 <style scoped>
-.booking-page {
+/* Base */
+.bk-page {
     min-height: 100vh;
-    padding: 0 16px 100px;
-    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
-    position: relative;
-}
-
-/* Progress bar */
-.progress-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: rgba(255, 255, 255, 0.1);
-    z-index: 100;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #FF6B4A, #FF8F6B);
-    transition: width 0.3s ease;
+    background: #F8F6F3;
+    padding-bottom: 140px;
 }
 
 /* Header */
-.booking-header {
+.bk-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 16px 0;
+    padding: 16px;
+    background: #fff;
+    border-bottom: 1px solid #E5E5E5;
     position: sticky;
     top: 0;
-    background: transparent;
-    z-index: 10;
+    z-index: 100;
 }
 
-.back-btn {
+.bk-back {
     width: 40px;
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
+    background: #F5F5F5;
     border: none;
     border-radius: 12px;
-    color: #fff;
+    color: #333;
     cursor: pointer;
 }
 
-.header-title {
+.bk-title {
     flex: 1;
     font-size: 18px;
     font-weight: 600;
-    color: #fff;
+    color: #333;
     margin: 0;
 }
 
-.step-indicator {
+.bk-step {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.6);
+    color: #999;
 }
 
-/* Step content - override global white background */
-.step-content {
-    padding-top: 8px;
-    background: transparent;
-    border-radius: 0;
-    padding: 0;
-    box-shadow: none;
+/* Content */
+.bk-content {
+    padding: 16px;
 }
 
-/* Section label */
-.section-label {
+/* Section */
+.section {
+    margin-bottom: 24px;
+}
+
+.section-title {
     font-size: 14px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.7);
-    margin: 20px 0 12px;
+    color: #666;
+    margin: 0 0 12px;
 }
 
-.section-label:first-child {
-    margin-top: 0;
-}
-
-/* Services slider */
-.services-slider {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    padding-bottom: 8px;
-    margin: 0 -16px;
-    padding-left: 16px;
-    padding-right: 16px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-}
-
-.services-slider::-webkit-scrollbar {
-    display: none;
-}
-
-.service-slide {
+/* Service Cards */
+.service-list {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    min-width: 100px;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.service-card {
+    display: flex;
+    gap: 12px;
     padding: 12px;
-    background: rgba(255, 255, 255, 0.08);
+    background: #fff;
     border: 2px solid transparent;
     border-radius: 16px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
     position: relative;
 }
 
-.service-slide.selected {
-    border-color: #FF6B4A;
-    background: rgba(255, 107, 74, 0.15);
+.service-card.selected {
+    border-color: #B8A369;
+    background: #FFFDF8;
 }
 
-.service-slide.disabled {
-    opacity: 0.4;
-    pointer-events: none;
-}
-
-.selection-hint {
-    font-weight: 400;
-    color: #FF6B4A;
-}
-
-.slide-image {
-    width: 64px;
-    height: 64px;
+.service-img {
+    width: 72px;
+    height: 72px;
     border-radius: 12px;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+    background: #F5F5F5;
 }
 
-.slide-image img {
+.service-img img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.slide-placeholder {
+.service-img-placeholder {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255, 255, 255, 0.4);
+    color: #CCC;
 }
 
-.slide-name {
-    font-size: 12px;
-    font-weight: 500;
-    color: #fff;
-    text-align: center;
-    max-width: 90px;
+.service-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.service-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 4px;
+}
+
+.service-desc {
+    font-size: 13px;
+    color: #888;
+    margin: 0 0 6px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.slide-check {
+.service-price {
+    font-size: 14px;
+    font-weight: 600;
+    color: #B8A369;
+}
+
+.service-check {
     position: absolute;
     top: 8px;
     right: 8px;
@@ -801,154 +666,43 @@ const pressureLevels = [
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #FF6B4A;
+    background: #B8A369;
     border-radius: 50%;
     color: #fff;
 }
 
-/* Person card */
-.person-card {
-    margin-top: 20px;
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-}
-
-.person-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-.person-number {
-    font-size: 14px;
-    font-weight: 600;
-    color: #FF6B4A;
-}
-
-.person-price {
-    font-size: 14px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.person-summary {
-    margin-bottom: 4px;
-}
-
-/* Selected services cards (legacy) */
-.selected-services {
-    margin-top: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.service-duration-card {
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-}
-
-.service-duration-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-.service-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #FF6B4A;
-}
-
-.service-price {
-    font-size: 14px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.service-summary {
-    margin-bottom: 4px;
-}
-
-/* Selected service info */
-.selected-info {
-    margin-top: 16px;
-    padding: 16px;
-    background: rgba(255, 107, 74, 0.1);
-    border: 1px solid rgba(255, 107, 74, 0.3);
-    border-radius: 16px;
-}
-
-.info-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: #fff;
-    font-size: 15px;
-}
-
-.info-price {
-    font-weight: 700;
-    color: #FF6B4A;
-}
-
-.check-icon {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #FF6B4A;
-    border-radius: 50%;
-    color: #fff;
-    flex-shrink: 0;
-}
-
-/* Duration chips */
-.duration-chips {
+/* Chips */
+.chip-row {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
 }
 
-.duration-chip {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 2px solid transparent;
-    border-radius: 12px;
-    color: #fff;
+.chip {
+    padding: 10px 20px;
+    background: #fff;
+    border: 2px solid #E5E5E5;
+    border-radius: 24px;
     font-size: 14px;
+    color: #333;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
 }
 
-.duration-chip.selected {
-    border-color: #FF6B4A;
-    background: rgba(255, 107, 74, 0.15);
+.chip.selected {
+    border-color: #B8A369;
+    background: #B8A369;
+    color: #fff;
 }
 
-.duration-chip .price {
-    color: #FF6B4A;
-    font-weight: 600;
-}
-
-/* People selector */
-.people-selector {
+/* People Control */
+.people-control {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 24px;
     justify-content: center;
     padding: 16px;
-    background: rgba(255, 255, 255, 0.08);
+    background: #fff;
     border-radius: 16px;
 }
 
@@ -958,188 +712,78 @@ const pressureLevels = [
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    border-radius: 12px;
-    color: #fff;
-    font-size: 24px;
+    background: #F5F5F5;
+    border: 1px solid #E5E5E5;
+    border-radius: 50%;
+    color: #333;
     cursor: pointer;
 }
 
 .people-btn:disabled {
     opacity: 0.3;
-    cursor: not-allowed;
 }
 
-.people-count {
-    font-size: 28px;
-    font-weight: 700;
-    color: #fff;
-    min-width: 40px;
-    text-align: center;
-}
-
-/* Pressure chips */
-.pressure-chips {
-    display: flex;
-    gap: 8px;
-}
-
-.pressure-chip {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 2px solid transparent;
-    border-radius: 12px;
-    color: #fff;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.pressure-chip.selected {
-    border-color: #FF6B4A;
-    background: rgba(255, 107, 74, 0.15);
-}
-
-.pressure-icon {
+.people-num {
     font-size: 20px;
-}
-
-/* Master cards */
-.ma-scroll {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    padding-bottom: 8px;
-    margin: 0 -16px;
-    padding-left: 16px;
-    padding-right: 16px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-}
-
-.ma-scroll::-webkit-scrollbar {
-    display: none;
-}
-
-.ma-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    padding: 12px;
-    min-width: 90px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 2px solid transparent;
-    border-radius: 16px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.ma-card.selected {
-    border-color: #FF6B4A;
-    background: rgba(255, 107, 74, 0.15);
-}
-
-.ma-card.disabled {
-    opacity: 0.4;
-    pointer-events: none;
-}
-
-.ma-card {
-    position: relative;
-}
-
-.ma-check {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #FF6B4A;
-    border-radius: 50%;
-    color: #fff;
-}
-
-.ma-avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, rgba(255, 107, 74, 0.4), rgba(107, 139, 164, 0.4));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
     font-weight: 600;
-    font-size: 20px;
-    overflow: hidden;
-}
-
-.ma-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.ma-name {
-    font-size: 13px;
-    font-weight: 500;
-    color: #fff;
+    color: #333;
+    min-width: 80px;
     text-align: center;
-    max-width: 70px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
-/* Date chips */
-.dates-scroll {
+/* Date Selection */
+.date-row {
     display: flex;
     gap: 8px;
     overflow-x: auto;
     padding-bottom: 8px;
     -webkit-overflow-scrolling: touch;
+}
+
+.date-row::-webkit-scrollbar {
+    display: none;
 }
 
 .date-chip {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 10px 14px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 2px solid transparent;
+    padding: 10px 16px;
+    background: #fff;
+    border: 2px solid #E5E5E5;
     border-radius: 12px;
-    color: #fff;
     cursor: pointer;
-    transition: all 0.2s ease;
-    min-width: 54px;
+    transition: all 0.2s;
+    min-width: 64px;
 }
 
 .date-chip.selected {
-    border-color: #FF6B4A;
-    background: rgba(255, 107, 74, 0.15);
+    border-color: #B8A369;
+    background: #B8A369;
 }
 
-.day-name {
+.date-day {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.6);
+    color: #888;
     text-transform: uppercase;
 }
 
-.day-num {
-    font-size: 18px;
-    font-weight: 600;
+.date-chip.selected .date-day {
+    color: rgba(255,255,255,0.8);
 }
 
-/* Time slots */
+.date-num {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-top: 2px;
+}
+
+.date-chip.selected .date-num {
+    color: #fff;
+}
+
+/* Slots */
 .slots-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1147,156 +791,284 @@ const pressureLevels = [
 }
 
 .slot-chip {
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 2px solid transparent;
+    padding: 12px 8px;
+    background: #fff;
+    border: 2px solid #E5E5E5;
     border-radius: 12px;
-    color: #fff;
-    font-size: 14px;
+    font-size: 13px;
+    color: #333;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
 }
 
 .slot-chip.selected {
-    border-color: #FF6B4A;
-    background: rgba(255, 107, 74, 0.15);
+    border-color: #B8A369;
+    background: #B8A369;
+    color: #fff;
 }
 
-.loading-slots,
-.no-slots,
-.no-masters {
-    padding: 24px;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.6);
+/* Master List */
+.master-list {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
 }
 
-.spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid rgba(255, 255, 255, 0.2);
-    border-top-color: #FF6B4A;
+.master-list::-webkit-scrollbar {
+    display: none;
+}
+
+.master-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    background: #fff;
+    border: 2px solid transparent;
+    border-radius: 16px;
+    min-width: 100px;
+    transition: all 0.2s;
+}
+
+.master-card.selected {
+    border-color: #B8A369;
+}
+
+.master-photo {
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto;
+    overflow: hidden;
+    background: linear-gradient(135deg, #B8A369, #D4C89A);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+.master-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-/* Summary card */
-.summary-card {
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
-    padding: 20px;
-}
-
-.summary-title {
-    font-size: 16px;
+.master-initial {
+    font-size: 24px;
     font-weight: 600;
     color: #fff;
-    margin: 0 0 16px;
 }
 
-.summary-row {
+.master-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.master-exp {
+    font-size: 12px;
+    color: #888;
+    background: #F5F5F5;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.master-btn {
+    padding: 8px 16px;
+    background: #B8A369;
+    border: none;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    cursor: pointer;
+}
+
+.master-btn.active {
+    background: #8B7B4D;
+}
+
+/* Confirmation */
+.confirm-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.confirm-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #E5E5E5;
+}
+
+.confirm-row {
     display: flex;
     justify-content: space-between;
     padding: 8px 0;
 }
 
-.summary-row .label {
-    color: rgba(255, 255, 255, 0.6);
+.confirm-label {
     font-size: 14px;
+    color: #888;
 }
 
-.summary-row .value {
-    color: #fff;
+.confirm-value {
     font-size: 14px;
     font-weight: 500;
+    color: #333;
 }
 
-.summary-row.total {
-    margin-top: 8px;
+.confirm-total {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 12px;
+    margin-top: 12px;
+    border-top: 1px solid #E5E5E5;
 }
 
-.summary-row.total .label,
-.summary-row.total .value {
+.confirm-price {
     font-size: 18px;
     font-weight: 700;
-}
-
-.summary-row.total .value {
-    color: #FF6B4A;
-}
-
-.summary-divider {
-    height: 1px;
-    background: rgba(255, 255, 255, 0.1);
-    margin: 12px 0;
+    color: #B8A369;
 }
 
 /* Notes */
 .notes-input {
     width: 100%;
     padding: 16px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    color: #fff;
+    background: #fff;
+    border: 1px solid #E5E5E5;
+    border-radius: 12px;
     font-size: 14px;
+    color: #333;
     resize: none;
     outline: none;
 }
 
-.notes-input::placeholder {
-    color: rgba(255, 255, 255, 0.4);
-}
-
 .notes-input:focus {
-    border-color: #FF6B4A;
+    border-color: #B8A369;
 }
 
-/* Bottom action */
-.bottom-action {
+/* Empty/Loading states */
+.empty-hint {
+    padding: 24px;
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+}
+
+.loading {
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #E5E5E5;
+    border-top-color: #B8A369;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Error */
+.error-msg {
+    padding: 12px 16px;
+    background: #FEE2E2;
+    border-radius: 12px;
+    color: #DC2626;
+    font-size: 14px;
+    margin-top: 16px;
+}
+
+/* Bottom Bar */
+.bk-bottom {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     padding: 16px;
-    background: linear-gradient(transparent, rgba(26, 42, 58, 0.95) 30%);
+    background: #fff;
+    border-top: 1px solid #E5E5E5;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
 }
 
-.action-btn {
+.bottom-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #E5E5E5;
+}
+
+.summary-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.summary-label {
+    font-size: 12px;
+    color: #888;
+}
+
+.summary-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.summary-detail {
+    font-size: 12px;
+    color: #888;
+}
+
+.summary-price {
+    text-align: right;
+}
+
+.price-label {
+    font-size: 12px;
+    color: #888;
+    display: block;
+}
+
+.price-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #B8A369;
+}
+
+.bk-btn {
     width: 100%;
-    padding: 18px;
-    background: linear-gradient(135deg, #FF6B4A, #FF8F6B);
+    padding: 16px;
+    background: #B8A369;
     border: none;
-    border-radius: 16px;
-    color: #fff;
+    border-radius: 12px;
     font-size: 16px;
     font-weight: 600;
+    color: #fff;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
 }
 
-.action-btn:disabled {
+.bk-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
 
-.action-btn.confirm {
-    background: linear-gradient(135deg, #4CAF50, #66BB6A);
-}
-
-/* Error message */
-.error-message {
-    margin-top: 16px;
-    padding: 12px 16px;
-    background: rgba(244, 67, 54, 0.15);
-    border: 1px solid rgba(244, 67, 54, 0.3);
-    border-radius: 12px;
-    color: #f44336;
-    font-size: 14px;
-    text-align: center;
+.bk-btn.confirm {
+    background: #B8A369;
 }
 </style>

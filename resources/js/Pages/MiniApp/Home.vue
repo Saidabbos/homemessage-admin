@@ -27,25 +27,20 @@ const greeting = computed(() => {
     return 'Salom!';
 });
 
+const formatPrice = (price) => new Intl.NumberFormat('uz-UZ').format(price);
+
 const logout = () => {
     router.post('/app/logout');
 };
 </script>
 
 <template>
-    <div class="miniapp-home">
-        <!-- Background -->
-        <div class="bg-gradient"></div>
-        <div class="bg-circles">
-            <div class="circle circle-1"></div>
-            <div class="circle circle-2"></div>
-        </div>
-
+    <div class="home-page">
         <!-- Header -->
-        <header class="app-header">
+        <header class="home-header">
             <div class="header-top">
                 <div class="logo">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                         <path d="M9 22V12h6v10"/>
                     </svg>
@@ -58,42 +53,41 @@ const logout = () => {
                     </svg>
                 </button>
             </div>
-            <h1 class="app-title">Home Massage</h1>
-            <p class="app-subtitle">{{ greeting }}</p>
+            <h1 class="home-title">Home Massage</h1>
+            <p class="home-greeting">{{ greeting }}</p>
         </header>
 
-        <!-- Services -->
+        <!-- Services Section -->
         <section class="services-section">
             <h2 class="section-title">Xizmatlar</h2>
-            <div class="services-grid">
+            <div class="services-list">
                 <div 
                     v-for="service in services" 
                     :key="service.id"
                     class="service-card"
                 >
-                    <div class="service-image" v-if="service.image_url">
-                        <img :src="service.image_url" :alt="service.name" />
+                    <div class="service-img">
+                        <img v-if="service.image_url" :src="service.image_url" :alt="service.name" />
+                        <div v-else class="service-img-placeholder">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                            </svg>
+                        </div>
                     </div>
                     <div class="service-info">
                         <h3 class="service-name">{{ service.name }}</h3>
-                        <p class="service-description">{{ service.description }}</p>
-                        <div class="service-durations" v-if="service.durations?.length">
-                            <span 
-                                v-for="dur in service.durations" 
-                                :key="dur.id"
-                                class="duration-chip"
-                            >
-                                {{ dur.duration }} min - {{ (dur.price / 1000).toFixed(0) }}K
-                            </span>
-                        </div>
+                        <p class="service-desc">{{ service.description }}</p>
+                        <span class="service-price">
+                            {{ formatPrice(service.durations?.[0]?.price || 0) }} - {{ formatPrice(service.durations?.[service.durations.length - 1]?.price || 0) }} UZS
+                        </span>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Book Button -->
-        <div class="book-button-container">
-            <button class="book-button" @click="$inertia.visit('/app/book')">
+        <div class="book-container">
+            <button class="book-btn" @click="$inertia.visit('/app/book')">
                 Buyurtma berish
             </button>
         </div>
@@ -101,54 +95,15 @@ const logout = () => {
 </template>
 
 <style scoped>
-.miniapp-home {
+.home-page {
     min-height: 100vh;
     padding: 16px;
     padding-bottom: 100px;
-    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
-    position: relative;
+    background: #F8F6F3;
 }
 
-.bg-gradient {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
-    z-index: 0;
-}
-
-.bg-circles {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.circle {
-    position: absolute;
-    border-radius: 50%;
-    background: linear-gradient(135deg, rgba(107, 139, 164, 0.3), rgba(255, 107, 74, 0.2));
-    filter: blur(40px);
-}
-
-.circle-1 {
-    width: 150px;
-    height: 150px;
-    top: -30px;
-    right: -30px;
-}
-
-.circle-2 {
-    width: 100px;
-    height: 100px;
-    bottom: 150px;
-    left: -20px;
-}
-
-.app-header {
-    position: relative;
-    z-index: 1;
-    text-align: center;
+/* Header */
+.home-header {
     margin-bottom: 24px;
 }
 
@@ -165,10 +120,9 @@ const logout = () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
+    background: #B8A369;
     border-radius: 12px;
-    color: #FF6B4A;
+    color: #fff;
 }
 
 .logout-btn {
@@ -177,125 +131,126 @@ const logout = () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: none;
+    background: #fff;
+    border: 1px solid #E5E5E5;
     border-radius: 10px;
-    color: rgba(255, 255, 255, 0.7);
+    color: #888;
     cursor: pointer;
 }
 
-.app-title {
+.home-title {
     font-size: 24px;
     font-weight: 700;
-    margin: 0 0 4px 0;
-    color: #ffffff;
+    color: #333;
+    margin: 0 0 4px;
 }
 
-.app-subtitle {
+.home-greeting {
     font-size: 15px;
-    color: rgba(255, 255, 255, 0.6);
+    color: #888;
     margin: 0;
 }
 
+/* Services */
 .services-section {
-    position: relative;
-    z-index: 1;
+    margin-bottom: 24px;
 }
 
 .section-title {
     font-size: 18px;
     font-weight: 600;
-    margin: 0 0 16px 0;
-    color: #ffffff;
+    color: #333;
+    margin: 0 0 16px;
 }
 
-.services-grid {
+.services-list {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
 .service-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 16px;
-    overflow: hidden;
     display: flex;
     gap: 12px;
+    padding: 12px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
-.service-image {
-    width: 90px;
-    height: 90px;
+.service-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    overflow: hidden;
     flex-shrink: 0;
+    background: #F5F5F5;
 }
 
-.service-image img {
+.service-img img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
+.service-img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #CCC;
+}
+
 .service-info {
-    padding: 12px 12px 12px 0;
     flex: 1;
+    min-width: 0;
 }
 
 .service-name {
     font-size: 16px;
     font-weight: 600;
-    margin: 0 0 4px 0;
-    color: #ffffff;
+    color: #333;
+    margin: 0 0 4px;
 }
 
-.service-description {
+.service-desc {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.5);
-    margin: 0 0 8px 0;
+    color: #888;
+    margin: 0 0 8px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
 
-.service-durations {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+.service-price {
+    font-size: 14px;
+    font-weight: 600;
+    color: #B8A369;
 }
 
-.duration-chip {
-    font-size: 11px;
-    padding: 4px 10px;
-    background: linear-gradient(135deg, #FF6B4A, #FF8F6B);
-    color: #ffffff;
-    border-radius: 12px;
-}
-
-.book-button-container {
+/* Book Button */
+.book-container {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     padding: 16px;
-    background: rgba(26, 42, 58, 0.95);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: #fff;
+    border-top: 1px solid #E5E5E5;
     z-index: 10;
 }
 
-.book-button {
+.book-btn {
     width: 100%;
     padding: 16px;
     font-size: 16px;
     font-weight: 600;
-    background: linear-gradient(135deg, #FF6B4A, #FF8F6B);
-    color: #ffffff;
+    background: #B8A369;
+    color: #fff;
     border: none;
-    border-radius: 14px;
+    border-radius: 12px;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(255, 107, 74, 0.3);
 }
 </style>

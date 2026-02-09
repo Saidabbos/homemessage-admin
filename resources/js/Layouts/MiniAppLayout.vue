@@ -8,17 +8,16 @@ onMounted(() => {
         tg.ready();
         tg.expand();
         
-        // Force dark theme
-        tg.setHeaderColor('#1a2a3a');
-        tg.setBackgroundColor('#1a2a3a');
+        // Light theme for new design
+        tg.setHeaderColor('#FFFFFF');
+        tg.setBackgroundColor('#F8F6F3');
     }
     
-    // Force all backgrounds to dark
-    document.documentElement.style.background = '#1a2a3a';
-    document.body.style.background = '#1a2a3a';
-    document.body.style.backgroundColor = '#1a2a3a';
+    // Set light backgrounds
+    document.documentElement.style.background = '#F8F6F3';
+    document.body.style.background = '#F8F6F3';
+    document.body.style.backgroundColor = '#F8F6F3';
     
-    // Remove any white backgrounds from Telegram wrappers
     const root = document.getElementById('app');
     if (root) {
         root.style.background = 'transparent';
@@ -35,16 +34,16 @@ onMounted(() => {
 <style scoped>
 .miniapp-container {
     min-height: 100vh;
-    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
-    color: #ffffff;
+    background: #F8F6F3;
+    color: #333333;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 </style>
 
 <style>
-/* Global styles to override Telegram WebApp backgrounds */
+/* Global styles for light theme */
 html, body, #app {
-    background: #1a2a3a;
-    background-color: #1a2a3a;
+    background: #F8F6F3;
+    background-color: #F8F6F3;
 }
 </style>

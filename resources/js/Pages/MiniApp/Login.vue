@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import MiniAppLayout from '@/Layouts/MiniAppLayout.vue';
-import axios from 'axios';
 
 defineOptions({ layout: MiniAppLayout });
 
@@ -12,7 +11,7 @@ const props = defineProps({
 
 const tg = ref(null);
 const tgUser = ref(null);
-const step = ref('phone'); // phone | otp
+const step = ref('phone');
 const countdown = ref(0);
 let countdownInterval = null;
 
@@ -31,10 +30,7 @@ onMounted(async () => {
     if (window.Telegram?.WebApp) {
         tg.value = window.Telegram.WebApp;
         tgUser.value = tg.value.initDataUnsafe?.user;
-        console.log('Telegram WebApp detected:', tg.value);
-        console.log('Telegram User:', tgUser.value);
         
-        // Try auto-login if we have Telegram user data
         if (tgUser.value?.id) {
             isAutoLogging.value = true;
             try {
@@ -53,8 +49,6 @@ onMounted(async () => {
                 });
                 
                 const result = await response.json();
-                console.log('Auto-login result:', result);
-                
                 if (result.success) {
                     window.location.href = '/app';
                     return;
@@ -64,26 +58,15 @@ onMounted(async () => {
             }
             isAutoLogging.value = false;
         }
-    } else {
-        console.log('Telegram WebApp NOT detected');
     }
 });
 
-const formattedPhone = computed(() => {
-    return form.phone.replace(/[^\d+]/g, '');
-});
-
-const canSendOtp = computed(() => {
-    return formattedPhone.value.length >= 13 && countdown.value === 0;
-});
-
-const canVerify = computed(() => {
-    return form.code.length === 6;
-});
+const formattedPhone = computed(() => form.phone.replace(/[^\d+]/g, ''));
+const canSendOtp = computed(() => formattedPhone.value.length >= 13 && countdown.value === 0);
+const canVerify = computed(() => form.code.length === 6);
 
 const sendOtp = async () => {
     if (!canSendOtp.value) return;
-
     form.post('/auth/otp/send', {
         preserveScroll: true,
         onSuccess: () => {
@@ -95,8 +78,6 @@ const sendOtp = async () => {
 
 const verifyOtp = async () => {
     if (!canVerify.value) return;
-
-    // Include Telegram data in the form submission (before Inertia redirect)
     const webapp = window.Telegram?.WebApp;
     const tgData = tgUser.value || webapp?.initDataUnsafe?.user;
     
@@ -105,21 +86,16 @@ const verifyOtp = async () => {
         form.telegram_username = tgData.username || null;
         form.telegram_first_name = tgData.first_name || null;
         form.telegram_photo_url = tgData.photo_url || null;
-        console.log('Including Telegram data in form:', tgData);
     }
 
-    form.post('/auth/otp/verify', {
-        preserveScroll: true,
-    });
+    form.post('/auth/otp/verify', { preserveScroll: true });
 };
 
 const startCountdown = () => {
     countdown.value = 60;
     countdownInterval = setInterval(() => {
         countdown.value--;
-        if (countdown.value <= 0) {
-            clearInterval(countdownInterval);
-        }
+        if (countdown.value <= 0) clearInterval(countdownInterval);
     }, 1000);
 };
 
@@ -128,46 +104,35 @@ const formatPhone = (e) => {
     if (!value.startsWith('+998')) {
         value = '+998' + value.replace('+998', '').replace('+', '');
     }
-    if (value.length > 13) {
-        value = value.slice(0, 13);
-    }
+    if (value.length > 13) value = value.slice(0, 13);
     form.phone = value;
 };
 </script>
 
 <template>
     <div class="login-page">
-        <!-- Auto-login loading overlay -->
-        <div v-if="isAutoLogging" class="auto-login-overlay">
-            <div class="auto-login-spinner"></div>
+        <!-- Auto-login loading -->
+        <div v-if="isAutoLogging" class="auto-login">
+            <div class="spinner"></div>
             <p>Kirish...</p>
         </div>
 
-        <!-- Floating circles background -->
-        <div class="bg-circles">
-            <div class="circle circle-1"></div>
-            <div class="circle circle-2"></div>
-            <div class="circle circle-3"></div>
-        </div>
-
-        <!-- Header -->
+        <!-- Logo -->
         <div class="login-header">
-            <div class="logo-container">
-                <div class="logo">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                        <path d="M9 22V12h6v10"/>
-                    </svg>
-                </div>
+            <div class="logo">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                    <path d="M9 22V12h6v10"/>
+                </svg>
             </div>
             <h1 class="title">Home Massage</h1>
             <p class="subtitle">Uyda professional massaj xizmati</p>
         </div>
 
-        <!-- Glass Card -->
-        <div class="glass-card">
+        <!-- Form Card -->
+        <div class="form-card">
             <!-- Phone Step -->
-            <div v-if="step === 'phone'" class="login-form">
+            <div v-if="step === 'phone'" class="form-content">
                 <div class="input-group">
                     <label class="input-label">Telefon raqamingiz</label>
                     <div class="input-wrapper">
@@ -190,29 +155,23 @@ const formatPhone = (e) => {
                     :disabled="!canSendOtp || form.processing"
                     @click="sendOtp"
                 >
-                    <span v-if="form.processing">Yuborilmoqda...</span>
-                    <span v-else>Kodni olish</span>
-                    <svg v-if="!form.processing" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M5 12h14M12 5l7 7-7 7"/>
-                    </svg>
+                    {{ form.processing ? 'Yuborilmoqda...' : 'Kodni olish' }}
                 </button>
             </div>
 
             <!-- OTP Step -->
-            <div v-if="step === 'otp'" class="login-form">
+            <div v-if="step === 'otp'" class="form-content">
                 <div class="input-group">
                     <label class="input-label">SMS kod</label>
                     <p class="input-hint">{{ form.phone }} raqamiga yuborildi</p>
-                    <div class="otp-container">
-                        <input
-                            type="text"
-                            class="otp-input"
-                            v-model="form.code"
-                            placeholder="••••••"
-                            maxlength="6"
-                            inputmode="numeric"
-                        />
-                    </div>
+                    <input
+                        type="text"
+                        class="otp-input"
+                        v-model="form.code"
+                        placeholder="••••••"
+                        maxlength="6"
+                        inputmode="numeric"
+                    />
                     <p v-if="form.errors.code" class="error-text">{{ form.errors.code }}</p>
                 </div>
 
@@ -221,11 +180,7 @@ const formatPhone = (e) => {
                     :disabled="!canVerify || form.processing"
                     @click="verifyOtp"
                 >
-                    <span v-if="form.processing">Tekshirilmoqda...</span>
-                    <span v-else>Kirish</span>
-                    <svg v-if="!form.processing" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M5 12h14M12 5l7 7-7 7"/>
-                    </svg>
+                    {{ form.processing ? 'Tekshirilmoqda...' : 'Kirish' }}
                 </button>
 
                 <div class="secondary-actions">
@@ -234,8 +189,7 @@ const formatPhone = (e) => {
                         :disabled="countdown > 0"
                         @click="sendOtp"
                     >
-                        <span v-if="countdown > 0">Qayta yuborish ({{ countdown }}s)</span>
-                        <span v-else>Qayta yuborish</span>
+                        {{ countdown > 0 ? `Qayta yuborish (${countdown}s)` : 'Qayta yuborish' }}
                     </button>
                     <span class="divider">•</span>
                     <button class="link-btn" @click="step = 'phone'">
@@ -246,9 +200,7 @@ const formatPhone = (e) => {
         </div>
 
         <!-- Footer -->
-        <div class="footer">
-            <p>Xizmatdan foydalanish orqali <a href="#">Foydalanish shartlari</a>ga rozilik bildirasiz</p>
-        </div>
+        <p class="footer">Xizmatdan foydalanish orqali Foydalanish shartlariga rozilik bildirasiz</p>
     </div>
 </template>
 
@@ -258,111 +210,82 @@ const formatPhone = (e) => {
     padding: 24px;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
-    position: relative;
-    overflow: hidden;
+    background: #F8F6F3;
 }
 
-/* Floating circles */
-.bg-circles {
-    position: absolute;
+/* Auto-login */
+.auto-login {
+    position: fixed;
     inset: 0;
-    overflow: hidden;
-    pointer-events: none;
+    background: #F8F6F3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
 }
 
-.circle {
-    position: absolute;
+.auto-login p {
+    color: #666;
+    margin-top: 16px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #E5E5E5;
+    border-top-color: #B8A369;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(107, 139, 164, 0.3), rgba(255, 107, 74, 0.2));
-    filter: blur(40px);
+    animation: spin 1s linear infinite;
 }
 
-.circle-1 {
-    width: 200px;
-    height: 200px;
-    top: -50px;
-    right: -50px;
-    animation: float 8s ease-in-out infinite;
-}
-
-.circle-2 {
-    width: 150px;
-    height: 150px;
-    bottom: 100px;
-    left: -30px;
-    animation: float 6s ease-in-out infinite reverse;
-}
-
-.circle-3 {
-    width: 100px;
-    height: 100px;
-    top: 50%;
-    right: 20%;
-    animation: float 10s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-20px) scale(1.05); }
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 /* Header */
 .login-header {
     text-align: center;
-    margin-bottom: 32px;
-    position: relative;
-    z-index: 1;
-    padding-top: 40px;
-}
-
-.logo-container {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 80px;
-    height: 80px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 24px;
-    margin-bottom: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin: 48px 0 32px;
 }
 
 .logo {
-    color: #FF6B4A;
+    width: 72px;
+    height: 72px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #B8A369;
+    border-radius: 20px;
+    color: #fff;
+    margin-bottom: 20px;
 }
 
 .title {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 700;
-    margin: 0 0 8px 0;
-    color: #ffffff;
+    color: #333;
+    margin: 0 0 8px;
 }
 
 .subtitle {
-    font-size: 15px;
-    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    color: #888;
     margin: 0;
 }
 
-/* Glass Card */
-.glass-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: 24px;
-    padding: 32px 24px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    position: relative;
-    z-index: 1;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+/* Form Card */
+.form-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }
 
-.login-form {
+.form-content {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
 }
 
 .input-group {
@@ -374,111 +297,81 @@ const formatPhone = (e) => {
 .input-label {
     font-size: 14px;
     font-weight: 600;
-    color: #ffffff;
+    color: #333;
 }
 
 .input-hint {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.5);
+    color: #888;
     margin: 0;
 }
 
 .input-wrapper {
     position: relative;
-    display: flex;
-    align-items: center;
 }
 
 .input-icon {
     position: absolute;
     left: 16px;
-    color: rgba(255, 255, 255, 0.4);
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
 }
 
 .input-field {
     width: 100%;
     padding: 16px 16px 16px 48px;
-    font-size: 17px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.05);
-    color: #ffffff;
+    font-size: 16px;
+    border: 1px solid #E5E5E5;
+    border-radius: 12px;
+    background: #F8F6F3;
+    color: #333;
     outline: none;
-    transition: all 0.3s ease;
-}
-
-.input-field::placeholder {
-    color: rgba(255, 255, 255, 0.3);
 }
 
 .input-field:focus {
-    border-color: #FF6B4A;
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.otp-container {
-    display: flex;
-    justify-content: center;
+    border-color: #B8A369;
 }
 
 .otp-input {
     width: 100%;
-    max-width: 200px;
     padding: 20px;
     text-align: center;
     letter-spacing: 12px;
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 600;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.05);
-    color: #ffffff;
+    border: 1px solid #E5E5E5;
+    border-radius: 12px;
+    background: #F8F6F3;
+    color: #333;
     outline: none;
-    transition: all 0.3s ease;
-}
-
-.otp-input::placeholder {
-    color: rgba(255, 255, 255, 0.2);
-    letter-spacing: 8px;
 }
 
 .otp-input:focus {
-    border-color: #FF6B4A;
-    background: rgba(255, 255, 255, 0.1);
+    border-color: #B8A369;
 }
 
 .error-text {
-    color: #FF6B4A;
+    color: #DC2626;
     font-size: 13px;
     margin: 0;
 }
 
 .submit-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 18px;
+    width: 100%;
+    padding: 16px;
     font-size: 16px;
     font-weight: 600;
-    background: linear-gradient(135deg, #FF6B4A, #FF8F6B);
-    color: #ffffff;
+    background: #B8A369;
+    color: #fff;
     border: none;
-    border-radius: 16px;
+    border-radius: 12px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(255, 107, 74, 0.3);
-}
-
-.submit-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 107, 74, 0.4);
 }
 
 .submit-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
 }
 
 .secondary-actions {
@@ -492,73 +385,30 @@ const formatPhone = (e) => {
     padding: 8px;
     font-size: 14px;
     background: transparent;
-    color: rgba(255, 255, 255, 0.7);
+    color: #888;
     border: none;
     cursor: pointer;
-    transition: color 0.3s ease;
 }
 
 .link-btn:hover:not(:disabled) {
-    color: #FF6B4A;
+    color: #B8A369;
 }
 
 .link-btn:disabled {
-    color: rgba(255, 255, 255, 0.3);
+    color: #CCC;
     cursor: not-allowed;
 }
 
 .divider {
-    color: rgba(255, 255, 255, 0.3);
+    color: #CCC;
 }
 
 /* Footer */
 .footer {
     margin-top: auto;
-    padding-top: 32px;
+    padding-top: 24px;
     text-align: center;
-    position: relative;
-    z-index: 1;
-}
-
-.footer p {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.4);
-    margin: 0;
-}
-
-.footer a {
-    color: rgba(255, 255, 255, 0.6);
-    text-decoration: underline;
-}
-
-/* Auto-login overlay */
-.auto-login-overlay {
-    position: fixed;
-    inset: 0;
-    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-}
-
-.auto-login-overlay p {
-    color: rgba(255, 255, 255, 0.8);
-    margin-top: 16px;
-    font-size: 16px;
-}
-
-.auto-login-spinner {
-    width: 48px;
-    height: 48px;
-    border: 3px solid rgba(255, 255, 255, 0.2);
-    border-top-color: #FF6B4A;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
+    color: #888;
 }
 </style>
