@@ -102,9 +102,35 @@ class HomeController extends Controller
     /**
      * Booking success page
      */
-    public function bookingSuccess()
+    public function bookingSuccess(Request $request)
     {
-        return Inertia::render('MiniApp/BookingSuccess');
+        $orderNumber = $request->query('order_number');
+        $order = null;
+        
+        if ($orderNumber) {
+            $order = \App\Models\Order::with(['master', 'serviceType'])
+                ->where('order_number', $orderNumber)
+                ->where('customer_id', Auth::id())
+                ->first();
+        }
+        
+        return Inertia::render('MiniApp/BookingSuccess', [
+            'order' => $order ? [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'booking_date' => $order->booking_date,
+                'arrival_window_start' => $order->arrival_window_start,
+                'arrival_window_end' => $order->arrival_window_end,
+                'total_price' => $order->total_amount,
+                'duration' => $order->duration?->duration ?? 60,
+                'master' => $order->master ? [
+                    'name' => $order->master->name,
+                ] : null,
+                'service_type' => $order->serviceType ? [
+                    'name' => $order->serviceType->name,
+                ] : null,
+            ] : null,
+        ]);
     }
 
     /**
