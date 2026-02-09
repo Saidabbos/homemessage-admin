@@ -52,6 +52,17 @@ class MasterRepository extends BaseRepository
     }
 
     /**
+     * Get all active masters (simple list)
+     */
+    public function getActive(): \Illuminate\Support\Collection
+    {
+        return $this->query()
+            ->where('status', true)
+            ->orderBy('first_name')
+            ->get();
+    }
+
+    /**
      * Get all active masters with service types
      */
     public function getActiveWithDetails(): \Illuminate\Support\Collection
