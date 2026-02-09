@@ -23,7 +23,8 @@ use Illuminate\Support\Collection;
 class SlotCalculationService
 {
     // Konstantalar (daqiqalarda)
-    public const SLOT_STEP = 30;              // Kelish oynasi qadami
+    public const SLOT_WINDOW = 30;            // Kelish oynasi kengligi (30 daqiqa)
+    public const SLOT_INTERVAL = 60;          // Slotlar orasidagi interval (har soat boshida)
     public const TRAVEL = 30;                 // Yo'l vaqti
     public const PRE = 10;                    // Tayyorgarlik (stol, yog', opros)
     public const POST = 10;                   // Yig'ishtirish
@@ -65,12 +66,13 @@ class SlotCalculationService
         $shiftStart = $this->parseTime($date, $master->shift_start ?? '08:00');
         $shiftEnd = $this->parseTime($date, $master->shift_end ?? '22:00');
         
-        // Slotlarni 30 daqiqalik qadamda generatsiya qilamiz
-        $current = $shiftStart->copy()->ceilMinutes(self::SLOT_STEP);
+        // Slotlarni har soat boshida generatsiya qilamiz (09:00, 10:00, 11:00...)
+        // Smena boshini eng yaqin soatga oshiramiz
+        $current = $shiftStart->copy()->ceilHour();
         
         while ($current->lt($shiftEnd)) {
             $windowStart = $current->copy();
-            $windowEnd = $windowStart->copy()->addMinutes(self::SLOT_STEP);
+            $windowEnd = $windowStart->copy()->addMinutes(self::SLOT_WINDOW);
             
             // Slot oynasi smena ichida bo'lishi kerak
             if ($windowEnd->gt($shiftEnd)) {
@@ -100,7 +102,7 @@ class SlotCalculationService
                 ];
             }
             
-            $current->addMinutes(self::SLOT_STEP);
+            $current->addMinutes(self::SLOT_INTERVAL);
         }
         
         return $slots;
