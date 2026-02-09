@@ -337,16 +337,19 @@ const selectedServiceSummary = computed(() => {
                 </div>
             </div>
 
-            <!-- Duration Selection -->
-            <div v-if="booking.services.length > 0" class="section">
-                <h3 class="section-title">Davomiyligi</h3>
+            <!-- Duration Selection for each selected service -->
+            <div v-for="(sel, index) in booking.services" :key="sel.service_id" class="section">
+                <h3 class="section-title">
+                    <span v-if="booking.services.length > 1">{{ index + 1 }}. </span>
+                    {{ getServiceById(sel.service_id)?.name }} - Davomiyligi
+                </h3>
                 <div class="chip-row">
                     <button 
-                        v-for="dur in getServiceById(booking.services[0]?.service_id)?.durations" 
+                        v-for="dur in getServiceById(sel.service_id)?.durations" 
                         :key="dur.id"
                         class="chip glass"
-                        :class="{ selected: booking.services[0]?.duration_id === dur.id }"
-                        @click="setDuration(booking.services[0].service_id, dur.id)"
+                        :class="{ selected: sel.duration_id === dur.id }"
+                        @click="setDuration(sel.service_id, dur.id)"
                     >
                         {{ dur.duration }} min
                     </button>
