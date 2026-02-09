@@ -234,6 +234,16 @@ const canProceedStep2 = computed(() =>
     booking.value.slot
 );
 
+// Format slot window display (e.g., "09:00" → "09:00–09:30")
+const slotDisplay = computed(() => {
+    if (!booking.value.slot) return '';
+    const [hours, minutes] = booking.value.slot.split(':').map(Number);
+    const endMinutes = minutes + 30;
+    const endHours = hours + Math.floor(endMinutes / 60);
+    const endMins = endMinutes % 60;
+    return `${booking.value.slot}–${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
+});
+
 const nextStep = () => {
     if (step.value < 3) step.value++;
 };
@@ -513,7 +523,7 @@ const pressureLevels = [
                         :class="{ selected: booking.slot === slot.start }"
                         @click="booking.slot = slot.start"
                     >
-                        {{ slot.label }}
+                        {{ slot.display }}
                     </button>
                 </div>
             </div>
@@ -550,7 +560,7 @@ const pressureLevels = [
                 
                 <div class="summary-row">
                     <span class="label">Kelish oynasi:</span>
-                    <span class="value">{{ booking.slot }}</span>
+                    <span class="value">{{ slotDisplay }}</span>
                 </div>
                 
                 <div class="summary-row">

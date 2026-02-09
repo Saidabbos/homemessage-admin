@@ -183,6 +183,16 @@ const canProceedStep2 = computed(() =>
     booking.value.master_id && booking.value.date && booking.value.slot
 );
 
+// Format slot window display (e.g., "09:00" → "09:00–09:30")
+const slotDisplay = computed(() => {
+    if (!booking.value.slot) return '';
+    const [hours, minutes] = booking.value.slot.split(':').map(Number);
+    const endMinutes = minutes + 30;
+    const endHours = hours + Math.floor(endMinutes / 60);
+    const endMins = endMinutes % 60;
+    return `${booking.value.slot}–${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
+});
+
 const canSubmit = computed(() => canProceedStep2.value);
 
 const nextStep = () => {
@@ -456,7 +466,7 @@ const pressureLevels = [
                             :class="{ selected: booking.slot === slot.start }"
                             @click="booking.slot = slot.start"
                         >
-                            {{ slot.label }}
+                            {{ slot.display }}
                         </button>
                     </div>
                 </div>
@@ -494,7 +504,7 @@ const pressureLevels = [
                     
                     <div class="confirm-row">
                         <span class="confirm-label">Kelish oynasi:</span>
-                        <span class="confirm-value">{{ booking.slot }}</span>
+                        <span class="confirm-value">{{ slotDisplay }}</span>
                     </div>
                     
                     <div class="confirm-row">
