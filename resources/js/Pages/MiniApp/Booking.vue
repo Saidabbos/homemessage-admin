@@ -211,10 +211,10 @@ const submitBooking = async () => {
                 'X-CSRF-TOKEN': csrfToken,
             },
             body: JSON.stringify({
-                services: booking.value.services,
-                master_ids: booking.value.master_ids,
                 master_id: booking.value.master_ids[0],
-                booking_date: booking.value.date,
+                service_type_id: booking.value.services[0]?.service_id,
+                duration_id: booking.value.services[0]?.duration_id,
+                date: booking.value.date,
                 arrival_window_start: booking.value.slot,
                 pressure_level: booking.value.pressure_level,
                 people_count: booking.value.people_count,
@@ -224,10 +224,10 @@ const submitBooking = async () => {
         
         const data = await response.json();
         
-        if (data.success && data.data?.order) {
-            router.visit(`/app/booking/success?order=${data.data.order.id}`);
+        if (data.success) {
+            router.visit(`/app/booking/success?order_number=${data.data?.order_number}`);
         } else {
-            submitError.value = data.message || 'Xatolik yuz berdi';
+            submitError.value = data.message || data.errors?.[Object.keys(data.errors)[0]]?.[0] || 'Xatolik yuz berdi';
         }
     } catch (e) {
         console.error('Booking failed:', e);
