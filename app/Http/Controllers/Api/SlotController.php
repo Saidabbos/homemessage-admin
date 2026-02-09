@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\SlotRepository;
+use App\Models\Master;
 use App\Services\SlotCalculationService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -12,7 +13,6 @@ use Illuminate\Support\Facades\Log;
 class SlotController extends Controller
 {
     public function __construct(
-        protected SlotRepository $slotRepository,
         protected SlotCalculationService $slotCalculationService
     ) {}
 
@@ -24,16 +24,22 @@ class SlotController extends Controller
         $validated = $request->validate([
             'master_id' => 'required|exists:masters,id',
             'date' => 'required|date|after_or_equal:today',
+            'duration' => 'sometimes|integer|min:30',
         ]);
 
-        $slots = $this->slotRepository->getAvailableSlotsForDate(
-            $validated['master_id'],
-            $validated['date']
+        $master = Master::findOrFail($validated['master_id']);
+        $date = Carbon::parse($validated['date']);
+        $duration = $validated['duration'] ?? 60;
+
+        $slots = $this->slotCalculationService->getSlotsForMaster(
+            $master,
+            $date,
+            $duration
         );
 
         return response()->json([
             'success' => true,
-            'data' => $slots,
+            'data' => ['slots' => $slots],
         ]);
     }
 
@@ -46,19 +52,24 @@ class SlotController extends Controller
             'master_id' => 'required|exists:masters,id',
             'start_date' => 'required|date|after_or_equal:today',
             'days' => 'sometimes|integer|min:1|max:14',
+            'duration' => 'sometimes|integer|min:30',
         ]);
 
+        $master = Master::findOrFail($validated['master_id']);
+        $startDate = Carbon::parse($validated['start_date']);
         $days = $validated['days'] ?? 7;
+        $duration = $validated['duration'] ?? 60;
 
-        $slots = $this->slotRepository->getAvailableSlotsForMaster(
-            $validated['master_id'],
-            $validated['start_date'],
-            $days
-        );
+        $result = [];
+        for ($i = 0; $i < $days; $i++) {
+            $date = $startDate->copy()->addDays($i);
+            $slots = $this->slotCalculationService->getSlotsForMaster($master, $date, $duration);
+            $result[$date->toDateString()] = $slots;
+        }
 
         return response()->json([
             'success' => true,
-            'data' => $slots,
+            'data' => $result,
         ]);
     }
 
@@ -92,8 +103,12 @@ class SlotController extends Controller
 
         // Get available slots for each master
         $allMasterSlots = [];
+        $dateCarbon = Carbon::parse($date);
         foreach ($masterIds as $masterId) {
-            $slots = $this->slotCalculationService->getAvailableSlots($masterId, $date, $duration);
+            $master = Master::find($masterId);
+            if (!$master) continue;
+            
+            $slots = $this->slotCalculationService->getSlotsForMaster($master, $dateCarbon, $duration);
             $allMasterSlots[$masterId] = collect($slots)->pluck('start')->toArray();
         }
 
