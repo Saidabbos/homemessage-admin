@@ -84,10 +84,12 @@ const setDuration = (serviceId, durationId) => {
 
 // Computed
 const totalPrice = computed(() => {
-    return booking.value.services.reduce((sum, sel) => {
+    let total = 0;
+    for (const sel of booking.value.services) {
         const duration = getSelectedDuration(sel.service_id);
-        return sum + (duration?.price || 0);
-    }, 0);
+        total += Number(duration?.price) || 0;
+    }
+    return total;
 });
 
 const totalDuration = computed(() => {
@@ -177,7 +179,10 @@ watch([() => booking.value.date, () => booking.value.master_ids.length], () => {
 });
 
 // Format
-const formatPrice = (price) => new Intl.NumberFormat('uz-UZ').format(price);
+const formatPrice = (price) => {
+    const num = Number(price) || 0;
+    return new Intl.NumberFormat('uz-UZ').format(num);
+};
 
 // Step navigation
 const canProceedStep1 = computed(() => 
