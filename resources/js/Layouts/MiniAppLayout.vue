@@ -25,15 +25,10 @@ onMounted(() => {
     </div>
 </template>
 
-<style>
-html, body {
-    background: #1a2a3a !important;
-    background-color: #1a2a3a !important;
-}
-
+<style scoped>
 .miniapp-container {
     min-height: 100vh;
-    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%) !important;
+    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
     color: #ffffff;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }

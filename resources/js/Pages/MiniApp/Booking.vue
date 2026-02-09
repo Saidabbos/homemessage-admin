@@ -324,19 +324,19 @@ const pressureLevels = [
             <!-- Master selection -->
             <div class="masters-section">
                 <h3 class="section-label">Master tanlang</h3>
-                <div class="masters-scroll">
+                <div class="ma-scroll">
                     <div 
                         v-for="master in masters" 
                         :key="master.id"
-                        class="master-card"
+                        class="ma-card"
                         :class="{ selected: booking.master_id === master.id }"
                         @click="booking.master_id = master.id"
                     >
-                        <div class="master-avatar">
+                        <div class="ma-avatar">
                             <img v-if="master.photo_url" :src="master.photo_url" :alt="master.name" />
                             <span v-else>{{ master.name?.charAt(0) }}</span>
                         </div>
-                        <span class="master-name">{{ master.name }}</span>
+                        <span class="ma-name">{{ master.name }}</span>
                     </div>
                 </div>
             </div>
@@ -481,13 +481,8 @@ const pressureLevels = [
 .booking-page {
     min-height: 100vh;
     padding: 0 16px 100px;
-    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%) !important;
+    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
     position: relative;
-}
-
-/* Override Telegram theme background */
-:deep(.miniapp-container) {
-    background: transparent !important;
 }
 
 /* Progress bar */
@@ -780,7 +775,7 @@ const pressureLevels = [
 }
 
 /* Master cards */
-.masters-scroll {
+.ma-scroll {
     display: flex;
     gap: 12px;
     overflow-x: auto;
@@ -792,11 +787,11 @@ const pressureLevels = [
     scrollbar-width: none;
 }
 
-.masters-scroll::-webkit-scrollbar {
+.ma-scroll::-webkit-scrollbar {
     display: none;
 }
 
-.master-card {
+.ma-card {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -810,12 +805,12 @@ const pressureLevels = [
     transition: all 0.2s ease;
 }
 
-.master-card.selected {
+.ma-card.selected {
     border-color: #FF6B4A;
     background: rgba(255, 107, 74, 0.15);
 }
 
-.master-avatar {
+.ma-avatar {
     width: 56px;
     height: 56px;
     border-radius: 50%;
@@ -829,13 +824,13 @@ const pressureLevels = [
     overflow: hidden;
 }
 
-.master-avatar img {
+.ma-avatar img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.master-name {
+.ma-name {
     font-size: 13px;
     font-weight: 500;
     color: #fff;
