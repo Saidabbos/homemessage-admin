@@ -618,9 +618,13 @@ const pressureLevels = [
     color: rgba(255, 255, 255, 0.6);
 }
 
-/* Step content */
+/* Step content - override global white background */
 .step-content {
     padding-top: 8px;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
 }
 
 /* Section label */
