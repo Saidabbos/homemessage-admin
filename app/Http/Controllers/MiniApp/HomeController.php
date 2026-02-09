@@ -4,6 +4,7 @@ namespace App\Http\Controllers\MiniApp;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Repositories\MasterRepository;
 use App\Repositories\ServiceTypeRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,7 @@ class HomeController extends Controller
 {
     public function __construct(
         protected ServiceTypeRepository $serviceTypeRepository,
+        protected MasterRepository $masterRepository,
     ) {}
 
     /**
@@ -64,6 +66,44 @@ class HomeController extends Controller
                 ])->values(),
             ]),
         ]);
+    }
+
+    /**
+     * Booking wizard page
+     */
+    public function booking()
+    {
+        $services = $this->serviceTypeRepository->getActiveWithDurations();
+        $masters = $this->masterRepository->getActive();
+
+        return Inertia::render('MiniApp/Booking', [
+            'services' => $services->map(fn ($service) => [
+                'id' => $service->id,
+                'slug' => $service->slug,
+                'name' => $service->name,
+                'description' => $service->description,
+                'image_url' => $service->image_url,
+                'durations' => $service->durations->where('status', true)->map(fn ($d) => [
+                    'id' => $d->id,
+                    'duration' => $d->duration,
+                    'price' => $d->price,
+                    'is_default' => $d->is_default,
+                ])->values(),
+            ]),
+            'masters' => $masters->map(fn ($master) => [
+                'id' => $master->id,
+                'name' => $master->name,
+                'photo_url' => $master->photo_url,
+            ]),
+        ]);
+    }
+
+    /**
+     * Booking success page
+     */
+    public function bookingSuccess()
+    {
+        return Inertia::render('MiniApp/BookingSuccess');
     }
 
     /**

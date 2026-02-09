@@ -32,6 +32,8 @@ Route::prefix('app')->group(function () {
     Route::post('/auto-login', [MiniAppHomeController::class, 'autoLogin'])->name('miniapp.auto-login');
     Route::post('/link-telegram', [MiniAppHomeController::class, 'linkTelegram'])->name('miniapp.link-telegram')->middleware('auth');
     Route::post('/logout', [MiniAppHomeController::class, 'logout'])->name('miniapp.logout')->middleware('auth');
+    Route::get('/book', [MiniAppHomeController::class, 'booking'])->name('miniapp.booking')->middleware('auth');
+    Route::get('/booking-success', [MiniAppHomeController::class, 'bookingSuccess'])->name('miniapp.booking-success')->middleware('auth');
 });
 
 // Default login redirect
