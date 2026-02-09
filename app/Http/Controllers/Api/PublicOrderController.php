@@ -23,7 +23,16 @@ class PublicOrderController extends Controller
      */
     public function store(Request $request)
     {
+        // Require authentication
+        if (!auth()->check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Iltimos, avval tizimga kiring',
+            ], 401);
+        }
+
         Log::info('PublicOrderController@store: Creating public order', [
+            'user_id' => auth()->id(),
             'request' => $request->all(),
         ]);
 
@@ -37,8 +46,6 @@ class PublicOrderController extends Controller
             'total_duration' => 'required|integer|min:30',
             'pressure_level' => 'required|in:light,medium,strong',
             'notes' => 'nullable|string|max:1000',
-            'customer_name' => 'required|string|max:255',
-            'customer_phone' => 'required|string|max:20',
             'services' => 'nullable|array',
             'services.*.service_type_id' => 'required_with:services|exists:service_types,id',
             'services.*.duration_id' => 'required_with:services|exists:service_type_durations,id',
@@ -46,22 +53,12 @@ class PublicOrderController extends Controller
 
         try {
             return DB::transaction(function () use ($validated, $request) {
-                // Find or create customer by phone
-                $phone = preg_replace('/[^0-9]/', '', $validated['customer_phone']);
-                
-                $customer = Customer::firstOrCreate(
-                    ['phone' => $phone],
-                    ['name' => $validated['customer_name']]
-                );
+                // Get authenticated customer
+                $customer = auth()->user();
 
-                // Update name if changed
-                if ($customer->name !== $validated['customer_name']) {
-                    $customer->update(['name' => $validated['customer_name']]);
-                }
-
-                Log::info('PublicOrderController@store: Customer resolved', [
+                Log::info('PublicOrderController@store: Using authenticated customer', [
                     'customer_id' => $customer->id,
-                    'phone' => $phone,
+                    'phone' => $customer->phone,
                 ]);
 
                 // Get duration info

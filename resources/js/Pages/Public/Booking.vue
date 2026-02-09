@@ -23,8 +23,6 @@ const booking = ref({
     slot: null,
     pressure_level: 'medium',
     notes: '',
-    customer_name: props.customer?.name || '',
-    customer_phone: props.customer?.phone || '',
 });
 
 // Toggle service selection
@@ -185,11 +183,7 @@ const canProceedStep2 = computed(() =>
     booking.value.master_id && booking.value.date && booking.value.slot
 );
 
-const canSubmit = computed(() => 
-    canProceedStep2.value && 
-    booking.value.customer_name && 
-    booking.value.customer_phone
-);
+const canSubmit = computed(() => canProceedStep2.value);
 
 const nextStep = () => {
     if (step.value < 3) step.value++;
@@ -230,8 +224,6 @@ const submitBooking = async () => {
                 total_duration: totalDuration.value,
                 pressure_level: booking.value.pressure_level,
                 notes: booking.value.notes,
-                customer_name: booking.value.customer_name,
-                customer_phone: booking.value.customer_phone,
             }),
         });
         
@@ -523,28 +515,19 @@ const pressureLevels = [
                     </div>
                 </div>
 
-                <!-- Customer info -->
+                <!-- Customer info (logged in user) -->
                 <div class="customer-section">
                     <h3 class="section-title">Sizning ma'lumotlaringiz</h3>
                     
-                    <div class="form-group">
-                        <label class="form-label">Ismingiz</label>
-                        <input 
-                            v-model="booking.customer_name" 
-                            type="text" 
-                            class="form-input"
-                            placeholder="Ism Familiya"
-                        />
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Telefon raqam</label>
-                        <input 
-                            v-model="booking.customer_phone" 
-                            type="tel" 
-                            class="form-input"
-                            placeholder="+998 90 123 45 67"
-                        />
+                    <div class="customer-info-card">
+                        <div class="customer-info-row">
+                            <span class="customer-info-label">Ism:</span>
+                            <span class="customer-info-value">{{ customer?.name || '-' }}</span>
+                        </div>
+                        <div class="customer-info-row">
+                            <span class="customer-info-label">Telefon:</span>
+                            <span class="customer-info-value">{{ customer?.phone || '-' }}</span>
+                        </div>
                     </div>
                     
                     <div class="form-group">

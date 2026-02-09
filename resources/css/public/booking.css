@@ -595,6 +595,35 @@
     margin-top: 24px;
 }
 
+.customer-info-card {
+    padding: 16px 20px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 16px;
+}
+
+.customer-info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+}
+
+.customer-info-row:not(:last-child) {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.customer-info-label {
+    font-size: 14px;
+    color: #64748b;
+}
+
+.customer-info-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e293b;
+}
+
 .form-group {
     margin-bottom: 16px;
 }
