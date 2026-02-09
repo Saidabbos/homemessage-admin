@@ -54,10 +54,11 @@ Route::prefix('v1')->group(function () {
     Route::post('/bookings', [BookingSubmitController::class, 'store']);
 });
 
-// Legacy Slots (deprecated)
+// Slots
 Route::prefix('slots')->group(function () {
     Route::get('/available', [SlotController::class, 'available']);
     Route::get('/by-date', [SlotController::class, 'byDate']);
+    Route::get('/multi-master', [SlotController::class, 'multiMaster']);
 });
 
 // Orders

@@ -13,11 +13,11 @@ const props = defineProps({
 // Wizard state
 const step = ref(1); // 1: Service, 2: Master & Time, 3: Confirm
 
-// Booking data - multi-select services (limited by people count)
+// Booking data - multi-select services and masters (limited by people count)
 const booking = ref({
     services: [], // Array of { service_id, duration_id }
     people_count: 1,
-    master_id: null,
+    master_ids: [], // Array of master ids (one per person)
     date: null,
     slot: null,
     pressure_level: 'medium',
@@ -37,6 +37,10 @@ const removePerson = () => {
         // Remove extra services if needed
         while (booking.value.services.length > booking.value.people_count) {
             booking.value.services.pop();
+        }
+        // Remove extra masters if needed
+        while (booking.value.master_ids.length > booking.value.people_count) {
+            booking.value.master_ids.pop();
         }
     }
 };
@@ -110,9 +114,13 @@ const selectedServiceIds = computed(() => {
     return booking.value.services.map(s => s.service_id);
 });
 
-const selectedMaster = computed(() => 
-    props.masters?.find(m => m.id === booking.value.master_id)
+// Get selected masters
+const selectedMasters = computed(() => 
+    booking.value.master_ids.map(id => props.masters?.find(m => m.id === id)).filter(Boolean)
 );
+
+// For backward compatibility
+const selectedMaster = computed(() => selectedMasters.value[0]);
 
 // Filtered masters based on all selected services
 const filteredMasters = computed(() => {
@@ -125,9 +133,30 @@ const filteredMasters = computed(() => {
     );
 });
 
-// Reset master when services change
+// Toggle master selection (limited by people count)
+const toggleMaster = (masterId) => {
+    const index = booking.value.master_ids.indexOf(masterId);
+    if (index >= 0) {
+        // Deselect
+        booking.value.master_ids.splice(index, 1);
+    } else {
+        // Can only select up to people_count masters
+        if (booking.value.master_ids.length < booking.value.people_count) {
+            booking.value.master_ids.push(masterId);
+        }
+    }
+    // Reset slot when masters change
+    booking.value.slot = null;
+};
+
+// Check if master is selected
+const isMasterSelected = (masterId) => {
+    return booking.value.master_ids.includes(masterId);
+};
+
+// Reset masters when services change
 watch(selectedServiceIds, () => {
-    booking.value.master_id = null;
+    booking.value.master_ids = [];
     booking.value.date = null;
     booking.value.slot = null;
 }, { deep: true });
@@ -154,9 +183,10 @@ const availableSlots = ref([]);
 const loadingSlots = ref(false);
 
 watch(
-    [() => booking.value.master_id, () => booking.value.date, totalDuration], 
-    async ([masterId, date, duration]) => {
-        if (masterId && date && duration > 0) {
+    [() => booking.value.master_ids.length, () => booking.value.date, totalDuration], 
+    async ([mastersCount, date, duration]) => {
+        // Load slots when all masters are selected
+        if (mastersCount === booking.value.people_count && date && duration > 0) {
             booking.value.slot = null; // Reset slot when params change
             await loadSlots();
         } else {
@@ -168,8 +198,10 @@ watch(
 const loadSlots = async () => {
     loadingSlots.value = true;
     try {
+        // Get slots that are available for ALL selected masters
         const duration = totalDuration.value || 60;
-        const response = await fetch(`/api/masters/${booking.value.master_id}/slots?date=${booking.value.date}&duration=${duration}&people_count=${booking.value.people_count}`);
+        const masterIds = booking.value.master_ids.join(',');
+        const response = await fetch(`/api/slots/multi-master?date=${booking.value.date}&duration=${duration}&master_ids=${masterIds}`);
         const data = await response.json();
         availableSlots.value = data.data?.slots || data.slots || [];
     } catch (e) {
@@ -197,7 +229,9 @@ const canProceedStep1 = computed(() =>
 );
 
 const canProceedStep2 = computed(() => 
-    booking.value.master_id && booking.value.date && booking.value.slot
+    booking.value.master_ids.length === booking.value.people_count && 
+    booking.value.date && 
+    booking.value.slot
 );
 
 const nextStep = () => {
@@ -234,7 +268,9 @@ const submitBooking = async () => {
                 // For backward compatibility
                 service_type_id: booking.value.services[0]?.service_id,
                 duration_id: booking.value.services[0]?.duration_id,
-                master_id: booking.value.master_id,
+                // Send all master IDs
+                master_ids: booking.value.master_ids,
+                master_id: booking.value.master_ids[0], // backward compat
                 date: booking.value.date,
                 arrival_window_start: booking.value.slot,
                 people_count: booking.value.people_count,
@@ -406,25 +442,39 @@ const pressureLevels = [
 
         <!-- Step 2: Master & Time Selection -->
         <div v-if="step === 2" class="step-content">
-            <!-- Master selection -->
+            <!-- Master selection (multi) -->
             <div class="ma-section">
-                <h3 class="section-label">Master tanlang</h3>
+                <h3 class="section-label">
+                    Masterlarni tanlang 
+                    <span class="selection-hint">({{ booking.master_ids.length }}/{{ booking.people_count }})</span>
+                </h3>
                 <div v-if="filteredMasters.length === 0" class="no-masters">
                     Bu xizmat uchun master topilmadi
+                </div>
+                <div v-else-if="filteredMasters.length < booking.people_count" class="no-masters">
+                    Yetarli master topilmadi ({{ filteredMasters.length }} / {{ booking.people_count }} kerak)
                 </div>
                 <div v-else class="ma-scroll">
                     <div 
                         v-for="master in filteredMasters" 
                         :key="master.id"
                         class="ma-card"
-                        :class="{ selected: booking.master_id === master.id }"
-                        @click="booking.master_id = master.id"
+                        :class="{ 
+                            selected: isMasterSelected(master.id),
+                            disabled: !isMasterSelected(master.id) && booking.master_ids.length >= booking.people_count
+                        }"
+                        @click="toggleMaster(master.id)"
                     >
                         <div class="ma-avatar">
                             <img v-if="master.photo_url" :src="master.photo_url" :alt="master.name" />
                             <span v-else>{{ master.name?.charAt(0) }}</span>
                         </div>
                         <span class="ma-name">{{ master.name }}</span>
+                        <div class="ma-check" v-if="isMasterSelected(master.id)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20,6 9,17 4,12"/>
+                            </svg>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -446,14 +496,14 @@ const pressureLevels = [
                 </div>
             </div>
 
-            <!-- Time slots -->
-            <div v-if="booking.master_id && booking.date" class="slots-section">
-                <h3 class="section-label">Kelish oynasi</h3>
+            <!-- Time slots (shown when all masters selected) -->
+            <div v-if="booking.master_ids.length === booking.people_count && booking.date" class="slots-section">
+                <h3 class="section-label">Kelish oynasi (barcha masterlar uchun)</h3>
                 <div v-if="loadingSlots" class="loading-slots">
                     <div class="spinner"></div>
                 </div>
                 <div v-else-if="availableSlots.length === 0" class="no-slots">
-                    Bu kunga bo'sh vaqt yo'q
+                    Bu kunga barcha masterlar uchun mos vaqt yo'q
                 </div>
                 <div v-else class="slots-grid">
                     <button 
@@ -487,9 +537,10 @@ const pressureLevels = [
 
                 <div class="summary-divider"></div>
                 
+                <!-- All selected masters -->
                 <div class="summary-row">
-                    <span class="label">Master:</span>
-                    <span class="value">{{ selectedMaster?.name }}</span>
+                    <span class="label">Masterlar:</span>
+                    <span class="value">{{ selectedMasters.map(m => m.name).join(', ') }}</span>
                 </div>
                 
                 <div class="summary-row">
@@ -983,6 +1034,29 @@ const pressureLevels = [
 .ma-card.selected {
     border-color: #FF6B4A;
     background: rgba(255, 107, 74, 0.15);
+}
+
+.ma-card.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.ma-card {
+    position: relative;
+}
+
+.ma-check {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FF6B4A;
+    border-radius: 50%;
+    color: #fff;
 }
 
 .ma-avatar {
