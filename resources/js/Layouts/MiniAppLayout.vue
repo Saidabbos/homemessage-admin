@@ -26,16 +26,16 @@ onMounted(() => {
 
 <style>
 :root {
-    --tg-theme-bg-color: #ffffff;
-    --tg-theme-text-color: #000000;
-    --tg-theme-hint-color: #999999;
-    --tg-theme-button-color: #3390ec;
+    --tg-theme-bg-color: #1a2a3a;
+    --tg-theme-text-color: #ffffff;
+    --tg-theme-hint-color: rgba(255, 255, 255, 0.6);
+    --tg-theme-button-color: #FF6B4A;
     --tg-theme-button-text-color: #ffffff;
 }
 
 .miniapp-container {
     min-height: 100vh;
-    background-color: var(--tg-theme-bg-color);
+    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
     color: var(--tg-theme-text-color);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }

@@ -481,15 +481,13 @@ const pressureLevels = [
 .booking-page {
     min-height: 100vh;
     padding: 0 16px 100px;
-    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
+    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%) !important;
     position: relative;
 }
 
-.bg-gradient {
-    position: fixed;
-    inset: 0;
-    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
-    z-index: -1;
+/* Override Telegram theme background */
+:deep(.miniapp-container) {
+    background: transparent !important;
 }
 
 /* Progress bar */
@@ -787,7 +785,15 @@ const pressureLevels = [
     gap: 12px;
     overflow-x: auto;
     padding-bottom: 8px;
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.masters-scroll::-webkit-scrollbar {
+    display: none;
 }
 
 .master-card {
@@ -796,7 +802,7 @@ const pressureLevels = [
     align-items: center;
     gap: 8px;
     padding: 12px;
-    min-width: 80px;
+    min-width: 90px;
     background: rgba(255, 255, 255, 0.08);
     border: 2px solid transparent;
     border-radius: 16px;
@@ -810,15 +816,16 @@ const pressureLevels = [
 }
 
 .master-avatar {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
-    background: rgba(255, 107, 74, 0.3);
+    background: linear-gradient(135deg, rgba(255, 107, 74, 0.4), rgba(107, 139, 164, 0.4));
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
     font-weight: 600;
+    font-size: 20px;
     overflow: hidden;
 }
 
@@ -829,7 +836,8 @@ const pressureLevels = [
 }
 
 .master-name {
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 500;
     color: #fff;
     text-align: center;
     max-width: 70px;
