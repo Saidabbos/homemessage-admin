@@ -290,7 +290,7 @@ class MasterScheduleController extends Controller
   <!-- Weekly navigation -->
   <div class="flex justify-between mb-4">
     <button @click="navigateWeek(-1)">← Oldingi hafta</button>
-    <span>{{ calendar[0]?.date }} — {{ calendar[6]?.date }}</span>
+    <span>@@{{ calendar[0]?.date }} — @@{{ calendar[6]?.date }}</span>
     <button @click="navigateWeek(1)">Keyingi hafta →</button>
   </div>
 
@@ -300,19 +300,19 @@ class MasterScheduleController extends Controller
       <tr>
         <th>Vaqt</th>
         <th v-for="day in calendar" :key="day.date">
-          {{ day.day_short }}<br>{{ day.day_number }}
+          @{{ day.day_short }}<br>@{{ day.day_number }}
         </th>
       </tr>
     </thead>
     <tbody>
       <tr v-for="(slot, idx) in slots" :key="slot.id">
-        <td>{{ slot.start_time }} - {{ slot.end_time }}</td>
+        <td>@{{ slot.start_time }} - @{{ slot.end_time }}</td>
         <td v-for="day in calendar" :key="day.date + slot.id">
           <div
             :class="getStatusClass(day.slots[idx]?.status)"
             @click="handleSlotClick(slot, day)"
           >
-            {{ getStatusLabel(day.slots[idx]?.status) }}
+            @{{ getStatusLabel(day.slots[idx]?.status) }}
           </div>
         </td>
       </tr>

@@ -1,12 +1,12 @@
 {
-    "name": "Golden Touch",
-    "description": "Massage booking MVP with dispatcher workflow",
     "agents": [
         "junie",
         "claude"
     ],
+    "description": "Massage booking MVP with dispatcher workflow",
     "guidelines": true,
     "herd_mcp": false,
     "mcp": true,
+    "name": "Golden Touch",
     "sail": false
 }

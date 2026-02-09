@@ -94,6 +94,7 @@ class HomeController extends Controller
                 'id' => $master->id,
                 'name' => $master->name,
                 'photo_url' => $master->photo_url,
+                'service_type_ids' => $master->serviceTypes->pluck('id')->toArray(),
             ]),
         ]);
     }

@@ -38,6 +38,21 @@ const selectedMaster = computed(() =>
     props.masters?.find(m => m.id === booking.value.master_id)
 );
 
+// Filtered masters based on selected service
+const filteredMasters = computed(() => {
+    if (!booking.value.service_id) return props.masters || [];
+    return (props.masters || []).filter(m => 
+        m.service_type_ids?.includes(booking.value.service_id)
+    );
+});
+
+// Reset master when service changes
+watch(() => booking.value.service_id, () => {
+    booking.value.master_id = null;
+    booking.value.date = null;
+    booking.value.slot = null;
+});
+
 // All unique durations across all services
 const allDurations = computed(() => {
     const durations = new Set();
@@ -324,9 +339,12 @@ const pressureLevels = [
             <!-- Master selection -->
             <div class="ma-section">
                 <h3 class="section-label">Master tanlang</h3>
-                <div class="ma-scroll">
+                <div v-if="filteredMasters.length === 0" class="no-masters">
+                    Bu xizmat uchun master topilmadi
+                </div>
+                <div v-else class="ma-scroll">
                     <div 
-                        v-for="master in masters" 
+                        v-for="master in filteredMasters" 
                         :key="master.id"
                         class="ma-card"
                         :class="{ selected: booking.master_id === master.id }"
@@ -904,7 +922,8 @@ const pressureLevels = [
 }
 
 .loading-slots,
-.no-slots {
+.no-slots,
+.no-masters {
     padding: 24px;
     text-align: center;
     color: rgba(255, 255, 255, 0.6);
