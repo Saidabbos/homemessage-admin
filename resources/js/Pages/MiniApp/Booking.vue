@@ -202,9 +202,14 @@ const submitBooking = async () => {
     submitError.value = null;
     
     try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
         const response = await fetch('/api/miniapp/orders', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+            },
             body: JSON.stringify({
                 services: booking.value.services,
                 master_ids: booking.value.master_ids,
