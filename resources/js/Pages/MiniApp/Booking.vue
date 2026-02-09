@@ -41,19 +41,29 @@ const removePerson = () => {
     }
 };
 
-// Service selection
+// Service selection (radio behavior for 1 person, multi-select for 2+)
 const toggleService = (serviceId) => {
-    const index = booking.value.services.findIndex(s => s.service_id === serviceId);
-    if (index >= 0) {
-        booking.value.services.splice(index, 1);
+    const service = props.services?.find(s => s.id === serviceId);
+    const defaultDuration = service?.durations?.find(d => d.is_default) || service?.durations?.[0];
+    
+    if (booking.value.people_count === 1) {
+        // Radio button behavior - replace selection
+        booking.value.services = [{
+            service_id: serviceId,
+            duration_id: defaultDuration?.id || null,
+        }];
     } else {
-        if (booking.value.services.length < booking.value.people_count) {
-            const service = props.services?.find(s => s.id === serviceId);
-            const defaultDuration = service?.durations?.find(d => d.is_default) || service?.durations?.[0];
-            booking.value.services.push({
-                service_id: serviceId,
-                duration_id: defaultDuration?.id || null,
-            });
+        // Multi-select behavior
+        const index = booking.value.services.findIndex(s => s.service_id === serviceId);
+        if (index >= 0) {
+            booking.value.services.splice(index, 1);
+        } else {
+            if (booking.value.services.length < booking.value.people_count) {
+                booking.value.services.push({
+                    service_id: serviceId,
+                    duration_id: defaultDuration?.id || null,
+                });
+            }
         }
     }
 };
@@ -278,6 +288,25 @@ const selectedServiceSummary = computed(() => {
 
         <!-- Step 1: Service Selection -->
         <div v-if="step === 1" class="bk-content">
+            <!-- People Count (at top) -->
+            <div class="section">
+                <h3 class="section-title">Kishilar soni</h3>
+                <div class="people-control glass">
+                    <button class="people-btn glass-btn" :disabled="booking.people_count <= 1" @click="removePerson">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </button>
+                    <span class="people-num">{{ booking.people_count }} kishi</span>
+                    <button class="people-btn glass-btn" :disabled="booking.people_count >= 5" @click="addPerson">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
             <!-- Service Cards -->
             <div class="service-list">
                 <div 
@@ -340,24 +369,6 @@ const selectedServiceSummary = computed(() => {
                 </div>
             </div>
 
-            <!-- People Count -->
-            <div class="section">
-                <h3 class="section-title">Kishilar soni</h3>
-                <div class="people-control glass">
-                    <button class="people-btn glass-btn" :disabled="booking.people_count <= 1" @click="removePerson">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="5" y1="12" x2="19" y2="12"/>
-                        </svg>
-                    </button>
-                    <span class="people-num">{{ booking.people_count }} kishi</span>
-                    <button class="people-btn glass-btn" :disabled="booking.people_count >= 5" @click="addPerson">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19"/>
-                            <line x1="5" y1="12" x2="19" y2="12"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
         </div>
 
         <!-- Step 2: Master & Time Selection -->
