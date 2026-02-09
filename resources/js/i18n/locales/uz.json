@@ -1,6 +1,8 @@
 {
   "common": {
     "home": "Bosh sahifa",
+    "book_now": "Buyurtma berish",
+    "view_masters": "Masterlarni ko'rish",
     "save": "Saqlash",
     "saving": "Saqlanmoqda...",
     "update": "Yangilash",

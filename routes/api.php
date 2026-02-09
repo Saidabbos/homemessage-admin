@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\SlotController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ServiceTypeController;
 use App\Http\Controllers\Api\MiniAppOrderController;
+use App\Http\Controllers\Api\PublicOrderController;
 use App\Http\Controllers\Webhook\PaymeController;
 use App\Http\Controllers\Webhook\ClickController;
 
@@ -69,6 +70,7 @@ Route::prefix('orders')->group(function () {
 // Mini App Orders (authenticated via session)
 Route::middleware('web')->group(function () {
     Route::post('/miniapp/orders', [MiniAppOrderController::class, 'store']);
+    Route::post('/public/orders', [PublicOrderController::class, 'store']);
 });
 
 /*

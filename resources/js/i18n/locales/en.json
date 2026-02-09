@@ -1,6 +1,8 @@
 {
   "common": {
     "home": "Home",
+    "book_now": "Book Now",
+    "view_masters": "View Masters",
     "save": "Save",
     "saving": "Saving...",
     "update": "Update",

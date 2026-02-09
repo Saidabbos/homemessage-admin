@@ -2,6 +2,7 @@
 @import 'tailwindcss';
 @import './public/landing.css';
 @import './public/masters.css';
+@import './public/booking.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';

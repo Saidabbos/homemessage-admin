@@ -39,11 +39,11 @@ const props = defineProps({
                     Premium massage booking system. Experience relaxation and wellness.
                 </p>
                 <div class="flex justify-center gap-4">
-                    <Link href="/masters" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                        View Masters
+                    <Link href="/booking" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        {{ t('common.book_now') }}
                     </Link>
-                    <Link href="/admin/login" class="px-8 py-3 bg-slate-200 text-slate-900 rounded-lg hover:bg-slate-300">
-                        Admin Panel
+                    <Link href="/masters" class="px-8 py-3 bg-slate-200 text-slate-900 rounded-lg hover:bg-slate-300">
+                        {{ t('common.view_masters') }}
                     </Link>
                 </div>
             </div>

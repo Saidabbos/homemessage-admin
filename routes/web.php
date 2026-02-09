@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\PressureLevelController;
 use App\Http\Controllers\Public\LandingController;
 use App\Http\Controllers\Public\MasterController as PublicMasterController;
 use App\Http\Controllers\Public\CustomerAuthController;
+use App\Http\Controllers\Public\BookingController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\MiniApp\HomeController as MiniAppHomeController;
 
@@ -24,6 +25,8 @@ use App\Http\Controllers\MiniApp\HomeController as MiniAppHomeController;
 Route::get('/', LandingController::class)->name('public.landing');
 Route::get('/masters', [PublicMasterController::class, 'index'])->name('public.masters.index');
 Route::get('/masters/{master}', [PublicMasterController::class, 'show'])->name('public.masters.show');
+Route::get('/booking', [BookingController::class, 'index'])->name('public.booking');
+Route::get('/booking/success', [BookingController::class, 'success'])->name('public.booking.success');
 
 // Telegram Mini App routes
 Route::prefix('app')->group(function () {
