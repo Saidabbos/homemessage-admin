@@ -13,6 +13,8 @@ use App\Repositories\ServiceTypeRepository;
 use App\Services\MasterService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\Order;
+use Carbon\Carbon;
 
 class MasterController extends Controller
 {
@@ -81,5 +83,47 @@ class MasterController extends Controller
 
         return redirect()->route('admin.masters.index')
             ->with('success', 'Master o\'chirildi');
+    }
+
+    public function schedule(Request $request, Master $master)
+    {
+        $month = $request->get('month', now()->format('Y-m'));
+        $startDate = Carbon::parse($month . '-01')->startOfMonth();
+        $endDate = $startDate->copy()->endOfMonth();
+
+        // Get orders for this master in this month
+        $orders = Order::where('master_id', $master->id)
+            ->whereBetween('booking_date', [$startDate, $endDate])
+            ->whereNotIn('status', [Order::STATUS_CANCELLED])
+            ->with(['serviceType', 'duration', 'customer'])
+            ->orderBy('booking_date')
+            ->orderBy('arrival_window_start')
+            ->get();
+
+        // Group orders by date for calendar markers
+        $ordersByDate = $orders->groupBy(function ($order) {
+            return Carbon::parse($order->booking_date)->format('Y-m-d');
+        })->map(function ($dayOrders) {
+            return $dayOrders->map(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'time_start' => substr($order->arrival_window_start, 0, 5),
+                    'time_end' => substr($order->arrival_window_end, 0, 5),
+                    'duration_minutes' => $order->duration?->minutes ?? 60,
+                    'service_name' => $order->serviceType?->name ?? '-',
+                    'customer_name' => $order->customer?->name ?? '-',
+                    'status' => $order->status,
+                    'payment_status' => $order->payment_status,
+                ];
+            });
+        });
+
+        return Inertia::render('Admin/Masters/Schedule', [
+            'master' => $master,
+            'month' => $month,
+            'ordersByDate' => $ordersByDate,
+            'totalOrders' => $orders->count(),
+        ]);
     }
 }

@@ -28,11 +28,12 @@ class Master extends Model
         'shift_end',
         'pressure_levels',
         'status',
+        'token',
     ];
 
     public $translatable = ['bio'];
 
-    protected $appends = ['photo_url', 'full_name'];
+    protected $appends = ['photo_url', 'full_name', 'name'];
 
     protected function casts(): array
     {
@@ -79,6 +80,14 @@ class Master extends Model
     public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
+    }
+
+    /**
+     * Alias for full_name
+     */
+    public function getNameAttribute(): string
+    {
+        return $this->full_name;
     }
 
     /**

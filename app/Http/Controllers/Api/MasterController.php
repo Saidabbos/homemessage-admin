@@ -22,7 +22,7 @@ class MasterController extends Controller
     {
         $masters = Master::query()
             ->where('status', true)
-            ->with(['serviceTypes:id,name,price', 'oils:id,name'])
+            ->with(['serviceTypes:id,name', 'oils:id,name'])
             ->withCount(['orders as completed_orders_count' => function ($q) {
                 $q->where('status', 'COMPLETED');
             }])
@@ -51,7 +51,7 @@ class MasterController extends Controller
             ], 404);
         }
 
-        $master->load(['serviceTypes:id,name,price,duration', 'oils:id,name']);
+        $master->load(['serviceTypes:id,name', 'serviceTypes.durations', 'oils:id,name']);
         $master->loadCount(['orders as completed_orders_count' => function ($q) {
             $q->where('status', 'COMPLETED');
         }]);
@@ -127,8 +127,8 @@ class MasterController extends Controller
             'service_types' => $master->serviceTypes->map(fn($st) => [
                 'id' => $st->id,
                 'name' => $st->getTranslation('name', app()->getLocale()),
-                'price' => (float) $st->price,
             ]),
+            'service_type_ids' => $master->serviceTypes->pluck('id')->toArray(),
         ];
 
         if ($detailed) {

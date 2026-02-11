@@ -44,7 +44,7 @@ services:
       MYSQL_USER: ${DB_USERNAME:-laravel_user}
       MYSQL_PASSWORD: ${DB_PASSWORD:-laravel_password}
     ports:
-      - "${DB_PORT:-3306}:3306"
+      - "127.0.0.1:${DB_PORT:-3306}:3306"
     volumes:
       - hm_db_data:/var/lib/mysql
       - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf

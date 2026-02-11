@@ -88,12 +88,6 @@ class SlotController extends Controller
         $date = $validated['date'];
         $duration = $validated['duration'] ?? 60;
 
-        Log::info('SlotController@multiMaster: Finding slots for multiple masters', [
-            'master_ids' => $masterIds,
-            'date' => $date,
-            'duration' => $duration,
-        ]);
-
         if (empty($masterIds)) {
             return response()->json([
                 'success' => true,
@@ -101,43 +95,59 @@ class SlotController extends Controller
             ]);
         }
 
-        // Get available slots for each master
-        $allMasterSlots = [];
         $dateCarbon = Carbon::parse($date);
+        
+        // Get all slots for each master (including disabled)
+        $allMasterSlots = [];
         foreach ($masterIds as $masterId) {
             $master = Master::find($masterId);
             if (!$master) continue;
             
             $slots = $this->slotCalculationService->getSlotsForMaster($master, $dateCarbon, $duration);
-            $allMasterSlots[$masterId] = collect($slots)->pluck('start')->toArray();
-        }
-
-        // Find intersection - slots available for ALL masters
-        $commonSlots = null;
-        foreach ($allMasterSlots as $masterId => $slots) {
-            if ($commonSlots === null) {
-                $commonSlots = $slots;
-            } else {
-                $commonSlots = array_intersect($commonSlots, $slots);
+            foreach ($slots as $slot) {
+                $start = $slot['start'];
+                if (!isset($allMasterSlots[$start])) {
+                    $allMasterSlots[$start] = [
+                        'start' => $start,
+                        'end' => $slot['end'],
+                        'label' => $start,
+                        'display' => $slot['display'],
+                        'window_start' => $slot['window_start'],
+                        'window_end' => $slot['window_end'],
+                        'available' => true,
+                        'disabled' => false,
+                        'reason' => null,
+                        'masters_available' => [],
+                        'masters_disabled' => [],
+                    ];
+                }
+                
+                if ($slot['disabled']) {
+                    $allMasterSlots[$start]['masters_disabled'][] = $masterId;
+                    // If ANY master has this slot disabled, mark it disabled
+                    $allMasterSlots[$start]['disabled'] = true;
+                    $allMasterSlots[$start]['available'] = false;
+                    $allMasterSlots[$start]['reason'] = $slot['reason'];
+                } else {
+                    $allMasterSlots[$start]['masters_available'][] = $masterId;
+                }
             }
         }
-
-        // Format result with display (window format: "09:00–09:30")
-        $result = array_map(function ($start) {
-            $startTime = Carbon::parse($start);
-            $endTime = $startTime->copy()->addMinutes(30);
-            return [
-                'start' => $start,
-                'label' => $start,
-                'display' => $start . '–' . $endTime->format('H:i'),
-                'window_start' => $start,
-                'window_end' => $endTime->format('H:i'),
-            ];
-        }, array_values($commonSlots ?? []));
-
-        Log::info('SlotController@multiMaster: Found common slots', [
-            'count' => count($result),
-        ]);
+        
+        // Filter to only include slots that exist for ALL masters
+        $masterCount = count($masterIds);
+        $result = [];
+        foreach ($allMasterSlots as $slot) {
+            $totalMasters = count($slot['masters_available']) + count($slot['masters_disabled']);
+            if ($totalMasters === $masterCount) {
+                // Remove internal tracking arrays before response
+                unset($slot['masters_available'], $slot['masters_disabled']);
+                $result[] = $slot;
+            }
+        }
+        
+        // Sort by start time
+        usort($result, fn($a, $b) => strcmp($a['start'], $b['start']));
 
         return response()->json([
             'success' => true,

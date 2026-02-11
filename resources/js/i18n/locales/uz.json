@@ -210,7 +210,12 @@
     "enterPassword": "Parolni kiriting",
     "newPassword": "Yangi parol",
     "passwordHint": "Kamida 6 ta belgi",
-    "passwordChangeHint": "Bo'sh qoldiring agar o'zgartirmoqchi bo'lmasangiz"
+    "passwordChangeHint": "Bo'sh qoldiring agar o'zgartirmoqchi bo'lmasangiz",
+    "schedule": "Jadval",
+    "total_orders_month": "Ushbu oydagi buyurtmalar",
+    "select_day": "Kunni tanlang",
+    "click_day_to_view": "Buyurtmalarni ko'rish uchun kunni bosing",
+    "no_orders_day": "Bu kunda buyurtma yo'q"
   },
   "settings": {
     "title": "Sozlamalar",

@@ -299,7 +299,7 @@
 
 /* Services Section - Landing Page (scoped to avoid conflicts) */
 .services-section {
-    background: var(--cream);
+    background: transparent;
     padding: 6rem 2rem;
 }
 

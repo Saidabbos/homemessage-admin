@@ -5,86 +5,98 @@ namespace App\Http\Controllers\Webhook;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Services\TelegramNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Click Merchant API Controller
- *
- * Implements Click's SHOP-API protocol
- * @see https://docs.click.uz/en/click-api-request/
+ * Click Webhook Controller
+ * Handles callbacks from Click payment system
+ * 
+ * @see https://docs.click.uz/
  */
 class ClickController extends Controller
 {
-    // Error codes
+    // Click error codes
     private const SUCCESS = 0;
     private const SIGN_CHECK_FAILED = -1;
     private const INVALID_AMOUNT = -2;
     private const ACTION_NOT_FOUND = -3;
     private const ALREADY_PAID = -4;
-    private const ORDER_NOT_FOUND = -5;
-    private const TRANSACTION_ERROR = -6;
-    private const INVALID_ACTION = -7;
+    private const USER_NOT_FOUND = -5;
+    private const TRANSACTION_NOT_FOUND = -6;
+    private const FAILED_TO_UPDATE = -7;
+    private const ERROR_IN_REQUEST = -8;
     private const TRANSACTION_CANCELLED = -9;
 
+    public function __construct(
+        protected TelegramNotificationService $telegramService
+    ) {}
+
     /**
-     * Handle Click Prepare request
+     * Handle Click prepare request
      */
     public function prepare(Request $request): JsonResponse
     {
-        $data = $request->all();
-
-        Log::channel('click')->info('Click prepare request', $data);
+        Log::info('Click prepare received', $request->all());
 
         // Verify signature
-        if (!$this->verifySign($data, 'prepare')) {
-            return $this->response(self::SIGN_CHECK_FAILED, 'Sign check failed', $data);
+        if (!$this->verifySignature($request, 'prepare')) {
+            return $this->errorResponse(self::SIGN_CHECK_FAILED, 'Invalid signature', $request);
         }
+
+        $orderId = $request->input('merchant_trans_id');
+        $amount = (float) $request->input('amount');
+        $clickTransId = $request->input('click_trans_id');
 
         // Find order
-        $order = Order::find($data['merchant_trans_id'] ?? null);
+        $order = Order::find($orderId);
 
         if (!$order) {
-            return $this->response(self::ORDER_NOT_FOUND, 'Order not found', $data);
+            return $this->errorResponse(self::USER_NOT_FOUND, 'Order not found', $request);
         }
 
-        // Check amount
-        $amount = (float) ($data['amount'] ?? 0);
-        if ((float) $order->total_amount !== $amount) {
-            return $this->response(self::INVALID_AMOUNT, 'Invalid amount', $data);
+        if ($order->status === Order::STATUS_CANCELLED) {
+            return $this->errorResponse(self::TRANSACTION_CANCELLED, 'Order is cancelled', $request);
         }
 
-        // Check if already paid
-        if ($order->isPaid()) {
-            return $this->response(self::ALREADY_PAID, 'Already paid', $data);
+        if ($order->payment_status === Order::PAY_PAID) {
+            return $this->errorResponse(self::ALREADY_PAID, 'Order already paid', $request);
         }
 
-        // Check if cancelled
-        if ($order->isCancelled()) {
-            return $this->response(self::TRANSACTION_CANCELLED, 'Order cancelled', $data);
+        // Verify amount
+        if (abs($order->total_amount - $amount) > 1) {
+            return $this->errorResponse(self::INVALID_AMOUNT, 'Invalid amount', $request);
         }
 
-        // Create payment record
-        $payment = Payment::create([
-            'order_id' => $order->id,
-            'provider' => Payment::PROVIDER_CLICK,
-            'external_id' => $data['click_trans_id'] ?? null,
-            'amount' => $amount,
-            'currency' => 'UZS',
-            'status' => Payment::STATUS_PENDING,
-            'provider_response' => $data,
-        ]);
+        // Create or find payment
+        $payment = Payment::where('provider', Payment::PROVIDER_CLICK)
+            ->where('order_id', $orderId)
+            ->where('status', Payment::STATUS_PENDING)
+            ->first();
 
-        Log::channel('click')->info('Click prepare response', [
-            'click_trans_id' => $data['click_trans_id'] ?? null,
-            'merchant_trans_id' => $order->id,
-            'merchant_prepare_id' => $payment->id,
+        if (!$payment) {
+            $payment = Payment::create([
+                'order_id' => $orderId,
+                'provider' => Payment::PROVIDER_CLICK,
+                'external_id' => $clickTransId,
+                'amount' => $amount,
+                'currency' => 'UZS',
+                'status' => Payment::STATUS_PENDING,
+            ]);
+        } else {
+            $payment->update(['external_id' => $clickTransId]);
+        }
+
+        Log::info('Click prepare success', [
+            'payment_id' => $payment->id,
+            'order_id' => $orderId,
         ]);
 
         return response()->json([
-            'click_trans_id' => $data['click_trans_id'] ?? null,
-            'merchant_trans_id' => (string) $order->id,
+            'click_trans_id' => $clickTransId,
+            'merchant_trans_id' => $orderId,
             'merchant_prepare_id' => $payment->id,
             'error' => self::SUCCESS,
             'error_note' => 'Success',
@@ -92,64 +104,63 @@ class ClickController extends Controller
     }
 
     /**
-     * Handle Click Complete request
+     * Handle Click complete request
      */
     public function complete(Request $request): JsonResponse
     {
-        $data = $request->all();
-
-        Log::channel('click')->info('Click complete request', $data);
+        Log::info('Click complete received', $request->all());
 
         // Verify signature
-        if (!$this->verifySign($data, 'complete')) {
-            return $this->response(self::SIGN_CHECK_FAILED, 'Sign check failed', $data);
+        if (!$this->verifySignature($request, 'complete')) {
+            return $this->errorResponse(self::SIGN_CHECK_FAILED, 'Invalid signature', $request);
         }
+
+        $orderId = $request->input('merchant_trans_id');
+        $prepareId = $request->input('merchant_prepare_id');
+        $clickTransId = $request->input('click_trans_id');
+        $error = (int) $request->input('error');
 
         // Find payment
-        $payment = Payment::find($data['merchant_prepare_id'] ?? null);
+        $payment = Payment::find($prepareId);
 
         if (!$payment) {
-            return $this->response(self::TRANSACTION_ERROR, 'Transaction not found', $data);
+            return $this->errorResponse(self::TRANSACTION_NOT_FOUND, 'Transaction not found', $request);
         }
 
-        // Check if already completed
-        if ($payment->isPaid()) {
-            return response()->json([
-                'click_trans_id' => $data['click_trans_id'] ?? null,
-                'merchant_trans_id' => (string) $payment->order_id,
-                'merchant_confirm_id' => $payment->id,
-                'error' => self::SUCCESS,
-                'error_note' => 'Success',
-            ]);
+        if ($payment->status === Payment::STATUS_PAID) {
+            return $this->errorResponse(self::ALREADY_PAID, 'Already paid', $request);
         }
 
-        // Check error from Click
-        $error = (int) ($data['error'] ?? 0);
+        if ($payment->status === Payment::STATUS_CANCELLED) {
+            return $this->errorResponse(self::TRANSACTION_CANCELLED, 'Transaction cancelled', $request);
+        }
 
+        // Check if Click reports error
         if ($error < 0) {
-            $payment->markAsCancelled('Click error: ' . ($data['error_note'] ?? 'Unknown'));
-
-            return response()->json([
-                'click_trans_id' => $data['click_trans_id'] ?? null,
-                'merchant_trans_id' => (string) $payment->order_id,
-                'merchant_confirm_id' => $payment->id,
-                'error' => $error,
-                'error_note' => $data['error_note'] ?? 'Transaction cancelled',
-            ]);
+            $payment->markAsCancelled('Click error: ' . $error);
+            
+            return $this->errorResponse($error, 'Payment failed', $request);
         }
 
         // Mark as paid
-        $payment->markAsPaid($data['click_trans_id'] ?? null);
+        $payment->update(['external_id' => $clickTransId]);
+        $payment->markAsPaid($clickTransId);
 
-        Log::channel('click')->info('Click complete response', [
-            'click_trans_id' => $data['click_trans_id'] ?? null,
-            'merchant_trans_id' => $payment->order_id,
-            'merchant_confirm_id' => $payment->id,
+        // Send notification
+        try {
+            $this->telegramService->notifyPaid($payment->order);
+        } catch (\Exception $e) {
+            Log::warning('Failed to send payment notification', ['error' => $e->getMessage()]);
+        }
+
+        Log::info('Click complete success', [
+            'payment_id' => $payment->id,
+            'order_id' => $orderId,
         ]);
 
         return response()->json([
-            'click_trans_id' => $data['click_trans_id'] ?? null,
-            'merchant_trans_id' => (string) $payment->order_id,
+            'click_trans_id' => $clickTransId,
+            'merchant_trans_id' => $orderId,
             'merchant_confirm_id' => $payment->id,
             'error' => self::SUCCESS,
             'error_note' => 'Success',
@@ -159,43 +170,54 @@ class ClickController extends Controller
     /**
      * Verify Click signature
      */
-    protected function verifySign(array $data, string $action): bool
+    protected function verifySignature(Request $request, string $action): bool
     {
         $secretKey = config('services.click.secret_key');
-
-        if ($action === 'prepare') {
-            $signString = $data['click_trans_id']
-                . $data['service_id']
-                . $secretKey
-                . $data['merchant_trans_id']
-                . $data['amount']
-                . $data['action']
-                . $data['sign_time'];
-        } else {
-            $signString = $data['click_trans_id']
-                . $data['service_id']
-                . $secretKey
-                . $data['merchant_trans_id']
-                . $data['merchant_prepare_id']
-                . $data['amount']
-                . $data['action']
-                . $data['sign_time'];
+        
+        if (empty($secretKey)) {
+            Log::warning('Click secret key not configured');
+            return false;
         }
 
-        $expectedSign = md5($signString);
+        $signString = $request->input('click_trans_id') .
+            $request->input('service_id') .
+            $secretKey .
+            $request->input('merchant_trans_id') .
+            ($action === 'complete' ? $request->input('merchant_prepare_id') : '') .
+            $request->input('amount') .
+            $request->input('action') .
+            $request->input('sign_time');
 
-        return $expectedSign === ($data['sign_string'] ?? '');
+        $expectedSign = md5($signString);
+        $actualSign = $request->input('sign_string');
+
+        if ($expectedSign !== $actualSign) {
+            Log::warning('Click signature mismatch', [
+                'expected' => $expectedSign,
+                'actual' => $actualSign,
+            ]);
+            return false;
+        }
+
+        return true;
     }
 
     /**
-     * Create response
+     * Return error response
      */
-    protected function response(int $error, string $message, array $data): JsonResponse
+    protected function errorResponse(int $code, string $message, Request $request): JsonResponse
     {
+        Log::error('Click webhook error', [
+            'code' => $code,
+            'message' => $message,
+            'request' => $request->all(),
+        ]);
+
         return response()->json([
-            'click_trans_id' => $data['click_trans_id'] ?? null,
-            'merchant_trans_id' => $data['merchant_trans_id'] ?? '',
-            'error' => $error,
+            'click_trans_id' => $request->input('click_trans_id'),
+            'merchant_trans_id' => $request->input('merchant_trans_id'),
+            'merchant_prepare_id' => $request->input('merchant_prepare_id'),
+            'error' => $code,
             'error_note' => $message,
         ]);
     }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Repositories\MasterRepository;
 use App\Repositories\ServiceTypeRepository;
+use App\Services\PaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -16,6 +17,7 @@ class HomeController extends Controller
     public function __construct(
         protected ServiceTypeRepository $serviceTypeRepository,
         protected MasterRepository $masterRepository,
+        protected PaymentService $paymentService,
     ) {}
 
     /**
@@ -92,8 +94,9 @@ class HomeController extends Controller
             ]),
             'masters' => $masters->map(fn ($master) => [
                 'id' => $master->id,
-                'name' => $master->name,
+                'name' => $master->full_name,
                 'photo_url' => $master->photo_url,
+                'experience' => $master->experience_years,
                 'service_type_ids' => $master->serviceTypes->pluck('id')->toArray(),
             ]),
         ]);
@@ -108,7 +111,7 @@ class HomeController extends Controller
         $order = null;
         
         if ($orderNumber) {
-            $order = \App\Models\Order::with(['master', 'serviceType'])
+            $order = \App\Models\Order::with(['master', 'serviceType', 'duration'])
                 ->where('order_number', $orderNumber)
                 ->where('customer_id', Auth::id())
                 ->first();
@@ -122,6 +125,10 @@ class HomeController extends Controller
                 'arrival_window_start' => $order->arrival_window_start,
                 'arrival_window_end' => $order->arrival_window_end,
                 'total_price' => $order->total_amount,
+                'payment_status' => $order->payment_status,
+                'payment_status_label' => $order->payment_status_label,
+                'payment_status_color' => $order->payment_status_color,
+                'can_be_paid' => $order->canBePaid(),
                 'duration' => $order->duration?->duration ?? 60,
                 'master' => $order->master ? [
                     'name' => $order->master->name,
@@ -130,6 +137,10 @@ class HomeController extends Controller
                     'name' => $order->serviceType->name,
                 ] : null,
             ] : null,
+            'payment' => [
+                'enabled' => $this->paymentService->isEnabled(),
+                'providers' => $this->paymentService->getAvailableProviders(),
+            ],
         ]);
     }
 

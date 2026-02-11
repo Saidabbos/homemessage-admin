@@ -210,7 +210,12 @@
     "enterPassword": "Enter password",
     "newPassword": "New password",
     "passwordHint": "Minimum 6 characters",
-    "passwordChangeHint": "Leave empty if you don't want to change"
+    "passwordChangeHint": "Leave empty if you don't want to change",
+    "schedule": "Schedule",
+    "total_orders_month": "Orders this month",
+    "select_day": "Select a day",
+    "click_day_to_view": "Click on a day to view orders",
+    "no_orders_day": "No orders on this day"
   },
   "settings": {
     "title": "Settings",

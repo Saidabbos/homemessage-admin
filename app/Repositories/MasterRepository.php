@@ -86,8 +86,8 @@ class MasterRepository extends BaseRepository
                 'service_types' => $master->serviceTypes->map(fn($st) => [
                     'id' => $st->id,
                     'name' => $st->getTranslation('name', app()->getLocale()),
-                    'price' => (float) $st->price,
                 ]),
+                'service_type_ids' => $master->serviceTypes->pluck('id')->toArray(),
             ]);
     }
 }

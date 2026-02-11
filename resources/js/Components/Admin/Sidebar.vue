@@ -217,6 +217,23 @@ const toggleMenu = (menu) => {
           </Link>
         </li>
 
+        <li>
+          <Link
+            href="/admin/ratings"
+            :class="[
+              'flex items-center px-3 py-2 rounded text-sm transition-colors',
+              isActive('admin.ratings')
+                ? 'bg-[#007bff] text-white'
+                : 'hover:bg-[#495057]'
+            ]"
+          >
+            <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            Baholar
+          </Link>
+        </li>
+
         <!-- Hisobotlar Section -->
         <li class="mt-4">
           <p class="px-3 text-xs uppercase text-[#6c757d] font-semibold tracking-wider mb-2">Hisobotlar</p>

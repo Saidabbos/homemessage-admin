@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ServiceTypeController;
 use App\Http\Controllers\Api\MiniAppOrderController;
 use App\Http\Controllers\Api\PublicOrderController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Webhook\PaymeController;
 use App\Http\Controllers\Webhook\ClickController;
 
@@ -74,6 +75,17 @@ Route::middleware('web')->group(function () {
     Route::post('/public/orders', [PublicOrderController::class, 'store']);
 });
 
+// Payment API
+Route::prefix('payment')->group(function () {
+    Route::get('/config', [PaymentController::class, 'config']);
+    
+    Route::middleware('web')->group(function () {
+        Route::post('/create', [PaymentController::class, 'create']);
+        Route::get('/status/{transactionId}', [PaymentController::class, 'status']);
+        Route::post('/cancel', [PaymentController::class, 'cancel']);
+    });
+});
+
 /*
 |--------------------------------------------------------------------------
 | Payment Webhook Routes
@@ -91,4 +103,7 @@ Route::prefix('webhook')->group(function () {
     // Click
     Route::post('/click/prepare', [ClickController::class, 'prepare']);
     Route::post('/click/complete', [ClickController::class, 'complete']);
+
+    // Telegram
+    Route::post('/telegram', [\App\Http\Controllers\Webhook\TelegramController::class, 'webhook']);
 });

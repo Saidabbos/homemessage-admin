@@ -89,18 +89,19 @@ class SlotCalculationService
                 $peopleCount
             );
             
-            if ($availability['available']) {
-                $slots[] = [
-                    'start' => $windowStart->format('H:i'),
-                    'end' => $windowEnd->format('H:i'),
-                    'label' => $windowStart->format('H:i'),
-                    'window_start' => $windowStart->format('H:i'),
-                    'window_end' => $windowEnd->format('H:i'),
-                    'display' => $windowStart->format('H:i') . '–' . $windowEnd->format('H:i'),
-                    'available_durations' => $availability['available_durations'],
-                    'master_id' => $master->id,
-                ];
-            }
+            $slots[] = [
+                'start' => $windowStart->format('H:i'),
+                'end' => $windowEnd->format('H:i'),
+                'label' => $windowStart->format('H:i'),
+                'window_start' => $windowStart->format('H:i'),
+                'window_end' => $windowEnd->format('H:i'),
+                'display' => $windowStart->format('H:i') . '–' . $windowEnd->format('H:i'),
+                'available' => $availability['available'],
+                'disabled' => !$availability['available'],
+                'reason' => $availability['reason'] ?? null,
+                'available_durations' => $availability['available_durations'] ?? [],
+                'master_id' => $master->id,
+            ];
             
             $current->addMinutes(self::SLOT_INTERVAL);
         }
@@ -172,7 +173,7 @@ class SlotCalculationService
         // A. Oldingi buyurtmadan keyin yetib kelish
         $prevOrder = $this->findPreviousOrder($orders, $windowStart);
         if ($prevOrder) {
-            $prevReadyToLeave = $this->getOrderEndTime($prevOrder)->addMinutes(self::POST);
+            $prevReadyToLeave = $this->getOrderEndTime($prevOrder, $date)->addMinutes(self::POST);
             $canArriveBy = $prevReadyToLeave->copy()->addMinutes(self::TRAVEL);
             
             if ($canArriveBy->gt($arrivalLatest)) {
@@ -333,7 +334,11 @@ class SlotCalculationService
     protected function findPreviousOrder(Collection $orders, Carbon $time): ?Order
     {
         return $orders
-            ->filter(fn ($order) => Carbon::parse($order->arrival_window_end)->lt($time))
+            ->filter(function ($order) use ($time) {
+                $orderDate = Carbon::parse($order->booking_date)->format('Y-m-d');
+                $orderEnd = Carbon::parse($orderDate . ' ' . $order->arrival_window_end);
+                return $orderEnd->lt($time);
+            })
             ->sortByDesc('arrival_window_end')
             ->first();
     }
@@ -344,7 +349,11 @@ class SlotCalculationService
     protected function findNextOrder(Collection $orders, Carbon $time): ?Order
     {
         return $orders
-            ->filter(fn ($order) => Carbon::parse($order->arrival_window_start)->gte($time))
+            ->filter(function ($order) use ($time) {
+                $orderDate = Carbon::parse($order->booking_date)->format('Y-m-d');
+                $orderStart = Carbon::parse($orderDate . ' ' . $order->arrival_window_start);
+                return $orderStart->gte($time);
+            })
             ->sortBy('arrival_window_start')
             ->first();
     }
@@ -352,13 +361,14 @@ class SlotCalculationService
     /**
      * Buyurtma tugash vaqtini olish
      */
-    protected function getOrderEndTime(Order $order): Carbon
+    protected function getOrderEndTime(Order $order, ?Carbon $date = null): Carbon
     {
-        $arrivalLatest = Carbon::parse($order->arrival_window_end);
-        $duration = $order->serviceType?->duration ?? 60;
-        $peopleCount = $order->people_count ?? 1;
+        // Use order's booking_date if date not provided
+        $bookingDate = $date ?? Carbon::parse($order->booking_date);
+        $arrivalLatest = Carbon::parse($bookingDate->format('Y-m-d') . ' ' . $order->arrival_window_end);
         
-        $visitCore = $this->calculateVisitCore($duration, $peopleCount);
+        $duration = $order->duration?->minutes ?? $order->serviceType?->duration ?? 60;
+        $peopleCount = $order->people_count ?? 1;
         
         return $arrivalLatest->copy()->addMinutes(self::PRE + $this->calculateMassageTotal($duration, $peopleCount));
     }
@@ -369,7 +379,7 @@ class SlotCalculationService
     protected function slotsOverlap(Carbon $start1, Carbon $end1, Order $order, Carbon $date): bool
     {
         $orderStart = Carbon::parse($date->format('Y-m-d') . ' ' . $order->arrival_window_start);
-        $orderBusyEnd = $this->getOrderEndTime($order)->addMinutes(self::POST);
+        $orderBusyEnd = $this->getOrderEndTime($order, $date)->addMinutes(self::POST);
         
         // Travel vaqtini ham hisobga olamiz
         $orderBusyStart = $orderStart->copy()->subMinutes(self::TRAVEL);

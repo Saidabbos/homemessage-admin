@@ -111,7 +111,7 @@ const selectedMasters = computed(() =>
 const filteredMasters = computed(() => {
     if (selectedServiceIds.value.length === 0) return props.masters || [];
     return (props.masters || []).filter(m => 
-        selectedServiceIds.value.every(serviceId => m.service_type_ids?.includes(serviceId))
+        selectedServiceIds.value.some(serviceId => m.service_type_ids?.includes(serviceId))
     );
 });
 
@@ -155,15 +155,19 @@ const availableSlots = ref([]);
 const loadingSlots = ref(false);
 
 const loadSlots = async () => {
-    if (!booking.value.date || booking.value.master_ids.length !== booking.value.people_count) {
+    if (!booking.value.date || booking.value.master_ids.length === 0) {
         availableSlots.value = [];
         return;
     }
     
     loadingSlots.value = true;
     try {
-        const duration = getSelectedDuration(booking.value.services[0]?.service_id)?.duration || 60;
+        // Use first selected service duration (each master does one service)
+        const firstDuration = getSelectedDuration(booking.value.services[0]?.service_id);
+        const duration = firstDuration?.duration || 60;
         const masterIds = booking.value.master_ids.join(',');
+        
+        // Use multi-master endpoint (works for single master too)
         const response = await fetch(`/api/slots/multi-master?date=${booking.value.date}&duration=${duration}&master_ids=${masterIds}`);
         const data = await response.json();
         availableSlots.value = data.data?.slots || data.slots || [];
@@ -173,10 +177,16 @@ const loadSlots = async () => {
     loadingSlots.value = false;
 };
 
-watch([() => booking.value.date, () => booking.value.master_ids.length], () => {
+// Watch date and master_ids for slot loading
+watch(() => booking.value.date, () => {
     booking.value.slot = null;
     loadSlots();
 });
+
+watch(() => booking.value.master_ids, () => {
+    booking.value.slot = null;
+    loadSlots();
+}, { deep: true });
 
 // Format
 const formatPrice = (price) => {
@@ -186,12 +196,12 @@ const formatPrice = (price) => {
 
 // Step navigation
 const canProceedStep1 = computed(() => 
-    booking.value.services.length === booking.value.people_count && 
+    booking.value.services.length >= 1 && 
     booking.value.services.every(s => s.service_id && s.duration_id)
 );
 
 const canProceedStep2 = computed(() => 
-    booking.value.master_ids.length === booking.value.people_count && 
+    booking.value.master_ids.length >= 1 && 
     booking.value.date && 
     booking.value.slot
 );
@@ -226,7 +236,7 @@ const submitBooking = async () => {
                 'X-CSRF-TOKEN': csrfToken,
             },
             body: JSON.stringify({
-                master_id: booking.value.master_ids[0],
+                master_ids: booking.value.master_ids,
                 service_type_id: booking.value.services[0]?.service_id,
                 duration_id: booking.value.services[0]?.duration_id,
                 date: booking.value.date,
@@ -381,46 +391,7 @@ const selectedServiceSummary = computed(() => {
 
         <!-- Step 2: Master & Time Selection -->
         <div v-if="step === 2" class="bk-content">
-            <!-- Date Selection -->
-            <div class="section">
-                <h3 class="section-title">Sana tanlang</h3>
-                <div class="date-row">
-                    <button 
-                        v-for="d in availableDates" 
-                        :key="d.value"
-                        class="date-chip glass"
-                        :class="{ selected: booking.date === d.value }"
-                        @click="booking.date = d.value"
-                    >
-                        <span class="date-day">{{ d.dayName }}</span>
-                        <span class="date-num">{{ d.display }}</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Time Slots -->
-            <div class="section">
-                <h3 class="section-title">Vaqt tanlang</h3>
-                <div v-if="!booking.date" class="empty-hint">Avval sanani tanlang</div>
-                <div v-else-if="booking.master_ids.length !== booking.people_count" class="empty-hint">Avval ustani tanlang</div>
-                <div v-else-if="loadingSlots" class="loading">
-                    <div class="spinner"></div>
-                </div>
-                <div v-else-if="availableSlots.length === 0" class="empty-hint">Bu kunga vaqt yo'q</div>
-                <div v-else class="slots-grid">
-                    <button 
-                        v-for="slot in availableSlots" 
-                        :key="slot.start"
-                        class="slot-chip glass"
-                        :class="{ selected: booking.slot === slot.start }"
-                        @click="booking.slot = slot.start"
-                    >
-                        {{ slot.display }}
-                    </button>
-                </div>
-            </div>
-
-            <!-- Master Selection -->
+            <!-- Master Selection (FIRST) -->
             <div class="section">
                 <h3 class="section-title">Ustani tanlang</h3>
                 <div v-if="filteredMasters.length === 0" class="empty-hint">Bu xizmat uchun usta topilmadi</div>
@@ -445,6 +416,49 @@ const selectedServiceSummary = computed(() => {
                             {{ isMasterSelected(master.id) ? 'Tanlangan' : 'Tanlash' }}
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Date Selection -->
+            <div class="section">
+                <h3 class="section-title">Sana tanlang</h3>
+                <div class="date-row">
+                    <button 
+                        v-for="d in availableDates" 
+                        :key="d.value"
+                        class="date-chip glass"
+                        :class="{ selected: booking.date === d.value }"
+                        @click="booking.date = d.value"
+                    >
+                        <span class="date-day">{{ d.dayName }}</span>
+                        <span class="date-num">{{ d.display }}</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Time Slots -->
+            <div class="section">
+                <h3 class="section-title">Vaqt tanlang</h3>
+                <div v-if="booking.master_ids.length === 0" class="empty-hint">Avval ustani tanlang</div>
+                <div v-else-if="!booking.date" class="empty-hint">Avval sanani tanlang</div>
+                <div v-else-if="loadingSlots" class="loading">
+                    <div class="spinner"></div>
+                </div>
+                <div v-else-if="availableSlots.length === 0" class="empty-hint">Bu kunga vaqt yo'q</div>
+                <div v-else class="slots-grid">
+                    <button 
+                        v-for="slot in availableSlots" 
+                        :key="slot.start"
+                        class="slot-chip glass"
+                        :class="{ 
+                            selected: booking.slot === slot.start,
+                            disabled: slot.disabled 
+                        }"
+                        :disabled="slot.disabled"
+                        @click="!slot.disabled && (booking.slot = slot.start)"
+                    >
+                        {{ slot.display }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -511,7 +525,7 @@ const selectedServiceSummary = computed(() => {
                 <div class="summary-text">
                     <span class="summary-label">Tanlangan:</span>
                     <span class="summary-value">{{ selectedServiceSummary }}</span>
-                    <span class="summary-detail">{{ slotDisplay }}, {{ selectedMasters[0]?.name }}</span>
+                    <span class="summary-detail">{{ slotDisplay }}, {{ selectedMasters.map(m => m.name).join(', ') }}</span>
                 </div>
                 <div class="summary-price">
                     <span class="price-label">Narxi:</span>
@@ -919,6 +933,18 @@ const selectedServiceSummary = computed(() => {
     color: #1a2a3a;
     font-weight: 600;
     box-shadow: 0 4px 20px rgba(184, 163, 105, 0.4);
+}
+
+.slot-chip.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    text-decoration: line-through;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.slot-chip.disabled:hover {
+    transform: none;
+    background: rgba(255, 255, 255, 0.03);
 }
 
 /* Master List */

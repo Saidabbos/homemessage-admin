@@ -12,7 +12,12 @@ class OrderService
 {
     public function __construct(
         protected OrderRepository $orderRepository,
-    ) {}
+        protected ?TelegramNotificationService $telegramService = null,
+        protected ?TelegramBotService $telegramBotService = null,
+    ) {
+        $this->telegramService = $telegramService ?? app(TelegramNotificationService::class);
+        $this->telegramBotService = $telegramBotService ?? app(TelegramBotService::class);
+    }
 
     /**
      * Update order status
@@ -69,7 +74,11 @@ class OrderService
             'new_status' => $newStatus,
         ]);
 
-        return $order->fresh();
+        // Auto-send Telegram notifications on status change
+        $order = $order->fresh();
+        $this->sendStatusChangeNotifications($order, $oldStatus, $newStatus);
+
+        return $order;
     }
 
     /**
@@ -182,5 +191,155 @@ class OrderService
             ],
             default => [],
         };
+    }
+
+    /**
+     * Save confirmation form (Block C - Анкета подтверждения)
+     */
+    public function saveConfirmation(Order $order, array $data): Order
+    {
+        Log::info('OrderService: Saving confirmation form', [
+            'order_id' => $order->id,
+            'call_outcome' => $data['call_outcome'] ?? null,
+        ]);
+
+        DB::transaction(function () use ($order, $data) {
+            $order->update([
+                'call_outcome' => $data['call_outcome'] ?? $order->call_outcome,
+                'conf_entrance' => $data['conf_entrance'] ?? $order->conf_entrance,
+                'conf_floor' => $data['conf_floor'] ?? $order->conf_floor,
+                'conf_elevator' => $data['conf_elevator'] ?? false,
+                'conf_parking' => $data['conf_parking'] ?? $order->conf_parking,
+                'conf_landmark' => $data['conf_landmark'] ?? $order->conf_landmark,
+                'conf_onsite_phone' => $data['conf_onsite_phone'] ?? $order->conf_onsite_phone,
+                'conf_constraints' => $data['conf_constraints'] ?? $order->conf_constraints,
+                'conf_space_ok' => $data['conf_space_ok'] ?? false,
+                'conf_pets' => $data['conf_pets'] ?? false,
+                'conf_note_to_master' => $data['conf_note_to_master'] ?? $order->conf_note_to_master,
+                'confirmed_by' => auth()->id(),
+                'confirmed_at' => now(),
+            ]);
+
+            // Log the confirmation
+            OrderLog::log(
+                $order,
+                'confirmed',
+                null,
+                $data['call_outcome'] ?? 'confirmed',
+                'Анкета заполнена'
+            );
+        });
+
+        // Check if ready to send to therapists
+        $this->checkAndSendReadyNotification($order->fresh());
+
+        Log::info('OrderService: Confirmation saved successfully', ['order_id' => $order->id]);
+
+        return $order->fresh();
+    }
+
+    /**
+     * Check if order is ready and send notification to therapists
+     */
+    public function checkAndSendReadyNotification(Order $order): bool
+    {
+        if (!$order->isReadyForTherapist()) {
+            Log::debug('OrderService: Order not ready for therapist notification', [
+                'order_id' => $order->id,
+                'call_outcome' => $order->call_outcome,
+                'payment_status' => $order->payment_status,
+                'status' => $order->status,
+                'has_address' => !empty($order->address),
+                'ready_sent_at' => $order->ready_sent_at,
+            ]);
+            return false;
+        }
+
+        Log::info('OrderService: Sending READY notification to therapists', ['order_id' => $order->id]);
+
+        $result = $this->telegramService->notifyReady($order);
+
+        if ($result) {
+            Log::info('OrderService: READY notification sent successfully', ['order_id' => $order->id]);
+        } else {
+            Log::warning('OrderService: Failed to send READY notification', ['order_id' => $order->id]);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get call outcome options
+     */
+    public function getCallOutcomeOptions(): array
+    {
+        return [
+            ['value' => 'pending', 'label' => 'Kutilmoqda'],
+            ['value' => 'confirmed', 'label' => 'Tasdiqlandi'],
+            ['value' => 'reschedule', 'label' => 'Qayta rejalashtirish'],
+            ['value' => 'no_answer', 'label' => 'Javob bermadi'],
+            ['value' => 'cancelled', 'label' => 'Bekor qilindi'],
+        ];
+    }
+
+    /**
+     * Send Telegram notifications when order status changes
+     */
+    protected function sendStatusChangeNotifications(Order $order, string $oldStatus, string $newStatus): void
+    {
+        // Load relations for notifications
+        $order->load(['customer', 'master.user']);
+
+        // IN_PROGRESS - Session started
+        if ($newStatus === Order::STATUS_IN_PROGRESS && $oldStatus !== Order::STATUS_IN_PROGRESS) {
+            Log::info('OrderService: Sending session start notifications', ['order_id' => $order->id]);
+            
+            try {
+                // Notify client
+                $clientResult = $this->telegramBotService->notifyClientSessionStart($order);
+                Log::info('OrderService: Client session start notification', [
+                    'order_id' => $order->id,
+                    'result' => $clientResult ? 'sent' : 'skipped (no telegram_id)',
+                ]);
+
+                // Notify master
+                $masterResult = $this->telegramBotService->notifyMasterSessionStart($order);
+                Log::info('OrderService: Master session start notification', [
+                    'order_id' => $order->id,
+                    'result' => $masterResult ? 'sent' : 'skipped (no telegram_id)',
+                ]);
+            } catch (\Exception $e) {
+                Log::error('OrderService: Failed to send session start notifications', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        // COMPLETED - Session ended
+        if ($newStatus === Order::STATUS_COMPLETED && $oldStatus !== Order::STATUS_COMPLETED) {
+            Log::info('OrderService: Sending session end notifications', ['order_id' => $order->id]);
+            
+            try {
+                // Notify client (with rating button)
+                $clientResult = $this->telegramBotService->notifyClientSessionEnd($order);
+                Log::info('OrderService: Client session end notification', [
+                    'order_id' => $order->id,
+                    'result' => $clientResult ? 'sent' : 'skipped (no telegram_id)',
+                ]);
+
+                // Notify master (with rating button)
+                $masterResult = $this->telegramBotService->notifyMasterSessionEnd($order);
+                Log::info('OrderService: Master session end notification', [
+                    'order_id' => $order->id,
+                    'result' => $masterResult ? 'sent' : 'skipped (no telegram_id)',
+                ]);
+            } catch (\Exception $e) {
+                Log::error('OrderService: Failed to send session end notifications', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
     }
 }

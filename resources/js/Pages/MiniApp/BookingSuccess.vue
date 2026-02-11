@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import MiniAppLayout from '@/Layouts/MiniAppLayout.vue';
 
@@ -6,6 +7,7 @@ defineOptions({ layout: MiniAppLayout });
 
 const props = defineProps({
     order: Object,
+    payment: Object,
 });
 
 const formatPrice = (price) => new Intl.NumberFormat('uz-UZ').format(price);
@@ -25,6 +27,56 @@ const slotDisplay = (start) => {
     const endHours = hours + Math.floor(endMinutes / 60);
     const endMins = endMinutes % 60;
     return `${start} - ${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
+};
+
+// Payment
+const paymentLoading = ref(false);
+const paymentError = ref(null);
+
+const initiatePayment = async (provider) => {
+    paymentLoading.value = true;
+    paymentError.value = null;
+    
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        const response = await fetch('/api/payment/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                order_number: props.order?.order_number,
+                provider: provider,
+            }),
+        });
+        
+        const result = await response.json();
+        
+        if (result.success && result.data?.payment_url) {
+            window.location.href = result.data.payment_url;
+        } else {
+            paymentError.value = result.message || "To'lov yaratishda xatolik";
+        }
+    } catch (e) {
+        console.error('Payment failed:', e);
+        paymentError.value = "To'lov tizimida xatolik";
+    }
+    
+    paymentLoading.value = false;
+};
+
+const getStatusColor = (status) => {
+    const colors = {
+        'NOT_PAID': '#6B7280',
+        'PENDING': '#F59E0B',
+        'PAID': '#10B981',
+        'FAILED': '#EF4444',
+        'REFUNDED': '#F97316',
+        'CANCELLED': '#EF4444',
+    };
+    return colors[status] || '#6B7280';
 };
 </script>
 
@@ -51,8 +103,19 @@ const slotDisplay = (start) => {
 
         <!-- Success Message -->
         <h2 class="success-message">Buyurtma qabul qilindi!</h2>
-        <p class="order-number">HM-{{ order?.order_number || order?.id }}</p>
+        <p class="order-number">{{ order?.order_number }}</p>
         <p class="success-hint">Tez orada operator siz bilan bog'lanadi</p>
+
+        <!-- Payment Status Badge -->
+        <div 
+            class="payment-badge"
+            :style="{ backgroundColor: getStatusColor(order?.payment_status) + '20', borderColor: getStatusColor(order?.payment_status) }"
+        >
+            <span class="badge-dot" :style="{ backgroundColor: getStatusColor(order?.payment_status) }"></span>
+            <span class="badge-text" :style="{ color: getStatusColor(order?.payment_status) }">
+                {{ order?.payment_status_label || "To'lanmagan" }}
+            </span>
+        </div>
 
         <!-- Order Details Box -->
         <div class="details-box glass">
@@ -84,13 +147,43 @@ const slotDisplay = (start) => {
             </div>
         </div>
 
+        <!-- Payment Section -->
+        <div v-if="payment?.enabled && order?.can_be_paid && payment?.providers?.length > 0" class="payment-section glass">
+            <h3 class="payment-title">Onlayn to'lov</h3>
+            
+            <div v-if="paymentError" class="payment-error">
+                {{ paymentError }}
+            </div>
+            
+            <div class="payment-providers">
+                <button
+                    v-for="provider in payment.providers"
+                    :key="provider.id"
+                    class="provider-btn"
+                    :disabled="paymentLoading"
+                    @click="initiatePayment(provider.id)"
+                >
+                    <img v-if="provider.icon" :src="provider.icon" :alt="provider.name" class="provider-icon" />
+                    <span>{{ provider.name }}</span>
+                </button>
+            </div>
+            
+            <p class="payment-hint">Yoki xizmat tugagandan keyin naqd to'lang</p>
+        </div>
+
+        <!-- Payment Disabled Notice -->
+        <div v-else-if="!payment?.enabled" class="payment-notice glass">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                <line x1="1" y1="10" x2="23" y2="10"/>
+            </svg>
+            <span>Xizmat tugagandan keyin naqd to'lash</span>
+        </div>
+
         <!-- Action Buttons -->
         <div class="action-buttons">
             <button class="btn-outline glass" @click="router.visit('/app')">
                 Bosh sahifaga
-            </button>
-            <button class="btn-primary" @click="router.visit('/app/orders')">
-                Buyurtmalarim
             </button>
         </div>
 
@@ -211,7 +304,7 @@ const slotDisplay = (start) => {
 .success-hint {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.5);
-    margin: 0 0 32px;
+    margin: 0 0 16px;
     text-align: center;
     animation: fadeInUp 0.5s ease 0.4s both;
     position: relative;
@@ -223,12 +316,37 @@ const slotDisplay = (start) => {
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* Payment Badge */
+.payment-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid;
+    margin-bottom: 24px;
+    animation: fadeInUp 0.5s ease 0.45s both;
+    position: relative;
+    z-index: 1;
+}
+
+.badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.badge-text {
+    font-size: 14px;
+    font-weight: 600;
+}
+
 /* Details Box */
 .details-box {
     width: 100%;
     border-radius: 24px;
     padding: 24px;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
     animation: fadeInUp 0.5s ease 0.5s both;
     position: relative;
     z-index: 1;
@@ -275,6 +393,98 @@ const slotDisplay = (start) => {
     color: #B8A369;
 }
 
+/* Payment Section */
+.payment-section {
+    width: 100%;
+    border-radius: 24px;
+    padding: 24px;
+    margin-bottom: 24px;
+    animation: fadeInUp 0.5s ease 0.55s both;
+    position: relative;
+    z-index: 1;
+}
+
+.payment-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 16px;
+    text-align: center;
+}
+
+.payment-error {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 16px;
+    color: #FCA5A5;
+    font-size: 14px;
+    text-align: center;
+}
+
+.payment-providers {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.provider-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.provider-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.provider-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.provider-icon {
+    width: 48px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.payment-hint {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+    text-align: center;
+    margin: 0;
+}
+
+/* Payment Notice */
+.payment-notice {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 16px 20px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    animation: fadeInUp 0.5s ease 0.55s both;
+    position: relative;
+    z-index: 1;
+}
+
 /* Action Buttons */
 .action-buttons {
     display: flex;
@@ -300,25 +510,6 @@ const slotDisplay = (start) => {
 .btn-outline:hover {
     background: rgba(184, 163, 105, 0.2);
     transform: translateY(-2px);
-}
-
-.btn-primary {
-    flex: 1;
-    padding: 16px;
-    background: linear-gradient(135deg, #B8A369, #D4C89A);
-    border: none;
-    border-radius: 16px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #1a2a3a;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 20px rgba(184, 163, 105, 0.4);
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(184, 163, 105, 0.5);
 }
 
 /* Contact Info */

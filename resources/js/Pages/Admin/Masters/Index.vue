@@ -220,6 +220,15 @@ const hasActiveFilters = () => search.value || status.value || gender.value || s
                       </svg>
                     </Link>
                     <Link
+                      :href="route('admin.masters.schedule', master.id)"
+                      class="p-1.5 text-[#28a745] hover:bg-[#28a745] hover:text-white rounded transition"
+                      :title="t('masters.schedule')"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
+                    </Link>
+                    <Link
                       :href="route('admin.masters.edit', master.id)"
                       class="p-1.5 text-[#ffc107] hover:bg-[#ffc107] hover:text-[#1f2d3d] rounded transition"
                       :title="t('common.edit')"

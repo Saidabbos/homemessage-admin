@@ -19,11 +19,15 @@ class Order extends Model
 
     // Payment statuses
     public const PAY_NOT_PAID = 'NOT_PAID';
+    public const PAY_PENDING = 'PENDING';
     public const PAY_PAID = 'PAID';
+    public const PAY_FAILED = 'FAILED';
     public const PAY_REFUNDED = 'REFUNDED';
+    public const PAY_CANCELLED = 'CANCELLED';
 
     protected $fillable = [
         'order_number',
+        'booking_group_id',
         'customer_id',
         'master_id',
         'service_type_id',
@@ -45,11 +49,33 @@ class Order extends Model
         'landmark',
         'contact_phone',
         'dispatcher_notes',
+        // Confirmation form fields
+        'conf_entrance',
+        'conf_floor',
+        'conf_elevator',
+        'conf_parking',
+        'conf_landmark',
+        'conf_onsite_phone',
+        'conf_constraints',
+        'conf_space_ok',
+        'conf_pets',
+        'conf_note_to_master',
+        'call_outcome',
         'confirmed_by',
         'confirmed_at',
+        'ready_sent_at',
+        'work_order_sent_at',
         'cancel_reason',
         'cancelled_by',
         'cancelled_at',
+        // QA fields
+        'qa_completed',
+        'qa_overall_rating',
+        'qa_punctuality_rating',
+        'qa_professionalism_rating',
+        'qa_feedback',
+        'qa_completed_at',
+        'qa_completed_by',
     ];
 
     protected $casts = [
@@ -59,6 +85,13 @@ class Order extends Model
         'paid_at' => 'datetime',
         'confirmed_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'ready_sent_at' => 'datetime',
+        'conf_elevator' => 'boolean',
+        'conf_space_ok' => 'boolean',
+        'conf_pets' => 'boolean',
+        'work_order_sent_at' => 'datetime',
+        'qa_completed' => 'boolean',
+        'qa_completed_at' => 'datetime',
     ];
 
     /**
@@ -201,6 +234,72 @@ class Order extends Model
     }
 
     /**
+     * Get orders in the same booking group
+     */
+    public function scopeInGroup($query, $groupId)
+    {
+        return $query->where('booking_group_id', $groupId);
+    }
+
+    /**
+     * Get related orders in same booking group (excluding self)
+     */
+    public function getGroupOrdersAttribute()
+    {
+        if (!$this->booking_group_id) {
+            return collect();
+        }
+        return static::where('booking_group_id', $this->booking_group_id)
+            ->where('id', '!=', $this->id)
+            ->get();
+    }
+
+    /**
+     * Check if order is ready for THERAPISTS notification
+     * Conditions: confirmed + paid + has address
+     */
+    public function isReadyForTherapist(): bool
+    {
+        return $this->call_outcome === 'confirmed'
+            && $this->payment_status === self::PAY_PAID
+            && $this->status === self::STATUS_CONFIRMED
+            && !empty($this->address)
+            && empty($this->ready_sent_at);
+    }
+
+    /**
+     * Mark READY notification as sent
+     */
+    public function markReadySent(): self
+    {
+        $this->update(['ready_sent_at' => now()]);
+        return $this;
+    }
+
+    /**
+     * Get call outcome label
+     */
+    public function getCallOutcomeLabelAttribute(): string
+    {
+        return match($this->call_outcome) {
+            'pending' => 'Kutilmoqda',
+            'confirmed' => 'Tasdiqlandi',
+            'reschedule' => 'Qayta rejalashtirish',
+            'no_answer' => 'Javob bermadi',
+            'cancelled' => 'Bekor qilindi',
+            default => $this->call_outcome ?? 'Kutilmoqda',
+        };
+    }
+
+    /**
+     * Check if order is part of a multi-master booking
+     */
+    public function isGroupBooking(): bool
+    {
+        return !empty($this->booking_group_id);
+    }
+
+    /**
      * Orders that overlap with a given time range on a date
      */
     public function scopeOverlappingWindow($query, $date, $windowStart, $windowEnd)
@@ -266,10 +365,88 @@ class Order extends Model
     {
         return match($this->payment_status) {
             self::PAY_NOT_PAID => "To'lanmagan",
+            self::PAY_PENDING => "Kutilmoqda",
             self::PAY_PAID => "To'langan",
-            self::PAY_REFUNDED => 'Qaytarilgan',
+            self::PAY_FAILED => "Xatolik",
+            self::PAY_REFUNDED => "Qaytarilgan",
+            self::PAY_CANCELLED => "Bekor qilingan",
             default => $this->payment_status,
         };
+    }
+
+    /**
+     * Get payment status color for UI
+     */
+    public function getPaymentStatusColorAttribute(): string
+    {
+        return match($this->payment_status) {
+            self::PAY_NOT_PAID => 'gray',
+            self::PAY_PENDING => 'yellow',
+            self::PAY_PAID => 'green',
+            self::PAY_FAILED => 'red',
+            self::PAY_REFUNDED => 'orange',
+            self::PAY_CANCELLED => 'red',
+            default => 'gray',
+        };
+    }
+
+    /**
+     * Mark order as payment pending
+     */
+    public function markPaymentPending(): self
+    {
+        $this->update(['payment_status' => self::PAY_PENDING]);
+        return $this;
+    }
+
+    /**
+     * Mark order as paid
+     */
+    public function markAsPaid(): self
+    {
+        $this->update([
+            'payment_status' => self::PAY_PAID,
+            'paid_at' => now(),
+        ]);
+        return $this;
+    }
+
+    /**
+     * Mark order payment as failed
+     */
+    public function markPaymentFailed(): self
+    {
+        $this->update(['payment_status' => self::PAY_FAILED]);
+        return $this;
+    }
+
+    /**
+     * Mark order as refunded
+     */
+    public function markAsRefunded(): self
+    {
+        $this->update(['payment_status' => self::PAY_REFUNDED]);
+        return $this;
+    }
+
+    /**
+     * Check if order can be paid
+     */
+    public function canBePaid(): bool
+    {
+        return in_array($this->payment_status, [
+            self::PAY_NOT_PAID,
+            self::PAY_PENDING,
+            self::PAY_FAILED,
+        ]) && !$this->isCancelled();
+    }
+
+    /**
+     * Check if order can be refunded
+     */
+    public function canBeRefunded(): bool
+    {
+        return $this->payment_status === self::PAY_PAID;
     }
 
     public function getFullAddressAttribute(): string

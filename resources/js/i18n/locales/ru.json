@@ -210,7 +210,12 @@
     "enterPassword": "Введите пароль",
     "newPassword": "Новый пароль",
     "passwordHint": "Минимум 6 символов",
-    "passwordChangeHint": "Оставьте пустым, если не хотите менять"
+    "passwordChangeHint": "Оставьте пустым, если не хотите менять",
+    "schedule": "Расписание",
+    "total_orders_month": "Заказов в этом месяце",
+    "select_day": "Выберите день",
+    "click_day_to_view": "Нажмите на день для просмотра заказов",
+    "no_orders_day": "Нет заказов в этот день"
   },
   "settings": {
     "title": "Настройки",

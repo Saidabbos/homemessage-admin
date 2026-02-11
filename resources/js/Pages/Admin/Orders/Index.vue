@@ -193,8 +193,18 @@ const formatArrivalWindow = (order) => {
           <tbody class="divide-y divide-gray-100">
             <tr v-for="order in orders.data" :key="order.id" class="hover:bg-[#f8f9fa]">
               <td class="px-4 py-3 font-medium text-[#007bff]">
-                <Link :href="route('admin.orders.show', order.id)">
+                <Link :href="route('admin.orders.show', order.id)" class="flex items-center gap-2">
                   {{ order.order_number }}
+                  <span 
+                    v-if="order.group_count > 1" 
+                    class="inline-flex items-center px-1.5 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 rounded"
+                    :title="`${order.group_count} ta bog'langan buyurtma`"
+                  >
+                    <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    {{ order.group_count }}
+                  </span>
                 </Link>
               </td>
               <td class="px-4 py-3">

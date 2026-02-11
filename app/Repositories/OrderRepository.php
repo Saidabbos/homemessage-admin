@@ -10,11 +10,39 @@ class OrderRepository
 {
     public function getFilteredPaginated(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        return $this->applyFilters(Order::query(), $filters)
+        $orders = $this->applyFilters(Order::query(), $filters)
             ->with(['customer', 'master', 'serviceType', 'duration', 'oil'])
             ->latest()
             ->paginate($perPage)
             ->withQueryString();
+
+        // Add group count for multi-master bookings
+        $groupIds = $orders->getCollection()
+            ->pluck('booking_group_id')
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($groupIds->isNotEmpty()) {
+            $groupCounts = Order::whereIn('booking_group_id', $groupIds)
+                ->selectRaw('booking_group_id, COUNT(*) as count')
+                ->groupBy('booking_group_id')
+                ->pluck('count', 'booking_group_id');
+
+            $orders->getCollection()->transform(function ($order) use ($groupCounts) {
+                $order->group_count = $order->booking_group_id 
+                    ? ($groupCounts[$order->booking_group_id] ?? 1)
+                    : 1;
+                return $order;
+            });
+        } else {
+            $orders->getCollection()->transform(function ($order) {
+                $order->group_count = 1;
+                return $order;
+            });
+        }
+
+        return $orders;
     }
 
     public function getNewOrders(int $perPage = 15): LengthAwarePaginator
@@ -56,7 +84,7 @@ class OrderRepository
 
     public function findWithDetails(int $id): ?Order
     {
-        return Order::query()
+        $order = Order::query()
             ->with([
                 'customer',
                 'master',
@@ -69,6 +97,16 @@ class OrderRepository
                 'payments',
             ])
             ->find($id);
+
+        // Load group orders if this is a multi-master booking
+        if ($order && $order->booking_group_id) {
+            $order->group_orders = Order::where('booking_group_id', $order->booking_group_id)
+                ->where('id', '!=', $order->id)
+                ->with(['master', 'serviceType'])
+                ->get();
+        }
+
+        return $order;
     }
 
     public function getStatusCounts(): array

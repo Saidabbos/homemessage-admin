@@ -463,8 +463,12 @@ const pressureLevels = [
                             v-for="slot in availableSlots" 
                             :key="slot.start"
                             class="slot-btn"
-                            :class="{ selected: booking.slot === slot.start }"
-                            @click="booking.slot = slot.start"
+                            :class="{ 
+                                selected: booking.slot === slot.start,
+                                disabled: slot.disabled 
+                            }"
+                            :disabled="slot.disabled"
+                            @click="!slot.disabled && (booking.slot = slot.start)"
                         >
                             {{ slot.display }}
                         </button>

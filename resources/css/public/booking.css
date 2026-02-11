@@ -517,6 +517,18 @@
     color: #3b82f6;
 }
 
+.slot-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    text-decoration: line-through;
+    background: #f1f5f9;
+    color: #94a3b8;
+}
+
+.slot-btn.disabled:hover {
+    border-color: transparent;
+}
+
 /* Loading & Empty States */
 .loading-state,
 .empty-state {

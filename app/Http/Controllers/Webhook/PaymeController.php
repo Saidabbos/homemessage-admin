@@ -5,78 +5,99 @@ namespace App\Http\Controllers\Webhook;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Services\TelegramNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Payme Merchant API Controller
- *
- * Implements Payme's JSON-RPC 2.0 protocol
- * @see https://developer.help.paycom.uz/metody-merchant-api
+ * Payme Webhook Controller
+ * Handles JSON-RPC callbacks from Payme
+ * 
+ * @see https://developer.help.paycom.uz/
  */
 class PaymeController extends Controller
 {
-    // Error codes
+    // Payme error codes
     private const ERROR_INVALID_AMOUNT = -31001;
     private const ERROR_ORDER_NOT_FOUND = -31050;
-    private const ERROR_CANT_PERFORM = -31008;
+    private const ERROR_ALREADY_PAID = -31051;
+    private const ERROR_ORDER_CANCELLED = -31052;
     private const ERROR_TRANSACTION_NOT_FOUND = -31003;
-    private const ERROR_INVALID_METHOD = -32601;
-    private const ERROR_AUTH_FAILED = -32504;
+    private const ERROR_UNABLE_TO_PERFORM = -31008;
+    private const ERROR_INVALID_ACCOUNT = -31099;
+
+    public function __construct(
+        protected TelegramNotificationService $telegramService
+    ) {}
 
     /**
-     * Handle Payme webhook request
+     * Handle Payme webhook
      */
     public function handle(Request $request): JsonResponse
     {
-        $data = $request->all();
-
-        Log::channel('payme')->info('Payme request', $data);
+        Log::info('Payme webhook received', [
+            'method' => $request->input('method'),
+            'params' => $request->input('params'),
+        ]);
 
         // Verify authorization
         if (!$this->verifyAuth($request)) {
-            return $this->errorResponse($data['id'] ?? null, self::ERROR_AUTH_FAILED, 'Unauthorized');
+            return $this->errorResponse(-32504, 'Unauthorized', $request->input('id'));
         }
 
-        $method = $data['method'] ?? null;
-        $params = $data['params'] ?? [];
+        $method = $request->input('method');
+        $params = $request->input('params', []);
+        $id = $request->input('id');
 
-        $result = match ($method) {
-            'CheckPerformTransaction' => $this->checkPerformTransaction($params),
-            'CreateTransaction' => $this->createTransaction($params),
-            'PerformTransaction' => $this->performTransaction($params),
-            'CancelTransaction' => $this->cancelTransaction($params),
-            'CheckTransaction' => $this->checkTransaction($params),
-            'GetStatement' => $this->getStatement($params),
-            default => ['error' => ['code' => self::ERROR_INVALID_METHOD, 'message' => 'Method not found']],
-        };
+        try {
+            $result = match($method) {
+                'CheckPerformTransaction' => $this->checkPerformTransaction($params),
+                'CreateTransaction' => $this->createTransaction($params),
+                'PerformTransaction' => $this->performTransaction($params),
+                'CancelTransaction' => $this->cancelTransaction($params),
+                'CheckTransaction' => $this->checkTransaction($params),
+                'GetStatement' => $this->getStatement($params),
+                default => throw new \Exception('Method not found', -32601),
+            };
 
-        Log::channel('payme')->info('Payme response', $result);
+            Log::info('Payme webhook success', ['method' => $method, 'result' => $result]);
 
-        return response()->json([
-            'jsonrpc' => '2.0',
-            'id' => $data['id'] ?? null,
-            ...$result,
-        ]);
+            return response()->json([
+                'jsonrpc' => '2.0',
+                'id' => $id,
+                'result' => $result,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Payme webhook error', [
+                'method' => $method,
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+            ]);
+
+            return $this->errorResponse($e->getCode() ?: -31099, $e->getMessage(), $id);
+        }
     }
 
     /**
-     * Verify Basic Auth
+     * Verify Payme authorization header
      */
     protected function verifyAuth(Request $request): bool
     {
         $authHeader = $request->header('Authorization');
-
+        
         if (!$authHeader || !str_starts_with($authHeader, 'Basic ')) {
             return false;
         }
 
         $credentials = base64_decode(substr($authHeader, 6));
-        [$login, $password] = explode(':', $credentials, 2) + [null, null];
+        [$login, $key] = explode(':', $credentials, 2);
 
-        return $login === config('services.payme.merchant_id')
-            && $password === config('services.payme.key');
+        $expectedLogin = 'Paycom';
+        $expectedKey = config('services.payme.key');
+
+        return $login === $expectedLogin && $key === $expectedKey;
     }
 
     /**
@@ -84,27 +105,32 @@ class PaymeController extends Controller
      */
     protected function checkPerformTransaction(array $params): array
     {
-        $order = $this->findOrder($params['account'] ?? []);
+        $orderId = $params['account']['order_id'] ?? null;
+        $amount = ($params['amount'] ?? 0) / 100; // tiyin to som
+
+        if (!$orderId) {
+            throw new \Exception('Order ID not provided', self::ERROR_INVALID_ACCOUNT);
+        }
+
+        $order = Order::find($orderId);
 
         if (!$order) {
-            return $this->error(self::ERROR_ORDER_NOT_FOUND, 'Order not found');
+            throw new \Exception('Order not found', self::ERROR_ORDER_NOT_FOUND);
         }
 
-        $amount = ($params['amount'] ?? 0) / 100; // Payme sends in tiyin
-
-        if ((float) $order->total_amount !== (float) $amount) {
-            return $this->error(self::ERROR_INVALID_AMOUNT, 'Invalid amount');
+        if ($order->status === Order::STATUS_CANCELLED) {
+            throw new \Exception('Order is cancelled', self::ERROR_ORDER_CANCELLED);
         }
 
-        if ($order->isPaid()) {
-            return $this->error(self::ERROR_CANT_PERFORM, 'Order already paid');
+        if ($order->payment_status === Order::PAY_PAID) {
+            throw new \Exception('Order already paid', self::ERROR_ALREADY_PAID);
         }
 
-        if ($order->isCancelled()) {
-            return $this->error(self::ERROR_CANT_PERFORM, 'Order cancelled');
+        if (abs($order->total_amount - $amount) > 1) {
+            throw new \Exception('Invalid amount', self::ERROR_INVALID_AMOUNT);
         }
 
-        return ['result' => ['allow' => true]];
+        return ['allow' => true];
     }
 
     /**
@@ -112,42 +138,51 @@ class PaymeController extends Controller
      */
     protected function createTransaction(array $params): array
     {
-        $order = $this->findOrder($params['account'] ?? []);
-
-        if (!$order) {
-            return $this->error(self::ERROR_ORDER_NOT_FOUND, 'Order not found');
-        }
-
-        $externalId = $params['id'] ?? null;
+        $paymeId = $params['id'];
+        $orderId = $params['account']['order_id'] ?? null;
         $amount = ($params['amount'] ?? 0) / 100;
+        $time = $params['time'];
 
-        // Check for existing transaction
-        $payment = Payment::where('external_id', $externalId)->first();
-
-        if ($payment) {
-            return ['result' => [
-                'create_time' => $payment->created_at->timestamp * 1000,
-                'transaction' => $payment->transaction_id,
-                'state' => $this->getPaymentState($payment),
-            ]];
+        // Check if transaction already exists
+        $existingPayment = Payment::where('external_id', $paymeId)->first();
+        
+        if ($existingPayment) {
+            return [
+                'create_time' => $existingPayment->created_at->timestamp * 1000,
+                'transaction' => $existingPayment->transaction_id,
+                'state' => $this->getPaymeState($existingPayment),
+            ];
         }
 
-        // Create new payment
+        // Verify order
+        $order = Order::find($orderId);
+        
+        if (!$order) {
+            throw new \Exception('Order not found', self::ERROR_ORDER_NOT_FOUND);
+        }
+
+        if ($order->payment_status === Order::PAY_PAID) {
+            throw new \Exception('Order already paid', self::ERROR_ALREADY_PAID);
+        }
+
+        // Create payment record
         $payment = Payment::create([
-            'order_id' => $order->id,
+            'order_id' => $orderId,
             'provider' => Payment::PROVIDER_PAYME,
-            'external_id' => $externalId,
+            'external_id' => $paymeId,
             'amount' => $amount,
             'currency' => 'UZS',
             'status' => Payment::STATUS_PROCESSING,
-            'provider_response' => $params,
         ]);
 
-        return ['result' => [
+        // Update order status
+        $order->update(['payment_status' => Order::PAY_PENDING]);
+
+        return [
             'create_time' => $payment->created_at->timestamp * 1000,
             'transaction' => $payment->transaction_id,
-            'state' => 1,
-        ]];
+            'state' => 1, // Created
+        ];
     }
 
     /**
@@ -155,32 +190,41 @@ class PaymeController extends Controller
      */
     protected function performTransaction(array $params): array
     {
-        $payment = Payment::where('external_id', $params['id'] ?? null)->first();
+        $paymeId = $params['id'];
+
+        $payment = Payment::where('external_id', $paymeId)->first();
 
         if (!$payment) {
-            return $this->error(self::ERROR_TRANSACTION_NOT_FOUND, 'Transaction not found');
+            throw new \Exception('Transaction not found', self::ERROR_TRANSACTION_NOT_FOUND);
         }
 
-        if ($payment->isPaid()) {
-            return ['result' => [
-                'perform_time' => $payment->paid_at->timestamp * 1000,
+        if ($payment->status === Payment::STATUS_PAID) {
+            return [
                 'transaction' => $payment->transaction_id,
-                'state' => 2,
-            ]];
+                'perform_time' => $payment->paid_at->timestamp * 1000,
+                'state' => 2, // Completed
+            ];
         }
 
-        if ($payment->isCancelled()) {
-            return $this->error(self::ERROR_CANT_PERFORM, 'Transaction cancelled');
+        if ($payment->status === Payment::STATUS_CANCELLED) {
+            throw new \Exception('Transaction cancelled', self::ERROR_UNABLE_TO_PERFORM);
         }
 
-        // Mark payment as paid
-        $payment->markAsPaid($params['id']);
+        // Mark as paid
+        $payment->markAsPaid();
 
-        return ['result' => [
-            'perform_time' => $payment->paid_at->timestamp * 1000,
+        // Send notification
+        try {
+            $this->telegramService->notifyPaid($payment->order);
+        } catch (\Exception $e) {
+            Log::warning('Failed to send payment notification', ['error' => $e->getMessage()]);
+        }
+
+        return [
             'transaction' => $payment->transaction_id,
-            'state' => 2,
-        ]];
+            'perform_time' => $payment->paid_at->timestamp * 1000,
+            'state' => 2, // Completed
+        ];
     }
 
     /**
@@ -188,29 +232,30 @@ class PaymeController extends Controller
      */
     protected function cancelTransaction(array $params): array
     {
-        $payment = Payment::where('external_id', $params['id'] ?? null)->first();
+        $paymeId = $params['id'];
+        $reason = $params['reason'] ?? 1;
+
+        $payment = Payment::where('external_id', $paymeId)->first();
 
         if (!$payment) {
-            return $this->error(self::ERROR_TRANSACTION_NOT_FOUND, 'Transaction not found');
+            throw new \Exception('Transaction not found', self::ERROR_TRANSACTION_NOT_FOUND);
         }
 
-        $reason = $params['reason'] ?? null;
+        $wasCompleted = $payment->status === Payment::STATUS_PAID;
 
-        if ($payment->isPaid()) {
-            // Refund
+        if ($wasCompleted) {
             $payment->markAsRefunded();
-            $state = -2;
+            $state = -2; // Cancelled after completion
         } else {
-            // Cancel
-            $payment->markAsCancelled($reason);
-            $state = -1;
+            $payment->markAsCancelled('Cancelled by Payme: ' . $reason);
+            $state = -1; // Cancelled before completion
         }
 
-        return ['result' => [
-            'cancel_time' => now()->timestamp * 1000,
+        return [
             'transaction' => $payment->transaction_id,
+            'cancel_time' => now()->timestamp * 1000,
             'state' => $state,
-        ]];
+        ];
     }
 
     /**
@@ -218,29 +263,31 @@ class PaymeController extends Controller
      */
     protected function checkTransaction(array $params): array
     {
-        $payment = Payment::where('external_id', $params['id'] ?? null)->first();
+        $paymeId = $params['id'];
+
+        $payment = Payment::where('external_id', $paymeId)->first();
 
         if (!$payment) {
-            return $this->error(self::ERROR_TRANSACTION_NOT_FOUND, 'Transaction not found');
+            throw new \Exception('Transaction not found', self::ERROR_TRANSACTION_NOT_FOUND);
         }
 
-        return ['result' => [
+        return [
             'create_time' => $payment->created_at->timestamp * 1000,
             'perform_time' => $payment->paid_at?->timestamp * 1000 ?? 0,
             'cancel_time' => $payment->cancelled_at?->timestamp * 1000 ?? 0,
             'transaction' => $payment->transaction_id,
-            'state' => $this->getPaymentState($payment),
-            'reason' => null,
-        ]];
+            'state' => $this->getPaymeState($payment),
+            'reason' => $payment->isCancelled() || $payment->isRefunded() ? 1 : null,
+        ];
     }
 
     /**
-     * Get statement (transactions list)
+     * Get statement (transaction list)
      */
     protected function getStatement(array $params): array
     {
-        $from = ($params['from'] ?? 0) / 1000;
-        $to = ($params['to'] ?? time()) / 1000;
+        $from = $params['from'] / 1000;
+        $to = $params['to'] / 1000;
 
         $payments = Payment::where('provider', Payment::PROVIDER_PAYME)
             ->whereBetween('created_at', [
@@ -249,67 +296,52 @@ class PaymeController extends Controller
             ])
             ->get();
 
-        $transactions = $payments->map(fn($p) => [
-            'id' => $p->external_id,
-            'time' => $p->created_at->timestamp * 1000,
-            'amount' => (int) ($p->amount * 100),
-            'account' => ['order_id' => $p->order_id],
-            'create_time' => $p->created_at->timestamp * 1000,
-            'perform_time' => $p->paid_at?->timestamp * 1000 ?? 0,
-            'cancel_time' => $p->cancelled_at?->timestamp * 1000 ?? 0,
-            'transaction' => $p->transaction_id,
-            'state' => $this->getPaymentState($p),
-            'reason' => null,
-        ]);
-
-        return ['result' => ['transactions' => $transactions]];
+        return [
+            'transactions' => $payments->map(fn($p) => [
+                'id' => $p->external_id,
+                'time' => $p->created_at->timestamp * 1000,
+                'amount' => (int) ($p->amount * 100),
+                'account' => ['order_id' => $p->order_id],
+                'create_time' => $p->created_at->timestamp * 1000,
+                'perform_time' => $p->paid_at?->timestamp * 1000 ?? 0,
+                'cancel_time' => $p->cancelled_at?->timestamp * 1000 ?? 0,
+                'transaction' => $p->transaction_id,
+                'state' => $this->getPaymeState($p),
+                'reason' => $p->isCancelled() || $p->isRefunded() ? 1 : null,
+            ])->toArray(),
+        ];
     }
 
     /**
-     * Find order by account params
+     * Get Payme state code from payment status
      */
-    protected function findOrder(array $account): ?Order
+    protected function getPaymeState(Payment $payment): int
     {
-        $orderId = $account['order_id'] ?? null;
-
-        if (!$orderId) {
-            return null;
-        }
-
-        return Order::find($orderId);
-    }
-
-    /**
-     * Get payment state for Payme
-     */
-    protected function getPaymentState(Payment $payment): int
-    {
-        return match ($payment->status) {
-            Payment::STATUS_PENDING, Payment::STATUS_PROCESSING => 1,
-            Payment::STATUS_PAID => 2,
-            Payment::STATUS_CANCELLED => -1,
-            Payment::STATUS_REFUNDED => -2,
-            default => 0,
+        return match($payment->status) {
+            Payment::STATUS_PROCESSING => 1,  // Created
+            Payment::STATUS_PAID => 2,        // Completed
+            Payment::STATUS_CANCELLED => -1,  // Cancelled before completion
+            Payment::STATUS_REFUNDED => -2,   // Cancelled after completion
+            default => 1,
         };
     }
 
     /**
-     * Create error response
+     * Return JSON-RPC error response
      */
-    protected function error(int $code, string $message): array
-    {
-        return ['error' => ['code' => $code, 'message' => $message]];
-    }
-
-    /**
-     * Create JSON-RPC error response
-     */
-    protected function errorResponse(?int $id, int $code, string $message): JsonResponse
+    protected function errorResponse(int $code, string $message, $id): JsonResponse
     {
         return response()->json([
             'jsonrpc' => '2.0',
             'id' => $id,
-            'error' => ['code' => $code, 'message' => $message],
+            'error' => [
+                'code' => $code,
+                'message' => [
+                    'ru' => $message,
+                    'uz' => $message,
+                    'en' => $message,
+                ],
+            ],
         ]);
     }
 }
