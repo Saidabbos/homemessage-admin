@@ -161,6 +161,23 @@ const toggleMenu = (menu) => {
           </Link>
         </li>
 
+        <li>
+          <Link
+            href="/admin/testimonials"
+            :class="[
+              'flex items-center px-3 py-2 rounded text-sm transition-colors',
+              isActive('admin.testimonials')
+                ? 'bg-[#007bff] text-white'
+                : 'hover:bg-[#495057]'
+            ]"
+          >
+            <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+            </svg>
+            Fikrlar
+          </Link>
+        </li>
+
         <!-- Foydalanuvchilar Section -->
         <li class="mt-4">
           <p class="px-3 text-xs uppercase text-[#6c757d] font-semibold tracking-wider mb-2">Foydalanuvchilar</p>

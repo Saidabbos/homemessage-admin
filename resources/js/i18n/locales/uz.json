@@ -70,6 +70,29 @@
     "enterName": "Moy nomini kiriting",
     "enterDescription": "Moy tavsifini kiriting"
   },
+  "testimonials": {
+    "title": "Fikrlar",
+    "singular": "Fikr",
+    "description": "Mijozlarning fikrlarini boshqarish",
+    "list": "Fikrlar Ro'yxati",
+    "new": "Yangi Fikr Qo'shish",
+    "edit": "Fikrni Tahrirlash",
+    "info": "Fikr ma'lumotlari",
+    "clientName": "Mijoz ismi",
+    "clientRole": "Mijoz roli",
+    "comment": "Fikr matni",
+    "rating": "Baho",
+    "sortOrder": "Tartib raqami",
+    "activeHint": "Faol fikrlar landing sahifada ko'rsatiladi",
+    "addFirst": "Birinchi Fikrni Qo'shish",
+    "noTestimonials": "Hozircha hech qanday fikr yaratilmagan",
+    "confirmDelete": "Haqiqatan ham bu fikrni o'chirmoqchimisiz?",
+    "enterName": "Mijoz ismini kiriting",
+    "enterRole": "Mijoz rolini kiriting",
+    "enterComment": "Fikr matnini kiriting",
+    "ratingHint": "1 dan 5 gacha baho",
+    "sortOrderHint": "Kichik raqam - yuqori pozitsiya"
+  },
   "serviceTypes": {
     "title": "Massage Turlari",
     "singular": "Massage turi",
@@ -425,6 +448,23 @@
       "subtitle": "Haqiqiy fikrlar, haqiqiy natijalar",
       "verified": "Tekshirilgan buyurtma"
     },
+    "contact": {
+      "badge": "ALOQA",
+      "title": "Biz Bilan Bog'laning",
+      "subtitle": "Savollaringiz bormi? Biz bilan bog'laning yoki to'g'ridan-to'g'ri bron qiling",
+      "name": "Ismingiz",
+      "namePlaceholder": "Ismingizni kiriting",
+      "phone": "Telefon raqamingiz",
+      "serviceType": "Massaj turi",
+      "selectService": "Massaj turini tanlang",
+      "message": "Xabar",
+      "messagePlaceholder": "Qo'shimcha ma'lumot yoki so'rovlaringizni yozing...",
+      "send": "Yuborish",
+      "sent": "Yuborildi!",
+      "address": "Manzil",
+      "phoneLabel": "Telefon",
+      "hours": "Ish vaqti"
+    },
     "sanctuary": {
       "badge": "NEGA BIZ",
       "title": "Sof Dam Olish<br>Maskani",
@@ -443,15 +483,25 @@
       "button": "Band Qilish"
     },
     "footer": {
-      "tagline": "Hashamat va tinchlik uyg'unligi. Biz sizning tanangizni tiklash va ongingizni tinchlantirish uchun premium massaj xizmatlarini taklif etamiz.",
+      "tagline": "Uyingizga premium massaj xizmati. Tanangiz va ruhingizga haqiqiy dam olish hissini hadya qilamiz.",
       "quickLinks": "Tezkor Havolalar",
+      "company": "Kompaniya",
+      "support": "Qo'llab-quvvatlash",
       "contact": "Aloqa",
+      "privacy": "Maxfiylik siyosati",
+      "terms": "Foydalanish shartlari",
+      "helpCenter": "Yordam markazi",
       "rights": "Barcha huquqlar himoyalangan."
     }
   },
   "public": {
     "masters": {
       "title": "Bizning Masterlarimiz",
+      "badge": "Sertifikatlangan mutaxassislar",
+      "heroTitle": "Bizning Ustalarimiz",
+      "heroSubtitle": "Har bir masterimiz o'z sohasining mutaxassisi. Sizga mos ustani tanlang va haqiqiy dam olish tajribasini his qiling.",
+      "searchPlaceholder": "Ism bo'yicha qidirish...",
+      "select": "Tanlash",
       "empty": "Hozircha masterlar mavjud emas",
       "years": "yil",
       "orders": "buyurtma"

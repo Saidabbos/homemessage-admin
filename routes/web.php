@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PressureLevelController;
+use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Public\LandingController;
 use App\Http\Controllers\Public\MasterController as PublicMasterController;
 use App\Http\Controllers\Public\CustomerAuthController;
@@ -142,6 +143,19 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
             'edit' => 'admin.pressure-levels.edit',
             'update' => 'admin.pressure-levels.update',
             'destroy' => 'admin.pressure-levels.destroy',
+        ]
+    ]);
+
+    // Testimonials CRUD
+    Route::resource('testimonials', TestimonialController::class, [
+        'names' => [
+            'index' => 'admin.testimonials.index',
+            'create' => 'admin.testimonials.create',
+            'store' => 'admin.testimonials.store',
+            'show' => 'admin.testimonials.show',
+            'edit' => 'admin.testimonials.edit',
+            'update' => 'admin.testimonials.update',
+            'destroy' => 'admin.testimonials.destroy',
         ]
     ]);
 

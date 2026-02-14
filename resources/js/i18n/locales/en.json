@@ -70,6 +70,29 @@
     "enterName": "Enter oil name",
     "enterDescription": "Enter oil description"
   },
+  "testimonials": {
+    "title": "Testimonials",
+    "singular": "Testimonial",
+    "description": "Manage client testimonials",
+    "list": "Testimonials List",
+    "new": "Add New Testimonial",
+    "edit": "Edit Testimonial",
+    "info": "Testimonial information",
+    "clientName": "Client Name",
+    "clientRole": "Client Role",
+    "comment": "Testimonial Text",
+    "rating": "Rating",
+    "sortOrder": "Sort Order",
+    "activeHint": "Active testimonials are displayed on the landing page",
+    "addFirst": "Add First Testimonial",
+    "noTestimonials": "No testimonials have been created yet",
+    "confirmDelete": "Are you sure you want to delete this testimonial?",
+    "enterName": "Enter client name",
+    "enterRole": "Enter client role",
+    "enterComment": "Enter testimonial text",
+    "ratingHint": "Rating from 1 to 5",
+    "sortOrderHint": "Lower number = higher position"
+  },
   "serviceTypes": {
     "title": "Massage Types",
     "singular": "Massage type",
@@ -425,8 +448,25 @@
       "subtitle": "Real stories, real results",
       "verified": "Verified booking"
     },
+    "contact": {
+      "badge": "CONTACT",
+      "title": "Get in Touch",
+      "subtitle": "Have questions? Contact us or book directly",
+      "name": "Your name",
+      "namePlaceholder": "Enter your name",
+      "phone": "Phone number",
+      "serviceType": "Massage type",
+      "selectService": "Select massage type",
+      "message": "Message",
+      "messagePlaceholder": "Write additional information or your requests...",
+      "send": "Send",
+      "sent": "Sent!",
+      "address": "Address",
+      "phoneLabel": "Phone",
+      "hours": "Working hours"
+    },
     "sanctuary": {
-      "badge": "WHY SERENITY",
+      "badge": "WHY HOMEMASSAGE",
       "title": "A Sanctuary of<br>Pure Relaxation",
       "description": "Step into a world where every detail is designed for your comfort. Our master therapists combine time-honored traditions with cutting-edge techniques.",
       "imageAlt": "Spa environment"
@@ -443,15 +483,25 @@
       "button": "Reserve Your Spot"
     },
     "footer": {
-      "tagline": "Where luxury meets tranquility. We offer premium massage and spa treatments designed to restore your body and calm your mind.",
+      "tagline": "Premium home massage service. We bring real relaxation to your body and soul.",
       "quickLinks": "Quick Links",
+      "company": "Company",
+      "support": "Support",
       "contact": "Contact",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Use",
+      "helpCenter": "Help Center",
       "rights": "All rights reserved."
     }
   },
   "public": {
     "masters": {
       "title": "Our Masters",
+      "badge": "Certified specialists",
+      "heroTitle": "Our Masters",
+      "heroSubtitle": "Each of our masters is an expert in their field. Choose the right specialist and experience true relaxation.",
+      "searchPlaceholder": "Search by name...",
+      "select": "Select",
       "empty": "No masters available yet",
       "years": "years",
       "orders": "orders"
