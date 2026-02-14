@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import MiniAppLayout from '@/Layouts/MiniAppLayout.vue';
 
@@ -10,132 +10,104 @@ const props = defineProps({
     masters: Array,
 });
 
-// Wizard state
+// Wizard state: 1 | 2 | 3 | 'cart'
 const step = ref(1);
+
+// Single service selection (replaces per-person system)
+const selectedService = ref(null); // { service_id, duration_id }
+
+// Cart state
+const cart = ref([]);
 
 // Booking data
 const booking = ref({
-    services: [],
-    people_count: 1,
-    master_ids: [],
+    master_id: null,
     date: null,
     slot: null,
     pressure_level: 'medium',
     notes: '',
 });
 
-// People count
-const addPerson = () => {
-    if (booking.value.people_count < 5) booking.value.people_count++;
-};
+// ==================== Service Selection ====================
 
-const removePerson = () => {
-    if (booking.value.people_count > 1) {
-        booking.value.people_count--;
-        while (booking.value.services.length > booking.value.people_count) {
-            booking.value.services.pop();
-        }
-        while (booking.value.master_ids.length > booking.value.people_count) {
-            booking.value.master_ids.pop();
-        }
-    }
-};
-
-// Service selection (radio behavior for 1 person, multi-select for 2+)
 const toggleService = (serviceId) => {
-    const service = props.services?.find(s => s.id === serviceId);
-    const defaultDuration = service?.durations?.find(d => d.is_default) || service?.durations?.[0];
-    
-    if (booking.value.people_count === 1) {
-        // Radio button behavior - replace selection
-        booking.value.services = [{
+    if (selectedService.value?.service_id === serviceId) {
+        selectedService.value = null;
+    } else {
+        const service = props.services?.find(s => s.id === serviceId);
+        const defaultDuration = service?.durations?.find(d => d.is_default) || service?.durations?.[0];
+        selectedService.value = {
             service_id: serviceId,
             duration_id: defaultDuration?.id || null,
-        }];
-    } else {
-        // Multi-select behavior
-        const index = booking.value.services.findIndex(s => s.service_id === serviceId);
-        if (index >= 0) {
-            booking.value.services.splice(index, 1);
-        } else {
-            if (booking.value.services.length < booking.value.people_count) {
-                booking.value.services.push({
-                    service_id: serviceId,
-                    duration_id: defaultDuration?.id || null,
-                });
-            }
-        }
+        };
     }
 };
 
-const isServiceSelected = (serviceId) => booking.value.services.some(s => s.service_id === serviceId);
+const isServiceSelected = (serviceId) => selectedService.value?.service_id === serviceId;
 const getServiceById = (serviceId) => props.services?.find(s => s.id === serviceId);
 
 const getSelectedDuration = (serviceId) => {
-    const sel = booking.value.services.find(s => s.service_id === serviceId);
+    if (selectedService.value?.service_id !== serviceId) return null;
     const service = getServiceById(serviceId);
-    return service?.durations?.find(d => d.id === sel?.duration_id);
+    return service?.durations?.find(d => d.id === selectedService.value.duration_id);
 };
 
 const setDuration = (serviceId, durationId) => {
-    const sel = booking.value.services.find(s => s.service_id === serviceId);
-    if (sel) sel.duration_id = durationId;
+    if (selectedService.value?.service_id === serviceId) {
+        selectedService.value = { ...selectedService.value, duration_id: durationId };
+    }
 };
 
-// Computed
-const totalPrice = computed(() => {
-    let total = 0;
-    for (const sel of booking.value.services) {
-        const duration = getSelectedDuration(sel.service_id);
-        total += Number(duration?.price) || 0;
-    }
-    return total;
+// ==================== Computed ====================
+
+const currentItemDuration = computed(() => {
+    if (!selectedService.value) return 0;
+    const dur = getSelectedDuration(selectedService.value.service_id);
+    return dur?.duration || 60;
 });
 
-const totalDuration = computed(() => {
-    const baseTotal = booking.value.services.reduce((sum, sel) => {
-        const duration = getSelectedDuration(sel.service_id);
-        return sum + (duration?.duration || 0);
-    }, 0);
-    const buffer = 10;
-    const peopleCount = booking.value.services.length || 1;
-    return baseTotal + buffer * (peopleCount - 1);
+const currentItemPrice = computed(() => {
+    if (!selectedService.value) return 0;
+    const dur = getSelectedDuration(selectedService.value.service_id);
+    return Number(dur?.price) || 0;
 });
 
-const selectedServiceIds = computed(() => booking.value.services.map(s => s.service_id));
+const cartTotal = computed(() => cart.value.reduce((sum, item) => sum + item.price, 0));
+const cartItemCount = computed(() => cart.value.length);
 
-const selectedMasters = computed(() => 
-    booking.value.master_ids.map(id => props.masters?.find(m => m.id === id)).filter(Boolean)
+const selectedServiceIds = computed(() =>
+    selectedService.value ? [selectedService.value.service_id] : []
+);
+
+// ==================== Master ====================
+
+const selectedMaster = computed(() =>
+    props.masters?.find(m => m.id === booking.value.master_id)
 );
 
 const filteredMasters = computed(() => {
     if (selectedServiceIds.value.length === 0) return props.masters || [];
-    return (props.masters || []).filter(m => 
-        selectedServiceIds.value.some(serviceId => m.service_type_ids?.includes(serviceId))
+    return (props.masters || []).filter(m =>
+        selectedServiceIds.value.some(serviceId =>
+            (m.service_type_ids || []).includes(serviceId)
+        )
     );
 });
 
-// Master selection
-const toggleMaster = (masterId) => {
-    const index = booking.value.master_ids.indexOf(masterId);
-    if (index >= 0) {
-        booking.value.master_ids.splice(index, 1);
-    } else {
-        if (booking.value.master_ids.length < booking.value.people_count) {
-            booking.value.master_ids.push(masterId);
-        }
-    }
+// Reset master/date/slot when service changes
+watch(() => selectedService.value?.service_id, () => {
+    booking.value.master_id = null;
+    booking.value.date = null;
     booking.value.slot = null;
-};
+});
 
-const isMasterSelected = (masterId) => booking.value.master_ids.includes(masterId);
+// ==================== Dates & Slots ====================
 
-// Available dates (7 days)
 const availableDates = computed(() => {
     const dates = [];
     const dayNames = ['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan'];
     const monthNames = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn', 'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
-    
+
     for (let i = 0; i < 7; i++) {
         const d = new Date();
         d.setDate(d.getDate() + i);
@@ -145,66 +117,47 @@ const availableDates = computed(() => {
             day: d.getDate(),
             month: monthNames[d.getMonth()],
             display: `${d.getDate()}-${monthNames[d.getMonth()]}`,
+            fullLabel: `${d.getDate()}-${monthNames[d.getMonth()]}, ${dayNames[d.getDay()]}`,
         });
     }
     return dates;
 });
 
-// Slots
 const availableSlots = ref([]);
 const loadingSlots = ref(false);
 
 const loadSlots = async () => {
-    if (!booking.value.date || booking.value.master_ids.length === 0) {
-        availableSlots.value = [];
-        return;
-    }
-    
     loadingSlots.value = true;
     try {
-        // Use first selected service duration (each master does one service)
-        const firstDuration = getSelectedDuration(booking.value.services[0]?.service_id);
-        const duration = firstDuration?.duration || 60;
-        const masterIds = booking.value.master_ids.join(',');
-        
-        // Use multi-master endpoint (works for single master too)
-        const response = await fetch(`/api/slots/multi-master?date=${booking.value.date}&duration=${duration}&master_ids=${masterIds}`);
+        const duration = currentItemDuration.value || 60;
+        const response = await fetch(`/api/masters/${booking.value.master_id}/slots?date=${booking.value.date}&duration=${duration}&people_count=1`);
         const data = await response.json();
         availableSlots.value = data.data?.slots || data.slots || [];
     } catch (e) {
         console.error('Failed to load slots:', e);
+        availableSlots.value = [];
     }
     loadingSlots.value = false;
 };
 
-// Watch date and master_ids for slot loading
-watch(() => booking.value.date, () => {
-    booking.value.slot = null;
-    loadSlots();
-});
+watch(
+    [() => booking.value.master_id, () => booking.value.date, currentItemDuration],
+    async ([masterId, date, duration]) => {
+        if (masterId && date && duration > 0) {
+            booking.value.slot = null;
+            await loadSlots();
+        } else {
+            availableSlots.value = [];
+        }
+    }
+);
 
-watch(() => booking.value.master_ids, () => {
-    booking.value.slot = null;
-    loadSlots();
-}, { deep: true });
+// ==================== Formatting ====================
 
-// Format
 const formatPrice = (price) => {
     const num = Number(price) || 0;
     return new Intl.NumberFormat('uz-UZ').format(num);
 };
-
-// Step navigation
-const canProceedStep1 = computed(() => 
-    booking.value.services.length >= 1 && 
-    booking.value.services.every(s => s.service_id && s.duration_id)
-);
-
-const canProceedStep2 = computed(() => 
-    booking.value.master_ids.length >= 1 && 
-    booking.value.date && 
-    booking.value.slot
-);
 
 const slotDisplay = computed(() => {
     if (!booking.value.slot) return '';
@@ -215,66 +168,162 @@ const slotDisplay = computed(() => {
     return `${booking.value.slot}–${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
 });
 
-const nextStep = () => { if (step.value < 3) step.value++; };
-const prevStep = () => { if (step.value > 1) step.value--; };
+const selectedDateLabel = computed(() => {
+    const d = availableDates.value.find(d => d.value === booking.value.date);
+    return d ? d.fullLabel : '';
+});
 
-// Submit
+const getTranslated = (field) => {
+    if (typeof field === 'string') return field;
+    if (field && typeof field === 'object') {
+        return field.uz || field.ru || field.en || Object.values(field)[0] || '';
+    }
+    return '';
+};
+
+const selectedServiceSummary = computed(() => {
+    if (!selectedService.value) return '';
+    const service = getServiceById(selectedService.value.service_id);
+    const duration = getSelectedDuration(selectedService.value.service_id);
+    return `${getTranslated(service?.name)}, ${duration?.duration || 60} daq`;
+});
+
+// ==================== Navigation ====================
+
+const canProceedStep1 = computed(() =>
+    selectedService.value?.service_id && selectedService.value?.duration_id
+);
+
+const canProceedStep2 = computed(() =>
+    booking.value.master_id && booking.value.date && booking.value.slot
+);
+
+const nextStep = () => { if (step.value < 3) step.value++; };
+
+const prevStep = () => {
+    if (step.value === 'cart') {
+        step.value = 3;
+    } else if (step.value > 1) {
+        step.value--;
+    }
+};
+
+// ==================== Cart ====================
+
+const addToCart = () => {
+    if (!canProceedStep2.value) return;
+
+    const service = getServiceById(selectedService.value.service_id);
+    const duration = getSelectedDuration(selectedService.value.service_id);
+    const master = selectedMaster.value;
+    const dateInfo = availableDates.value.find(d => d.value === booking.value.date);
+
+    const cartItem = {
+        id: Date.now() + Math.random(),
+        service_id: selectedService.value.service_id,
+        duration_id: selectedService.value.duration_id,
+        master_id: booking.value.master_id,
+        date: booking.value.date,
+        slot: booking.value.slot,
+        pressure_level: booking.value.pressure_level,
+        notes: booking.value.notes,
+        // Snapshot for display
+        service_name: getTranslated(service?.name),
+        duration_minutes: duration?.duration || 60,
+        price: Number(duration?.price) || 0,
+        master_name: master?.name || '',
+        master_photo: master?.photo_url || null,
+        date_label: dateInfo?.fullLabel || booking.value.date,
+        slot_display: slotDisplay.value,
+        pressure_label: pressureLevels.find(p => p.value === booking.value.pressure_level)?.label,
+    };
+
+    cart.value.push(cartItem);
+    step.value = 'cart';
+};
+
+const removeFromCart = (itemId) => {
+    cart.value = cart.value.filter(item => item.id !== itemId);
+    if (cart.value.length === 0) {
+        resetWizard();
+    }
+};
+
+const bookAnotherMaster = () => {
+    resetWizard();
+};
+
+const resetWizard = () => {
+    selectedService.value = null;
+    booking.value = {
+        master_id: null,
+        date: null,
+        slot: null,
+        pressure_level: 'medium',
+        notes: '',
+    };
+    step.value = 1;
+};
+
+// ==================== Submit ====================
+
 const submitting = ref(false);
 const submitError = ref(null);
 
-const submitBooking = async () => {
+const submitCart = async () => {
+    if (cart.value.length === 0) return;
+
     submitting.value = true;
     submitError.value = null;
-    
+
     try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-        const response = await fetch('/api/miniapp/orders', {
+
+        const orders = cart.value.map(item => ({
+            service_type_id: item.service_id,
+            duration_id: item.duration_id,
+            master_id: item.master_id,
+            date: item.date,
+            arrival_window_start: item.slot,
+            total_duration: item.duration_minutes,
+            pressure_level: item.pressure_level,
+            notes: item.notes,
+        }));
+
+        const response = await fetch('/api/public/orders/batch', {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json', 
+            headers: {
+                'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': csrfToken,
             },
-            body: JSON.stringify({
-                master_ids: booking.value.master_ids,
-                service_type_id: booking.value.services[0]?.service_id,
-                duration_id: booking.value.services[0]?.duration_id,
-                date: booking.value.date,
-                arrival_window_start: booking.value.slot,
-                pressure_level: booking.value.pressure_level,
-                people_count: booking.value.people_count,
-                notes: booking.value.notes,
-            }),
+            body: JSON.stringify({ orders }),
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
-            router.visit(`/app/booking-success?order_number=${data.data?.order_number}`);
+            const groupId = data.group_id || '';
+            cart.value = [];
+            router.visit(`/app/booking-success?group_id=${groupId}`);
         } else {
-            submitError.value = data.message || data.errors?.[Object.keys(data.errors)[0]]?.[0] || 'Xatolik yuz berdi';
+            submitError.value = data.message || 'Xatolik yuz berdi';
         }
     } catch (e) {
-        console.error('Booking failed:', e);
+        console.error('Cart submission failed:', e);
         submitError.value = 'Xatolik yuz berdi. Qayta urinib ko\'ring.';
     }
     submitting.value = false;
 };
 
-// Pressure levels
+// ==================== Constants ====================
+
 const pressureLevels = [
-    { value: 'light', label: 'Yengil' },
+    { value: 'soft', label: 'Yengil' },
     { value: 'medium', label: "O'rtacha" },
-    { value: 'strong', label: 'Kuchli' },
+    { value: 'hard', label: 'Kuchli' },
     { value: 'any', label: "Farqi yo'q" },
 ];
-
-const selectedServiceSummary = computed(() => {
-    if (booking.value.services.length === 0) return '';
-    const firstService = getServiceById(booking.value.services[0]?.service_id);
-    const firstDuration = getSelectedDuration(booking.value.services[0]?.service_id);
-    return `${firstService?.name}, ${firstDuration?.duration || 60} daq`;
-});
 </script>
 
 <template>
@@ -288,51 +337,48 @@ const selectedServiceSummary = computed(() => {
 
         <!-- Header -->
         <header class="bk-header glass">
-            <button class="bk-back glass-btn" @click="step > 1 ? prevStep() : router.visit('/app')">
+            <button class="bk-back glass-btn" @click="step === 'cart' ? prevStep() : (step > 1 ? prevStep() : router.visit('/app'))">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M19 12H5M12 19l-7-7 7-7"/>
                 </svg>
             </button>
             <h1 class="bk-title">
                 <span v-if="step === 1">Xizmat tanlang</span>
-                <span v-else-if="step === 2">Vaqt va usta tanlang</span>
-                <span v-else>Tasdiqlash</span>
+                <span v-else-if="step === 2">Usta va vaqt tanlang</span>
+                <span v-else-if="step === 3">Tasdiqlash</span>
+                <span v-else>Savat</span>
             </h1>
-            <span class="bk-step">{{ step }}/3</span>
+            <div class="bk-header-right">
+                <button
+                    v-if="step !== 'cart' && cartItemCount > 0"
+                    class="bk-cart-btn glass-btn"
+                    @click="step = 'cart'"
+                >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+                    </svg>
+                    <span class="bk-cart-badge">{{ cartItemCount }}</span>
+                </button>
+                <span v-else class="bk-step-num">
+                    <template v-if="step !== 'cart'">{{ step }}/3</template>
+                </span>
+            </div>
         </header>
 
         <!-- Step 1: Service Selection -->
         <div v-if="step === 1" class="bk-content">
-            <!-- People Count (at top) -->
-            <div class="section">
-                <h3 class="section-title">Kishilar soni</h3>
-                <div class="people-control glass">
-                    <button class="people-btn glass-btn" :disabled="booking.people_count <= 1" @click="removePerson">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="5" y1="12" x2="19" y2="12"/>
-                        </svg>
-                    </button>
-                    <span class="people-num">{{ booking.people_count }} kishi</span>
-                    <button class="people-btn glass-btn" :disabled="booking.people_count >= 5" @click="addPerson">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19"/>
-                            <line x1="5" y1="12" x2="19" y2="12"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
             <!-- Service Cards -->
             <div class="service-list">
-                <div 
-                    v-for="service in services" 
+                <div
+                    v-for="service in services"
                     :key="service.id"
                     class="service-card glass"
                     :class="{ selected: isServiceSelected(service.id) }"
                     @click="toggleService(service.id)"
                 >
                     <div class="service-img">
-                        <img v-if="service.image_url" :src="service.image_url" :alt="service.name" />
+                        <img v-if="service.image_url" :src="service.image_url" :alt="getTranslated(service.name)" />
                         <div v-else class="service-img-placeholder">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                                 <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
@@ -340,8 +386,8 @@ const selectedServiceSummary = computed(() => {
                         </div>
                     </div>
                     <div class="service-info">
-                        <h3 class="service-name">{{ service.name }}</h3>
-                        <p class="service-desc">{{ service.description }}</p>
+                        <h3 class="service-name">{{ getTranslated(service.name) }}</h3>
+                        <p class="service-desc">{{ getTranslated(service.description) }}</p>
                         <span class="service-price">{{ formatPrice(service.durations?.[0]?.price || 0) }} - {{ formatPrice(service.durations?.[service.durations.length - 1]?.price || 0) }} UZS</span>
                     </div>
                     <div v-if="isServiceSelected(service.id)" class="service-check">
@@ -352,19 +398,18 @@ const selectedServiceSummary = computed(() => {
                 </div>
             </div>
 
-            <!-- Duration Selection for each selected service -->
-            <div v-for="(sel, index) in booking.services" :key="sel.service_id" class="section">
+            <!-- Duration Selection -->
+            <div v-if="selectedService" class="section">
                 <h3 class="section-title">
-                    <span v-if="booking.services.length > 1">{{ index + 1 }}. </span>
-                    {{ getServiceById(sel.service_id)?.name }} - Davomiyligi
+                    {{ getTranslated(getServiceById(selectedService.service_id)?.name) }} - Davomiyligi
                 </h3>
                 <div class="chip-row">
-                    <button 
-                        v-for="dur in getServiceById(sel.service_id)?.durations" 
+                    <button
+                        v-for="dur in getServiceById(selectedService.service_id)?.durations"
                         :key="dur.id"
                         class="chip glass"
-                        :class="{ selected: sel.duration_id === dur.id }"
-                        @click="setDuration(sel.service_id, dur.id)"
+                        :class="{ selected: selectedService.duration_id === dur.id }"
+                        @click="setDuration(selectedService.service_id, dur.id)"
                     >
                         {{ dur.duration }} min
                     </button>
@@ -375,8 +420,8 @@ const selectedServiceSummary = computed(() => {
             <div class="section">
                 <h3 class="section-title">Kuch darajasi</h3>
                 <div class="chip-row">
-                    <button 
-                        v-for="level in pressureLevels" 
+                    <button
+                        v-for="level in pressureLevels"
                         :key="level.value"
                         class="chip glass"
                         :class="{ selected: booking.pressure_level === level.value }"
@@ -386,21 +431,20 @@ const selectedServiceSummary = computed(() => {
                     </button>
                 </div>
             </div>
-
         </div>
 
         <!-- Step 2: Master & Time Selection -->
         <div v-if="step === 2" class="bk-content">
-            <!-- Master Selection (FIRST) -->
+            <!-- Master Selection -->
             <div class="section">
                 <h3 class="section-title">Ustani tanlang</h3>
                 <div v-if="filteredMasters.length === 0" class="empty-hint">Bu xizmat uchun usta topilmadi</div>
                 <div v-else class="master-list">
-                    <div 
-                        v-for="master in filteredMasters" 
+                    <div
+                        v-for="master in filteredMasters"
                         :key="master.id"
                         class="master-card glass"
-                        :class="{ selected: isMasterSelected(master.id) }"
+                        :class="{ selected: booking.master_id === master.id }"
                     >
                         <div class="master-photo">
                             <img v-if="master.photo_url" :src="master.photo_url" :alt="master.name" />
@@ -408,12 +452,12 @@ const selectedServiceSummary = computed(() => {
                         </div>
                         <span class="master-name">{{ master.name }}</span>
                         <span class="master-exp">{{ master.experience || 3 }} yil</span>
-                        <button 
+                        <button
                             class="master-btn"
-                            :class="{ active: isMasterSelected(master.id) }"
-                            @click="toggleMaster(master.id)"
+                            :class="{ active: booking.master_id === master.id }"
+                            @click="booking.master_id = master.id; booking.slot = null;"
                         >
-                            {{ isMasterSelected(master.id) ? 'Tanlangan' : 'Tanlash' }}
+                            {{ booking.master_id === master.id ? 'Tanlangan' : 'Tanlash' }}
                         </button>
                     </div>
                 </div>
@@ -423,8 +467,8 @@ const selectedServiceSummary = computed(() => {
             <div class="section">
                 <h3 class="section-title">Sana tanlang</h3>
                 <div class="date-row">
-                    <button 
-                        v-for="d in availableDates" 
+                    <button
+                        v-for="d in availableDates"
                         :key="d.value"
                         class="date-chip glass"
                         :class="{ selected: booking.date === d.value }"
@@ -439,20 +483,20 @@ const selectedServiceSummary = computed(() => {
             <!-- Time Slots -->
             <div class="section">
                 <h3 class="section-title">Vaqt tanlang</h3>
-                <div v-if="booking.master_ids.length === 0" class="empty-hint">Avval ustani tanlang</div>
+                <div v-if="!booking.master_id" class="empty-hint">Avval ustani tanlang</div>
                 <div v-else-if="!booking.date" class="empty-hint">Avval sanani tanlang</div>
                 <div v-else-if="loadingSlots" class="loading">
                     <div class="spinner"></div>
                 </div>
                 <div v-else-if="availableSlots.length === 0" class="empty-hint">Bu kunga vaqt yo'q</div>
                 <div v-else class="slots-grid">
-                    <button 
-                        v-for="slot in availableSlots" 
+                    <button
+                        v-for="slot in availableSlots"
                         :key="slot.start"
                         class="slot-chip glass"
-                        :class="{ 
+                        :class="{
                             selected: booking.slot === slot.start,
-                            disabled: slot.disabled 
+                            disabled: slot.disabled
                         }"
                         :disabled="slot.disabled"
                         @click="!slot.disabled && (booking.slot = slot.start)"
@@ -467,37 +511,42 @@ const selectedServiceSummary = computed(() => {
         <div v-if="step === 3" class="bk-content">
             <div class="confirm-box glass">
                 <h3 class="confirm-title">Buyurtma tafsilotlari</h3>
-                
-                <div class="confirm-row">
-                    <span class="confirm-label">Sana:</span>
-                    <span class="confirm-value">{{ booking.date }}</span>
-                </div>
-                
-                <div class="confirm-row">
-                    <span class="confirm-label">Vaqt:</span>
-                    <span class="confirm-value">{{ slotDisplay }}</span>
-                </div>
-                
-                <div class="confirm-row">
-                    <span class="confirm-label">Usta:</span>
-                    <span class="confirm-value">{{ selectedMasters.map(m => m.name).join(', ') }}</span>
-                </div>
-                
+
                 <div class="confirm-row">
                     <span class="confirm-label">Xizmat:</span>
                     <span class="confirm-value">{{ selectedServiceSummary }}</span>
                 </div>
-                
+
+                <div class="confirm-row">
+                    <span class="confirm-label">Usta:</span>
+                    <span class="confirm-value">{{ selectedMaster?.name }}</span>
+                </div>
+
+                <div class="confirm-row">
+                    <span class="confirm-label">Sana:</span>
+                    <span class="confirm-value">{{ selectedDateLabel }}</span>
+                </div>
+
+                <div class="confirm-row">
+                    <span class="confirm-label">Vaqt:</span>
+                    <span class="confirm-value">{{ slotDisplay }}</span>
+                </div>
+
+                <div class="confirm-row">
+                    <span class="confirm-label">Bosim:</span>
+                    <span class="confirm-value">{{ pressureLevels.find(p => p.value === booking.pressure_level)?.label }}</span>
+                </div>
+
                 <div class="confirm-total">
-                    <span class="confirm-label">Jami:</span>
-                    <span class="confirm-price">{{ formatPrice(totalPrice) }} UZS</span>
+                    <span class="confirm-label">Narxi:</span>
+                    <span class="confirm-price">{{ formatPrice(currentItemPrice) }} UZS</span>
                 </div>
             </div>
 
             <!-- Notes -->
             <div class="section">
                 <h3 class="section-title">Qo'shimcha izoh</h3>
-                <textarea 
+                <textarea
                     v-model="booking.notes"
                     class="notes-input glass"
                     placeholder="Masalan: 5-qavat, 25-xonadon"
@@ -508,55 +557,149 @@ const selectedServiceSummary = computed(() => {
             <div v-if="submitError" class="error-msg">{{ submitError }}</div>
         </div>
 
+        <!-- Cart View -->
+        <div v-if="step === 'cart'" class="bk-content">
+            <div v-if="cart.length === 0" class="cart-empty">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+                </svg>
+                <p>Savat bo'sh</p>
+            </div>
+
+            <div v-else class="cart-items">
+                <div
+                    v-for="item in cart"
+                    :key="item.id"
+                    class="cart-item glass"
+                >
+                    <div class="cart-item-top">
+                        <div class="cart-item-service">
+                            <h4>{{ item.service_name }}</h4>
+                            <span class="cart-item-duration">{{ item.duration_minutes }} min</span>
+                        </div>
+                        <button class="cart-item-remove" @click="removeFromCart(item.id)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="cart-item-details">
+                        <div class="cart-item-row">
+                            <span class="cart-item-label">Usta</span>
+                            <span class="cart-item-val">{{ item.master_name }}</span>
+                        </div>
+                        <div class="cart-item-row">
+                            <span class="cart-item-label">Sana</span>
+                            <span class="cart-item-val">{{ item.date_label }}</span>
+                        </div>
+                        <div class="cart-item-row">
+                            <span class="cart-item-label">Vaqt</span>
+                            <span class="cart-item-val">{{ item.slot_display }}</span>
+                        </div>
+                        <div class="cart-item-row">
+                            <span class="cart-item-label">Bosim</span>
+                            <span class="cart-item-val">{{ item.pressure_label }}</span>
+                        </div>
+                    </div>
+                    <div class="cart-item-price">
+                        {{ formatPrice(item.price) }} UZS
+                    </div>
+                </div>
+
+                <!-- Cart Total -->
+                <div class="cart-total glass">
+                    <span class="cart-total-label">Jami:</span>
+                    <span class="cart-total-value">{{ formatPrice(cartTotal) }} UZS</span>
+                </div>
+            </div>
+
+            <div v-if="submitError" class="error-msg">{{ submitError }}</div>
+        </div>
+
         <!-- Bottom Bar -->
         <div class="bk-bottom glass">
-            <div v-if="step === 1 && booking.services.length > 0" class="bottom-summary">
+            <!-- Summary for steps 1-3 -->
+            <div v-if="step === 1 && selectedService" class="bottom-summary">
                 <div class="summary-text">
                     <span class="summary-label">Tanlangan:</span>
                     <span class="summary-value">{{ selectedServiceSummary }}</span>
                 </div>
                 <div class="summary-price">
                     <span class="price-label">Narxi:</span>
-                    <span class="price-value">{{ formatPrice(totalPrice) }} UZS</span>
+                    <span class="price-value">{{ formatPrice(currentItemPrice) }} UZS</span>
                 </div>
             </div>
-            
+
             <div v-if="step === 2 && booking.slot" class="bottom-summary">
                 <div class="summary-text">
                     <span class="summary-label">Tanlangan:</span>
                     <span class="summary-value">{{ selectedServiceSummary }}</span>
-                    <span class="summary-detail">{{ slotDisplay }}, {{ selectedMasters.map(m => m.name).join(', ') }}</span>
+                    <span class="summary-detail">{{ slotDisplay }}, {{ selectedMaster?.name }}</span>
                 </div>
                 <div class="summary-price">
                     <span class="price-label">Narxi:</span>
-                    <span class="price-value">{{ formatPrice(totalPrice) }} UZS</span>
+                    <span class="price-value">{{ formatPrice(currentItemPrice) }} UZS</span>
                 </div>
             </div>
 
-            <button 
-                v-if="step === 1"
-                class="bk-btn"
-                :disabled="!canProceedStep1"
-                @click="nextStep"
-            >
-                Davom etish
-            </button>
-            <button 
-                v-else-if="step === 2"
-                class="bk-btn"
-                :disabled="!canProceedStep2"
-                @click="nextStep"
-            >
-                Davom etish
-            </button>
-            <button 
-                v-else
-                class="bk-btn"
-                :disabled="submitting"
-                @click="submitBooking"
-            >
-                {{ submitting ? 'Yuborilmoqda...' : 'Buyurtma berish' }}
-            </button>
+            <div v-if="step === 'cart' && cart.length > 0" class="bottom-summary">
+                <div class="summary-text">
+                    <span class="summary-label">Savat:</span>
+                    <span class="summary-value">{{ cartItemCount }} ta xizmat</span>
+                </div>
+                <div class="summary-price">
+                    <span class="price-label">Jami:</span>
+                    <span class="price-value">{{ formatPrice(cartTotal) }} UZS</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div v-if="step !== 'cart'" class="bottom-actions">
+                <button
+                    v-if="step === 1"
+                    class="bk-btn"
+                    :disabled="!canProceedStep1"
+                    @click="nextStep"
+                >
+                    Davom etish
+                </button>
+                <button
+                    v-else-if="step === 2"
+                    class="bk-btn"
+                    :disabled="!canProceedStep2"
+                    @click="nextStep"
+                >
+                    Davom etish
+                </button>
+                <button
+                    v-else-if="step === 3"
+                    class="bk-btn bk-btn-cart"
+                    @click="addToCart"
+                >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+                    </svg>
+                    Savatga qo'shish
+                </button>
+            </div>
+
+            <div v-else class="bottom-actions cart-actions">
+                <button
+                    class="bk-btn bk-btn-secondary"
+                    @click="bookAnotherMaster"
+                >
+                    Boshqa usta tanlash
+                </button>
+                <button
+                    class="bk-btn"
+                    :disabled="cart.length === 0 || submitting"
+                    @click="submitCart"
+                >
+                    {{ submitting ? 'Yuborilmoqda...' : "To'lov qilish" }}
+                </button>
+            </div>
         </div>
     </div>
 </template>
@@ -565,7 +708,7 @@ const selectedServiceSummary = computed(() => {
 /* Base */
 .bk-page {
     min-height: 100vh;
-    padding-bottom: 160px;
+    padding-bottom: 180px;
     background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
     position: relative;
     overflow-x: hidden;
@@ -647,9 +790,49 @@ const selectedServiceSummary = computed(() => {
     margin: 0;
 }
 
-.bk-step {
+.bk-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bk-step-num {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.5);
+}
+
+.bk-cart-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    color: #B8A369;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.bk-cart-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.bk-cart-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #B8A369;
+    color: #1a2a3a;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 0 4px;
 }
 
 /* Content */
@@ -809,46 +992,6 @@ const selectedServiceSummary = computed(() => {
     color: #1a2a3a;
     font-weight: 600;
     box-shadow: 0 4px 20px rgba(184, 163, 105, 0.4);
-}
-
-/* People Control */
-.people-control {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    justify-content: center;
-    padding: 16px;
-    border-radius: 20px;
-}
-
-.people-btn {
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    color: #fff;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.people-btn:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.1);
-}
-
-.people-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-}
-
-.people-num {
-    font-size: 20px;
-    font-weight: 600;
-    color: #fff;
-    min-width: 80px;
-    text-align: center;
 }
 
 /* Date Selection */
@@ -1107,6 +1250,124 @@ const selectedServiceSummary = computed(() => {
     box-shadow: 0 0 20px rgba(184, 163, 105, 0.2);
 }
 
+/* Cart */
+.cart-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 48px 24px;
+    color: rgba(255, 255, 255, 0.4);
+    text-align: center;
+}
+
+.cart-empty p {
+    font-size: 16px;
+    margin: 0;
+}
+
+.cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.cart-item {
+    border-radius: 20px;
+    padding: 16px;
+    position: relative;
+}
+
+.cart-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.cart-item-service h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 4px;
+}
+
+.cart-item-duration {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.cart-item-remove {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(220, 38, 38, 0.2);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    border-radius: 10px;
+    color: #FCA5A5;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cart-item-remove:hover {
+    background: rgba(220, 38, 38, 0.4);
+    transform: scale(1.1);
+}
+
+.cart-item-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.cart-item-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+}
+
+.cart-item-label {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.cart-item-val {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+.cart-item-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #B8A369;
+    text-align: right;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cart-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-radius: 16px;
+    margin-top: 8px;
+}
+
+.cart-total-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.cart-total-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #B8A369;
+}
+
 /* Empty/Loading states */
 .empty-hint {
     padding: 24px;
@@ -1203,8 +1464,18 @@ const selectedServiceSummary = computed(() => {
     color: #B8A369;
 }
 
+.bottom-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.cart-actions {
+    display: flex;
+    gap: 10px;
+}
+
 .bk-btn {
-    width: 100%;
+    flex: 1;
     padding: 18px;
     background: linear-gradient(135deg, #B8A369, #D4C89A);
     border: none;
@@ -1215,6 +1486,10 @@ const selectedServiceSummary = computed(() => {
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 20px rgba(184, 163, 105, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .bk-btn:hover:not(:disabled) {
@@ -1226,5 +1501,22 @@ const selectedServiceSummary = computed(() => {
     opacity: 0.4;
     cursor: not-allowed;
     transform: none;
+}
+
+.bk-btn-cart {
+    background: linear-gradient(135deg, #B8A369, #D4C89A);
+}
+
+.bk-btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    box-shadow: none;
+    flex: 0.6;
+}
+
+.bk-btn-secondary:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: none;
 }
 </style>

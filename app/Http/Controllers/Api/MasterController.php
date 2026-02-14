@@ -79,7 +79,7 @@ class MasterController extends Controller
         // Validate request parameters
         $validated = $request->validate([
             'date' => 'required|date|after_or_equal:today',
-            'duration' => 'required|integer|in:60,90,120',
+            'duration' => 'required|integer|min:30|max:180',
             'people_count' => 'integer|min:1|max:4',
         ]);
 

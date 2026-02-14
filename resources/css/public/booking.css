@@ -1085,6 +1085,199 @@
     to { transform: rotate(360deg); }
 }
 
+/* ========== Cart Header Bar (topbar) ========== */
+
+.bk-cart-header-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #1B2B5A;
+}
+
+.bk-cart-header-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.bk-cart-header-count {
+    background: #C8A951;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+}
+
+.bk-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bk-cart-toggle {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(200, 169, 81, 0.12);
+    border: 1px solid rgba(200, 169, 81, 0.3);
+    color: #C8A951;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.bk-cart-toggle:hover {
+    background: rgba(200, 169, 81, 0.2);
+}
+
+.bk-cart-toggle-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #C8A951;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+}
+
+/* ========== Cart View ========== */
+
+.bk-cart-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+    color: #1B2B5A50;
+}
+
+.bk-cart-empty svg {
+    margin-bottom: 16px;
+    opacity: 0.3;
+}
+
+.bk-cart-empty p {
+    font-size: 16px;
+    margin-bottom: 24px;
+}
+
+.bk-cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.bk-cart-item {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 20px;
+    padding: 20px;
+    transition: all 0.25s ease;
+}
+
+.bk-cart-item:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.bk-cart-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.bk-cart-item-service h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1B2B5A;
+    margin: 0 0 4px;
+}
+
+.bk-cart-item-duration {
+    font-size: 12px;
+    font-weight: 500;
+    color: #C8A951;
+}
+
+.bk-cart-item-remove {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(220, 38, 38, 0.08);
+    border: 1px solid rgba(220, 38, 38, 0.15);
+    color: #dc2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.bk-cart-item-remove:hover {
+    background: rgba(220, 38, 38, 0.15);
+}
+
+.bk-cart-item-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bk-cart-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bk-cart-item-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1B2B5A70;
+}
+
+.bk-cart-item-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1B2B5A;
+}
+
+.bk-cart-item-price {
+    font-size: 14px;
+    font-weight: 700;
+    color: #C8A951;
+}
+
+/* ========== Add to Cart Button ========== */
+
+.bk-btn-add-cart {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 /* ========== Responsive ========== */
 
 /* Tablet: stack to single column */
@@ -1185,5 +1378,22 @@
 
     .bk-btn-next {
         padding: 16px 32px;
+    }
+
+    .bk-cart-items {
+        gap: 12px;
+    }
+
+    .bk-cart-item {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .bk-cart-item-service h4 {
+        font-size: 15px;
+    }
+
+    .bk-cart-header-label {
+        font-size: 14px;
     }
 }

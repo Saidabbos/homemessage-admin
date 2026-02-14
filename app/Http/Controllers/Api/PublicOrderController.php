@@ -44,7 +44,7 @@ class PublicOrderController extends Controller
             'arrival_window_start' => 'required|string',
             'people_count' => 'required|integer|min:1|max:5',
             'total_duration' => 'required|integer|min:30',
-            'pressure_level' => 'required|in:light,medium,strong',
+            'pressure_level' => 'required|in:soft,medium,hard,any',
             'notes' => 'nullable|string|max:1000',
             'services' => 'nullable|array',
             'services.*.service_type_id' => 'required_with:services|exists:service_types,id',
@@ -126,6 +126,91 @@ class PublicOrderController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Buyurtma yaratishda xatolik yuz berdi',
+            ], 500);
+        }
+    }
+
+    /**
+     * Create multiple orders from cart (batch submission).
+     */
+    public function storeBatch(Request $request)
+    {
+        if (!auth()->check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Iltimos, avval tizimga kiring',
+            ], 401);
+        }
+
+        $validated = $request->validate([
+            'orders' => 'required|array|min:1|max:10',
+            'orders.*.service_type_id' => 'required|exists:service_types,id',
+            'orders.*.duration_id' => 'required|exists:service_type_durations,id',
+            'orders.*.master_id' => 'required|exists:masters,id',
+            'orders.*.date' => 'required|date',
+            'orders.*.arrival_window_start' => 'required|string',
+            'orders.*.total_duration' => 'required|integer|min:30',
+            'orders.*.pressure_level' => 'required|in:soft,medium,hard,any',
+            'orders.*.notes' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            return DB::transaction(function () use ($validated) {
+                $customer = auth()->user();
+                $groupId = 'GRP-' . strtoupper(Str::random(12));
+                $createdOrders = [];
+
+                foreach ($validated['orders'] as $orderData) {
+                    $duration = ServiceTypeDuration::findOrFail($orderData['duration_id']);
+
+                    $arrivalStart = $orderData['arrival_window_start'];
+                    $arrivalEnd = date('H:i', strtotime($arrivalStart) + 30 * 60);
+
+                    $order = Order::create([
+                        'order_number' => Order::generateOrderNumber(),
+                        'booking_group_id' => $groupId,
+                        'customer_id' => $customer->id,
+                        'service_type_id' => $orderData['service_type_id'],
+                        'duration_id' => $orderData['duration_id'],
+                        'master_id' => $orderData['master_id'],
+                        'booking_date' => $orderData['date'],
+                        'arrival_window_start' => $arrivalStart,
+                        'arrival_window_end' => $arrivalEnd,
+                        'people_count' => 1,
+                        'total_amount' => $duration->price,
+                        'pressure_level' => $orderData['pressure_level'],
+                        'dispatcher_notes' => $orderData['notes'],
+                        'status' => Order::STATUS_NEW,
+                        'payment_status' => Order::PAY_NOT_PAID,
+                    ]);
+
+                    $createdOrders[] = [
+                        'id' => $order->id,
+                        'order_number' => $order->order_number,
+                    ];
+                }
+
+                Log::info('PublicOrderController@storeBatch: Batch orders created', [
+                    'group_id' => $groupId,
+                    'count' => count($createdOrders),
+                    'customer_id' => $customer->id,
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Buyurtmalar muvaffaqiyatli yaratildi',
+                    'orders' => $createdOrders,
+                    'group_id' => $groupId,
+                ]);
+            });
+        } catch (\Exception $e) {
+            Log::error('PublicOrderController@storeBatch: Failed', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Buyurtmalar yaratishda xatolik yuz berdi',
             ], 500);
         }
     }

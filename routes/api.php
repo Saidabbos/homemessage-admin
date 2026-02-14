@@ -73,6 +73,7 @@ Route::prefix('orders')->group(function () {
 Route::middleware('web')->group(function () {
     Route::post('/miniapp/orders', [MiniAppOrderController::class, 'store']);
     Route::post('/public/orders', [PublicOrderController::class, 'store']);
+    Route::post('/public/orders/batch', [PublicOrderController::class, 'storeBatch']);
 });
 
 // Payment API

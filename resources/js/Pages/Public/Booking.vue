@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, reactive } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
@@ -11,16 +11,14 @@ const props = defineProps({
     customer: Object,
 });
 
-// Wizard state
-const step = ref(1); // 1: Service, 2: Master & Time, 3: Confirm
+// Wizard state: 1 | 2 | 3 | 'cart'
+const step = ref(1);
 
-// Per-person service data
-const peopleCount = ref(1);
-const activePerson = ref(1); // which person tab is active (1-based)
-const peopleServices = reactive({}); // { 1: [{ service_id, duration_id }], 2: [...] }
+// Single service selection (replaces per-person system)
+const selectedService = ref(null); // { service_id, duration_id }
 
-// Initialize first person
-peopleServices[1] = [];
+// Cart state
+const cart = ref([]);
 
 // Shared booking data
 const booking = ref({
@@ -31,147 +29,72 @@ const booking = ref({
     notes: '',
 });
 
-// Current person's services (shortcut)
-const currentServices = computed(() => peopleServices[activePerson.value] || []);
+// ==================== Service Selection ====================
 
-// Set people count
-const setPeopleCount = (count) => {
-    const oldCount = peopleCount.value;
-    peopleCount.value = count;
-
-    // Add new person entries
-    for (let i = oldCount + 1; i <= count; i++) {
-        if (!peopleServices[i]) {
-            peopleServices[i] = [];
-        }
-    }
-
-    // Remove excess person entries
-    for (let i = count + 1; i <= oldCount; i++) {
-        delete peopleServices[i];
-    }
-
-    // Ensure active person is valid
-    if (activePerson.value > count) {
-        activePerson.value = count;
-    }
-};
-
-// Toggle service for current person
 const toggleService = (serviceId) => {
-    const services = peopleServices[activePerson.value];
-    const index = services.findIndex(s => s.service_id === serviceId);
-    if (index >= 0) {
-        services.splice(index, 1);
+    if (selectedService.value?.service_id === serviceId) {
+        selectedService.value = null;
     } else {
         const service = props.services?.find(s => s.id === serviceId);
         const defaultDuration = service?.durations?.find(d => d.is_default) || service?.durations?.[0];
-        services.push({
+        selectedService.value = {
             service_id: serviceId,
             duration_id: defaultDuration?.id || null,
-        });
+        };
     }
 };
 
 const isServiceSelected = (serviceId) => {
-    return currentServices.value.some(s => s.service_id === serviceId);
+    return selectedService.value?.service_id === serviceId;
 };
 
 const getServiceById = (serviceId) => {
     return props.services?.find(s => s.id === serviceId);
 };
 
-const getSelectedDurationForPerson = (personIndex, serviceId) => {
-    const services = peopleServices[personIndex] || [];
-    const sel = services.find(s => s.service_id === serviceId);
-    const service = getServiceById(serviceId);
-    return service?.durations?.find(d => d.id === sel?.duration_id);
-};
-
 const getSelectedDuration = (serviceId) => {
-    return getSelectedDurationForPerson(activePerson.value, serviceId);
+    if (selectedService.value?.service_id !== serviceId) return null;
+    const service = getServiceById(serviceId);
+    return service?.durations?.find(d => d.id === selectedService.value.duration_id);
 };
 
 const setDuration = (serviceId, durationId) => {
-    const services = peopleServices[activePerson.value];
-    const sel = services.find(s => s.service_id === serviceId);
-    if (sel) {
-        sel.duration_id = durationId;
+    if (selectedService.value?.service_id === serviceId) {
+        selectedService.value = { ...selectedService.value, duration_id: durationId };
     }
 };
 
-// All services across all people (flat array)
-const allServices = computed(() => {
-    const result = [];
-    for (let i = 1; i <= peopleCount.value; i++) {
-        const services = peopleServices[i] || [];
-        for (const sel of services) {
-            result.push({ ...sel, person: i });
-        }
-    }
-    return result;
+// ==================== Computed ====================
+
+const currentItemDuration = computed(() => {
+    if (!selectedService.value) return 0;
+    const dur = getSelectedDuration(selectedService.value.service_id);
+    return dur?.duration || 60;
 });
 
-// Total price: sum of all people's service prices
-const totalPrice = computed(() => {
-    let sum = 0;
-    for (let i = 1; i <= peopleCount.value; i++) {
-        const services = peopleServices[i] || [];
-        for (const sel of services) {
-            const dur = getSelectedDurationForPerson(i, sel.service_id);
-            sum += Number(dur?.price) || 0;
-        }
-    }
-    return sum;
+const currentItemPrice = computed(() => {
+    if (!selectedService.value) return 0;
+    const dur = getSelectedDuration(selectedService.value.service_id);
+    return Number(dur?.price) || 0;
 });
 
-// Total duration: sum of each person's service durations + buffer between people
-const totalDuration = computed(() => {
-    let maxPersonDuration = 0;
-    for (let i = 1; i <= peopleCount.value; i++) {
-        const services = peopleServices[i] || [];
-        let personTotal = 0;
-        for (const sel of services) {
-            const dur = getSelectedDurationForPerson(i, sel.service_id);
-            personTotal += dur?.duration || 0;
-        }
-        if (personTotal > maxPersonDuration) {
-            maxPersonDuration = personTotal;
-        }
-    }
-    const buffer = 10;
-    return maxPersonDuration > 0
-        ? maxPersonDuration * peopleCount.value + buffer * (peopleCount.value - 1)
-        : 0;
+const cartTotal = computed(() => {
+    return cart.value.reduce((sum, item) => sum + item.price, 0);
 });
 
-// All unique service IDs across all people (for master filtering)
-const allServiceIds = computed(() => {
-    const ids = new Set();
-    for (let i = 1; i <= peopleCount.value; i++) {
-        const services = peopleServices[i] || [];
-        for (const sel of services) {
-            ids.add(sel.service_id);
-        }
-    }
-    return [...ids];
+const cartItemCount = computed(() => cart.value.length);
+
+// Service IDs for master filtering
+const selectedServiceIds = computed(() => {
+    return selectedService.value ? [selectedService.value.service_id] : [];
 });
 
-// Person has at least one service selected
-const personHasServices = (personIndex) => {
-    return (peopleServices[personIndex] || []).length > 0;
-};
-
-// Person service count
-const personServiceCount = (personIndex) => {
-    return (peopleServices[personIndex] || []).length;
-};
+// ==================== Master ====================
 
 const selectedMaster = computed(() =>
     props.masters?.find(m => m.id === booking.value.master_id)
 );
 
-// Master search & scroll
 const masterSearch = ref('');
 const mastersRef = ref(null);
 
@@ -188,15 +111,13 @@ const getMasterServiceIds = (m) => {
 const filteredMasters = computed(() => {
     let masters = props.masters || [];
 
-    // Filter by selected service types
-    if (allServiceIds.value.length > 0) {
+    if (selectedServiceIds.value.length > 0) {
         masters = masters.filter(m => {
             const stIds = getMasterServiceIds(m);
-            return allServiceIds.value.every(sid => stIds.includes(sid));
+            return selectedServiceIds.value.every(sid => stIds.includes(sid));
         });
     }
 
-    // Filter by search
     if (masterSearch.value.trim()) {
         const q = masterSearch.value.toLowerCase().trim();
         masters = masters.filter(m =>
@@ -216,14 +137,15 @@ const getMasterSpecialties = (master) => {
     }).filter(Boolean).slice(0, 2).join(' & ');
 };
 
-// Reset master/date/slot when services change
-watch(allServiceIds, () => {
+// Reset master/date/slot when service changes
+watch(() => selectedService.value?.service_id, () => {
     booking.value.master_id = null;
     booking.value.date = null;
     booking.value.slot = null;
-}, { deep: true });
+});
 
-// Available dates (next 7 days)
+// ==================== Dates & Slots ====================
+
 const monthNames = ['yan', 'fev', 'mar', 'apr', 'may', 'iyn', 'iyl', 'avg', 'sen', 'okt', 'noy', 'dek'];
 const dayNames = ['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan'];
 
@@ -245,12 +167,11 @@ const availableDates = computed(() => {
     return dates;
 });
 
-// Slots
 const availableSlots = ref([]);
 const loadingSlots = ref(false);
 
 watch(
-    [() => booking.value.master_id, () => booking.value.date, totalDuration],
+    [() => booking.value.master_id, () => booking.value.date, currentItemDuration],
     async ([masterId, date, duration]) => {
         if (masterId && date && duration > 0) {
             booking.value.slot = null;
@@ -264,8 +185,8 @@ watch(
 const loadSlots = async () => {
     loadingSlots.value = true;
     try {
-        const duration = totalDuration.value || 60;
-        const response = await fetch(`/api/masters/${booking.value.master_id}/slots?date=${booking.value.date}&duration=${duration}&people_count=${peopleCount.value}`);
+        const duration = currentItemDuration.value || 60;
+        const response = await fetch(`/api/masters/${booking.value.master_id}/slots?date=${booking.value.date}&duration=${duration}&people_count=1`);
         const data = await response.json();
         availableSlots.value = data.data?.slots || data.slots || [];
     } catch (e) {
@@ -275,18 +196,16 @@ const loadSlots = async () => {
     loadingSlots.value = false;
 };
 
+// ==================== Formatting ====================
+
 const formatDate = (date) => {
-    return date.toLocaleDateString('uz-UZ', {
-        month: 'short',
-        day: 'numeric'
-    });
+    return date.toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' });
 };
 
 const formatPrice = (price) => {
     return new Intl.NumberFormat('uz-UZ').format(price);
 };
 
-// Format slot as range "HH:MM - HH:MM"
 const formatSlotRange = (start) => {
     if (!start) return '';
     const [h, m] = start.split(':').map(Number);
@@ -295,27 +214,11 @@ const formatSlotRange = (start) => {
     return `${start} - ${String(endH).padStart(2, '0')}:${String(endM % 60).padStart(2, '0')}`;
 };
 
-// Get selected date label
 const selectedDateLabel = computed(() => {
     const d = availableDates.value.find(d => d.value === booking.value.date);
     return d ? d.fullLabel : '';
 });
 
-// Step navigation - all people must have at least 1 service with duration
-const canProceedStep1 = computed(() => {
-    for (let i = 1; i <= peopleCount.value; i++) {
-        const services = peopleServices[i] || [];
-        if (services.length === 0) return false;
-        if (!services.every(s => s.service_id && s.duration_id)) return false;
-    }
-    return true;
-});
-
-const canProceedStep2 = computed(() =>
-    booking.value.master_id && booking.value.date && booking.value.slot
-);
-
-// Format slot window display
 const slotDisplay = computed(() => {
     if (!booking.value.slot) return '';
     const [hours, minutes] = booking.value.slot.split(':').map(Number);
@@ -325,6 +228,16 @@ const slotDisplay = computed(() => {
     return `${booking.value.slot}–${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
 });
 
+// ==================== Navigation ====================
+
+const canProceedStep1 = computed(() => {
+    return selectedService.value?.service_id && selectedService.value?.duration_id;
+});
+
+const canProceedStep2 = computed(() =>
+    booking.value.master_id && booking.value.date && booking.value.slot
+);
+
 const canSubmit = computed(() => canProceedStep2.value);
 
 const nextStep = () => {
@@ -332,83 +245,127 @@ const nextStep = () => {
 };
 
 const prevStep = () => {
-    if (step.value > 1) step.value--;
+    if (step.value === 'cart') {
+        step.value = 3;
+    } else if (step.value > 1) {
+        step.value--;
+    }
 };
 
-// Submit booking
+// ==================== Cart ====================
+
+const addToCart = () => {
+    if (!canSubmit.value) return;
+
+    const service = getServiceById(selectedService.value.service_id);
+    const duration = getSelectedDuration(selectedService.value.service_id);
+    const dateInfo = availableDates.value.find(d => d.value === booking.value.date);
+
+    const cartItem = {
+        id: Date.now() + Math.random(),
+        service_id: selectedService.value.service_id,
+        duration_id: selectedService.value.duration_id,
+        master_id: booking.value.master_id,
+        date: booking.value.date,
+        slot: booking.value.slot,
+        pressure_level: booking.value.pressure_level,
+        notes: booking.value.notes,
+        // Snapshot for display
+        service_name: getTranslated(service.name),
+        duration_minutes: duration.duration,
+        price: Number(duration.price),
+        master_name: selectedMaster.value.name,
+        master_photo: selectedMaster.value.photo_url,
+        date_label: dateInfo?.fullLabel || booking.value.date,
+        slot_display: slotDisplay.value,
+        pressure_label: pressureLevels.find(p => p.value === booking.value.pressure_level)?.label,
+    };
+
+    cart.value.push(cartItem);
+    step.value = 'cart';
+};
+
+const removeFromCart = (itemId) => {
+    cart.value = cart.value.filter(item => item.id !== itemId);
+    if (cart.value.length === 0) {
+        resetWizard();
+    }
+};
+
+const bookAnotherMaster = () => {
+    resetWizard();
+};
+
+const resetWizard = () => {
+    selectedService.value = null;
+    booking.value = {
+        master_id: null,
+        date: null,
+        slot: null,
+        pressure_level: 'medium',
+        notes: '',
+    };
+    step.value = 1;
+};
+
+// ==================== Submit Cart ====================
+
 const submitting = ref(false);
 const submitError = ref(null);
 
-const submitBooking = async () => {
+const submitCart = async () => {
+    if (cart.value.length === 0) return;
+
     submitting.value = true;
     submitError.value = null;
 
     try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
-        // Build per-person services for API
-        const perPersonServices = [];
-        for (let i = 1; i <= peopleCount.value; i++) {
-            const services = peopleServices[i] || [];
-            perPersonServices.push({
-                person: i,
-                services: services.map(sel => ({
-                    service_type_id: sel.service_id,
-                    duration_id: sel.duration_id,
-                })),
-            });
-        }
-
-        // Flat services list for backward compatibility
-        const flatServices = allServices.value.map(sel => ({
-            service_type_id: sel.service_id,
-            duration_id: sel.duration_id,
+        const orders = cart.value.map(item => ({
+            service_type_id: item.service_id,
+            duration_id: item.duration_id,
+            master_id: item.master_id,
+            date: item.date,
+            arrival_window_start: item.slot,
+            total_duration: item.duration_minutes,
+            pressure_level: item.pressure_level,
+            notes: item.notes,
         }));
 
-        const response = await fetch('/api/public/orders', {
+        const response = await fetch('/api/public/orders/batch', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': csrfToken,
                 'Accept': 'application/json',
             },
-            body: JSON.stringify({
-                services: flatServices,
-                per_person_services: perPersonServices,
-                service_type_id: flatServices[0]?.service_type_id,
-                duration_id: flatServices[0]?.duration_id,
-                master_id: booking.value.master_id,
-                date: booking.value.date,
-                arrival_window_start: booking.value.slot,
-                people_count: peopleCount.value,
-                total_duration: totalDuration.value,
-                pressure_level: booking.value.pressure_level,
-                notes: booking.value.notes,
-            }),
+            body: JSON.stringify({ orders }),
         });
 
         const result = await response.json();
 
         if (result.success) {
+            cart.value = [];
             router.visit('/booking/success');
         } else {
             submitError.value = result.message || 'Xatolik yuz berdi';
         }
     } catch (e) {
-        console.error('Booking failed:', e);
+        console.error('Cart submission failed:', e);
         submitError.value = 'Xatolik yuz berdi. Qayta urinib ko\'ring.';
     }
     submitting.value = false;
 };
 
-// Pressure levels
+// ==================== Constants & Helpers ====================
+
 const pressureLevels = [
-    { value: 'light', label: 'Yengil', icon: 'feather' },
+    { value: 'soft', label: 'Yengil', icon: 'feather' },
     { value: 'medium', label: "O'rtacha", icon: 'waves' },
-    { value: 'strong', label: 'Kuchli', icon: 'zap' },
+    { value: 'hard', label: 'Kuchli', icon: 'zap' },
 ];
 
-// Get translated name from translatable field
 const getTranslated = (field) => {
     if (typeof field === 'string') return field;
     if (field && typeof field === 'object') {
@@ -418,7 +375,6 @@ const getTranslated = (field) => {
     return '';
 };
 
-// Service icons mapping
 const getServiceIcon = (service) => {
     const name = getTranslated(service.name).toLowerCase();
     if (name.includes('classic') || name.includes('klassik')) return 'classic';
@@ -437,8 +393,8 @@ const getServiceIcon = (service) => {
         <div class="bk-topbar">
             <a href="/" class="bk-logo">HOMEMASSAGE</a>
 
-            <!-- Stepper -->
-            <div class="bk-stepper">
+            <!-- Stepper (steps 1-3) -->
+            <div v-if="step !== 'cart'" class="bk-stepper">
                 <div class="bk-step" :class="{ active: step >= 1, completed: step > 1 }">
                     <div class="bk-step-circle">
                         <svg v-if="step > 1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg>
@@ -463,12 +419,35 @@ const getServiceIcon = (service) => {
                 </div>
             </div>
 
-            <!-- Close Button -->
-            <a href="/" class="bk-close-btn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            <!-- Cart header (cart view) -->
+            <div v-else class="bk-cart-header-bar">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
                 </svg>
-            </a>
+                <span class="bk-cart-header-label">Savat</span>
+                <span v-if="cartItemCount > 0" class="bk-cart-header-count">{{ cartItemCount }}</span>
+            </div>
+
+            <!-- Close / Cart toggle -->
+            <div class="bk-topbar-right">
+                <button
+                    v-if="step !== 'cart' && cartItemCount > 0"
+                    class="bk-cart-toggle"
+                    @click="step = 'cart'"
+                >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+                    </svg>
+                    <span class="bk-cart-toggle-count">{{ cartItemCount }}</span>
+                </button>
+                <a href="/" class="bk-close-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </a>
+            </div>
         </div>
 
         <!-- Two Column Layout -->
@@ -477,55 +456,9 @@ const getServiceIcon = (service) => {
             <div class="bk-form-col">
                 <!-- Step 1: Service Selection -->
                 <div v-if="step === 1" class="bk-step-content">
-                    <!-- People Count — FIRST -->
+                    <!-- Massage Type -->
                     <div class="bk-section">
-                        <h3 class="bk-section-title">Necha kishi?</h3>
-                        <div class="bk-people-grid">
-                            <button
-                                v-for="n in 4"
-                                :key="n"
-                                class="bk-people-btn"
-                                :class="{ selected: peopleCount === n }"
-                                @click="setPeopleCount(n)"
-                            >
-                                <div class="bk-people-icon">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                                        <circle cx="12" cy="7" r="4"/>
-                                    </svg>
-                                    <span v-if="n > 1" class="bk-people-badge">x{{ n }}</span>
-                                </div>
-                                <span class="bk-people-label">{{ n }} {{ n === 1 ? 'kishi' : 'kishi' }}</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Person Tabs (if multiple people) -->
-                    <div v-if="peopleCount > 1" class="bk-section">
-                        <div class="bk-person-tabs">
-                            <button
-                                v-for="n in peopleCount"
-                                :key="n"
-                                class="bk-person-tab"
-                                :class="{ active: activePerson === n, 'has-services': personHasServices(n) }"
-                                @click="activePerson = n"
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                                    <circle cx="12" cy="7" r="4"/>
-                                </svg>
-                                <span>{{ n }}-kishi</span>
-                                <span v-if="personServiceCount(n) > 0" class="bk-tab-badge">{{ personServiceCount(n) }}</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Massage Type (per-person) -->
-                    <div class="bk-section">
-                        <h3 class="bk-section-title">
-                            Massaj turi
-                            <span v-if="peopleCount > 1" class="bk-section-hint">({{ activePerson }}-kishi uchun)</span>
-                        </h3>
+                        <h3 class="bk-section-title">Massaj turi</h3>
                         <div class="bk-service-grid">
                             <div
                                 v-for="service in services"
@@ -556,26 +489,19 @@ const getServiceIcon = (service) => {
                         </div>
                     </div>
 
-                    <!-- Duration Picker (per-person) -->
-                    <div v-if="currentServices.length > 0" class="bk-section">
+                    <!-- Duration Picker -->
+                    <div v-if="selectedService" class="bk-section">
                         <h3 class="bk-section-title">Davomiylik</h3>
-                        <div
-                            v-for="sel in currentServices"
-                            :key="sel.service_id"
-                            class="bk-duration-group"
-                        >
-                            <p v-if="currentServices.length > 1" class="bk-duration-label">{{ getTranslated(getServiceById(sel.service_id)?.name) }}</p>
-                            <div class="bk-duration-row">
-                                <button
-                                    v-for="dur in getServiceById(sel.service_id)?.durations"
-                                    :key="dur.id"
-                                    class="bk-duration-btn"
-                                    :class="{ selected: sel.duration_id === dur.id }"
-                                    @click="setDuration(sel.service_id, dur.id)"
-                                >
-                                    {{ dur.duration }} min
-                                </button>
-                            </div>
+                        <div class="bk-duration-row">
+                            <button
+                                v-for="dur in getServiceById(selectedService.service_id)?.durations"
+                                :key="dur.id"
+                                class="bk-duration-btn"
+                                :class="{ selected: selectedService.duration_id === dur.id }"
+                                @click="setDuration(selectedService.service_id, dur.id)"
+                            >
+                                {{ dur.duration }} min
+                            </button>
                         </div>
                     </div>
 
@@ -611,7 +537,6 @@ const getServiceIcon = (service) => {
 
                 <!-- Step 2: Master & Time Selection -->
                 <div v-if="step === 2" class="bk-step-content">
-                    <!-- Step Title -->
                     <div class="bk-step-header">
                         <h2 class="bk-step-heading">Master va vaqtni tanlang</h2>
                         <p class="bk-step-subheading">O'zingizga mos master, sana va vaqt oralig'ini belgilang</p>
@@ -712,17 +637,9 @@ const getServiceIcon = (service) => {
                     <div class="bk-confirm-card">
                         <h3 class="bk-confirm-title">Buyurtma ma'lumotlari</h3>
 
-                        <template v-for="p in peopleCount" :key="'confirm-person-' + p">
-                            <div v-if="peopleCount > 1" class="bk-confirm-person-header">{{ p }}-kishi</div>
-                            <div v-for="sel in peopleServices[p]" :key="'p' + p + '-' + sel.service_id" class="bk-confirm-row">
-                                <span class="bk-confirm-label">{{ getTranslated(getServiceById(sel.service_id)?.name) }}</span>
-                                <span class="bk-confirm-value">{{ getSelectedDurationForPerson(p, sel.service_id)?.duration }} min</span>
-                            </div>
-                        </template>
-
                         <div class="bk-confirm-row">
-                            <span class="bk-confirm-label">Kishi soni</span>
-                            <span class="bk-confirm-value">{{ peopleCount }}</span>
+                            <span class="bk-confirm-label">{{ getTranslated(getServiceById(selectedService.service_id)?.name) }}</span>
+                            <span class="bk-confirm-value">{{ getSelectedDuration(selectedService.service_id)?.duration }} min</span>
                         </div>
 
                         <div class="bk-confirm-divider"></div>
@@ -734,7 +651,7 @@ const getServiceIcon = (service) => {
 
                         <div class="bk-confirm-row">
                             <span class="bk-confirm-label">Sana</span>
-                            <span class="bk-confirm-value">{{ booking.date }}</span>
+                            <span class="bk-confirm-value">{{ selectedDateLabel }}</span>
                         </div>
 
                         <div class="bk-confirm-row">
@@ -776,35 +693,92 @@ const getServiceIcon = (service) => {
                         {{ submitError }}
                     </div>
                 </div>
+
+                <!-- Cart View -->
+                <div v-if="step === 'cart'" class="bk-step-content">
+                    <div class="bk-step-header">
+                        <h2 class="bk-step-heading">Savatingiz</h2>
+                        <p class="bk-step-subheading">{{ cartItemCount }} ta xizmat tanlangan</p>
+                    </div>
+
+                    <div v-if="cart.length === 0" class="bk-cart-empty">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+                        </svg>
+                        <p>Savat bo'sh</p>
+                        <button class="bk-btn-next" @click="step = 1">Xizmat tanlash</button>
+                    </div>
+
+                    <div v-else class="bk-cart-items">
+                        <div
+                            v-for="item in cart"
+                            :key="item.id"
+                            class="bk-cart-item"
+                        >
+                            <div class="bk-cart-item-top">
+                                <div class="bk-cart-item-service">
+                                    <h4>{{ item.service_name }}</h4>
+                                    <span class="bk-cart-item-duration">{{ item.duration_minutes }} min</span>
+                                </div>
+                                <button class="bk-cart-item-remove" @click="removeFromCart(item.id)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="bk-cart-item-details">
+                                <div class="bk-cart-item-row">
+                                    <span class="bk-cart-item-label">Master</span>
+                                    <span class="bk-cart-item-value">{{ item.master_name }}</span>
+                                </div>
+                                <div class="bk-cart-item-row">
+                                    <span class="bk-cart-item-label">Sana</span>
+                                    <span class="bk-cart-item-value">{{ item.date_label }}</span>
+                                </div>
+                                <div class="bk-cart-item-row">
+                                    <span class="bk-cart-item-label">Vaqt</span>
+                                    <span class="bk-cart-item-value">{{ item.slot_display }}</span>
+                                </div>
+                                <div class="bk-cart-item-row">
+                                    <span class="bk-cart-item-label">Bosim</span>
+                                    <span class="bk-cart-item-value">{{ item.pressure_label }}</span>
+                                </div>
+                                <div class="bk-cart-item-row">
+                                    <span class="bk-cart-item-label">Narx</span>
+                                    <span class="bk-cart-item-price">{{ formatPrice(item.price) }} so'm</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-if="submitError" class="bk-error" style="margin-top: 16px;">
+                        {{ submitError }}
+                    </div>
+                </div>
             </div>
 
             <!-- Right Column: Summary -->
             <div class="bk-summary-col">
                 <div class="bk-summary-card">
-                    <h3 class="bk-summary-title">{{ step >= 2 ? 'Buyurtma xulosasi' : 'Buyurtma' }}</h3>
+                    <h3 class="bk-summary-title">
+                        {{ step === 'cart' ? 'Savat' : (step >= 2 ? 'Buyurtma xulosasi' : 'Buyurtma') }}
+                    </h3>
 
-                    <div v-if="allServices.length > 0" class="bk-summary-items">
+                    <!-- Current item summary (steps 1-3) -->
+                    <div v-if="step !== 'cart' && selectedService" class="bk-summary-items">
                         <div class="bk-summary-divider" style="margin-top: 0;"></div>
 
-                        <!-- Service info -->
-                        <template v-for="p in peopleCount" :key="'summary-p-' + p">
-                            <div v-if="peopleCount > 1 && (peopleServices[p] || []).length > 0" class="bk-summary-person">{{ p }}-kishi</div>
-                            <div v-for="sel in (peopleServices[p] || [])" :key="'sp' + p + '-' + sel.service_id" class="bk-summary-row">
-                                <span class="bk-summary-label">{{ getTranslated(getServiceById(sel.service_id)?.name) }}</span>
-                                <span class="bk-summary-value">{{ getSelectedDurationForPerson(p, sel.service_id)?.duration || '—' }} min</span>
-                            </div>
-                        </template>
-
                         <div class="bk-summary-row">
-                            <span class="bk-summary-label">Kishi soni</span>
-                            <span class="bk-summary-value">{{ peopleCount }}</span>
+                            <span class="bk-summary-label">{{ getTranslated(getServiceById(selectedService.service_id)?.name) }}</span>
+                            <span class="bk-summary-value">{{ getSelectedDuration(selectedService.service_id)?.duration || '—' }} min</span>
                         </div>
+
                         <div class="bk-summary-row">
                             <span class="bk-summary-label">Bosim</span>
                             <span class="bk-summary-value">{{ pressureLevels.find(p => p.value === booking.pressure_level)?.label }}</span>
                         </div>
 
-                        <!-- Step 2+ info: date, master, time -->
                         <template v-if="step >= 2">
                             <div v-if="selectedDateLabel" class="bk-summary-row">
                                 <span class="bk-summary-label">Sana</span>
@@ -816,6 +790,16 @@ const getServiceIcon = (service) => {
                             </div>
                         </template>
                     </div>
+
+                    <!-- Cart summary -->
+                    <div v-else-if="step === 'cart' && cart.length > 0" class="bk-summary-items">
+                        <div class="bk-summary-divider" style="margin-top: 0;"></div>
+                        <div v-for="item in cart" :key="'s-' + item.id" class="bk-summary-row">
+                            <span class="bk-summary-label">{{ item.service_name }}</span>
+                            <span class="bk-summary-value">{{ formatPrice(item.price) }}</span>
+                        </div>
+                    </div>
+
                     <div v-else class="bk-summary-empty">
                         Xizmat tanlang
                     </div>
@@ -824,11 +808,10 @@ const getServiceIcon = (service) => {
 
                     <div class="bk-summary-total">
                         <span class="bk-summary-total-label">Jami</span>
-                        <span class="bk-summary-total-value">{{ formatPrice(totalPrice) }} so'm</span>
+                        <span class="bk-summary-total-value">{{ formatPrice(step === 'cart' ? cartTotal : currentItemPrice) }} so'm</span>
                     </div>
 
-                    <!-- Show time after total (like Pencil design) -->
-                    <div v-if="step >= 2 && booking.slot" class="bk-summary-row" style="margin-top: 12px;">
+                    <div v-if="step !== 'cart' && step >= 2 && booking.slot" class="bk-summary-row" style="margin-top: 12px;">
                         <span class="bk-summary-label">Vaqt</span>
                         <span class="bk-summary-value">{{ formatSlotRange(booking.slot) }}</span>
                     </div>
@@ -836,41 +819,68 @@ const getServiceIcon = (service) => {
 
                 <!-- Action buttons -->
                 <div class="bk-actions">
-                    <button
-                        v-if="step > 1"
-                        class="bk-btn-back"
-                        @click="prevStep"
-                    >
-                        Orqaga
-                    </button>
+                    <!-- Steps 1-3 navigation -->
+                    <template v-if="step !== 'cart'">
+                        <button
+                            v-if="step > 1"
+                            class="bk-btn-back"
+                            @click="prevStep"
+                        >
+                            Orqaga
+                        </button>
 
-                    <button
-                        v-if="step === 1"
-                        class="bk-btn-next"
-                        :disabled="!canProceedStep1"
-                        @click="nextStep"
-                    >
-                        Davom etish
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
-                    </button>
-                    <button
-                        v-else-if="step === 2"
-                        class="bk-btn-next"
-                        :disabled="!canProceedStep2"
-                        @click="nextStep"
-                    >
-                        Keyingi qadam
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
-                    </button>
-                    <button
-                        v-else
-                        class="bk-btn-next bk-btn-submit"
-                        :disabled="!canSubmit || submitting"
-                        @click="submitBooking"
-                    >
-                        <span v-if="submitting">Yuborilmoqda...</span>
-                        <span v-else>Buyurtma berish</span>
-                    </button>
+                        <button
+                            v-if="step === 1"
+                            class="bk-btn-next"
+                            :disabled="!canProceedStep1"
+                            @click="nextStep"
+                        >
+                            Davom etish
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
+                        </button>
+                        <button
+                            v-else-if="step === 2"
+                            class="bk-btn-next"
+                            :disabled="!canProceedStep2"
+                            @click="nextStep"
+                        >
+                            Keyingi qadam
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
+                        </button>
+                        <button
+                            v-else-if="step === 3"
+                            class="bk-btn-next bk-btn-add-cart"
+                            :disabled="!canSubmit"
+                            @click="addToCart"
+                        >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+                            </svg>
+                            Savatga qo'shish
+                        </button>
+                    </template>
+
+                    <!-- Cart actions -->
+                    <template v-else>
+                        <button
+                            class="bk-btn-back"
+                            @click="bookAnotherMaster"
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"/><polyline points="5,12 12,19 19,12"/>
+                            </svg>
+                            Boshqa master tanlash
+                        </button>
+                        <button
+                            class="bk-btn-next bk-btn-submit"
+                            :disabled="cart.length === 0 || submitting"
+                            @click="submitCart"
+                        >
+                            <span v-if="submitting">Yuborilmoqda...</span>
+                            <span v-else>To'lov qilish ({{ formatPrice(cartTotal) }} so'm)</span>
+                        </button>
+                    </template>
                 </div>
             </div>
         </div>
