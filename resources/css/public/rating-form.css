@@ -1,0 +1,322 @@
+/* ── Rating Form Page ── */
+/* Shared styles for Rating.vue (customer→master) and RatingClient.vue (master→customer) */
+
+.rf-page {
+    min-height: 100vh;
+    background: #F5F2ED;
+    padding: 24px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Manrope', sans-serif;
+}
+
+.rf-container {
+    width: 100%;
+    max-width: 480px;
+}
+
+/* Header */
+.rf-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.rf-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #E8E5E0;
+}
+
+.rf-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.rf-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.rf-avatar-customer {
+    border-color: #1B2B5A;
+}
+
+.rf-avatar-customer .rf-avatar-placeholder {
+    background: linear-gradient(135deg, #1B2B5A, #2a3f7e);
+}
+
+.rf-avatar-master {
+    border-color: #2D6A4F;
+}
+
+.rf-avatar-master .rf-avatar-placeholder {
+    background: linear-gradient(135deg, #2D6A4F, #3d8b6a);
+}
+
+.rf-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 6px;
+}
+
+.rf-order-info {
+    font-size: 13px;
+    color: #8B8680;
+    margin: 0 0 12px;
+}
+
+.rf-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.rf-badge-customer {
+    background: #1B2B5A;
+}
+
+.rf-badge-master {
+    background: #2D6A4F;
+}
+
+/* Card */
+.rf-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+/* Rating Section */
+.rf-section {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.rf-section:last-child {
+    margin-bottom: 0;
+}
+
+.rf-main-rating {
+    padding: 20px;
+    background: #FAFAF8;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.rf-label {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 12px;
+}
+
+.rf-label-sm {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #8B8680;
+    margin-bottom: 8px;
+}
+
+/* Stars */
+.rf-stars {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.rf-stars-sm {
+    gap: 4px;
+}
+
+.rf-star {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #E8E5E0;
+    transition: all 0.2s ease;
+}
+
+.rf-star-sm {
+    width: 30px;
+    height: 30px;
+}
+
+.rf-star:hover,
+.rf-star.rf-star-filled {
+    color: #C8A951;
+    transform: scale(1.1);
+}
+
+.rf-star.rf-star-error {
+    animation: rf-shake 0.5s ease;
+}
+
+@keyframes rf-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+.rf-star svg {
+    width: 100%;
+    height: 100%;
+}
+
+.rf-error {
+    display: block;
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+/* Additional Ratings Grid */
+.rf-sub-ratings {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #F0EDE8;
+}
+
+.rf-sub-ratings .rf-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 0;
+    text-align: left;
+}
+
+.rf-sub-ratings .rf-label-sm {
+    margin-bottom: 0;
+    white-space: nowrap;
+}
+
+.rf-sub-ratings-single {
+    align-items: center;
+}
+
+.rf-sub-ratings-single .rf-section {
+    justify-content: center;
+}
+
+/* Feedback */
+.rf-feedback-section {
+    text-align: left;
+    margin-bottom: 24px;
+}
+
+.rf-textarea {
+    width: 100%;
+    padding: 14px;
+    border: 1.5px solid #E8E5E0;
+    border-radius: 12px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    color: #1a1a2e;
+    resize: none;
+    transition: border-color 0.2s;
+    background: #FAFAF8;
+    box-sizing: border-box;
+}
+
+.rf-textarea:focus {
+    outline: none;
+    border-color: #C8A951;
+    background: #fff;
+}
+
+.rf-textarea::placeholder {
+    color: #B5B0A8;
+}
+
+/* Submit Button */
+.rf-submit {
+    width: 100%;
+    padding: 16px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.rf-submit svg {
+    width: 20px;
+    height: 20px;
+}
+
+.rf-submit-customer {
+    background: #1B2B5A;
+}
+
+.rf-submit-customer:hover:not(:disabled) {
+    background: #243670;
+    box-shadow: 0 4px 12px rgba(27, 43, 90, 0.3);
+}
+
+.rf-submit-master {
+    background: #2D6A4F;
+}
+
+.rf-submit-master:hover:not(:disabled) {
+    background: #3d8b6a;
+    box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
+}
+
+.rf-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .rf-page {
+        padding: 16px 12px;
+    }
+
+    .rf-card {
+        padding: 20px;
+    }
+
+    .rf-star {
+        width: 38px;
+        height: 38px;
+    }
+
+    .rf-sub-ratings {
+        gap: 12px;
+    }
+}

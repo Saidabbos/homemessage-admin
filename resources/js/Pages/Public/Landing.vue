@@ -197,9 +197,19 @@ const testimonialsList = (props.testimonials && props.testimonials.length > 0)
     }))
     : defaultTestimonials
 
+function tr(field) {
+    if (typeof field === 'string') return field
+    if (field && typeof field === 'object') {
+        const locale = document.documentElement.lang || 'uz'
+        return field[locale] || field.uz || field.ru || field.en || Object.values(field)[0] || ''
+    }
+    return ''
+}
+
 function getInitials(name) {
-    if (!name) return ''
-    return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+    const str = tr(name)
+    if (!str) return ''
+    return str.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
 }
 
 function getStarCount(rating) {
@@ -511,7 +521,7 @@ function submitContact() {
                             </svg>
 
                             <!-- Comment Text -->
-                            <p class="testimonial-text">{{ item.comment }}</p>
+                            <p class="testimonial-text">{{ tr(item.comment) }}</p>
 
                             <!-- Star Rating -->
                             <div class="testimonial-stars">
@@ -529,8 +539,8 @@ function submitContact() {
                                     <span class="testimonial-initials">{{ getInitials(item.client_name) }}</span>
                                 </div>
                                 <div class="testimonial-author-info">
-                                    <span class="testimonial-author-name">{{ item.client_name }}</span>
-                                    <span class="testimonial-author-role">{{ item.client_role }}</span>
+                                    <span class="testimonial-author-name">{{ tr(item.client_name) }}</span>
+                                    <span class="testimonial-author-role">{{ tr(item.client_role) }}</span>
                                 </div>
                             </div>
                         </div>

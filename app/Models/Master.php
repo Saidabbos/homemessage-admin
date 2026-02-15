@@ -151,4 +151,12 @@ class Master extends Model
     {
         return $this->belongsToMany(PressureLevel::class, 'master_pressure_level');
     }
+
+    /**
+     * Get all ratings received from customers
+     */
+    public function receivedRatings(): HasMany
+    {
+        return $this->hasMany(Rating::class)->where('type', Rating::TYPE_CLIENT_TO_MASTER);
+    }
 }

@@ -1,0 +1,364 @@
+/* ── Rating Complete Page ── */
+/* Shared styles for both RatingComplete and RatingClientComplete */
+
+.rc-page {
+    min-height: 100vh;
+    background: #F5F2ED;
+    padding: 24px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Manrope', sans-serif;
+}
+
+.rc-container {
+    width: 100%;
+    max-width: 480px;
+}
+
+/* Success Header */
+.rc-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.rc-success-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: rc-pop 0.5s ease;
+}
+
+.rc-success-icon svg {
+    width: 36px;
+    height: 36px;
+    color: #fff;
+}
+
+.rc-success-icon-customer {
+    background: linear-gradient(135deg, #1B2B5A, #2a3f7e);
+}
+
+.rc-success-icon-master {
+    background: linear-gradient(135deg, #2D6A4F, #3d8b6a);
+}
+
+@keyframes rc-pop {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.rc-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 6px;
+}
+
+.rc-subtitle {
+    font-size: 14px;
+    color: #8B8680;
+    margin: 0;
+}
+
+/* Rating Card */
+.rc-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 16px;
+}
+
+/* Person Info */
+.rc-person {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #F0EDE8;
+}
+
+.rc-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid #F0EDE8;
+}
+
+.rc-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.rc-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.rc-avatar-placeholder-customer {
+    background: linear-gradient(135deg, #1B2B5A, #2a3f7e);
+}
+
+.rc-avatar-placeholder-master {
+    background: linear-gradient(135deg, #2D6A4F, #3d8b6a);
+}
+
+.rc-person-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.rc-person-name {
+    display: block;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 2px;
+}
+
+.rc-person-role {
+    font-size: 12px;
+    color: #8B8680;
+}
+
+.rc-order-meta {
+    font-size: 12px;
+    color: #8B8680;
+    display: block;
+    margin-top: 2px;
+}
+
+/* Overall Rating */
+.rc-overall {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.rc-overall-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    font-weight: 700;
+    color: #C8A951;
+    line-height: 1;
+}
+
+.rc-overall-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #8B8680;
+    margin-top: 4px;
+}
+
+.rc-stars {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.rc-stars svg {
+    width: 28px;
+    height: 28px;
+}
+
+.rc-star-filled {
+    color: #C8A951;
+}
+
+.rc-star-empty {
+    color: #E8E5E0;
+}
+
+/* Sub Ratings */
+.rc-sub-ratings {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 1px solid #F0EDE8;
+}
+
+.rc-sub-item {
+    text-align: center;
+}
+
+.rc-sub-label {
+    font-size: 11px;
+    color: #8B8680;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.rc-sub-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+.rc-sub-stars {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    margin-top: 4px;
+}
+
+.rc-sub-stars svg {
+    width: 12px;
+    height: 12px;
+}
+
+/* Feedback */
+.rc-feedback {
+    background: #FAFAF8;
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 20px;
+    border-left: 3px solid #C8A951;
+}
+
+.rc-feedback-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #8B8680;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.rc-feedback-text {
+    font-size: 14px;
+    color: #4a4a4a;
+    line-height: 1.5;
+    font-style: italic;
+    margin: 0;
+}
+
+/* Action Buttons */
+.rc-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.rc-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.rc-btn-primary-customer {
+    background: #1B2B5A;
+    color: #fff;
+}
+
+.rc-btn-primary-customer:hover {
+    background: #243670;
+    box-shadow: 0 4px 12px rgba(27, 43, 90, 0.3);
+}
+
+.rc-btn-primary-master {
+    background: #2D6A4F;
+    color: #fff;
+}
+
+.rc-btn-primary-master:hover {
+    background: #3d8b6a;
+    box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
+}
+
+.rc-btn-secondary {
+    background: #fff;
+    color: #1a1a2e;
+    border: 1px solid #E8E5E0;
+}
+
+.rc-btn-secondary:hover {
+    background: #FAFAF8;
+    border-color: #C8A951;
+}
+
+.rc-btn svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* Order Info Badge */
+.rc-order-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #FAFAF8;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #8B8680;
+    margin-bottom: 20px;
+}
+
+.rc-order-badge svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .rc-page {
+        padding: 16px 12px;
+    }
+
+    .rc-card {
+        padding: 20px;
+    }
+
+    .rc-overall-value {
+        font-size: 40px;
+    }
+
+    .rc-sub-ratings {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .rc-sub-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-align: left;
+    }
+
+    .rc-sub-stars {
+        margin-top: 0;
+    }
+
+    .rc-actions {
+        flex-direction: column;
+    }
+}

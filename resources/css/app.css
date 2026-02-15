@@ -6,7 +6,16 @@
 @import './public/dashboard.css';
 @import './public/customer-orders.css';
 @import './public/customer-favorites.css';
+@import './public/customer-ratings.css';
 @import './public/auth.css';
+@import './public/master-dashboard.css';
+@import './public/master-orders.css';
+@import './public/master-ratings.css';
+@import './public/master-profile.css';
+@import './public/rating-complete.css';
+@import './public/rating-form.css';
+@import './public/customer-order-show.css';
+@import './public/master-order-show.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';

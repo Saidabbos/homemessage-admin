@@ -107,6 +107,22 @@
     padding: 8px;
 }
 
+.cf-user-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+    text-decoration: none;
+    color: inherit;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+}
+
+.cf-user-link:hover {
+    background: rgba(255,255,255,0.06);
+}
+
 .cf-user-avatar {
     width: 40px;
     height: 40px;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Customer;
+namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
@@ -11,32 +11,33 @@ use Inertia\Inertia;
 
 class OrderController extends Controller
 {
-    /**
-     * Display customer's orders with filters and pagination.
-     */
     public function index(Request $request)
     {
         $user = Auth::user();
+        $master = $user->master;
 
-        $query = Order::query()
-            ->where('customer_id', $user->id)
-            ->with(['master', 'serviceType', 'duration', 'oil']);
-
-        // Status filter
-        if ($status = $request->input('status')) {
-            $query->where('status', $status);
+        if (!$master) {
+            abort(404);
         }
 
-        // Search filter (order number or service name)
+        $query = Order::query()
+            ->where('master_id', $master->id)
+            ->with(['customer', 'serviceType', 'duration']);
+
+        if ($status = $request->input('status')) {
+            if ($status === 'ACTIVE') {
+                $query->whereNotIn('status', [Order::STATUS_COMPLETED, Order::STATUS_CANCELLED]);
+            } else {
+                $query->where('status', $status);
+            }
+        }
+
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('order_number', 'like', "%{$search}%")
-                    ->orWhereHas('serviceType', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('master', function ($q) use ($search) {
-                        $q->where('first_name', 'like', "%{$search}%")
-                            ->orWhere('last_name', 'like', "%{$search}%");
+                    ->orWhereHas('customer', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
                     });
             });
         }
@@ -56,7 +57,8 @@ class OrderController extends Controller
                 'booking_date_formatted' => $order->booking_date?->translatedFormat('d M, Y'),
                 'arrival_time' => $order->arrival_window_start ? substr($order->arrival_window_start, 0, 5) : null,
                 'service_name' => $order->serviceType?->getTranslation('name', $locale) ?? '-',
-                'master_name' => $order->master?->full_name ?? '-',
+                'customer_name' => $order->customer?->name ?? '-',
+                'customer_phone' => $order->customer?->phone ?? '-',
                 'duration_minutes' => $order->duration?->duration ?? 60,
                 'total_amount' => (float) $order->total_amount,
                 'status' => $order->status,
@@ -64,55 +66,55 @@ class OrderController extends Controller
             ];
         });
 
-        // Status counts for tabs
-        $statusCounts = Order::where('customer_id', $user->id)
+        $statusCounts = Order::where('master_id', $master->id)
             ->selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status')
             ->toArray();
 
-        return Inertia::render('Customer/Orders/Index', [
+        return Inertia::render('Master/Orders/Index', [
             'orders' => $orders,
             'filters' => $request->only(['status', 'search']),
             'statusCounts' => $statusCounts,
-            'customer' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'phone' => $user->phone,
+            'master' => [
+                'id' => $master->id,
+                'name' => $master->full_name,
+                'phone' => $master->phone,
+                'photo_url' => $master->photo_url,
             ],
         ]);
     }
 
-    /**
-     * Display a single order with rating info.
-     */
     public function show(Order $order)
     {
         $user = Auth::user();
+        $master = $user->master;
 
-        if ($order->customer_id !== $user->id) {
+        if (!$master || $order->master_id !== $master->id) {
             abort(403);
         }
 
-        $order->load(['master', 'serviceType', 'duration', 'oil', 'logs']);
+        $order->load(['customer', 'serviceType', 'duration', 'oil', 'logs']);
         $locale = app()->getLocale();
 
-        // Check if rating exists for this order
         $customerRating = Rating::where('order_id', $order->id)
             ->where('type', Rating::TYPE_CLIENT_TO_MASTER)
+            ->whereNotNull('rated_at')
             ->first();
 
-        $canRate = $order->isCompleted() && (!$customerRating || !$customerRating->isCompleted());
+        $masterRating = Rating::where('order_id', $order->id)
+            ->where('type', Rating::TYPE_MASTER_TO_CLIENT)
+            ->first();
 
-        return Inertia::render('Customer/Orders/Show', [
+        $canRate = $order->isCompleted() && (!$masterRating || !$masterRating->isCompleted());
+
+        return Inertia::render('Master/Orders/Show', [
             'order' => [
                 'id' => $order->id,
                 'order_number' => $order->order_number,
                 'booking_date_display' => $order->booking_date?->translatedFormat('d M, Y'),
                 'arrival_window' => $order->arrival_window_display,
-                'service_type' => $order->serviceType ? [
-                    'name' => $order->serviceType->getTranslation('name', $locale),
-                ] : null,
+                'service_type' => $order->serviceType ? ['name' => $order->serviceType->getTranslation('name', $locale)] : null,
                 'duration' => $order->duration ? ['minutes' => $order->duration->duration] : null,
                 'oil' => $order->oil ? ['name' => $order->oil->getTranslation('name', $locale)] : null,
                 'people_count' => $order->people_count,
@@ -121,14 +123,17 @@ class OrderController extends Controller
                 'status' => $order->status,
                 'payment_status' => $order->payment_status,
                 'address' => $order->address,
-                'entrance' => $order->entrance,
-                'floor' => $order->floor,
-                'apartment' => $order->apartment,
-                'landmark' => $order->landmark,
-                'master' => $order->master ? [
-                    'name' => $order->master->full_name,
-                    'phone' => $order->master->phone,
-                    'photo_url' => $order->master->photo_url,
+                'customer' => $order->customer ? [
+                    'name' => $order->customer->name,
+                    'phone' => $order->customer->phone,
+                ] : null,
+                'customer_rating' => $customerRating ? [
+                    'overall_rating' => $customerRating->overall_rating,
+                    'punctuality_rating' => $customerRating->punctuality_rating,
+                    'professionalism_rating' => $customerRating->professionalism_rating,
+                    'cleanliness_rating' => $customerRating->cleanliness_rating,
+                    'feedback' => $customerRating->feedback,
+                    'rated_at' => $customerRating->rated_at->format('d.m.Y'),
                 ] : null,
                 'logs' => $order->logs->map(fn ($log) => [
                     'id' => $log->id,
@@ -137,19 +142,17 @@ class OrderController extends Controller
                 ]),
                 'created_at' => $order->created_at->format('d.m.Y H:i'),
                 'can_rate' => $canRate,
-                'customer_rating' => $customerRating?->isCompleted() ? [
-                    'overall_rating' => $customerRating->overall_rating,
-                    'punctuality_rating' => $customerRating->punctuality_rating,
-                    'professionalism_rating' => $customerRating->professionalism_rating,
-                    'cleanliness_rating' => $customerRating->cleanliness_rating,
-                    'feedback' => $customerRating->feedback,
-                    'rated_at' => $customerRating->rated_at->format('d.m.Y'),
+                'master_rating' => $masterRating?->isCompleted() ? [
+                    'overall_rating' => $masterRating->overall_rating,
+                    'feedback' => $masterRating->feedback,
+                    'rated_at' => $masterRating->rated_at->format('d.m.Y'),
                 ] : null,
             ],
-            'customer' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'phone' => $user->phone,
+            'master' => [
+                'id' => $master->id,
+                'name' => $master->full_name,
+                'phone' => $master->phone,
+                'photo_url' => $master->photo_url,
             ],
         ]);
     }

@@ -22,6 +22,11 @@ use App\Http\Controllers\Public\BookingController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
 use App\Http\Controllers\Customer\FavoriteController as CustomerFavoriteController;
+use App\Http\Controllers\Customer\RatingController as CustomerRatingController;
+use App\Http\Controllers\Master\DashboardController as MasterDashboardController;
+use App\Http\Controllers\Master\OrderController as MasterOrderController;
+use App\Http\Controllers\Master\RatingController as MasterRatingController;
+use App\Http\Controllers\Master\ProfileController as MasterProfileController;
 use App\Http\Controllers\MiniApp\HomeController as MiniAppHomeController;
 use App\Http\Controllers\Public\MasterViewController;
 
@@ -68,9 +73,23 @@ Route::prefix('auth')->group(function () {
 Route::prefix('customer')->middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('customer.dashboard');
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('customer.orders');
+    Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('customer.orders.show');
+    Route::get('/ratings', [CustomerRatingController::class, 'index'])->name('customer.ratings');
+    Route::post('/orders/{order}/rate', [CustomerRatingController::class, 'createAndRedirect'])->name('customer.orders.rate');
     Route::get('/favorites', [CustomerFavoriteController::class, 'index'])->name('customer.favorites');
     Route::post('/favorites/{master}/toggle', [CustomerFavoriteController::class, 'toggle'])->name('customer.favorites.toggle');
     Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
+});
+
+// Master Protected Routes
+Route::prefix('master')->middleware(['auth', 'role:master'])->group(function () {
+    Route::get('/dashboard', [MasterDashboardController::class, 'index'])->name('master.dashboard');
+    Route::get('/orders', [MasterOrderController::class, 'index'])->name('master.orders');
+    Route::get('/orders/{order}', [MasterOrderController::class, 'show'])->name('master.orders.show');
+    Route::get('/ratings', [MasterRatingController::class, 'index'])->name('master.ratings');
+    Route::post('/orders/{order}/rate', [MasterRatingController::class, 'createAndRedirect'])->name('master.orders.rate');
+    Route::get('/profile', [MasterProfileController::class, 'index'])->name('master.profile');
+    Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('master.logout');
 });
 
 // Admin Auth Routes

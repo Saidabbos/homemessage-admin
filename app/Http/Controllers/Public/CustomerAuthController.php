@@ -23,9 +23,14 @@ class CustomerAuthController extends Controller
      */
     public function showLogin()
     {
-        // Redirect to dashboard if already authenticated as customer
-        if (Auth::check() && Auth::user()->hasRole('customer')) {
-            return redirect()->route('customer.dashboard');
+        if (Auth::check()) {
+            $user = Auth::user();
+            if ($user->hasRole('master')) {
+                return redirect()->route('master.dashboard');
+            }
+            if ($user->hasRole('customer')) {
+                return redirect()->route('customer.dashboard');
+            }
         }
 
         return Inertia::render('Public/Auth/Login');
@@ -97,18 +102,21 @@ class CustomerAuthController extends Controller
         // Create session
         Auth::login($user, true); // remember = true
 
+        // Determine redirect based on role
+        $defaultRoute = $user->hasRole('master') ? route('master.dashboard') : route('customer.dashboard');
+
         // Return Inertia-compatible response
         if ($request->header('X-Inertia')) {
             // Redirect based on where request came from
-            $redirect = str_contains($request->header('referer', ''), '/app') 
-                ? route('miniapp.home') 
-                : route('customer.dashboard');
+            $redirect = str_contains($request->header('referer', ''), '/app')
+                ? route('miniapp.home')
+                : $defaultRoute;
             return redirect($redirect);
         }
 
         return response()->json([
             'success' => true,
-            'redirect' => route('customer.dashboard'),
+            'redirect' => $defaultRoute,
             'message' => __('auth.otp.login_success'),
         ]);
     }

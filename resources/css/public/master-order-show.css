@@ -1,0 +1,379 @@
+/* ============================================
+   Master Order Show Page
+   ============================================ */
+
+.mos-page {
+    display: flex;
+    min-height: 100vh;
+    background: #F5F2ED;
+    font-family: 'Manrope', sans-serif;
+}
+
+/* ── Sidebar (reuses mo- pattern from master-orders.css) ── */
+/* Sidebar is styled via mo-* classes from master-orders.css */
+
+/* ── Main Area ── */
+.mos-main {
+    flex: 1;
+    margin-left: 240px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Top Bar */
+.mos-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 32px;
+    border-bottom: 1px solid rgba(45, 106, 79, 0.06);
+}
+
+.mos-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.mos-back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(45, 106, 79, 0.03);
+    color: #2D6A4F;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.mos-back-btn:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.mos-back-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.mos-page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: #2D6A4F;
+    margin: 0;
+}
+
+.mos-order-number {
+    font-size: 13px;
+    color: #8B8680;
+    margin-top: 2px;
+}
+
+/* Content Area */
+.mos-content {
+    padding: 28px 32px;
+    flex: 1;
+}
+
+.mos-full-row {
+    margin-bottom: 20px;
+}
+
+.mos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.mos-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Status Bar */
+.mos-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.37);
+}
+
+.mos-status-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mos-status-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #8B8680;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mos-status-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: #2D6A4F;
+}
+
+.mos-payment-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.mos-pay-not-paid { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
+.mos-pay-pending { background: rgba(255, 193, 7, 0.15); color: #b38600; }
+.mos-pay-paid { background: rgba(40, 167, 69, 0.1); color: #065F46; }
+.mos-pay-failed { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
+.mos-pay-refunded { background: rgba(108, 117, 125, 0.1); color: #6c757d; }
+.mos-pay-cancelled { background: rgba(108, 117, 125, 0.1); color: #6c757d; }
+
+/* Info Cards */
+.mos-card {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.37);
+    padding: 20px;
+}
+
+.mos-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2D6A4F;
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(45, 106, 79, 0.06);
+}
+
+/* Info Rows */
+.mos-info-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mos-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.mos-info-label {
+    font-size: 13px;
+    color: #8B8680;
+}
+
+.mos-info-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #2D6A4F;
+}
+
+.mos-info-value a {
+    color: #2D6A4F;
+    text-decoration: none;
+}
+
+.mos-info-value a:hover {
+    text-decoration: underline;
+}
+
+.mos-info-total {
+    padding-top: 12px;
+    border-top: 1px solid rgba(45, 106, 79, 0.06);
+    margin-top: 4px;
+}
+
+.mos-info-total .mos-info-label {
+    font-weight: 700;
+    color: #2D6A4F;
+    font-size: 14px;
+}
+
+.mos-info-total .mos-info-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #C8A951;
+}
+
+/* Rating Section */
+.mos-rating-display {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.mos-rating-overall {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mos-rating-stars {
+    display: flex;
+    gap: 4px;
+}
+
+.mos-rating-stars svg {
+    width: 22px;
+    height: 22px;
+}
+
+.mos-rating-date {
+    font-size: 12px;
+    color: #8B8680;
+}
+
+.mos-sub-ratings {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 12px;
+    background: #FAFAF8;
+    border-radius: 10px;
+}
+
+.mos-sub-item {
+    text-align: center;
+}
+
+.mos-sub-label {
+    font-size: 11px;
+    color: #8B8680;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.mos-sub-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: #2D6A4F;
+}
+
+.mos-rating-feedback {
+    background: #FAFAF8;
+    border-radius: 10px;
+    padding: 14px;
+    border-left: 3px solid #C8A951;
+    font-size: 13px;
+    color: rgba(45, 106, 79, 0.7);
+    font-style: italic;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Rate Button */
+.mos-rate-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 16px;
+    background: #2D6A4F;
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
+}
+
+.mos-rate-btn:hover {
+    background: #3d8b6a;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(45, 106, 79, 0.35);
+}
+
+.mos-rate-btn svg {
+    width: 22px;
+    height: 22px;
+}
+
+/* Address */
+.mos-address-text {
+    font-size: 14px;
+    color: #2D6A4F;
+    margin: 0 0 8px;
+}
+
+.mos-address-detail {
+    font-size: 12px;
+    color: #8B8680;
+    margin: 0;
+}
+
+.mos-address-landmark {
+    font-size: 12px;
+    color: #8B8680;
+    margin: 6px 0 0;
+}
+
+/* Footer */
+.mos-footer-info {
+    text-align: center;
+    font-size: 12px;
+    color: #8B8680;
+    padding: 16px 0;
+}
+
+/* ── Mobile Responsive ── */
+@media (max-width: 768px) {
+    .mos-main {
+        margin-left: 0;
+    }
+
+    .mos-topbar {
+        padding: 16px;
+    }
+
+    .mos-page-title {
+        font-size: 18px;
+    }
+
+    .mos-content {
+        padding: 16px;
+    }
+
+    .mos-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mos-sub-ratings {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .mos-sub-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-align: left;
+    }
+}
+
+@media (max-width: 480px) {
+    .mos-status-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}

@@ -85,13 +85,22 @@ class RatingController extends Controller
     public function complete(string $token)
     {
         $rating = Rating::where('token', $token)
-            ->with(['master', 'customer'])
+            ->with(['master', 'customer', 'order.serviceType'])
             ->firstOrFail();
+
+        $locale = app()->getLocale();
+
+        $orderData = $rating->order ? [
+            'order_number' => $rating->order->order_number,
+            'service_name' => $rating->order->serviceType?->getTranslation('name', $locale) ?? '-',
+            'booking_date' => $rating->order->booking_date?->format('d.m.Y'),
+        ] : null;
 
         if ($rating->isClientToMaster()) {
             return Inertia::render('Public/RatingComplete', [
                 'rating' => $rating,
                 'master' => $rating->master,
+                'order' => $orderData,
                 'type' => 'client_to_master',
             ]);
         }
@@ -99,6 +108,7 @@ class RatingController extends Controller
         return Inertia::render('Public/RatingClientComplete', [
             'rating' => $rating,
             'customer' => $rating->customer,
+            'order' => $orderData,
             'type' => 'master_to_client',
         ]);
     }

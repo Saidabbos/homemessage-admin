@@ -35,6 +35,7 @@ class MasterService
             $user = User::create([
                 'name' => $data['first_name'] . ' ' . $data['last_name'],
                 'email' => $data['email'],
+                'phone' => $data['phone'],
                 'password' => $data['password'],
             ]);
             $user->assignRole('master');
@@ -89,6 +90,7 @@ class MasterService
                 $userData = [
                     'name' => $data['first_name'] . ' ' . $data['last_name'],
                     'email' => $data['email'],
+                    'phone' => $data['phone'],
                 ];
 
                 if ($request->filled('password')) {

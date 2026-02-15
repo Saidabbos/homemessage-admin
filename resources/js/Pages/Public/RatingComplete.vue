@@ -1,233 +1,118 @@
 <script setup>
+import { Link, usePage } from '@inertiajs/vue3'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+const page = usePage()
+
 const props = defineProps({
     rating: Object,
     master: Object,
-});
+    order: Object,
+    type: String,
+})
 
 const getRatingText = (rating) => {
-    if (rating >= 5) return 'Ajoyib!';
-    if (rating >= 4) return 'Yaxshi';
-    if (rating >= 3) return "O'rtacha";
-    if (rating >= 2) return 'Yomon';
-    return 'Juda yomon';
-};
+    if (rating >= 5) return t('rating.excellent')
+    if (rating >= 4) return t('rating.good')
+    if (rating >= 3) return t('rating.average')
+    if (rating >= 2) return t('rating.poor')
+    return t('rating.veryPoor')
+}
+
+const isAuthenticated = !!page.props?.auth?.user
 </script>
 
 <template>
-    <div class="complete-page">
-        <div class="complete-container">
-            <!-- Success Icon -->
-            <div class="success-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"/>
-                    <polyline points="22,4 12,14.01 9,11.01" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+    <div class="rc-page">
+        <div class="rc-container">
+            <!-- Success Header -->
+            <div class="rc-header">
+                <div class="rc-success-icon rc-success-icon-customer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20,6 9,17 4,12"/>
+                    </svg>
+                </div>
+                <h1 class="rc-title">{{ t('rating.thankYou') }}</h1>
+                <p class="rc-subtitle">{{ t('rating.ratingAccepted') }}</p>
             </div>
 
-            <h1 class="title">Rahmat!</h1>
-            <p class="subtitle">Bahoyingiz qabul qilindi</p>
+            <!-- Rating Card -->
+            <div class="rc-card">
+                <!-- Order Badge -->
+                <div v-if="order" class="rc-order-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    {{ order.service_name }} &middot; {{ order.booking_date }}
+                </div>
 
-            <!-- Rating Summary -->
-            <div class="rating-summary">
-                <div class="master-info">
-                    <div class="master-avatar">
+                <!-- Master Info -->
+                <div class="rc-person">
+                    <div class="rc-avatar">
                         <img v-if="master.photo" :src="master.photo" :alt="master.full_name" />
-                        <div v-else class="avatar-placeholder">
+                        <div v-else class="rc-avatar-placeholder rc-avatar-placeholder-customer">
                             {{ master.first_name?.[0] }}{{ master.last_name?.[0] }}
                         </div>
                     </div>
-                    <div class="master-details">
-                        <span class="master-name">{{ master.full_name }}</span>
-                        <div class="rating-display">
-                            <span class="rating-value">{{ rating.overall_rating }}</span>
-                            <span class="rating-text">{{ getRatingText(rating.overall_rating) }}</span>
+                    <div class="rc-person-info">
+                        <span class="rc-person-name">{{ master.full_name }}</span>
+                        <span class="rc-person-role">{{ t('rating.massageTherapist') }}</span>
+                    </div>
+                </div>
+
+                <!-- Overall Rating -->
+                <div class="rc-overall">
+                    <span class="rc-overall-value">{{ rating.overall_rating }}</span>
+                    <div class="rc-overall-text">{{ getRatingText(rating.overall_rating) }}</div>
+                    <div class="rc-stars">
+                        <svg v-for="s in 5" :key="s" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" :fill="s <= rating.overall_rating ? '#C8A951' : '#E8E5E0'" :stroke="s <= rating.overall_rating ? '#C8A951' : '#E8E5E0'" stroke-width="1" :class="s <= rating.overall_rating ? 'rc-star-filled' : 'rc-star-empty'">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Sub Ratings -->
+                <div v-if="rating.punctuality_rating || rating.professionalism_rating || rating.cleanliness_rating" class="rc-sub-ratings">
+                    <div v-if="rating.punctuality_rating" class="rc-sub-item">
+                        <span class="rc-sub-label">{{ t('rating.punctuality') }}</span>
+                        <span class="rc-sub-value">{{ rating.punctuality_rating }}/5</span>
+                        <div class="rc-sub-stars">
+                            <svg v-for="s in 5" :key="s" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" :fill="s <= rating.punctuality_rating ? '#C8A951' : '#E8E5E0'" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        </div>
+                    </div>
+                    <div v-if="rating.professionalism_rating" class="rc-sub-item">
+                        <span class="rc-sub-label">{{ t('rating.professionalism') }}</span>
+                        <span class="rc-sub-value">{{ rating.professionalism_rating }}/5</span>
+                        <div class="rc-sub-stars">
+                            <svg v-for="s in 5" :key="s" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" :fill="s <= rating.professionalism_rating ? '#C8A951' : '#E8E5E0'" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        </div>
+                    </div>
+                    <div v-if="rating.cleanliness_rating" class="rc-sub-item">
+                        <span class="rc-sub-label">{{ t('rating.cleanliness') }}</span>
+                        <span class="rc-sub-value">{{ rating.cleanliness_rating }}/5</span>
+                        <div class="rc-sub-stars">
+                            <svg v-for="s in 5" :key="s" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" :fill="s <= rating.cleanliness_rating ? '#C8A951' : '#E8E5E0'" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         </div>
                     </div>
                 </div>
 
-                <!-- Stars -->
-                <div class="stars-display">
-                    <svg 
-                        v-for="star in 5" 
-                        :key="star" 
-                        viewBox="0 0 24 24" 
-                        fill="currentColor"
-                        :class="{ filled: star <= rating.overall_rating }"
-                    >
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                    </svg>
+                <!-- Feedback -->
+                <div v-if="rating.feedback" class="rc-feedback">
+                    <div class="rc-feedback-label">{{ t('rating.yourFeedback') }}</div>
+                    <p class="rc-feedback-text">"{{ rating.feedback }}"</p>
                 </div>
-
-                <p v-if="rating.feedback" class="feedback-text">"{{ rating.feedback }}"</p>
             </div>
 
-            <!-- CTA -->
-            <a href="/" class="home-btn">Bosh sahifaga qaytish</a>
+            <!-- Action Buttons -->
+            <div class="rc-actions">
+                <Link href="/customer/dashboard" class="rc-btn rc-btn-primary-customer">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                    {{ t('rating.goToDashboard') }}
+                </Link>
+                <Link href="/" class="rc-btn rc-btn-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    {{ t('rating.goHome') }}
+                </Link>
+            </div>
         </div>
     </div>
 </template>
-
-<style scoped>
-.complete-page {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.complete-container {
-    background: white;
-    border-radius: 24px;
-    padding: 40px 32px;
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-}
-
-.success-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 24px;
-    background: linear-gradient(135deg, #10b981, #059669);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: pop 0.5s ease;
-}
-
-@keyframes pop {
-    0% { transform: scale(0); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
-}
-
-.success-icon svg {
-    width: 40px;
-    height: 40px;
-    color: white;
-}
-
-.title {
-    font-size: 28px;
-    font-weight: 700;
-    color: #1a1a2e;
-    margin: 0 0 8px;
-}
-
-.subtitle {
-    color: #6b7280;
-    font-size: 15px;
-    margin: 0 0 32px;
-}
-
-.rating-summary {
-    background: #f8fafc;
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 24px;
-}
-
-.master-info {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 16px;
-}
-
-.master-avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    overflow: hidden;
-    flex-shrink: 0;
-}
-
-.master-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.avatar-placeholder {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.master-details {
-    text-align: left;
-}
-
-.master-name {
-    display: block;
-    font-weight: 600;
-    color: #1a1a2e;
-    margin-bottom: 4px;
-}
-
-.rating-display {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-}
-
-.rating-value {
-    font-size: 24px;
-    font-weight: 700;
-    color: #fbbf24;
-}
-
-.rating-text {
-    color: #6b7280;
-    font-size: 14px;
-}
-
-.stars-display {
-    display: flex;
-    justify-content: center;
-    gap: 4px;
-}
-
-.stars-display svg {
-    width: 28px;
-    height: 28px;
-    color: #e5e7eb;
-}
-
-.stars-display svg.filled {
-    color: #fbbf24;
-}
-
-.feedback-text {
-    margin: 16px 0 0;
-    font-style: italic;
-    color: #6b7280;
-    font-size: 14px;
-}
-
-.home-btn {
-    display: inline-block;
-    padding: 14px 32px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    text-decoration: none;
-    font-weight: 600;
-    border-radius: 12px;
-    transition: all 0.3s ease;
-}
-
-.home-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-}
-</style>

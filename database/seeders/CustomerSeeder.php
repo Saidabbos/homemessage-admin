@@ -12,7 +12,7 @@ class CustomerSeeder extends Seeder
         $customers = [
             [
                 'name' => 'Nodira Xasanova',
-                'phone' => '+998901234567',
+                'phone' => '+998901111567',
                 'email' => 'nodira@example.com',
                 'locale' => 'uz',
             ],

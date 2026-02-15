@@ -1,0 +1,99 @@
+/* ============================================
+   Customer Ratings Page
+   ============================================ */
+
+.cr-page { display: flex; min-height: 100vh; background: #F5F2ED; font-family: 'Manrope', sans-serif; }
+
+/* ── Sidebar (same pattern as dashboard/orders/favorites) ── */
+.cr-sidebar { width: 240px; min-height: 100vh; background: linear-gradient(180deg, #1B2B5A, #152348); display: flex; flex-direction: column; justify-content: space-between; padding: 24px 16px; position: fixed; top: 0; left: 0; z-index: 50; }
+.cr-sidebar-top { display: flex; flex-direction: column; gap: 32px; }
+.cr-sidebar-logo { display: flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; padding: 0 8px; }
+.cr-sidebar-logo svg { color: #C8A951; flex-shrink: 0; }
+.cr-sidebar-logo span { font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 700; letter-spacing: 1.5px; color: #fff; }
+.cr-nav { display: flex; flex-direction: column; gap: 4px; }
+.cr-nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s ease; cursor: pointer; }
+.cr-nav-item:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.06); }
+.cr-nav-item.active { background: #C8A951; color: #fff; font-weight: 600; }
+.cr-nav-item.active svg { color: #fff; }
+.cr-nav-item svg { flex-shrink: 0; }
+.cr-sidebar-bottom { margin-top: auto; }
+.cr-sidebar-divider { height: 1px; background: rgba(255,255,255,0.1); margin-bottom: 16px; }
+.cr-user-profile { display: flex; align-items: center; gap: 10px; padding: 8px; }
+.cr-user-link { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; text-decoration: none; color: inherit; border-radius: 8px; transition: background 0.2s ease; }
+.cr-user-link:hover { background: rgba(255,255,255,0.06); }
+.cr-user-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cr-user-avatar svg { color: rgba(255,255,255,0.8); }
+.cr-user-info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.cr-user-name { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cr-user-phone { font-size: 11px; color: rgba(255,255,255,0.5); }
+.cr-logout-btn { background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; padding: 4px; border-radius: 6px; transition: all 0.2s ease; flex-shrink: 0; }
+.cr-logout-btn:hover { color: #ff6b6b; background: rgba(255,255,255,0.06); }
+
+/* ── Main Area ── */
+.cr-main { flex: 1; margin-left: 240px; display: flex; flex-direction: column; min-height: 100vh; }
+
+.cr-topbar { padding: 24px 32px 0; }
+.cr-page-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600; color: #1B2B5A; margin: 0; }
+.cr-page-subtitle { font-size: 13px; color: #8B8680; margin-top: 4px; }
+
+.cr-content { padding: 24px 32px 32px; display: flex; flex-direction: column; gap: 20px; }
+
+/* Summary Card */
+.cr-summary { background: #fff; border-radius: 14px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; justify-content: center; }
+.cr-summary-rating { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.cr-summary-num { font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 700; color: #1B2B5A; }
+.cr-summary-stars { display: flex; gap: 4px; }
+.cr-summary-count { font-size: 13px; color: #8B8680; }
+
+/* Tabs */
+.cr-tabs { display: flex; gap: 8px; }
+.cr-tab { padding: 10px 20px; border-radius: 10px; border: 1px solid #E0DDD8; background: #fff; color: #6B6560; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
+.cr-tab:hover { border-color: #C8A951; color: #1B2B5A; }
+.cr-tab.active { background: #1B2B5A; color: #fff; border-color: #1B2B5A; font-weight: 600; }
+
+/* Ratings List */
+.cr-list { display: flex; flex-direction: column; gap: 16px; }
+
+.cr-card { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.cr-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.cr-card-left { display: flex; align-items: center; gap: 12px; }
+.cr-avatar { width: 44px; height: 44px; border-radius: 50%; background: #E8E5E0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+.cr-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.cr-avatar svg { color: #8B8680; }
+.cr-name { display: block; font-size: 15px; font-weight: 600; color: #1B2B5A; }
+.cr-meta { display: block; font-size: 12px; color: #8B8680; margin-top: 2px; }
+.cr-date { font-size: 12px; color: #8B8680; flex-shrink: 0; }
+
+.cr-stars-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.cr-stars { display: flex; gap: 2px; }
+.cr-sub-ratings { display: flex; gap: 12px; font-size: 12px; color: #8B8680; }
+
+.cr-feedback { margin: 12px 0 0; font-size: 14px; color: #6B6560; line-height: 1.5; background: #FAFAF8; border-radius: 10px; padding: 12px 16px; }
+
+/* Empty State */
+.cr-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 64px 16px; text-align: center; }
+.cr-empty svg { color: #C8C3BC; margin-bottom: 12px; }
+.cr-empty p { font-size: 14px; color: #8B8680; margin: 0; }
+
+/* Pagination */
+.cr-pagination { display: flex; align-items: center; justify-content: center; gap: 16px; padding-top: 8px; }
+.cr-pag-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid #E0DDD8; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; color: #1B2B5A; }
+.cr-pag-btn:hover:not(:disabled) { border-color: #C8A951; }
+.cr-pag-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.cr-pag-info { font-size: 14px; color: #6B6560; font-weight: 500; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .cr-sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
+    .cr-main { margin-left: 0; }
+    .cr-topbar { padding: 20px 16px 0; }
+    .cr-content { padding: 20px 16px; }
+    .cr-page-title { font-size: 20px; }
+    .cr-sub-ratings { flex-direction: column; gap: 4px; }
+}
+
+@media (max-width: 480px) {
+    .cr-card { padding: 16px; }
+    .cr-tabs { flex-direction: column; }
+    .cr-tab { text-align: center; }
+}

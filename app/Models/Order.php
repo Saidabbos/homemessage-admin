@@ -201,6 +201,21 @@ class Order extends Model
         return $this->hasMany(TelegramMessage::class)->latest();
     }
 
+    public function ratings(): HasMany
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+    public function customerRating()
+    {
+        return $this->hasOne(Rating::class)->where('type', Rating::TYPE_CLIENT_TO_MASTER);
+    }
+
+    public function masterRating()
+    {
+        return $this->hasOne(Rating::class)->where('type', Rating::TYPE_MASTER_TO_CLIENT);
+    }
+
     public function auditLogs()
     {
         return $this->morphMany(AuditLog::class, 'auditable')->latest();

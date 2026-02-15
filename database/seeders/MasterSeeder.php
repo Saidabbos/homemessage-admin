@@ -140,6 +140,7 @@ class MasterSeeder extends Seeder
                 $user = User::create([
                     'name' => $masterData['first_name'] . ' ' . $masterData['last_name'],
                     'email' => $masterData['email'],
+                    'phone' => $masterData['phone'],
                     'password' => $masterData['password'],
                 ]);
                 $user->assignRole('master');
