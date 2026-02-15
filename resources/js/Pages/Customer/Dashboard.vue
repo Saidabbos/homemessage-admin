@@ -1,161 +1,188 @@
-<template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-    <!-- Header -->
-    <div class="bg-purple-700 text-white py-8">
-      <div class="max-w-2xl mx-auto px-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-3xl font-bold">{{ t('customer.welcome') }}, {{ customer.name }}!</h1>
-            <p class="text-purple-200 mt-1">Home Massage</p>
-          </div>
-          <div class="text-right">
-            <p class="text-sm text-purple-200">{{ t('customer.memberSince') }}</p>
-            <p class="font-semibold">{{ formattedDate }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="max-w-2xl mx-auto px-4 py-8">
-      <!-- Profile Card -->
-      <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-        <h2 class="text-xl font-bold text-gray-900 mb-6">{{ t('customer.profile') }}</h2>
-
-        <div class="space-y-4">
-          <!-- Name -->
-          <div class="flex items-center justify-between pb-4 border-b border-gray-200">
-            <div>
-              <p class="text-sm text-gray-600">{{ t('common.name') }}</p>
-              <p class="text-lg font-semibold text-gray-900">{{ customer.name }}</p>
-            </div>
-            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-              <span class="text-xl font-bold text-purple-600">{{ customer.name.charAt(0) }}</span>
-            </div>
-          </div>
-
-          <!-- Phone -->
-          <div class="flex items-center justify-between pb-4 border-b border-gray-200">
-            <div>
-              <p class="text-sm text-gray-600">{{ t('customer.phone') }}</p>
-              <p class="text-lg font-semibold text-gray-900">{{ customer.phone }}</p>
-            </div>
-            <svg class="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
-            </svg>
-          </div>
-
-          <!-- Language -->
-          <div class="flex items-center justify-between pb-4 border-b border-gray-200">
-            <div>
-              <p class="text-sm text-gray-600">{{ t('customer.locale') }}</p>
-              <p class="text-lg font-semibold text-gray-900">{{ localeDisplay }}</p>
-            </div>
-          </div>
-
-          <!-- Status -->
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-600">{{ t('customer.status') }}</p>
-              <p class="text-lg font-semibold text-gray-900">
-                <span v-if="customer.status" class="text-green-600">{{ t('common.active') }}</span>
-                <span v-else class="text-red-600">{{ t('common.inactive') }}</span>
-              </p>
-            </div>
-            <div :class="['w-3 h-3 rounded-full', customer.status ? 'bg-green-500' : 'bg-red-500']"/>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="grid grid-cols-2 gap-4 mb-6">
-        <!-- Book Service Button -->
-        <button class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-4 rounded-lg transition-all flex items-center justify-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m0 0h6"/>
-          </svg>
-          {{ t('orders.book') }}
-        </button>
-
-        <!-- View Orders Button -->
-        <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-lg transition-all flex items-center justify-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
-          {{ t('common.orders') }}
-        </button>
-      </div>
-
-      <!-- Coming Soon Section -->
-      <div class="bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-2xl p-6 mb-6">
-        <h3 class="text-lg font-bold text-gray-900 mb-4">{{ t('common.coming_soon') }}</h3>
-        <ul class="space-y-2 text-gray-700">
-          <li class="flex items-center gap-2">
-            <span class="text-purple-600">•</span>
-            Адреса бошқаришини қўлга ол
-          </li>
-          <li class="flex items-center gap-2">
-            <span class="text-purple-600">•</span>
-            Buyurtma tarixini ko'ring
-          </li>
-          <li class="flex items-center gap-2">
-            <span class="text-purple-600">•</span>
-            Профил маълумотларини таҳрирла
-          </li>
-        </ul>
-      </div>
-
-      <!-- Logout Button -->
-      <form :action="route('customer.logout')" method="POST">
-        <input type="hidden" name="_token" :value="csrfToken"/>
-        <button
-          type="submit"
-          class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-          </svg>
-          {{ t('customer.logout') }}
-        </button>
-      </form>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { computed } from 'vue'
+import { Head, Link, usePage, router } from '@inertiajs/vue3'
 import { useI18n } from 'vue-i18n'
-import { usePage } from '@inertiajs/vue3'
 
 const { t } = useI18n()
 const page = usePage()
 
 const props = defineProps({
-  customer: {
-    type: Object,
-    required: true,
-  },
+    customer: { type: Object, required: true },
 })
 
-const csrfToken = computed(() => page.props.csrf_token)
-
-const formattedDate = computed(() => {
-  const date = new Date(props.customer.created_at)
-  return date.toLocaleDateString()
+const currentDate = computed(() => {
+    const d = new Date()
+    const days = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba']
+    const months = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr']
+    return `${days[d.getDay()]}, ${d.getDate()}-${months[d.getMonth()]}, ${d.getFullYear()}`
 })
 
-const localeDisplay = computed(() => {
-  const locales = {
-    uz: 'O\'zbekcha',
-    ru: 'Русский',
-    en: 'English',
-  }
-  return locales[props.customer.locale] || props.customer.locale
+const userInitial = computed(() => {
+    return props.customer.name ? props.customer.name.charAt(0).toUpperCase() : '?'
 })
+
+const logout = () => {
+    router.post('/customer/logout')
+}
 </script>
 
-<style scoped>
-button:active {
-  transform: scale(0.98);
-}
-</style>
+<template>
+    <Head :title="t('customer.dashboard')" />
+
+    <div class="cd-page">
+        <!-- Sidebar -->
+        <aside class="cd-sidebar">
+            <div class="cd-sidebar-top">
+                <Link href="/" class="cd-sidebar-logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V9m-4.5 3a4.5 4.5 0 1 0 4.5 4.5M7.5 12H9m3 4.5a4.5 4.5 0 1 1-4.5-4.5M12 16.5V15m4.5-3a4.5 4.5 0 1 0-4.5-4.5M16.5 12H15"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <span>HOMEMASSAGE</span>
+                </Link>
+
+                <nav class="cd-nav">
+                    <Link href="/customer/dashboard" class="cd-nav-item active">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                        <span>{{ t('customer.navDashboard') }}</span>
+                    </Link>
+                    <Link href="/customer/orders" class="cd-nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <span>{{ t('customer.navBookings') }}</span>
+                    </Link>
+                    <Link href="/masters" class="cd-nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <span>{{ t('customer.navMasters') }}</span>
+                    </Link>
+                    <span class="cd-nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+                        <span>{{ t('customer.navHistory') }}</span>
+                    </span>
+                    <Link href="/customer/favorites" class="cd-nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                        <span>{{ t('customer.navFavorites') }}</span>
+                    </Link>
+                    <span class="cd-nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>{{ t('customer.navSettings') }}</span>
+                    </span>
+                </nav>
+            </div>
+
+            <div class="cd-sidebar-bottom">
+                <div class="cd-sidebar-divider"></div>
+                <div class="cd-user-profile">
+                    <div class="cd-user-avatar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <div class="cd-user-info">
+                        <span class="cd-user-name">{{ customer.name }}</span>
+                        <span class="cd-user-phone">{{ customer.phone }}</span>
+                    </div>
+                    <button class="cd-logout-btn" @click="logout" :title="t('customer.logout')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Area -->
+        <main class="cd-main">
+            <!-- Top Bar -->
+            <div class="cd-topbar">
+                <div class="cd-topbar-left">
+                    <h1 class="cd-greeting">{{ t('customer.welcome') }}, {{ customer.name }}!</h1>
+                    <p class="cd-date">{{ currentDate }}</p>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="cd-content">
+                <!-- Left Column -->
+                <div class="cd-left-col">
+                    <!-- Stats Row -->
+                    <div class="cd-stats-row">
+                        <div class="cd-stat-card">
+                            <div class="cd-stat-top">
+                                <span class="cd-stat-label">{{ t('customer.totalSessions') }}</span>
+                                <div class="cd-stat-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                </div>
+                            </div>
+                            <span class="cd-stat-val">0</span>
+                        </div>
+                        <div class="cd-stat-card">
+                            <div class="cd-stat-top">
+                                <span class="cd-stat-label">{{ t('customer.upcoming') }}</span>
+                                <div class="cd-stat-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </div>
+                            </div>
+                            <span class="cd-stat-val">0</span>
+                        </div>
+                        <div class="cd-stat-card">
+                            <div class="cd-stat-top">
+                                <span class="cd-stat-label">{{ t('customer.totalSpent') }}</span>
+                                <div class="cd-stat-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                </div>
+                            </div>
+                            <span class="cd-stat-val">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Bookings -->
+                    <div class="cd-card">
+                        <div class="cd-card-head">
+                            <h2 class="cd-card-title">{{ t('customer.upcomingSessions') }}</h2>
+                        </div>
+                        <div class="cd-empty-state">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            <p>{{ t('customer.noUpcoming') }}</p>
+                            <Link href="/booking" class="cd-empty-cta">{{ t('customer.bookFirst') }}</Link>
+                        </div>
+                    </div>
+
+                    <!-- Recent History -->
+                    <div class="cd-card cd-card-grow">
+                        <div class="cd-card-head">
+                            <h2 class="cd-card-title">{{ t('customer.recentHistory') }}</h2>
+                        </div>
+                        <div class="cd-empty-state">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+                            <p>{{ t('customer.noHistory') }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="cd-right-col">
+                    <!-- Quick Book -->
+                    <div class="cd-quick-book">
+                        <div class="cd-qb-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </div>
+                        <h3 class="cd-qb-title">{{ t('customer.newBooking') }}</h3>
+                        <p class="cd-qb-desc">{{ t('customer.newBookingDesc') }}</p>
+                        <Link href="/booking" class="cd-qb-btn">
+                            <span>{{ t('landing.nav.bookNow') }}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                        </Link>
+                    </div>
+
+                    <!-- Favorite Masters -->
+                    <div class="cd-card cd-card-grow">
+                        <div class="cd-card-head">
+                            <h2 class="cd-card-title cd-card-title-sm">{{ t('customer.favoriteMasters') }}</h2>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="cd-heart-icon"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                        </div>
+                        <div class="cd-empty-state cd-empty-sm">
+                            <p>{{ t('customer.noFavorites') }}</p>
+                            <Link href="/masters" class="cd-empty-cta">{{ t('customer.browseMasters') }}</Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</template>

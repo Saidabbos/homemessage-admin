@@ -1,0 +1,479 @@
+/* ============================================
+   Customer Favorites Page
+   ============================================ */
+
+.cf-page {
+    display: flex;
+    min-height: 100vh;
+    background: #EDE8DF;
+    font-family: 'Manrope', sans-serif;
+}
+
+/* ── Sidebar ── */
+.cf-sidebar {
+    width: 260px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #1B2B5A, #152348);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 28px 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 50;
+}
+
+.cf-sidebar-top {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.cf-sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    text-decoration: none;
+    padding: 0 8px;
+}
+
+.cf-sidebar-logo svg {
+    color: #C8A951;
+    flex-shrink: 0;
+}
+
+.cf-sidebar-logo span {
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #fff;
+}
+
+.cf-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cf-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.cf-nav-item:hover {
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.cf-nav-item.active {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.cf-nav-item.active svg {
+    color: #C8A951;
+}
+
+.cf-nav-item svg {
+    flex-shrink: 0;
+}
+
+.cf-sidebar-bottom {
+    margin-top: auto;
+}
+
+.cf-sidebar-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin-bottom: 16px;
+}
+
+.cf-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+}
+
+.cf-user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    background: rgba(200, 169, 81, 0.19);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cf-user-avatar svg {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.cf-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.cf-user-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cf-user-phone {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.cf-logout-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.cf-logout-btn:hover {
+    color: #ff6b6b;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* ── Main Area ── */
+.cf-main {
+    flex: 1;
+    margin-left: 260px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.cf-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    border-bottom: 1px solid rgba(27, 43, 90, 0.06);
+}
+
+.cf-page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: #1B2B5A;
+    margin: 0;
+}
+
+.cf-page-subtitle {
+    font-size: 13px;
+    color: rgba(27, 43, 90, 0.31);
+    margin-top: 2px;
+}
+
+.cf-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 28px 32px;
+    flex: 1;
+}
+
+/* ── Top Section ── */
+.cf-top-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.cf-fav-count {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: rgba(27, 43, 90, 0.5);
+}
+
+.cf-filters {
+    display: flex;
+    gap: 12px;
+}
+
+.cf-filter-btn {
+    padding: 8px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(27, 43, 90, 0.06);
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px);
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    color: rgba(27, 43, 90, 0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.cf-filter-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+    color: rgba(27, 43, 90, 0.7);
+}
+
+.cf-filter-btn.active {
+    background: #1B2B5A;
+    color: #fff;
+    border-color: #1B2B5A;
+}
+
+/* ── Masters Grid ── */
+.cf-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+/* ── Master Card ── */
+.cf-card {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.37);
+    backdrop-filter: blur(16px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cf-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(27, 43, 90, 0.08);
+}
+
+.cf-card-img {
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+}
+
+.cf-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cf-card-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.cf-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.cf-card-name-block {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.cf-card-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1B2B5A;
+    margin: 0;
+}
+
+.cf-card-spec {
+    font-size: 12px;
+    color: rgba(27, 43, 90, 0.37);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cf-heart-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(200, 169, 81, 0.08);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.cf-heart-btn:hover {
+    background: rgba(200, 169, 81, 0.2);
+}
+
+/* Rating Row */
+.cf-card-rating {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cf-rating-text {
+    font-size: 12px;
+    color: rgba(27, 43, 90, 0.5);
+}
+
+.cf-price-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: #C8A951;
+}
+
+/* Book Button */
+.cf-book-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: #1B2B5A;
+    color: #fff;
+    border-radius: 14px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s ease;
+    width: 100%;
+}
+
+.cf-book-btn:hover {
+    background: #253672;
+}
+
+/* ── Empty State ── */
+.cf-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 16px;
+    text-align: center;
+}
+
+.cf-empty svg {
+    color: rgba(27, 43, 90, 0.12);
+    margin-bottom: 20px;
+}
+
+.cf-empty p {
+    font-size: 15px;
+    color: rgba(27, 43, 90, 0.4);
+    margin: 0 0 24px;
+}
+
+.cf-empty-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 24px;
+    background: #C8A951;
+    color: #1B2B5A;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.cf-empty-cta:hover {
+    background: #d4b76a;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+    .cf-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .cf-top-section {
+        flex-wrap: wrap;
+    }
+
+    .cf-filters {
+        overflow-x: auto;
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .cf-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .cf-sidebar.open {
+        transform: translateX(0);
+    }
+
+    .cf-main {
+        margin-left: 0;
+    }
+
+    .cf-topbar {
+        padding: 16px;
+    }
+
+    .cf-page-title {
+        font-size: 20px;
+    }
+
+    .cf-content {
+        padding: 16px;
+    }
+
+    .cf-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cf-card-img {
+        height: 180px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cf-filters {
+        gap: 8px;
+    }
+
+    .cf-filter-btn {
+        padding: 6px 14px;
+        font-size: 12px;
+    }
+}

@@ -3,6 +3,9 @@
 @import './public/landing.css';
 @import './public/masters.css';
 @import './public/booking.css';
+@import './public/dashboard.css';
+@import './public/customer-orders.css';
+@import './public/customer-favorites.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';

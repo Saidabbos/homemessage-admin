@@ -20,6 +20,8 @@ use App\Http\Controllers\Public\MasterController as PublicMasterController;
 use App\Http\Controllers\Public\CustomerAuthController;
 use App\Http\Controllers\Public\BookingController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
+use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
+use App\Http\Controllers\Customer\FavoriteController as CustomerFavoriteController;
 use App\Http\Controllers\MiniApp\HomeController as MiniAppHomeController;
 use App\Http\Controllers\Public\MasterViewController;
 
@@ -65,6 +67,9 @@ Route::prefix('auth')->group(function () {
 // Customer Protected Routes
 Route::prefix('customer')->middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('customer.dashboard');
+    Route::get('/orders', [CustomerOrderController::class, 'index'])->name('customer.orders');
+    Route::get('/favorites', [CustomerFavoriteController::class, 'index'])->name('customer.favorites');
+    Route::post('/favorites/{master}/toggle', [CustomerFavoriteController::class, 'toggle'])->name('customer.favorites.toggle');
     Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
 });
 

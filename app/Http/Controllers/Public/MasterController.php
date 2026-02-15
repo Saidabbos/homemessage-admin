@@ -36,7 +36,7 @@ class MasterController extends Controller
             abort(404);
         }
 
-        $master->load(['serviceTypes', 'oils']);
+        $master->load(['serviceTypes.activeDurations', 'oils']);
 
         return Inertia::render('Public/Masters/Show', [
             'master' => $this->formatMasterForView($master),
@@ -60,8 +60,17 @@ class MasterController extends Controller
                 'id' => $st->id,
                 'name' => $st->getTranslation('name', app()->getLocale()),
                 'description' => $st->getTranslation('description', app()->getLocale()),
-                'price' => (float) $st->price,
-                'duration' => $st->duration,
+                'price_range' => $st->price_range,
+                'min_price' => $st->min_price,
+                'max_price' => $st->max_price,
+                'durations' => $st->activeDurations->map(fn($d) => [
+                    'id' => $d->id,
+                    'duration' => $d->duration,
+                    'price' => (float) $d->price,
+                    'formatted_duration' => $d->formatted_duration,
+                    'formatted_price' => $d->formatted_price,
+                    'is_default' => $d->is_default,
+                ]),
             ]),
             'oils' => $master->oils->map(fn($oil) => [
                 'id' => $oil->id,
