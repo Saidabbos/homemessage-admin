@@ -24,6 +24,7 @@
     align-items: center;
     gap: 12px;
     text-decoration: none;
+    flex-shrink: 0;
 }
 
 .masters-page .mp-nav-logo-icon {
@@ -43,7 +44,9 @@
 .masters-page .mp-nav-links {
     display: flex;
     align-items: center;
-    gap: 40px;
+    gap: 24px;
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 .masters-page .mp-nav-link {
@@ -90,7 +93,8 @@
 .masters-page .mp-nav-right {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
+    flex-shrink: 0;
 }
 
 .masters-page .mp-nav-user {

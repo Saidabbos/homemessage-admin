@@ -52,13 +52,13 @@
     color: #fff;
 }
 
-.mp-nav {
+.mp-page .mp-nav {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.mp-nav-item {
+.mp-page .mp-nav-item {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -72,22 +72,22 @@
     cursor: pointer;
 }
 
-.mp-nav-item:hover {
+.mp-page .mp-nav-item:hover {
     color: rgba(255, 255, 255, 0.9);
     background: rgba(255, 255, 255, 0.06);
 }
 
-.mp-nav-item.active {
+.mp-page .mp-nav-item.active {
     background: #C8A951;
     color: #fff;
     font-weight: 600;
 }
 
-.mp-nav-item.active svg {
+.mp-page .mp-nav-item.active svg {
     color: #fff;
 }
 
-.mp-nav-item svg {
+.mp-page .mp-nav-item svg {
     flex-shrink: 0;
 }
 
