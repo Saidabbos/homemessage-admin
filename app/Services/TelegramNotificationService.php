@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Log;
 
 class TelegramNotificationService
 {
-    protected string $botToken;
-    protected string $dispatcherChatId;
+    protected ?string $botToken;
+    protected ?string $dispatcherChatId;
     protected ?string $therapistBotToken;
     protected ?string $therapistChatId;
 
