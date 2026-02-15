@@ -12,6 +12,8 @@ use App\Http\Controllers\Api\PublicOrderController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Webhook\PaymeController;
 use App\Http\Controllers\Webhook\ClickController;
+use App\Http\Controllers\Api\MockPaymeController;
+use App\Http\Controllers\Api\MockClickController;
 
 /*
 |--------------------------------------------------------------------------
@@ -107,4 +109,28 @@ Route::prefix('webhook')->group(function () {
 
     // Telegram
     Route::post('/telegram', [\App\Http\Controllers\Webhook\TelegramController::class, 'webhook']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Mock Payment Routes (Testing Only)
+|--------------------------------------------------------------------------
+|
+| These routes simulate payment provider behavior for testing.
+| Disabled in production unless PAYME_MOCK_ENABLED=true
+|
+*/
+
+Route::prefix('mock/payme')->middleware('web')->group(function () {
+    Route::post('/simulate', [MockPaymeController::class, 'simulatePayment']);
+    Route::get('/status', [MockPaymeController::class, 'getStatus']);
+    Route::post('/trigger', [MockPaymeController::class, 'triggerMethod']);
+    Route::post('/reset', [MockPaymeController::class, 'resetOrder']);
+});
+
+Route::prefix('mock/click')->middleware('web')->group(function () {
+    Route::post('/simulate', [MockClickController::class, 'simulatePayment']);
+    Route::get('/status', [MockClickController::class, 'getStatus']);
+    Route::post('/trigger', [MockClickController::class, 'triggerMethod']);
+    Route::post('/reset', [MockClickController::class, 'resetOrder']);
 });

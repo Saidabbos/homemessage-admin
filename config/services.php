@@ -48,17 +48,19 @@ return [
     'payme' => [
         'enabled' => env('PAYME_ENABLED', false),
         'merchant_id' => env('PAYME_MERCHANT_ID'),
-        'key' => env('PAYME_KEY'),
+        'key' => env('PAYME_KEY', 'test_key'),
         'test_mode' => env('PAYME_TEST_MODE', true),
         'checkout_url' => env('PAYME_CHECKOUT_URL', 'https://checkout.paycom.uz'),
+        'mock_enabled' => env('PAYME_MOCK_ENABLED', false),
     ],
 
     'click' => [
         'enabled' => env('CLICK_ENABLED', false),
         'merchant_id' => env('CLICK_MERCHANT_ID'),
-        'service_id' => env('CLICK_SERVICE_ID'),
-        'secret_key' => env('CLICK_SECRET_KEY'),
+        'service_id' => env('CLICK_SERVICE_ID', '12345'),
+        'secret_key' => env('CLICK_SECRET_KEY', 'test_secret'),
         'test_mode' => env('CLICK_TEST_MODE', true),
+        'mock_enabled' => env('CLICK_MOCK_ENABLED', false),
     ],
 
     /*
