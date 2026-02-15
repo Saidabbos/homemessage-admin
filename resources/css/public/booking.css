@@ -91,6 +91,27 @@
     background: #C8A951;
 }
 
+/* User Avatar */
+.bk-user-avatar {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #C8A951;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1B2B5A;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.bk-user-avatar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(200, 169, 81, 0.4);
+}
+
 /* Close Button */
 .bk-close-btn {
     width: 40px;

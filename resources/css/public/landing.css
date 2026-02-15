@@ -117,6 +117,80 @@
     box-shadow: 0 6px 20px rgba(200, 169, 81, 0.4);
 }
 
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+}
+
+.nav-user-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px 8px 8px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.nav-user-link:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.nav-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #C8A951;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1B2B5A;
+}
+
+.nav-username {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1B2B5A;
+}
+
+.nav-login {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1B2B5A;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.nav-login:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.nav-login svg {
+    color: #C8A951;
+}
+
 .nav-mobile-toggle {
     display: none;
     align-items: center;
@@ -173,6 +247,63 @@
     font-size: 15px;
     border-radius: 24px;
     text-decoration: none;
+}
+
+.mobile-menu-divider {
+    height: 1px;
+    background: rgba(27, 43, 90, 0.08);
+    margin: 8px 0;
+}
+
+.mobile-menu-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #1B2B5A;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.mobile-menu-user:hover {
+    background: rgba(200, 169, 81, 0.08);
+}
+
+.mobile-menu-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #C8A951;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1B2B5A;
+}
+
+.mobile-menu-login {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: rgba(27, 43, 90, 0.65);
+    font-size: 15px;
+    transition: all 0.2s ease;
+}
+
+.mobile-menu-login:hover {
+    color: #C8A951;
+    background: rgba(200, 169, 81, 0.08);
+}
+
+.mobile-menu-login svg {
+    color: #C8A951;
 }
 
 /* ==================== SCROLL SNAP CONTAINER ==================== */
@@ -1393,7 +1524,7 @@
     }
 
     .nav-links,
-    .nav-cta {
+    .nav-right {
         display: none;
     }
 

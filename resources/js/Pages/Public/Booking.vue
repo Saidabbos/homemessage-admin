@@ -1,9 +1,12 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
+
+const page = usePage();
+const authUser = computed(() => page.props.auth?.user);
 
 const props = defineProps({
     services: Array,
@@ -429,8 +432,13 @@ const getServiceIcon = (service) => {
                 <span v-if="cartItemCount > 0" class="bk-cart-header-count">{{ cartItemCount }}</span>
             </div>
 
-            <!-- Close / Cart toggle -->
+            <!-- Close / Cart toggle / User -->
             <div class="bk-topbar-right">
+                <!-- User avatar -->
+                <a v-if="authUser" href="/customer/dashboard" class="bk-user-avatar" :title="authUser.name">
+                    {{ authUser.avatar }}
+                </a>
+
                 <button
                     v-if="step !== 'cart' && cartItemCount > 0"
                     class="bk-cart-toggle"
