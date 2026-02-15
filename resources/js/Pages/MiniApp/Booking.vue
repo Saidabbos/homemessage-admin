@@ -112,7 +112,7 @@ const availableDates = computed(() => {
         const d = new Date();
         d.setDate(d.getDate() + i);
         dates.push({
-            value: d.toISOString().split('T')[0],
+            value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`,
             dayName: dayNames[d.getDay()],
             day: d.getDate(),
             month: monthNames[d.getMonth()],

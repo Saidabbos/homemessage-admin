@@ -156,7 +156,7 @@ const availableDates = computed(() => {
         const date = new Date(today);
         date.setDate(today.getDate() + i);
         dates.push({
-            value: date.toISOString().split('T')[0],
+            value: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
             label: formatDate(date),
             dayName: dayNames[date.getDay()],
             day: date.getDate(),

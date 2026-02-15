@@ -31,7 +31,7 @@ class SlotCalculationService
     public const INTER_CLIENT_BUFFER = 10;    // 2+ kishi orasidagi pauza
     
     // Minimal oldindan buyurtma (soatlarda)
-    public const MIN_LEAD_TIME_HOURS = 6;
+    public const MIN_LEAD_TIME_HOURS = 2;
 
     /**
      * Berilgan sana va parametrlar uchun mavjud slotlarni qaytaradi
