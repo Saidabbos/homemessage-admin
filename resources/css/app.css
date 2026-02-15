@@ -6,6 +6,7 @@
 @import './public/dashboard.css';
 @import './public/customer-orders.css';
 @import './public/customer-favorites.css';
+@import './public/auth.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
