@@ -233,7 +233,7 @@ class MockClickController extends Controller
 
         // Reset payment status if no other paid payments
         if (!$order->payments()->where('status', Payment::STATUS_PAID)->exists()) {
-            $order->update(['payment_status' => Order::PAY_UNPAID]);
+            $order->update(['payment_status' => Order::PAY_NOT_PAID]);
         }
 
         Log::info('Mock Click: Order reset', ['order_id' => $order->id]);
@@ -250,7 +250,7 @@ class MockClickController extends Controller
     protected function sendClickRequest(string $action, array $params): array
     {
         $endpoint = $action === 'prepare' ? 'prepare' : 'complete';
-        $webhookUrl = config('app.url') . '/api/webhook/click/' . $endpoint;
+        $webhookUrl = (config('app.internal_url') ?: config('app.url')) . '/api/webhook/click/' . $endpoint;
 
         // Generate signature
         $secretKey = config('services.click.secret_key', 'test_secret');

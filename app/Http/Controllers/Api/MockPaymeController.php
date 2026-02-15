@@ -213,7 +213,7 @@ class MockPaymeController extends Controller
         $order->payments()->delete();
 
         // Reset payment status
-        $order->update(['payment_status' => Order::PAY_UNPAID]);
+        $order->update(['payment_status' => Order::PAY_NOT_PAID]);
 
         Log::info('Mock Payme: Order reset', ['order_id' => $order->id]);
 
@@ -228,7 +228,7 @@ class MockPaymeController extends Controller
      */
     protected function sendPaymeRequest(string $method, array $params): array
     {
-        $webhookUrl = config('app.url') . '/api/webhook/payme';
+        $webhookUrl = (config('app.internal_url') ?: config('app.url')) . '/api/webhook/payme';
         
         // Create auth header (mock credentials)
         $mockKey = config('services.payme.key', 'test_key');
