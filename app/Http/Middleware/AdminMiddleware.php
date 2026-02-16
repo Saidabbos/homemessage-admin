@@ -21,8 +21,8 @@ class AdminMiddleware
                 ->with('error', 'Avval login qiling');
         }
 
-        // Check if user has admin role
-        if (!auth()->user()->hasRole('admin')) {
+        // Check if user has admin or dispatcher role
+        if (!auth()->user()->hasAnyRole(['admin', 'dispatcher'])) {
             abort(403, 'Sizda bu sahifaga kirish ruxsati yo\'q');
         }
 

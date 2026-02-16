@@ -14,7 +14,7 @@ class AuthController extends Controller
      */
     public function showLogin()
     {
-        if (Auth::check() && Auth::user()->hasRole('admin')) {
+        if (Auth::check() && Auth::user()->hasAnyRole(['admin', 'dispatcher'])) {
             return redirect()->route('admin.dashboard');
         }
 
@@ -40,7 +40,7 @@ class AuthController extends Controller
         if (Auth::attempt($validated, $request->remember)) {
             $user = Auth::user();
 
-            if (!$user->hasRole('admin')) {
+            if (!$user->hasAnyRole(['admin', 'dispatcher'])) {
                 Auth::logout();
                 return back()->with('error', 'Siz admin hisobiga ega emassiz');
             }
