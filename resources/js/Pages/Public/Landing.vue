@@ -7,6 +7,13 @@ const { t } = useI18n()
 
 const page = usePage()
 const authUser = computed(() => page.props.auth?.user)
+const canBook = computed(() => !authUser.value || authUser.value.role === 'customer')
+const dashboardUrl = computed(() => {
+    if (!authUser.value) return '/auth/login'
+    if (authUser.value.role === 'master') return '/master/dashboard'
+    if (authUser.value.role === 'customer') return '/customer/dashboard'
+    return '/admin/dashboard'
+})
 
 const props = defineProps({
     serviceTypes: Array,
@@ -278,13 +285,13 @@ function submitContact() {
 
                 <!-- Desktop Right -->
                 <div class="nav-right">
-                    <Link href="/booking" class="nav-cta">
+                    <Link v-if="canBook" href="/booking" class="nav-cta">
                         <span>{{ t('landing.nav.bookNow') }}</span>
                     </Link>
 
                     <!-- Auth: logged in -->
                     <div v-if="authUser" class="nav-user">
-                        <Link href="/customer/dashboard" class="nav-user-link">
+                        <Link :href="dashboardUrl" class="nav-user-link">
                             <span class="nav-avatar">{{ authUser.avatar }}</span>
                             <span class="nav-username">{{ authUser.name }}</span>
                         </Link>
@@ -316,11 +323,11 @@ function submitContact() {
                     <Link href="/masters" class="mobile-menu-link" @click="mobileMenuOpen = false">{{ t('landing.nav.masters') }}</Link>
                     <a href="#testimonials" class="mobile-menu-link" @click="mobileMenuOpen = false">{{ t('landing.nav.testimonials') }}</a>
                     <a href="#contact" class="mobile-menu-link" @click="mobileMenuOpen = false">{{ t('landing.nav.about') }}</a>
-                    <Link href="/booking" class="mobile-menu-cta" @click="mobileMenuOpen = false">{{ t('landing.nav.bookNow') }}</Link>
+                    <Link v-if="canBook" href="/booking" class="mobile-menu-cta" @click="mobileMenuOpen = false">{{ t('landing.nav.bookNow') }}</Link>
 
                     <!-- Mobile Auth -->
                     <div class="mobile-menu-divider"></div>
-                    <Link v-if="authUser" href="/customer/dashboard" class="mobile-menu-user" @click="mobileMenuOpen = false">
+                    <Link v-if="authUser" :href="dashboardUrl" class="mobile-menu-user" @click="mobileMenuOpen = false">
                         <span class="mobile-menu-avatar">{{ authUser.avatar }}</span>
                         <span>{{ authUser.name }}</span>
                     </Link>
@@ -354,7 +361,7 @@ function submitContact() {
                         <p class="hero-sub" v-html="heroSubtitle.replace(/\n/g, '<br>')"></p>
 
                         <div class="hero-ctas">
-                            <Link href="/booking" class="hero-cta-primary">
+                            <Link v-if="canBook" href="/booking" class="hero-cta-primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>
                                 </svg>

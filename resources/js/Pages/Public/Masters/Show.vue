@@ -7,6 +7,13 @@ const { t } = useI18n()
 
 const page = usePage()
 const authUser = computed(() => page.props.auth?.user)
+const canBook = computed(() => !authUser.value || authUser.value.role === 'customer')
+const dashboardUrl = computed(() => {
+    if (!authUser.value) return '/auth/login'
+    if (authUser.value.role === 'master') return '/master/dashboard'
+    if (authUser.value.role === 'customer') return '/customer/dashboard'
+    return '/admin/dashboard'
+})
 
 const props = defineProps({
     master: {
@@ -49,13 +56,13 @@ const getServiceIcon = (index) => {
             </div>
 
             <div class="md-nav-right">
-                <Link href="/booking" class="md-nav-cta">
+                <Link v-if="canBook" href="/booking" class="md-nav-cta">
                     {{ t('landing.nav.bookNow') }}
                 </Link>
 
                 <!-- Auth: logged in -->
                 <div v-if="authUser" class="md-nav-user">
-                    <Link href="/customer/dashboard" class="md-nav-user-link">
+                    <Link :href="dashboardUrl" class="md-nav-user-link">
                         <span class="md-nav-avatar">{{ authUser.avatar }}</span>
                         <span class="md-nav-username">{{ authUser.name }}</span>
                     </Link>
@@ -126,7 +133,7 @@ const getServiceIcon = (index) => {
 
                 <!-- CTA Row -->
                 <div class="md-cta-row">
-                    <Link :href="`/booking?master=${master.id}`" class="md-cta-primary">
+                    <Link v-if="canBook" :href="`/booking?master=${master.id}`" class="md-cta-primary">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         <span>{{ t('landing.nav.bookNow') }}</span>
                     </Link>
@@ -234,7 +241,7 @@ const getServiceIcon = (index) => {
                 <h2 class="md-cta-title">{{ master.full_name }} {{ t('public.master.ctaBookWith') }}</h2>
                 <p class="md-cta-desc">{{ t('public.master.ctaDesc') }}</p>
                 <div class="md-cta-buttons">
-                    <Link :href="`/booking?master=${master.id}`" class="md-cta-btn-primary">
+                    <Link v-if="canBook" :href="`/booking?master=${master.id}`" class="md-cta-btn-primary">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         <span>{{ t('public.master.bookNow') }}</span>
                     </Link>
@@ -262,7 +269,7 @@ const getServiceIcon = (index) => {
                 </div>
                 <div class="md-footer-col">
                     <h4>{{ t('landing.nav.services') }}</h4>
-                    <Link href="/booking">{{ t('landing.nav.bookNow') }}</Link>
+                    <Link v-if="canBook" href="/booking">{{ t('landing.nav.bookNow') }}</Link>
                 </div>
                 <div class="md-footer-col">
                     <h4>{{ t('landing.footer.company') }}</h4>

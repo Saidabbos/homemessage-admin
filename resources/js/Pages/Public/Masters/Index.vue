@@ -7,6 +7,13 @@ const { t, locale } = useI18n()
 
 const page = usePage()
 const authUser = computed(() => page.props.auth?.user)
+const canBook = computed(() => !authUser.value || authUser.value.role === 'customer')
+const dashboardUrl = computed(() => {
+    if (!authUser.value) return '/auth/login'
+    if (authUser.value.role === 'master') return '/master/dashboard'
+    if (authUser.value.role === 'customer') return '/customer/dashboard'
+    return '/admin/dashboard'
+})
 
 const props = defineProps({
     masters: {
@@ -66,13 +73,13 @@ const formatPrice = (price) => {
             </div>
 
             <div class="mp-nav-right">
-                <Link href="/booking" class="mp-nav-cta">
+                <Link v-if="canBook" href="/booking" class="mp-nav-cta">
                     {{ t('landing.nav.bookNow') }}
                 </Link>
 
                 <!-- Auth: logged in -->
                 <div v-if="authUser" class="mp-nav-user">
-                    <Link href="/customer/dashboard" class="mp-nav-user-link">
+                    <Link :href="dashboardUrl" class="mp-nav-user-link">
                         <span class="mp-nav-avatar">{{ authUser.avatar }}</span>
                         <span class="mp-nav-username">{{ authUser.name }}</span>
                     </Link>

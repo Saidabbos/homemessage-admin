@@ -1,9 +1,13 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3'
+import { Head, Link, usePage } from '@inertiajs/vue3'
 import { useI18n } from 'vue-i18n'
+import { computed } from 'vue'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
 
 const { t } = useI18n()
+const page = usePage()
+const authUser = computed(() => page.props.auth?.user)
+const canBook = computed(() => !authUser.value || authUser.value.role === 'customer')
 
 const props = defineProps({
     serviceTypes: {
@@ -113,7 +117,7 @@ const getServiceIcon = (id) => {
                 <div class="cta-section">
                     <h3>{{ t('public.services.cta_title') }}</h3>
                     <p>{{ t('public.services.cta_text') }}</p>
-                    <Link href="/booking" class="cta-button">
+                    <Link v-if="canBook" href="/booking" class="cta-button">
                         {{ t('common.book_now') }}
                     </Link>
                 </div>

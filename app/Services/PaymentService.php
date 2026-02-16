@@ -122,7 +122,7 @@ class PaymentService
             'merchant_id' => $merchantId,
             'amount' => $payment->amount,
             'transaction_param' => $payment->order_id,
-            'return_url' => route('miniapp.booking.success', ['order_number' => $payment->order->order_number]),
+            'return_url' => route('miniapp.booking-success', ['order_number' => $payment->order->order_number]),
         ]);
 
         return "https://my.click.uz/services/pay?{$params}";

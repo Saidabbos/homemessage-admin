@@ -23,12 +23,18 @@ class PublicOrderController extends Controller
      */
     public function store(Request $request)
     {
-        // Require authentication
         if (!auth()->check()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Iltimos, avval tizimga kiring',
             ], 401);
+        }
+
+        if (!auth()->user()->hasRole('customer')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Faqat mijozlar buyurtma bera oladi',
+            ], 403);
         }
 
         Log::info('PublicOrderController@store: Creating public order', [
@@ -140,6 +146,13 @@ class PublicOrderController extends Controller
                 'success' => false,
                 'message' => 'Iltimos, avval tizimga kiring',
             ], 401);
+        }
+
+        if (!auth()->user()->hasRole('customer')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Faqat mijozlar buyurtma bera oladi',
+            ], 403);
         }
 
         $validated = $request->validate([
