@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
@@ -89,6 +89,78 @@ const formatArrivalWindow = (order) => {
   const start = order.arrival_window_start?.substring(0, 5);
   const end = order.arrival_window_end?.substring(0, 5);
   return `${start} – ${end}`;
+};
+
+// Tree table: group orders by booking_group_id
+const groupColors = ['#007bff', '#28a745', '#fd7e14', '#6f42c1', '#e83e8c', '#17a2b8'];
+const expandedGroups = ref({});
+
+const treeRows = computed(() => {
+  const rows = [];
+  const grouped = {};
+  const singles = [];
+  let colorIdx = 0;
+
+  // Separate grouped vs single orders
+  props.orders.data.forEach(order => {
+    if (order.booking_group_id && order.group_count > 1) {
+      if (!grouped[order.booking_group_id]) {
+        grouped[order.booking_group_id] = {
+          color: groupColors[colorIdx % groupColors.length],
+          orders: [],
+        };
+        colorIdx++;
+      }
+      grouped[order.booking_group_id].orders.push(order);
+    } else {
+      singles.push({ type: 'single', order });
+    }
+  });
+
+  // Build tree rows preserving original order
+  const seen = {};
+  props.orders.data.forEach(order => {
+    if (order.booking_group_id && order.group_count > 1) {
+      if (!seen[order.booking_group_id]) {
+        seen[order.booking_group_id] = true;
+        const group = grouped[order.booking_group_id];
+        // Parent row (first order in group)
+        rows.push({
+          type: 'parent',
+          order: group.orders[0],
+          groupId: order.booking_group_id,
+          groupColor: group.color,
+          childCount: group.orders.length,
+        });
+        // Child rows (remaining orders)
+        for (let i = 1; i < group.orders.length; i++) {
+          rows.push({
+            type: 'child',
+            order: group.orders[i],
+            groupId: order.booking_group_id,
+            groupColor: group.color,
+          });
+        }
+      }
+    } else {
+      rows.push({ type: 'single', order });
+    }
+  });
+
+  return rows;
+});
+
+const toggleGroup = (groupId) => {
+  expandedGroups.value[groupId] = !isExpanded(groupId);
+};
+
+const isExpanded = (groupId) => {
+  return expandedGroups.value[groupId] !== false; // default expanded
+};
+
+const isRowVisible = (row) => {
+  if (row.type !== 'child') return true;
+  return isExpanded(row.groupId);
 };
 </script>
 
@@ -191,61 +263,101 @@ const formatArrivalWindow = (order) => {
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <tr v-for="order in orders.data" :key="order.id" class="hover:bg-[#f8f9fa]">
-              <td class="px-4 py-3 font-medium text-[#007bff]">
-                <Link :href="route('admin.orders.show', order.id)" class="flex items-center gap-2">
-                  {{ order.order_number }}
-                  <span 
-                    v-if="order.group_count > 1" 
-                    class="inline-flex items-center px-1.5 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 rounded"
-                    :title="`${order.group_count} ta bog'langan buyurtma`"
+            <template v-for="row in treeRows" :key="row.order.id">
+              <tr
+                v-if="isRowVisible(row)"
+                class="hover:bg-[#f8f9fa] transition-colors"
+                :style="row.type !== 'single' ? { borderLeft: `4px solid ${row.groupColor}` } : {}"
+                :class="{
+                  'bg-[#f0f4ff]': row.type === 'parent',
+                  'bg-[#fafbff]': row.type === 'child',
+                }"
+              >
+                <!-- Order Number -->
+                <td class="px-4 py-3 font-medium text-[#007bff]">
+                  <div class="flex items-center gap-2">
+                    <!-- Tree toggle for parent rows -->
+                    <button
+                      v-if="row.type === 'parent'"
+                      @click="toggleGroup(row.groupId)"
+                      class="flex items-center justify-center w-5 h-5 rounded hover:bg-gray-200 transition-colors"
+                    >
+                      <svg
+                        class="w-4 h-4 text-[#6c757d] transition-transform"
+                        :class="{ 'rotate-90': isExpanded(row.groupId) }"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                      >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                    <!-- Tree indent for child rows -->
+                    <span v-if="row.type === 'child'" class="flex items-center w-5 pl-1">
+                      <svg class="w-3.5 h-3.5 text-gray-300" viewBox="0 0 16 16" fill="none">
+                        <path d="M4 0v10h12" stroke="currentColor" stroke-width="1.5" fill="none" />
+                      </svg>
+                    </span>
+                    <Link :href="route('admin.orders.show', row.order.id)" class="flex items-center gap-2">
+                      {{ row.order.order_number }}
+                      <span
+                        v-if="row.type === 'parent'"
+                        class="inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded"
+                        :style="{ backgroundColor: row.groupColor + '18', color: row.groupColor }"
+                      >
+                        <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        {{ row.childCount }}
+                      </span>
+                    </Link>
+                  </div>
+                </td>
+                <!-- Customer -->
+                <td class="px-4 py-3">
+                  <div class="font-medium text-[#1f2d3d]">{{ row.order.customer?.name || '-' }}</div>
+                  <div class="text-xs text-[#6c757d]">{{ row.order.customer?.phone || row.order.contact_phone }}</div>
+                </td>
+                <!-- Master -->
+                <td class="px-4 py-3">
+                  {{ row.order.master?.first_name }} {{ row.order.master?.last_name }}
+                </td>
+                <!-- Date/Time -->
+                <td class="px-4 py-3">
+                  <div class="font-medium">{{ formatDate(row.order.booking_date) }}</div>
+                  <div class="text-xs text-[#6c757d]">{{ formatArrivalWindow(row.order) }}</div>
+                </td>
+                <!-- Service -->
+                <td class="px-4 py-3">
+                  {{ row.order.service_type?.name?.uz || row.order.service_type?.name }}
+                </td>
+                <!-- Status -->
+                <td class="px-4 py-3 text-center">
+                  <span
+                    class="inline-flex px-2 py-1 text-xs font-medium rounded"
+                    :class="getStatusClass(row.order.status)"
                   >
-                    <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    {{ order.group_count }}
+                    {{ statuses.find(s => s.value === row.order.status)?.label || row.order.status }}
                   </span>
-                </Link>
-              </td>
-              <td class="px-4 py-3">
-                <div class="font-medium text-[#1f2d3d]">{{ order.customer?.name || '-' }}</div>
-                <div class="text-xs text-[#6c757d]">{{ order.customer?.phone || order.contact_phone }}</div>
-              </td>
-              <td class="px-4 py-3">
-                {{ order.master?.first_name }} {{ order.master?.last_name }}
-              </td>
-              <td class="px-4 py-3">
-                <div class="font-medium">{{ formatDate(order.booking_date) }}</div>
-                <div class="text-xs text-[#6c757d]">{{ formatArrivalWindow(order) }}</div>
-              </td>
-              <td class="px-4 py-3">
-                {{ order.service_type?.name?.uz || order.service_type?.name }}
-              </td>
-              <td class="px-4 py-3 text-center">
-                <span
-                  class="inline-flex px-2 py-1 text-xs font-medium rounded"
-                  :class="getStatusClass(order.status)"
-                >
-                  {{ statuses.find(s => s.value === order.status)?.label || order.status }}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-center">
-                <span
-                  class="inline-flex px-2 py-1 text-xs font-medium rounded"
-                  :class="getPaymentStatusClass(order.payment_status)"
-                >
-                  {{ paymentStatuses.find(s => s.value === order.payment_status)?.label || order.payment_status }}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-center">
-                <Link
-                  :href="route('admin.orders.show', order.id)"
-                  class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-[#007bff] hover:bg-[#e7f3ff] rounded transition"
-                >
-                  {{ t('common.view') }}
-                </Link>
-              </td>
-            </tr>
+                </td>
+                <!-- Payment -->
+                <td class="px-4 py-3 text-center">
+                  <span
+                    class="inline-flex px-2 py-1 text-xs font-medium rounded"
+                    :class="getPaymentStatusClass(row.order.payment_status)"
+                  >
+                    {{ paymentStatuses.find(s => s.value === row.order.payment_status)?.label || row.order.payment_status }}
+                  </span>
+                </td>
+                <!-- Actions -->
+                <td class="px-4 py-3 text-center">
+                  <Link
+                    :href="route('admin.orders.show', row.order.id)"
+                    class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-[#007bff] hover:bg-[#e7f3ff] rounded transition"
+                  >
+                    {{ t('common.view') }}
+                  </Link>
+                </td>
+              </tr>
+            </template>
             <tr v-if="orders.data.length === 0">
               <td colspan="8" class="px-4 py-12 text-center text-[#6c757d]">
                 {{ t('orders.emptyMessage') }}
