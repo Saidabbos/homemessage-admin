@@ -1,0 +1,308 @@
+/* Booking Success Page Styles — bs- prefix */
+
+/* ========== Page ========== */
+.bs-page {
+    min-height: 100vh;
+    background: linear-gradient(160deg, #F0EBE2 0%, #E5E0D7 50%, #DDD8CF 100%);
+    font-family: 'Manrope', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ========== Top Bar ========== */
+.bs-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 24px;
+    width: 100%;
+    max-width: 600px;
+}
+
+.bs-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1B2B5A;
+    text-decoration: none;
+    letter-spacing: 2px;
+}
+
+/* ========== Content ========== */
+.bs-content {
+    width: 100%;
+    max-width: 600px;
+    padding: 20px 24px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+/* ========== Success Icon ========== */
+.bs-success-icon {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.1);
+    border: 2px solid rgba(34, 197, 94, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #22c55e;
+    animation: bs-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes bs-pop {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.bs-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: #1B2B5A;
+    text-align: center;
+    margin: 0;
+}
+
+.bs-subtitle {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(27, 43, 90, 0.5);
+    text-align: center;
+    line-height: 1.5;
+    margin: -8px 0 0;
+}
+
+/* ========== Order Cards ========== */
+.bs-orders {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.bs-order-card {
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 20px;
+    padding: 20px;
+}
+
+.bs-order-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.bs-order-number {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1B2B5A;
+}
+
+.bs-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.bs-badge.paid {
+    background: rgba(34, 197, 94, 0.1);
+    color: #16a34a;
+}
+
+.bs-badge.pending {
+    background: rgba(200, 169, 81, 0.12);
+    color: #C8A951;
+}
+
+.bs-badge.failed {
+    background: rgba(220, 38, 38, 0.08);
+    color: #dc2626;
+}
+
+.bs-order-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bs-order-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bs-order-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(27, 43, 90, 0.5);
+}
+
+.bs-order-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1B2B5A;
+}
+
+.bs-order-price {
+    font-size: 14px;
+    font-weight: 700;
+    color: #C8A951;
+}
+
+/* ========== Next Steps ========== */
+.bs-steps-card {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 20px;
+    padding: 24px;
+    width: 100%;
+}
+
+.bs-steps-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1B2B5A;
+    margin: 0 0 16px;
+}
+
+.bs-steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.bs-step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(27, 43, 90, 0.7);
+    line-height: 1.4;
+}
+
+.bs-step-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(200, 169, 81, 0.12);
+    color: #C8A951;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* ========== Actions ========== */
+.bs-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.bs-btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 16px 32px;
+    background: #C8A951;
+    border: none;
+    border-radius: 28px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1B2B5A;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    box-shadow: 0 6px 16px rgba(200, 169, 81, 0.2);
+}
+
+.bs-btn-primary:hover {
+    background: #b89940;
+    transform: translateY(-1px);
+}
+
+.bs-btn-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 14px 32px;
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 28px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1B2B5A;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.bs-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.55);
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 640px) {
+    .bs-topbar {
+        padding: 14px 16px;
+    }
+
+    .bs-logo {
+        font-size: 14px;
+        letter-spacing: 1px;
+    }
+
+    .bs-content {
+        padding: 16px 16px 32px;
+        gap: 20px;
+    }
+
+    .bs-title {
+        font-size: 22px;
+    }
+
+    .bs-order-card {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .bs-steps-card {
+        padding: 20px;
+        border-radius: 16px;
+    }
+}

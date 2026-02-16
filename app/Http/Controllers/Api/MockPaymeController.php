@@ -3,25 +3,24 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Webhook\PaymeController;
 use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
  * Mock Payme Controller
- * 
+ *
  * Simulates Payme payment flow for testing purposes.
- * Only works in non-production environments.
+ * Calls webhook handler directly (no HTTP self-request).
  */
 class MockPaymeController extends Controller
 {
     /**
      * Simulate full payment flow
-     * Creates transaction and performs it immediately
      */
     public function simulatePayment(Request $request): JsonResponse
     {
@@ -47,7 +46,7 @@ class MockPaymeController extends Controller
 
         try {
             // Step 1: Check if transaction can be performed
-            $checkResult = $this->sendPaymeRequest('CheckPerformTransaction', [
+            $checkResult = $this->callPaymeWebhook('CheckPerformTransaction', [
                 'amount' => (int) ($order->total_amount * 100),
                 'account' => ['order_id' => $order->id],
             ]);
@@ -62,7 +61,7 @@ class MockPaymeController extends Controller
 
             // Step 2: Create transaction
             $paymeId = 'mock_' . Str::uuid();
-            $createResult = $this->sendPaymeRequest('CreateTransaction', [
+            $createResult = $this->callPaymeWebhook('CreateTransaction', [
                 'id' => $paymeId,
                 'time' => now()->timestamp * 1000,
                 'amount' => (int) ($order->total_amount * 100),
@@ -79,7 +78,7 @@ class MockPaymeController extends Controller
 
             // Step 3: Handle scenario
             if ($scenario === 'cancel') {
-                $cancelResult = $this->sendPaymeRequest('CancelTransaction', [
+                $cancelResult = $this->callPaymeWebhook('CancelTransaction', [
                     'id' => $paymeId,
                     'reason' => 1,
                 ]);
@@ -102,7 +101,7 @@ class MockPaymeController extends Controller
             }
 
             // Step 4: Perform transaction (success scenario)
-            $performResult = $this->sendPaymeRequest('PerformTransaction', [
+            $performResult = $this->callPaymeWebhook('PerformTransaction', [
                 'id' => $paymeId,
             ]);
 
@@ -182,7 +181,7 @@ class MockPaymeController extends Controller
             'params' => 'required|array',
         ]);
 
-        $result = $this->sendPaymeRequest($validated['method'], $validated['params']);
+        $result = $this->callPaymeWebhook($validated['method'], $validated['params']);
 
         return response()->json([
             'success' => !isset($result['error']),
@@ -224,13 +223,10 @@ class MockPaymeController extends Controller
     }
 
     /**
-     * Send JSON-RPC request to our own webhook endpoint
+     * Call Payme webhook handler directly (no HTTP self-request).
      */
-    protected function sendPaymeRequest(string $method, array $params): array
+    protected function callPaymeWebhook(string $method, array $params): array
     {
-        $webhookUrl = (config('app.internal_url') ?: config('app.url')) . '/api/webhook/payme';
-        
-        // Create auth header (mock credentials)
         $mockKey = config('services.payme.key', 'test_key');
         $auth = base64_encode("Paycom:{$mockKey}");
 
@@ -241,21 +237,21 @@ class MockPaymeController extends Controller
             'params' => $params,
         ];
 
-        Log::info('Mock Payme: Sending request', [
-            'url' => $webhookUrl,
+        Log::info('Mock Payme: Calling webhook directly', ['method' => $method]);
+
+        // Create request with JSON body so $request->input() reads correctly
+        $fakeRequest = Request::create('/api/webhook/payme', 'POST', [], [], [], [
+            'CONTENT_TYPE' => 'application/json',
+            'HTTP_AUTHORIZATION' => "Basic {$auth}",
+        ], json_encode($payload));
+
+        $controller = app(PaymeController::class);
+        $response = $controller->handle($fakeRequest);
+
+        $result = json_decode($response->getContent(), true);
+
+        Log::info('Mock Payme: Direct call result', [
             'method' => $method,
-        ]);
-
-        $response = Http::withHeaders([
-            'Authorization' => "Basic {$auth}",
-            'Content-Type' => 'application/json',
-        ])->post($webhookUrl, $payload);
-
-        $result = $response->json();
-
-        Log::info('Mock Payme: Response received', [
-            'method' => $method,
-            'status' => $response->status(),
             'result' => $result,
         ]);
 

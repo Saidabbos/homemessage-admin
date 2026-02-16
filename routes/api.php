@@ -14,6 +14,7 @@ use App\Http\Controllers\Webhook\PaymeController;
 use App\Http\Controllers\Webhook\ClickController;
 use App\Http\Controllers\Api\MockPaymeController;
 use App\Http\Controllers\Api\MockClickController;
+use App\Http\Controllers\Api\PublicPaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,6 +77,10 @@ Route::middleware('web')->group(function () {
     Route::post('/miniapp/orders', [MiniAppOrderController::class, 'store']);
     Route::post('/public/orders', [PublicOrderController::class, 'store']);
     Route::post('/public/orders/batch', [PublicOrderController::class, 'storeBatch']);
+
+    // Public payment endpoints (booking flow)
+    Route::post('/public/payment/create', [PublicPaymentController::class, 'create']);
+    Route::get('/public/payment/status/{orderId}', [PublicPaymentController::class, 'status']);
 });
 
 // Payment API

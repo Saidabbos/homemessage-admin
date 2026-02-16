@@ -44,6 +44,7 @@ Route::get('/', LandingController::class)->name('public.landing');
 Route::get('/masters', [PublicMasterController::class, 'index'])->name('public.masters.index');
 Route::get('/masters/{master}', [PublicMasterController::class, 'show'])->name('public.masters.show');
 Route::get('/booking', [BookingController::class, 'index'])->name('public.booking')->middleware('auth');
+Route::get('/booking/payment/{groupId}', [BookingController::class, 'payment'])->name('public.booking.payment')->middleware('auth');
 Route::get('/booking/success', [BookingController::class, 'success'])->name('public.booking.success')->middleware('auth');
 
 // Telegram Mini App routes

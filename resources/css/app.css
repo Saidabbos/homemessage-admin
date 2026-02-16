@@ -16,6 +16,8 @@
 @import './public/rating-form.css';
 @import './public/customer-order-show.css';
 @import './public/master-order-show.css';
+@import './public/booking-payment.css';
+@import './public/booking-success.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';

@@ -350,7 +350,7 @@ const submitCart = async () => {
 
         if (result.success) {
             cart.value = [];
-            router.visit('/booking/success');
+            router.visit('/booking/payment/' + result.group_id);
         } else {
             submitError.value = result.message || 'Xatolik yuz berdi';
         }

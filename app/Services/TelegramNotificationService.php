@@ -230,7 +230,7 @@ class TelegramNotificationService
     /**
      * Send message via Telegram Bot API
      */
-    protected function sendMessage(string $chatId, string $text, ?string $botToken = null): bool
+    protected function sendMessage(?string $chatId, string $text, ?string $botToken = null): bool
     {
         $token = $botToken ?? $this->botToken;
 
