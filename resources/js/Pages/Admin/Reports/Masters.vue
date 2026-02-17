@@ -1,7 +1,8 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import { Bar } from 'vue-chartjs';
 import {
     Chart as ChartJS,
@@ -13,15 +14,44 @@ import {
     Legend,
 } from 'chart.js';
 
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Label } from '@/components/ui/label';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
+
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 defineOptions({ layout: AdminLayout });
 
-const props = defineProps({
-    filters: Object,
-    masters: Array,
-    summary: Object,
-});
+const { t } = useI18n();
+
+const props = defineProps<{
+    filters: {
+        date_from?: string;
+        date_to?: string;
+    };
+    masters: Array<{
+        id: number;
+        name: string;
+        phone: string;
+        photo: string | null;
+        total_orders: number;
+        completed_orders: number;
+        cancelled_orders: number;
+        completion_rate: number;
+        revenue: number;
+        rating: number | null;
+    }>;
+    summary: {
+        total_masters: number;
+        total_orders: number;
+        total_revenue: number;
+        avg_orders: number;
+    };
+}>();
 
 const localFilters = ref({
     date_from: props.filters?.date_from || '',
@@ -32,7 +62,7 @@ const applyFilters = () => {
     router.get('/admin/reports/masters', localFilters.value, { preserveState: true });
 };
 
-const formatMoney = (amount) => {
+const formatMoney = (amount: number | undefined) => {
     return new Intl.NumberFormat('uz-UZ').format(amount || 0);
 };
 
@@ -55,14 +85,14 @@ const revenueChartData = computed(() => ({
     labels: props.masters?.slice(0, 8).map(m => m.name?.length > 10 ? m.name.substring(0, 10) + '...' : m.name) || [],
     datasets: [{
         label: 'Daromad',
-        data: props.masters?.slice(0, 8).map(m => m.revenue / 1000) || [], // in thousands
+        data: props.masters?.slice(0, 8).map(m => m.revenue / 1000) || [],
         backgroundColor: 'rgba(16, 185, 129, 0.8)',
         borderRadius: 6,
     }]
 }));
 
 const horizontalBarOptions = {
-    indexAxis: 'y',
+    indexAxis: 'y' as const,
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -80,14 +110,14 @@ const horizontalBarOptions = {
 };
 
 const revenueBarOptions = {
-    indexAxis: 'y',
+    indexAxis: 'y' as const,
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
         legend: { display: false },
         tooltip: {
             callbacks: {
-                label: (ctx) => formatMoney(ctx.raw * 1000) + ' so\'m'
+                label: (ctx: any) => formatMoney(ctx.raw * 1000) + ' so\'m'
             }
         }
     },
@@ -100,165 +130,194 @@ const revenueBarOptions = {
         }
     }
 };
+
+const getRankClass = (index: number) => {
+    if (index === 0) return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300';
+    if (index === 1) return 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300';
+    if (index === 2) return 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300';
+    return 'text-muted-foreground';
+};
+
+const getCompletionClass = (rate: number) => {
+    if (rate >= 80) return 'text-green-600';
+    if (rate >= 50) return 'text-yellow-600';
+    return 'text-destructive';
+};
 </script>
 
 <template>
-    <div>
+    <div class="space-y-6">
         <!-- Header -->
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+            <Button variant="ghost" size="icon" as-child>
+                <Link href="/admin/reports">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </Link>
+            </Button>
             <div>
-                <div class="flex items-center gap-3">
-                    <Link href="/admin/reports" class="text-gray-400 hover:text-gray-600">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                        </svg>
-                    </Link>
-                    <h1 class="text-2xl font-bold text-gray-800">Masterlar hisoboti</h1>
-                </div>
-                <p class="text-gray-500 text-sm mt-1">Masterlar ishlash statistikasi</p>
+                <h1 class="text-2xl font-bold tracking-tight">{{ t('reports.masters_report', 'Masterlar hisoboti') }}</h1>
+                <p class="text-muted-foreground">{{ t('reports.masters_stats', 'Masterlar ishlash statistikasi') }}</p>
             </div>
         </div>
 
         <!-- Filters -->
-        <div class="bg-white rounded-xl shadow-sm p-5 mb-6">
-            <div class="flex items-end gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Boshlanish</label>
-                    <input type="date" v-model="localFilters.date_from" class="px-3 py-2 border rounded-lg text-sm" />
+        <Card>
+            <CardContent class="pt-6">
+                <div class="flex items-end gap-4">
+                    <div class="space-y-2">
+                        <Label>{{ t('reports.date_from', 'Boshlanish') }}</Label>
+                        <Input type="date" v-model="localFilters.date_from" class="w-auto" />
+                    </div>
+                    <div class="space-y-2">
+                        <Label>{{ t('reports.date_to', 'Tugash') }}</Label>
+                        <Input type="date" v-model="localFilters.date_to" class="w-auto" />
+                    </div>
+                    <Button @click="applyFilters">{{ t('common.apply', 'Qo\'llash') }}</Button>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tugash</label>
-                    <input type="date" v-model="localFilters.date_to" class="px-3 py-2 border rounded-lg text-sm" />
-                </div>
-                <button @click="applyFilters" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm">
-                    Qo'llash
-                </button>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
 
         <!-- Summary Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white rounded-xl shadow-sm p-4">
-                <p class="text-2xl font-bold text-gray-800">{{ summary?.total_masters || 0 }}</p>
-                <p class="text-sm text-gray-500">Faol masterlar</p>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm p-4">
-                <p class="text-2xl font-bold text-blue-600">{{ summary?.total_orders || 0 }}</p>
-                <p class="text-sm text-gray-500">Jami buyurtmalar</p>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm p-4">
-                <p class="text-2xl font-bold text-green-600">{{ formatMoney(summary?.total_revenue) }}</p>
-                <p class="text-sm text-gray-500">Jami daromad</p>
-            </div>
-            <div class="bg-white rounded-xl shadow-sm p-4">
-                <p class="text-2xl font-bold text-purple-600">{{ summary?.avg_orders || 0 }}</p>
-                <p class="text-sm text-gray-500">O'rtacha buyurtma/master</p>
-            </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card>
+                <CardContent class="pt-6">
+                    <p class="text-2xl font-bold">{{ summary?.total_masters || 0 }}</p>
+                    <p class="text-sm text-muted-foreground">{{ t('reports.active_masters', 'Faol masterlar') }}</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardContent class="pt-6">
+                    <p class="text-2xl font-bold text-blue-600">{{ summary?.total_orders || 0 }}</p>
+                    <p class="text-sm text-muted-foreground">{{ t('reports.total_orders', 'Jami buyurtmalar') }}</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardContent class="pt-6">
+                    <p class="text-2xl font-bold text-green-600">{{ formatMoney(summary?.total_revenue) }}</p>
+                    <p class="text-sm text-muted-foreground">{{ t('reports.total_revenue', 'Jami daromad') }}</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardContent class="pt-6">
+                    <p class="text-2xl font-bold text-purple-600">{{ summary?.avg_orders || 0 }}</p>
+                    <p class="text-sm text-muted-foreground">{{ t('reports.avg_per_master', 'O\'rtacha buyurtma/master') }}</p>
+                </CardContent>
+            </Card>
         </div>
 
         <!-- Charts Row -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <!-- Orders Chart -->
-            <div class="bg-white rounded-xl shadow-sm p-5">
-                <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                    </svg>
-                    Buyurtmalar soni bo'yicha
-                </h3>
-                <div v-if="masters?.length" class="h-[250px]">
-                    <Bar :data="ordersChartData" :options="horizontalBarOptions" />
-                </div>
-                <div v-else class="text-gray-500 text-center py-12">Ma'lumot yo'q</div>
-            </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle class="flex items-center text-base">
+                        <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        {{ t('reports.by_orders_count', 'Buyurtmalar soni bo\'yicha') }}
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div v-if="masters?.length" class="h-[250px]">
+                        <Bar :data="ordersChartData" :options="horizontalBarOptions" />
+                    </div>
+                    <div v-else class="text-muted-foreground text-center py-12">{{ t('common.no_data', 'Ma\'lumot yo\'q') }}</div>
+                </CardContent>
+            </Card>
 
-            <!-- Revenue Chart -->
-            <div class="bg-white rounded-xl shadow-sm p-5">
-                <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    Daromad bo'yicha (ming so'm)
-                </h3>
-                <div v-if="masters?.length" class="h-[250px]">
-                    <Bar :data="revenueChartData" :options="revenueBarOptions" />
-                </div>
-                <div v-else class="text-gray-500 text-center py-12">Ma'lumot yo'q</div>
-            </div>
+            <Card>
+                <CardHeader>
+                    <CardTitle class="flex items-center text-base">
+                        <svg class="w-5 h-5 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        {{ t('reports.by_revenue', 'Daromad bo\'yicha') }} ({{ t('reports.thousands', 'ming so\'m') }})
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div v-if="masters?.length" class="h-[250px]">
+                        <Bar :data="revenueChartData" :options="revenueBarOptions" />
+                    </div>
+                    <div v-else class="text-muted-foreground text-center py-12">{{ t('common.no_data', 'Ma\'lumot yo\'q') }}</div>
+                </CardContent>
+            </Card>
         </div>
 
         <!-- Masters Table -->
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="px-5 py-4 border-b">
-                <h2 class="font-semibold text-gray-800">Masterlar reytingi</h2>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-3 text-left font-medium text-gray-600">#</th>
-                            <th class="px-4 py-3 text-left font-medium text-gray-600">Master</th>
-                            <th class="px-4 py-3 text-center font-medium text-gray-600">Buyurtmalar</th>
-                            <th class="px-4 py-3 text-center font-medium text-gray-600">Tugallangan</th>
-                            <th class="px-4 py-3 text-center font-medium text-gray-600">Bekor</th>
-                            <th class="px-4 py-3 text-center font-medium text-gray-600">Completion %</th>
-                            <th class="px-4 py-3 text-right font-medium text-gray-600">Daromad</th>
-                            <th class="px-4 py-3 text-center font-medium text-gray-600">Reyting</th>
-                            <th class="px-4 py-3 text-left font-medium text-gray-600">Daromad %</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y">
-                        <tr v-for="(master, i) in masters" :key="master.id" class="hover:bg-gray-50">
-                            <td class="px-4 py-3">
-                                <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                                    :class="i === 0 ? 'bg-yellow-100 text-yellow-700' : i === 1 ? 'bg-gray-200 text-gray-700' : i === 2 ? 'bg-orange-100 text-orange-700' : 'text-gray-500'">
-                                    {{ i + 1 }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3">
-                                <div class="flex items-center gap-3">
-                                    <img v-if="master.photo" :src="master.photo" class="w-10 h-10 rounded-full object-cover" />
-                                    <div v-else class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-medium">
-                                        {{ master.name?.charAt(0) }}
+        <Card>
+            <CardHeader>
+                <CardTitle>{{ t('reports.masters_ranking', 'Masterlar reytingi') }}</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div class="rounded-md border">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead class="w-12">#</TableHead>
+                                <TableHead>{{ t('reports.master', 'Master') }}</TableHead>
+                                <TableHead class="text-center">{{ t('reports.orders', 'Buyurtmalar') }}</TableHead>
+                                <TableHead class="text-center">{{ t('reports.completed', 'Tugallangan') }}</TableHead>
+                                <TableHead class="text-center">{{ t('reports.cancelled', 'Bekor') }}</TableHead>
+                                <TableHead class="text-center">Completion %</TableHead>
+                                <TableHead class="text-right">{{ t('reports.revenue', 'Daromad') }}</TableHead>
+                                <TableHead class="text-center">{{ t('reports.rating', 'Reyting') }}</TableHead>
+                                <TableHead class="w-32">{{ t('reports.revenue_bar', 'Daromad %') }}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow v-for="(master, i) in masters" :key="master.id">
+                                <TableCell>
+                                    <span 
+                                        class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+                                        :class="getRankClass(i)"
+                                    >
+                                        {{ i + 1 }}
+                                    </span>
+                                </TableCell>
+                                <TableCell>
+                                    <div class="flex items-center gap-3">
+                                        <Avatar class="h-10 w-10">
+                                            <AvatarImage v-if="master.photo" :src="master.photo" />
+                                            <AvatarFallback>{{ master.name?.charAt(0) }}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <div class="font-medium">{{ master.name }}</div>
+                                            <div class="text-xs text-muted-foreground">{{ master.phone }}</div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div class="font-medium text-gray-800">{{ master.name }}</div>
-                                        <div class="text-xs text-gray-500">{{ master.phone }}</div>
+                                </TableCell>
+                                <TableCell class="text-center font-semibold">{{ master.total_orders }}</TableCell>
+                                <TableCell class="text-center text-green-600">{{ master.completed_orders }}</TableCell>
+                                <TableCell class="text-center text-destructive">{{ master.cancelled_orders }}</TableCell>
+                                <TableCell class="text-center">
+                                    <span :class="getCompletionClass(master.completion_rate)" class="font-medium">
+                                        {{ master.completion_rate }}%
+                                    </span>
+                                </TableCell>
+                                <TableCell class="text-right font-semibold text-green-600">{{ formatMoney(master.revenue) }}</TableCell>
+                                <TableCell class="text-center">
+                                    <div v-if="master.rating" class="flex items-center justify-center gap-1">
+                                        <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                        </svg>
+                                        <span class="font-medium">{{ master.rating }}</span>
                                     </div>
-                                </div>
-                            </td>
-                            <td class="px-4 py-3 text-center font-semibold text-gray-800">{{ master.total_orders }}</td>
-                            <td class="px-4 py-3 text-center text-green-600">{{ master.completed_orders }}</td>
-                            <td class="px-4 py-3 text-center text-red-600">{{ master.cancelled_orders }}</td>
-                            <td class="px-4 py-3 text-center">
-                                <span :class="master.completion_rate >= 80 ? 'text-green-600' : master.completion_rate >= 50 ? 'text-yellow-600' : 'text-red-600'" class="font-medium">
-                                    {{ master.completion_rate }}%
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-right font-semibold text-green-600">{{ formatMoney(master.revenue) }}</td>
-                            <td class="px-4 py-3 text-center">
-                                <div v-if="master.rating" class="flex items-center justify-center gap-1">
-                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                    </svg>
-                                    <span class="font-medium">{{ master.rating }}</span>
-                                </div>
-                                <span v-else class="text-gray-400">-</span>
-                            </td>
-                            <td class="px-4 py-3">
-                                <div class="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                    <div class="h-full bg-green-500 rounded-full" :style="{ width: (master.revenue / maxRevenue * 100) + '%' }"></div>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div v-if="!masters?.length" class="p-8 text-center text-gray-500">
-                Masterlar topilmadi
-            </div>
-        </div>
+                                    <span v-else class="text-muted-foreground">-</span>
+                                </TableCell>
+                                <TableCell>
+                                    <Progress :model-value="(master.revenue / maxRevenue) * 100" class="h-2" />
+                                </TableCell>
+                            </TableRow>
+                            <TableRow v-if="!masters?.length">
+                                <TableCell :colspan="9" class="text-center text-muted-foreground py-8">
+                                    {{ t('reports.no_masters', 'Masterlar topilmadi') }}
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </div>
+            </CardContent>
+        </Card>
     </div>
 </template>
