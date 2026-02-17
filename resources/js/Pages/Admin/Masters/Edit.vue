@@ -1,22 +1,56 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Checkbox } from '@/components/ui/checkbox';
+
 defineOptions({ layout: AdminLayout });
 
 const { t } = useI18n();
 
-const props = defineProps({
-  master: Object,
-  serviceTypes: Array,
-  oils: Array,
-  pressureLevels: Array,
-});
+const props = defineProps<{
+  master: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    full_name: string;
+    phone: string;
+    email: string;
+    photo_url: string;
+    birth_date: string;
+    gender: string;
+    experience_years: number;
+    status: boolean;
+    service_types: number[];
+    oils: number[];
+    pressure_levels: number[];
+    uz?: { bio: string };
+    ru?: { bio: string };
+    en?: { bio: string };
+  };
+  serviceTypes: Array<{ id: number; name: { uz?: string } | string }>;
+  oils: Array<{ id: number; name: { uz?: string } | string }>;
+  pressureLevels: Array<{ id: number; name: { uz?: string } | string }>;
+}>();
 
 const activeTab = ref('uz');
-const photoPreview = ref(props.master.photo_url);
+const photoPreview = ref<string | null>(props.master.photo_url);
+
+const languageTabs = [
+  { key: 'uz', label: "O'zbek", flag: '🇺🇿' },
+  { key: 'ru', label: 'Русский', flag: '🇷🇺' },
+  { key: 'en', label: 'English', flag: '🇬🇧' },
+];
 
 const form = useForm({
   _method: 'PUT',
@@ -25,7 +59,7 @@ const form = useForm({
   phone: props.master.phone,
   email: props.master.email || '',
   password: '',
-  photo: null,
+  photo: null as File | null,
   birth_date: props.master.birth_date || '',
   gender: props.master.gender,
   experience_years: props.master.experience_years,
@@ -38,337 +72,225 @@ const form = useForm({
   en: { bio: props.master.en?.bio || '' },
 });
 
-const handlePhotoChange = (e) => {
-  const file = e.target.files[0];
+const handlePhotoChange = (e: Event) => {
+  const target = e.target as HTMLInputElement;
+  const file = target.files?.[0];
   if (file) {
     form.photo = file;
     photoPreview.value = URL.createObjectURL(file);
   }
 };
 
+const toggleArrayItem = (arr: number[], id: number) => {
+  const idx = arr.indexOf(id);
+  if (idx > -1) arr.splice(idx, 1);
+  else arr.push(id);
+};
+
 const submit = () => {
   form.patch(route('admin.masters.update', props.master.id));
+};
+
+const getName = (item: { name: { uz?: string } | string }) => {
+  return typeof item.name === 'object' ? item.name?.uz : item.name;
 };
 </script>
 
 <template>
-  <div>
-    <!-- Content Header -->
-    <div class="mb-4">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 class="text-2xl font-semibold text-[#1f2d3d]">{{ t('masters.edit') }}</h1>
-          <p class="text-sm text-[#6c757d] mt-1">{{ master.full_name }}</p>
-        </div>
-        <nav class="mt-2 sm:mt-0">
-          <ol class="flex items-center text-sm">
-            <li><Link href="/admin/dashboard" class="text-[#007bff]">{{ t('common.home') }}</Link></li>
-            <li class="mx-2 text-[#6c757d]">/</li>
-            <li><Link href="/admin/masters" class="text-[#007bff]">{{ t('masters.title') }}</Link></li>
-            <li class="mx-2 text-[#6c757d]">/</li>
-            <li class="text-[#6c757d]">{{ t('common.edit') }}</li>
-          </ol>
-        </nav>
-      </div>
+  <div class="space-y-6">
+    <!-- Header -->
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight">{{ t('masters.edit', 'Masterni tahrirlash') }}</h1>
+      <p class="text-muted-foreground">{{ master.full_name }}</p>
     </div>
 
     <form @submit.prevent="submit">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <!-- Main Info Card -->
-        <div class="lg:col-span-2">
-          <div class="bg-white rounded shadow-sm">
-            <div class="px-4 py-3 border-b border-gray-200 bg-[#ffc107]">
-              <h3 class="font-semibold text-[#1f2d3d]">{{ t('masters.personalInfo') }}</h3>
-            </div>
-            <div class="p-4">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Info -->
+        <div class="lg:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>{{ t('masters.personalInfo', 'Shaxsiy ma\'lumotlar') }}</CardTitle>
+            </CardHeader>
+            <CardContent class="space-y-4">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- First Name -->
-                <div>
-                  <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
-                    {{ t('masters.firstName') }} <span class="text-[#dc3545]">*</span>
-                  </label>
-                  <input
-                    v-model="form.first_name"
-                    type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#007bff] focus:border-transparent"
-                  />
-                  <p v-if="form.errors.first_name" class="mt-1 text-sm text-[#dc3545]">{{ form.errors.first_name }}</p>
+                <div class="space-y-2">
+                  <Label>{{ t('masters.firstName', 'Ism') }} <span class="text-destructive">*</span></Label>
+                  <Input v-model="form.first_name" />
+                  <p v-if="form.errors.first_name" class="text-destructive text-xs">{{ form.errors.first_name }}</p>
                 </div>
 
-                <!-- Last Name -->
-                <div>
-                  <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
-                    {{ t('masters.lastName') }} <span class="text-[#dc3545]">*</span>
-                  </label>
-                  <input
-                    v-model="form.last_name"
-                    type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#007bff] focus:border-transparent"
-                  />
-                  <p v-if="form.errors.last_name" class="mt-1 text-sm text-[#dc3545]">{{ form.errors.last_name }}</p>
+                <div class="space-y-2">
+                  <Label>{{ t('masters.lastName', 'Familiya') }} <span class="text-destructive">*</span></Label>
+                  <Input v-model="form.last_name" />
+                  <p v-if="form.errors.last_name" class="text-destructive text-xs">{{ form.errors.last_name }}</p>
                 </div>
 
-                <!-- Phone -->
-                <div>
-                  <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
-                    {{ t('masters.phone') }} <span class="text-[#dc3545]">*</span>
-                  </label>
-                  <input
-                    v-model="form.phone"
-                    type="tel"
-                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#007bff] focus:border-transparent"
-                  />
-                  <p v-if="form.errors.phone" class="mt-1 text-sm text-[#dc3545]">{{ form.errors.phone }}</p>
+                <div class="space-y-2">
+                  <Label>{{ t('masters.phone', 'Telefon') }} <span class="text-destructive">*</span></Label>
+                  <Input v-model="form.phone" />
+                  <p v-if="form.errors.phone" class="text-destructive text-xs">{{ form.errors.phone }}</p>
                 </div>
 
-                <!-- Email -->
-                <div>
-                  <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
-                    {{ t('masters.email') }} <span class="text-[#dc3545]">*</span>
-                  </label>
-                  <input
-                    v-model="form.email"
-                    type="email"
-                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#007bff] focus:border-transparent"
-                  />
-                  <p v-if="form.errors.email" class="mt-1 text-sm text-[#dc3545]">{{ form.errors.email }}</p>
+                <div class="space-y-2">
+                  <Label>{{ t('masters.email', 'Email') }} <span class="text-destructive">*</span></Label>
+                  <Input type="email" v-model="form.email" />
+                  <p v-if="form.errors.email" class="text-destructive text-xs">{{ form.errors.email }}</p>
                 </div>
 
-                <!-- Password -->
-                <div>
-                  <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
-                    {{ t('masters.password') }}
-                  </label>
-                  <input
-                    v-model="form.password"
-                    type="password"
-                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#007bff] focus:border-transparent"
-                    :placeholder="t('masters.newPassword')"
-                  />
-                  <p class="mt-1 text-xs text-[#6c757d]">{{ t('masters.passwordChangeHint') }}</p>
-                  <p v-if="form.errors.password" class="mt-1 text-sm text-[#dc3545]">{{ form.errors.password }}</p>
+                <div class="space-y-2">
+                  <Label>{{ t('masters.password', 'Yangi parol') }}</Label>
+                  <Input type="password" v-model="form.password" :placeholder="t('masters.newPassword', 'Bo\'sh qoldiring...')" />
+                  <p class="text-xs text-muted-foreground">{{ t('masters.passwordChangeHint', 'O\'zgartirmaslik uchun bo\'sh qoldiring') }}</p>
+                  <p v-if="form.errors.password" class="text-destructive text-xs">{{ form.errors.password }}</p>
                 </div>
 
-                <!-- Birth Date -->
-                <div>
-                  <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
-                    {{ t('masters.birthDate') }}
-                  </label>
-                  <input
-                    v-model="form.birth_date"
-                    type="date"
-                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#007bff] focus:border-transparent"
-                  />
+                <div class="space-y-2">
+                  <Label>{{ t('masters.birthDate', 'Tug\'ilgan sana') }}</Label>
+                  <Input type="date" v-model="form.birth_date" />
                 </div>
 
-                <!-- Gender -->
-                <div>
-                  <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
-                    {{ t('masters.gender') }} <span class="text-[#dc3545]">*</span>
-                  </label>
-                  <select
-                    v-model="form.gender"
-                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#007bff] focus:border-transparent"
-                  >
-                    <option value="female">{{ t('masters.female') }}</option>
-                    <option value="male">{{ t('masters.male') }}</option>
-                  </select>
+                <div class="space-y-2">
+                  <Label>{{ t('masters.gender', 'Jinsi') }} <span class="text-destructive">*</span></Label>
+                  <Select v-model="form.gender">
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="female">{{ t('masters.female', 'Ayol') }}</SelectItem>
+                      <SelectItem value="male">{{ t('masters.male', 'Erkak') }}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <!-- Experience Years -->
-                <div>
-                  <label class="block text-sm font-medium text-[#1f2d3d] mb-1">
-                    {{ t('masters.experience') }} <span class="text-[#dc3545]">*</span>
-                  </label>
-                  <input
-                    v-model="form.experience_years"
-                    type="number"
-                    min="0"
-                    max="50"
-                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#007bff] focus:border-transparent"
-                  />
-                </div>
-
-                <!-- Status -->
-                <div class="flex items-center">
-                  <label class="relative inline-flex items-center cursor-pointer">
-                    <input v-model="form.status" type="checkbox" class="sr-only peer">
-                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#007bff] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#28a745]"></div>
-                    <span class="ml-3 text-sm font-medium text-[#1f2d3d]">{{ t('common.active') }}</span>
-                  </label>
+                <div class="space-y-2">
+                  <Label>{{ t('masters.experience', 'Tajriba (yil)') }} <span class="text-destructive">*</span></Label>
+                  <Input type="number" v-model="form.experience_years" min="0" max="50" />
                 </div>
               </div>
 
+              <div class="flex items-center justify-between rounded-lg border p-4">
+                <Label>{{ t('common.active', 'Faol') }}</Label>
+                <Switch v-model:checked="form.status" />
+              </div>
+
               <!-- Service Types -->
-              <div class="mt-4">
-                <label class="block text-sm font-medium text-[#1f2d3d] mb-2">
-                  {{ t('masters.services') }}
-                </label>
+              <div class="space-y-3">
+                <Label>{{ t('masters.services', 'Xizmatlar') }}</Label>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  <label
-                    v-for="serviceType in serviceTypes"
-                    :key="serviceType.id"
-                    class="flex items-center p-2 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer"
+                  <div
+                    v-for="st in serviceTypes"
+                    :key="st.id"
+                    class="flex items-center space-x-2 rounded-lg border p-3 cursor-pointer hover:bg-muted/50"
+                    @click="toggleArrayItem(form.service_types, st.id)"
                   >
-                    <input
-                      v-model="form.service_types"
-                      type="checkbox"
-                      :value="serviceType.id"
-                      class="w-4 h-4 text-[#007bff] border-gray-300 rounded focus:ring-[#007bff]"
-                    />
-                    <span class="ml-2 text-sm text-[#1f2d3d]">{{ serviceType.name?.uz || serviceType.name }}</span>
-                  </label>
+                    <Checkbox :checked="form.service_types.includes(st.id)" />
+                    <span class="text-sm">{{ getName(st) }}</span>
+                  </div>
                 </div>
               </div>
 
               <!-- Oils -->
-              <div class="mt-4">
-                <label class="block text-sm font-medium text-[#1f2d3d] mb-2">
-                  {{ t('masters.oils') }}
-                </label>
+              <div class="space-y-3">
+                <Label>{{ t('masters.oils', 'Yog\'lar') }}</Label>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  <label
+                  <div
                     v-for="oil in oils"
                     :key="oil.id"
-                    class="flex items-center p-2 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer"
+                    class="flex items-center space-x-2 rounded-lg border p-3 cursor-pointer hover:bg-muted/50"
+                    @click="toggleArrayItem(form.oils, oil.id)"
                   >
-                    <input
-                      v-model="form.oils"
-                      type="checkbox"
-                      :value="oil.id"
-                      class="w-4 h-4 text-[#17a2b8] border-gray-300 rounded focus:ring-[#17a2b8]"
-                    />
-                    <span class="ml-2 text-sm text-[#1f2d3d]">{{ oil.name?.uz || oil.name }}</span>
-                  </label>
+                    <Checkbox :checked="form.oils.includes(oil.id)" />
+                    <span class="text-sm">{{ getName(oil) }}</span>
+                  </div>
                 </div>
               </div>
 
               <!-- Pressure Levels -->
-              <div class="mt-4">
-                <label class="block text-sm font-medium text-[#1f2d3d] mb-2">
-                  Kuch Darajasi
-                </label>
+              <div class="space-y-3">
+                <Label>{{ t('masters.pressureLevels', 'Kuch darajasi') }}</Label>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  <label
-                    v-for="pressureLevel in pressureLevels"
-                    :key="pressureLevel.id"
-                    class="flex items-center p-2 border border-gray-200 rounded hover:bg-gray-50 cursor-pointer"
+                  <div
+                    v-for="pl in pressureLevels"
+                    :key="pl.id"
+                    class="flex items-center space-x-2 rounded-lg border p-3 cursor-pointer hover:bg-muted/50"
+                    @click="toggleArrayItem(form.pressure_levels, pl.id)"
                   >
-                    <input
-                      v-model="form.pressure_levels"
-                      type="checkbox"
-                      :value="pressureLevel.id"
-                      class="w-4 h-4 text-[#28a745] border-gray-300 rounded focus:ring-[#28a745]"
-                    />
-                    <span class="ml-2 text-sm text-[#1f2d3d]">{{ pressureLevel.name?.uz || pressureLevel.name }}</span>
-                  </label>
+                    <Checkbox :checked="form.pressure_levels.includes(pl.id)" />
+                    <span class="text-sm">{{ getName(pl) }}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <!-- Bio Translations -->
-          <div class="bg-white rounded shadow-sm mt-4">
-            <div class="px-4 py-3 border-b border-gray-200">
-              <h3 class="font-semibold text-[#1f2d3d]">{{ t('masters.bio') }}</h3>
-            </div>
-            <div class="p-4">
-              <!-- Language Tabs -->
-              <div class="flex border-b border-gray-200 mb-4">
-                <button
+          <!-- Bio -->
+          <Card>
+            <CardHeader>
+              <CardTitle>{{ t('masters.bio', 'Biografiya') }}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div class="flex gap-2 mb-4">
+                <Button
+                  v-for="tab in languageTabs"
+                  :key="tab.key"
                   type="button"
-                  @click="activeTab = 'uz'"
-                  :class="['px-4 py-2 text-sm font-medium border-b-2 -mb-px', activeTab === 'uz' ? 'border-[#007bff] text-[#007bff]' : 'border-transparent text-[#6c757d] hover:text-[#1f2d3d]']"
+                  :variant="activeTab === tab.key ? 'default' : 'outline'"
+                  size="sm"
+                  @click="activeTab = tab.key"
                 >
-                  O'zbek
-                </button>
-                <button
-                  type="button"
-                  @click="activeTab = 'ru'"
-                  :class="['px-4 py-2 text-sm font-medium border-b-2 -mb-px', activeTab === 'ru' ? 'border-[#007bff] text-[#007bff]' : 'border-transparent text-[#6c757d] hover:text-[#1f2d3d]']"
-                >
-                  Русский
-                </button>
-                <button
-                  type="button"
-                  @click="activeTab = 'en'"
-                  :class="['px-4 py-2 text-sm font-medium border-b-2 -mb-px', activeTab === 'en' ? 'border-[#007bff] text-[#007bff]' : 'border-transparent text-[#6c757d] hover:text-[#1f2d3d]']"
-                >
-                  English
-                </button>
+                  {{ tab.flag }} {{ tab.label }}
+                </Button>
               </div>
 
               <div v-show="activeTab === 'uz'">
-                <textarea
-                  v-model="form.uz.bio"
-                  rows="4"
-                  class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#007bff] focus:border-transparent"
-                  :placeholder="t('masters.enterBio')"
-                ></textarea>
+                <Textarea v-model="form.uz.bio" rows="4" />
               </div>
               <div v-show="activeTab === 'ru'">
-                <textarea
-                  v-model="form.ru.bio"
-                  rows="4"
-                  class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#007bff] focus:border-transparent"
-                  :placeholder="t('masters.enterBio')"
-                ></textarea>
+                <Textarea v-model="form.ru.bio" rows="4" />
               </div>
               <div v-show="activeTab === 'en'">
-                <textarea
-                  v-model="form.en.bio"
-                  rows="4"
-                  class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#007bff] focus:border-transparent"
-                  :placeholder="t('masters.enterBio')"
-                ></textarea>
+                <Textarea v-model="form.en.bio" rows="4" />
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
 
-        <!-- Photo & Stats Card -->
-        <div class="lg:col-span-1">
-          <div class="bg-white rounded shadow-sm">
-            <div class="px-4 py-3 border-b border-gray-200">
-              <h3 class="font-semibold text-[#1f2d3d]">{{ t('masters.photo') }}</h3>
-            </div>
-            <div class="p-4">
-              <div class="flex flex-col items-center">
-                <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-100 border-4 border-gray-200 mb-4">
-                  <img :src="photoPreview" class="w-full h-full object-cover" />
-                </div>
-                <label class="cursor-pointer">
-                  <span class="px-4 py-2 bg-[#6c757d] text-white text-sm font-medium rounded hover:bg-[#5a6268] transition">
-                    {{ t('masters.changePhoto') }}
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    class="hidden"
-                    @change="handlePhotoChange"
-                  />
-                </label>
-              </div>
-            </div>
-          </div>
+        <!-- Sidebar -->
+        <div class="space-y-6">
+          <!-- Photo -->
+          <Card>
+            <CardHeader>
+              <CardTitle>{{ t('masters.photo', 'Rasm') }}</CardTitle>
+            </CardHeader>
+            <CardContent class="flex flex-col items-center space-y-4">
+              <Avatar class="w-32 h-32">
+                <AvatarImage v-if="photoPreview" :src="photoPreview" />
+                <AvatarFallback class="text-4xl">{{ master.first_name?.charAt(0) }}</AvatarFallback>
+              </Avatar>
 
-          <!-- Action Buttons -->
-          <div class="bg-white rounded shadow-sm mt-4 p-4">
-            <button
-              type="submit"
-              :disabled="form.processing"
-              class="w-full px-4 py-2 bg-[#ffc107] text-[#1f2d3d] font-medium rounded hover:bg-[#e0a800] transition disabled:opacity-50"
-            >
-              <span v-if="form.processing">{{ t('common.saving') }}</span>
-              <span v-else>{{ t('common.update') }}</span>
-            </button>
-            <Link
-              href="/admin/masters"
-              class="block w-full mt-2 px-4 py-2 bg-[#6c757d] text-white font-medium rounded hover:bg-[#5a6268] transition text-center"
-            >
-              {{ t('common.cancel') }}
-            </Link>
-          </div>
+              <label class="cursor-pointer">
+                <Button type="button" variant="secondary" as="span">
+                  {{ t('masters.changePhoto', 'Rasmni o\'zgartirish') }}
+                </Button>
+                <input type="file" accept="image/*" class="hidden" @change="handlePhotoChange" />
+              </label>
+            </CardContent>
+          </Card>
+
+          <!-- Actions -->
+          <Card>
+            <CardContent class="pt-6 space-y-2">
+              <Button type="submit" class="w-full" :disabled="form.processing">
+                <svg v-if="form.processing" class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {{ form.processing ? t('common.saving', 'Saqlanmoqda...') : t('common.update', 'Yangilash') }}
+              </Button>
+              <Button type="button" variant="outline" class="w-full" as-child>
+                <Link href="/admin/masters">{{ t('common.cancel', 'Bekor qilish') }}</Link>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </form>
