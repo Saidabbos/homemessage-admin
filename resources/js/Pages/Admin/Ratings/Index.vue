@@ -1,10 +1,20 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Pagination from '@/Components/UI/Pagination.vue';
 
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 defineOptions({ layout: AdminLayout });
+
+const { t } = useI18n();
 
 const props = defineProps({
     ratings: Object,
@@ -26,10 +36,7 @@ const applyFilters = () => {
         status: status.value || undefined,
         master_id: masterId.value || undefined,
         rating: rating.value || undefined,
-    }, {
-        preserveState: true,
-        replace: true,
-    });
+    }, { preserveState: true, replace: true });
 };
 
 const resetFilters = () => {
@@ -46,188 +53,185 @@ watch(search, () => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(applyFilters, 300);
 });
-
 watch([type, status, masterId, rating], applyFilters);
 
 const formatRating = (val) => val ? parseFloat(val).toFixed(1) : '-';
 
 const deleteRating = (id) => {
-    if (confirm('Haqiqatan ham bu bahoni o\'chirmoqchimisiz?')) {
+    if (confirm(t('ratings.confirmDelete') || 'O\'chirmoqchimisiz?')) {
         router.delete(route('admin.ratings.destroy', id));
     }
 };
+
+const hasActiveFilters = () => search.value || type.value || status.value || masterId.value || rating.value;
 </script>
 
 <template>
-    <div class="p-6">
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-6">
+    <div class="space-y-6">
+        <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-gray-800">Baholar</h1>
-                <p class="text-gray-500 text-sm">Barcha baholarni ko'rish va boshqarish</p>
+                <h1 class="text-2xl font-bold tracking-tight">{{ t('ratings.title') || 'Baholar' }}</h1>
+                <p class="text-muted-foreground">{{ t('ratings.subtitle') || 'Barcha baholarni ko\'rish va boshqarish' }}</p>
             </div>
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-            <div class="bg-white rounded-lg shadow-sm p-4 border-l-4 border-blue-500">
-                <div class="text-2xl font-bold text-blue-600">{{ stats?.total || 0 }}</div>
-                <div class="text-sm text-gray-500">Jami</div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm p-4 border-l-4 border-green-500">
-                <div class="text-2xl font-bold text-green-600">{{ stats?.rated || 0 }}</div>
-                <div class="text-sm text-gray-500">Baholangan</div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm p-4 border-l-4 border-orange-500">
-                <div class="text-2xl font-bold text-orange-600">{{ stats?.pending || 0 }}</div>
-                <div class="text-sm text-gray-500">Kutilmoqda</div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm p-4 border-l-4 border-yellow-500">
-                <div class="text-2xl font-bold text-yellow-600">{{ formatRating(stats?.avg_master) }}</div>
-                <div class="text-sm text-gray-500">Master o'rtacha</div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm p-4 border-l-4 border-purple-500">
-                <div class="text-2xl font-bold text-purple-600">{{ formatRating(stats?.avg_client) }}</div>
-                <div class="text-sm text-gray-500">Mijoz o'rtacha</div>
-            </div>
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <Card class="border-l-4 border-l-blue-500">
+                <CardContent class="p-4">
+                    <div class="text-2xl font-bold text-blue-600">{{ stats?.total || 0 }}</div>
+                    <p class="text-sm text-muted-foreground">Jami</p>
+                </CardContent>
+            </Card>
+            <Card class="border-l-4 border-l-green-500">
+                <CardContent class="p-4">
+                    <div class="text-2xl font-bold text-green-600">{{ stats?.rated || 0 }}</div>
+                    <p class="text-sm text-muted-foreground">Baholangan</p>
+                </CardContent>
+            </Card>
+            <Card class="border-l-4 border-l-yellow-500">
+                <CardContent class="p-4">
+                    <div class="text-2xl font-bold text-yellow-600">{{ stats?.pending || 0 }}</div>
+                    <p class="text-sm text-muted-foreground">Kutilmoqda</p>
+                </CardContent>
+            </Card>
+            <Card class="border-l-4 border-l-purple-500">
+                <CardContent class="p-4">
+                    <div class="text-2xl font-bold text-purple-600">{{ formatRating(stats?.avg_master) }}</div>
+                    <p class="text-sm text-muted-foreground">Master o'rtacha</p>
+                </CardContent>
+            </Card>
+            <Card class="border-l-4 border-l-cyan-500">
+                <CardContent class="p-4">
+                    <div class="text-2xl font-bold text-cyan-600">{{ formatRating(stats?.avg_client) }}</div>
+                    <p class="text-sm text-muted-foreground">Mijoz o'rtacha</p>
+                </CardContent>
+            </Card>
         </div>
 
-        <!-- Filters -->
-        <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
-            <div class="grid grid-cols-2 lg:grid-cols-6 gap-4">
-                <div>
-                    <input 
-                        v-model="search" 
-                        type="text" 
-                        placeholder="Qidirish..." 
-                        class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                    />
+        <!-- Main Card -->
+        <Card>
+            <CardHeader class="pb-4">
+                <div class="flex flex-col lg:flex-row lg:items-center gap-4 flex-wrap">
+                    <Input v-model="search" placeholder="Qidirish..." class="lg:w-48" />
+                    <Select v-model="type">
+                        <SelectTrigger class="lg:w-40">
+                            <SelectValue placeholder="Turi" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="">Barchasi</SelectItem>
+                            <SelectItem value="client_to_master">Mijoz → Master</SelectItem>
+                            <SelectItem value="master_to_client">Master → Mijoz</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Select v-model="status">
+                        <SelectTrigger class="lg:w-40">
+                            <SelectValue placeholder="Holat" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="">Barchasi</SelectItem>
+                            <SelectItem value="rated">Baholangan</SelectItem>
+                            <SelectItem value="pending">Kutilmoqda</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Select v-model="rating">
+                        <SelectTrigger class="lg:w-32">
+                            <SelectValue placeholder="Baho" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="">Barchasi</SelectItem>
+                            <SelectItem value="5">⭐ 5</SelectItem>
+                            <SelectItem value="4">⭐ 4</SelectItem>
+                            <SelectItem value="3">⭐ 3</SelectItem>
+                            <SelectItem value="2">⭐ 2</SelectItem>
+                            <SelectItem value="1">⭐ 1</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Button v-if="hasActiveFilters()" variant="ghost" @click="resetFilters">{{ t('common.reset') }}</Button>
                 </div>
-                <div>
-                    <select v-model="type" class="w-full px-3 py-2 border rounded-lg text-sm">
-                        <option value="">Barcha turlar</option>
-                        <option value="client_to_master">Mijoz → Master</option>
-                        <option value="master_to_client">Master → Mijoz</option>
-                    </select>
-                </div>
-                <div>
-                    <select v-model="status" class="w-full px-3 py-2 border rounded-lg text-sm">
-                        <option value="">Barcha holatlar</option>
-                        <option value="rated">Baholangan</option>
-                        <option value="pending">Kutilmoqda</option>
-                    </select>
-                </div>
-                <div>
-                    <select v-model="masterId" class="w-full px-3 py-2 border rounded-lg text-sm">
-                        <option value="">Barcha masterlar</option>
-                        <option v-for="m in masters" :key="m.id" :value="m.id">{{ m.name }}</option>
-                    </select>
-                </div>
-                <div>
-                    <select v-model="rating" class="w-full px-3 py-2 border rounded-lg text-sm">
-                        <option value="">Barcha baholar</option>
-                        <option value="5">5 ⭐</option>
-                        <option value="4">4 ⭐</option>
-                        <option value="3">3 ⭐</option>
-                        <option value="2">2 ⭐</option>
-                        <option value="1">1 ⭐</option>
-                    </select>
-                </div>
-                <div>
-                    <button @click="resetFilters" class="w-full px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200">
-                        Tozalash
-                    </button>
-                </div>
-            </div>
-        </div>
+            </CardHeader>
 
-        <!-- Table -->
-        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-            <table class="w-full">
-                <thead class="bg-gray-50 border-b">
-                    <tr>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Buyurtma</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Turi</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Master</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Mijoz</th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Baho</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Izoh</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Sana</th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Amallar</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y">
-                    <tr v-for="r in ratings.data" :key="r.id" class="hover:bg-gray-50">
-                        <td class="px-4 py-3">
-                            <Link v-if="r.order_id" :href="`/admin/orders/${r.order_id}`" class="text-blue-600 hover:underline font-mono text-sm">
-                                {{ r.order_number }}
-                            </Link>
-                            <span v-else class="text-gray-400">-</span>
-                        </td>
-                        <td class="px-4 py-3">
-                            <span 
-                                class="text-xs px-2 py-1 rounded-full"
-                                :class="r.type === 'client_to_master' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'"
-                            >
-                                {{ r.type === 'client_to_master' ? 'Mijoz → Master' : 'Master → Mijoz' }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3">
-                            <div class="flex items-center">
-                                <img v-if="r.master_photo" :src="r.master_photo" class="w-8 h-8 rounded-full mr-2 object-cover" />
-                                <div v-else class="w-8 h-8 rounded-full mr-2 bg-gray-200 flex items-center justify-center text-xs">
-                                    {{ r.master_name?.charAt(0) }}
-                                </div>
-                                <span class="text-sm">{{ r.master_name }}</span>
-                            </div>
-                        </td>
-                        <td class="px-4 py-3 text-sm">{{ r.customer_name || '-' }}</td>
-                        <td class="px-4 py-3 text-center">
-                            <div v-if="r.is_rated" class="flex items-center justify-center">
-                                <span class="text-lg font-bold text-yellow-500 mr-1">{{ r.overall_rating }}</span>
-                                <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                </svg>
-                            </div>
-                            <span v-else class="text-xs px-2 py-1 bg-orange-100 text-orange-600 rounded-full">Kutilmoqda</span>
-                        </td>
-                        <td class="px-4 py-3">
-                            <p v-if="r.feedback" class="text-sm text-gray-600 truncate max-w-xs" :title="r.feedback">
-                                "{{ r.feedback }}"
-                            </p>
-                            <span v-else class="text-gray-400">-</span>
-                        </td>
-                        <td class="px-4 py-3 text-sm text-gray-500">
-                            {{ r.rated_at || r.created_at }}
-                        </td>
-                        <td class="px-4 py-3 text-center">
-                            <div class="flex items-center justify-center gap-2">
-                                <Link :href="route('admin.ratings.show', r.id)" class="text-blue-500 hover:text-blue-700">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                    </svg>
+            <CardContent class="p-0">
+                <Table v-if="ratings.data.length > 0">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Buyurtma</TableHead>
+                            <TableHead>Turi</TableHead>
+                            <TableHead>Baholagan</TableHead>
+                            <TableHead>Baholangan</TableHead>
+                            <TableHead class="text-center">Baho</TableHead>
+                            <TableHead>Izoh</TableHead>
+                            <TableHead>Sana</TableHead>
+                            <TableHead class="text-center">{{ t('common.actions') }}</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow v-for="item in ratings.data" :key="item.id">
+                            <TableCell>
+                                <Link :href="`/admin/orders/${item.order_id}`" class="text-primary hover:underline font-mono text-sm">
+                                    {{ item.order?.order_number || '#' + item.order_id }}
                                 </Link>
-                                <button @click="deleteRating(r.id)" class="text-red-500 hover:text-red-700">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr v-if="!ratings.data?.length">
-                        <td colspan="8" class="px-4 py-12 text-center text-gray-500">
-                            Baholar topilmadi
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            </TableCell>
+                            <TableCell>
+                                <Badge v-if="item.type === 'client_to_master'" class="bg-purple-500/10 text-purple-700">
+                                    Mijoz → Master
+                                </Badge>
+                                <Badge v-else class="bg-cyan-500/10 text-cyan-700">
+                                    Master → Mijoz
+                                </Badge>
+                            </TableCell>
+                            <TableCell class="font-medium">
+                                {{ item.type === 'client_to_master' ? item.order?.customer?.name : item.order?.master?.full_name }}
+                            </TableCell>
+                            <TableCell class="text-muted-foreground">
+                                {{ item.type === 'client_to_master' ? item.order?.master?.full_name : item.order?.customer?.name }}
+                            </TableCell>
+                            <TableCell class="text-center">
+                                <div v-if="item.overall_rating" class="flex items-center justify-center gap-1">
+                                    <span class="text-yellow-500">⭐</span>
+                                    <span class="font-bold">{{ item.overall_rating }}</span>
+                                </div>
+                                <Badge v-else variant="outline" class="text-yellow-600">Kutilmoqda</Badge>
+                            </TableCell>
+                            <TableCell class="max-w-xs truncate text-muted-foreground">
+                                {{ item.feedback || '-' }}
+                            </TableCell>
+                            <TableCell class="text-sm text-muted-foreground">{{ item.rated_at || '-' }}</TableCell>
+                            <TableCell>
+                                <div class="flex items-center justify-center gap-1">
+                                    <Button variant="ghost" size="icon" as-child>
+                                        <Link :href="`/admin/orders/${item.order_id}`">
+                                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                        </Link>
+                                    </Button>
+                                    <Button variant="ghost" size="icon" @click="deleteRating(item.id)">
+                                        <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </Button>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+                <div v-else class="flex flex-col items-center justify-center py-12">
+                    <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">{{ t('common.noData') }}</h3>
+                    <p class="text-muted-foreground">Baholar topilmadi</p>
+                </div>
+            </CardContent>
 
-            <!-- Pagination -->
-            <div v-if="ratings.data?.length" class="px-4 py-3 border-t bg-gray-50">
+            <div v-if="ratings.data.length > 0" class="flex items-center justify-between px-6 py-4 border-t">
+                <p class="text-sm text-muted-foreground">{{ t('common.total') }}: <strong>{{ ratings.total }}</strong></p>
                 <Pagination :links="ratings.links" />
             </div>
-        </div>
+        </Card>
     </div>
 </template>
