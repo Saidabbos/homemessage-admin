@@ -1,6 +1,6 @@
 <script setup>
-import { computed, ref } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
+import { computed, ref, onMounted } from 'vue';
+import { Link, usePage, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
 import {
@@ -20,6 +20,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,14 +34,50 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const page = usePage();
 const auth = computed(() => page.props.auth);
 const flash = computed(() => page.props.flash);
+
+// Dark mode
+const isDark = ref(false);
+
+onMounted(() => {
+  // Check localStorage or system preference
+  const stored = localStorage.getItem('theme');
+  if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    isDark.value = true;
+    document.documentElement.classList.add('dark');
+  }
+});
+
+const toggleDarkMode = () => {
+  isDark.value = !isDark.value;
+  if (isDark.value) {
+    document.documentElement.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+    localStorage.setItem('theme', 'light');
+  }
+};
+
+// Language switcher
+const languages = [
+  { code: 'uz', label: "O'zbekcha", flag: '🇺🇿' },
+  { code: 'ru', label: 'Русский', flag: '🇷🇺' },
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+];
+
+const currentLang = computed(() => languages.find(l => l.code === locale.value) || languages[0]);
+
+const switchLanguage = (code) => {
+  locale.value = code;
+  localStorage.setItem('locale', code);
+  document.documentElement.lang = code;
+};
 
 const isActive = (path) => {
   const url = page.url;
@@ -114,7 +151,6 @@ const getIcon = (name) => {
 };
 
 const logout = () => {
-  // Using Inertia to post to logout
   const form = document.createElement('form');
   form.method = 'POST';
   form.action = '/admin/logout';
@@ -228,16 +264,83 @@ const logout = () => {
     <!-- Main Content -->
     <SidebarInset>
       <!-- Header -->
-      <header class="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-        <SidebarTrigger class="-ml-1" />
-        <Separator orientation="vertical" class="mr-2 h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/admin/dashboard">Admin</BreadcrumbLink>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+      <header class="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4">
+        <div class="flex items-center gap-2">
+          <SidebarTrigger class="-ml-1" />
+          <Separator orientation="vertical" class="mr-2 h-4" />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/admin/dashboard">Admin</BreadcrumbLink>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+
+        <!-- Right side: Language & Theme -->
+        <div class="flex items-center gap-2">
+          <!-- Language Switcher -->
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button variant="ghost" size="sm" class="gap-2">
+                <span class="text-base">{{ currentLang.flag }}</span>
+                <span class="hidden sm:inline">{{ currentLang.code.toUpperCase() }}</span>
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                v-for="lang in languages"
+                :key="lang.code"
+                @click="switchLanguage(lang.code)"
+                :class="{ 'bg-accent': locale === lang.code }"
+              >
+                <span class="mr-2 text-base">{{ lang.flag }}</span>
+                {{ lang.label }}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <!-- Dark/Light Mode Toggle -->
+          <Button variant="ghost" size="icon" @click="toggleDarkMode">
+            <!-- Sun icon (shown in dark mode) -->
+            <svg
+              v-if="isDark"
+              class="size-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+            <!-- Moon icon (shown in light mode) -->
+            <svg
+              v-else
+              class="size-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          </Button>
+        </div>
       </header>
 
       <!-- Flash Messages -->
