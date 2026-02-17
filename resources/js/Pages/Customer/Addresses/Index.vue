@@ -314,6 +314,85 @@ const customer = page.props.auth?.user || {}
 </template>
 
 <style>
+/* Form styles */
+.cd-form-group {
+    margin-bottom: 1rem;
+}
+
+.cd-form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.cd-form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.cd-form-input:focus {
+    outline: none;
+    border-color: #C8A951;
+    box-shadow: 0 0 0 3px rgba(200, 169, 81, 0.1);
+}
+
+.cd-form-input.cd-form-error {
+    border-color: #ef4444;
+}
+
+.cd-error-text {
+    display: block;
+    font-size: 0.8rem;
+    color: #ef4444;
+    margin-top: 0.25rem;
+}
+
+/* Button styles */
+.cd-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.cd-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.cd-btn-primary {
+    background: linear-gradient(135deg, #C8A951 0%, #B8983F 100%);
+    color: #fff;
+}
+
+.cd-btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(200, 169, 81, 0.3);
+}
+
+/* Page title */
+.cd-page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #1B2B5A;
+    margin: 0;
+}
+
 /* Additional styles for addresses page */
 .cd-addresses-grid {
     display: grid;
@@ -335,8 +414,8 @@ const customer = page.props.auth?.user || {}
 }
 
 .cd-address-default {
-    border-color: #6366f1;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.02) 0%, rgba(99, 102, 241, 0.05) 100%);
+    border-color: #C8A951;
+    background: linear-gradient(135deg, rgba(200, 169, 81, 0.02) 0%, rgba(200, 169, 81, 0.08) 100%);
 }
 
 .cd-address-header {
@@ -355,14 +434,14 @@ const customer = page.props.auth?.user || {}
 }
 
 .cd-address-name svg {
-    color: #6366f1;
+    color: #C8A951;
 }
 
 .cd-address-badge {
     font-size: 0.75rem;
     font-weight: 500;
-    color: #6366f1;
-    background: rgba(99, 102, 241, 0.1);
+    color: #1B2B5A;
+    background: rgba(200, 169, 81, 0.15);
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
 }
@@ -404,8 +483,9 @@ const customer = page.props.auth?.user || {}
 .cd-btn-link {
     background: none;
     border: none;
-    color: #6366f1;
+    color: #1B2B5A;
     font-size: 0.875rem;
+    font-weight: 500;
     cursor: pointer;
     padding: 0;
 }
@@ -529,8 +609,8 @@ const customer = page.props.auth?.user || {}
 
 .cd-form-textarea:focus {
     outline: none;
-    border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    border-color: #C8A951;
+    box-shadow: 0 0 0 3px rgba(200, 169, 81, 0.1);
 }
 
 .cd-checkbox-label {
@@ -545,7 +625,7 @@ const customer = page.props.auth?.user || {}
 .cd-checkbox {
     width: 18px;
     height: 18px;
-    accent-color: #6366f1;
+    accent-color: #C8A951;
 }
 
 .cd-btn-secondary {
