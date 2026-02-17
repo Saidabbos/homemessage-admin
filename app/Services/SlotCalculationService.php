@@ -360,6 +360,14 @@ class SlotCalculationService
 
     /**
      * Buyurtma tugash vaqtini olish
+     * 
+     * Hisoblash: arrival_window_end + PRE + massage_total
+     * 
+     * Misol (90 daqiqalik massaj, 1 kishi):
+     * - arrival_window_end: 13:30
+     * - PRE: 10 daqiqa
+     * - massage_total: 90 daqiqa
+     * - Natija: 13:30 + 10 + 90 = 15:10
      */
     protected function getOrderEndTime(Order $order, ?Carbon $date = null): Carbon
     {
@@ -367,7 +375,8 @@ class SlotCalculationService
         $bookingDate = $date ?? Carbon::parse($order->booking_date);
         $arrivalLatest = Carbon::parse($bookingDate->format('Y-m-d') . ' ' . $order->arrival_window_end);
         
-        $duration = $order->duration?->minutes ?? $order->serviceType?->duration ?? 60;
+        // duration field is 'duration' not 'minutes' in ServiceTypeDuration model
+        $duration = $order->duration?->duration ?? $order->serviceType?->duration ?? 60;
         $peopleCount = $order->people_count ?? 1;
         
         return $arrivalLatest->copy()->addMinutes(self::PRE + $this->calculateMassageTotal($duration, $peopleCount));
