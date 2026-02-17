@@ -5,10 +5,13 @@ namespace App\Http\Controllers\MiniApp;
 use App\Http\Controllers\Controller;
 use App\Mappers\OrderMapper;
 use App\Models\CustomerAddress;
+use App\Models\Order;
+use App\Models\Rating;
 use App\Models\User;
 use App\Repositories\MasterRepository;
 use App\Repositories\ServiceTypeRepository;
 use App\Services\PaymentService;
+use App\Services\RatingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -20,6 +23,7 @@ class HomeController extends Controller
         protected ServiceTypeRepository $serviceTypeRepository,
         protected MasterRepository $masterRepository,
         protected PaymentService $paymentService,
+        protected RatingService $ratingService,
     ) {}
 
     /**
@@ -697,5 +701,115 @@ class HomeController extends Controller
 
         return redirect()->route('miniapp.addresses')
             ->with('success', 'Asosiy manzil o\'zgartirildi');
+    }
+
+    /**
+     * Display user's ratings with tabs (received/given)
+     */
+    public function ratings(Request $request)
+    {
+        $user = Auth::user();
+        $tab = $request->input('tab', 'given');
+        $locale = app()->getLocale();
+
+        if ($tab === 'received') {
+            // Ratings received from masters
+            $ratings = Rating::where('customer_id', $user->id)
+                ->where('type', Rating::TYPE_MASTER_TO_CLIENT)
+                ->whereNotNull('rated_at')
+                ->with(['master', 'order.serviceType'])
+                ->latest('rated_at')
+                ->paginate(10)
+                ->withQueryString();
+        } else {
+            // Ratings given to masters
+            $ratings = Rating::where('customer_id', $user->id)
+                ->where('type', Rating::TYPE_CLIENT_TO_MASTER)
+                ->whereNotNull('rated_at')
+                ->with(['master', 'order.serviceType'])
+                ->latest('rated_at')
+                ->paginate(10)
+                ->withQueryString();
+        }
+
+        $ratings->through(fn ($r) => [
+            'id' => $r->id,
+            'type' => $r->type,
+            'overall_rating' => $r->overall_rating,
+            'punctuality_rating' => $r->punctuality_rating,
+            'professionalism_rating' => $r->professionalism_rating,
+            'cleanliness_rating' => $r->cleanliness_rating,
+            'feedback' => $r->feedback,
+            'rated_at' => $r->rated_at->format('d.m.Y'),
+            'master_name' => $r->master?->full_name,
+            'master_photo' => $r->master?->photo_url,
+            'order_number' => $r->order?->order_number,
+            'service_name' => $r->order?->serviceType?->getTranslation('name', $locale),
+        ]);
+
+        $summary = $this->ratingService->getCustomerRatingSummary($user->id);
+
+        // Count ratings
+        $givenCount = Rating::where('customer_id', $user->id)
+            ->where('type', Rating::TYPE_CLIENT_TO_MASTER)
+            ->whereNotNull('rated_at')
+            ->count();
+
+        $receivedCount = Rating::where('customer_id', $user->id)
+            ->where('type', Rating::TYPE_MASTER_TO_CLIENT)
+            ->whereNotNull('rated_at')
+            ->count();
+
+        // Pending orders to rate (completed orders without rating)
+        $pendingOrders = Order::where('customer_id', $user->id)
+            ->where('status', 'COMPLETED')
+            ->whereDoesntHave('ratings', function ($q) use ($user) {
+                $q->where('customer_id', $user->id)
+                    ->where('type', Rating::TYPE_CLIENT_TO_MASTER)
+                    ->whereNotNull('rated_at');
+            })
+            ->with(['master', 'serviceType'])
+            ->latest('completed_at')
+            ->take(5)
+            ->get()
+            ->map(fn ($o) => [
+                'id' => $o->id,
+                'order_number' => $o->order_number,
+                'master_name' => $o->master?->full_name,
+                'master_photo' => $o->master?->photo_url,
+                'service_name' => $o->serviceType?->getTranslation('name', $locale),
+                'completed_at' => $o->completed_at?->format('d.m.Y'),
+            ]);
+
+        return Inertia::render('MiniApp/Ratings', [
+            'ratings' => $ratings,
+            'tab' => $tab,
+            'summary' => $summary,
+            'counts' => [
+                'received' => $receivedCount,
+                'given' => $givenCount,
+            ],
+            'pendingOrders' => $pendingOrders,
+        ]);
+    }
+
+    /**
+     * Create rating and redirect to rate page
+     */
+    public function rateOrder(Order $order)
+    {
+        $user = Auth::user();
+
+        if ($order->customer_id !== $user->id) {
+            abort(403);
+        }
+
+        if ($order->status !== 'COMPLETED') {
+            return back()->with('error', 'Faqat yakunlangan buyurtmalarni baholash mumkin');
+        }
+
+        $rating = $this->ratingService->getOrCreateForOrder($order, $user->id);
+
+        return redirect()->route('rating.show', $rating->token);
     }
 }

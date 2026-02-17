@@ -269,20 +269,37 @@ const savePin = async () => {
             </div>
         </div>
 
-        <!-- Addresses Section -->
-        <div class="addresses-section">
-            <Link href="/app/addresses" class="addresses-card">
-                <div class="addresses-icon">
+        <!-- Quick Links Section -->
+        <div class="quick-links-section">
+            <!-- Addresses -->
+            <Link href="/app/addresses" class="quick-link-card">
+                <div class="quick-link-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                         <circle cx="12" cy="10" r="3"/>
                     </svg>
                 </div>
-                <div class="addresses-info">
-                    <h3 class="addresses-title">Manzillarim</h3>
-                    <p class="addresses-desc">Saqlangan manzillarni boshqarish</p>
+                <div class="quick-link-info">
+                    <h3 class="quick-link-title">Manzillarim</h3>
+                    <p class="quick-link-desc">Saqlangan manzillarni boshqarish</p>
                 </div>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="addresses-arrow">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="quick-link-arrow">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </Link>
+
+            <!-- Ratings -->
+            <Link href="/app/ratings" class="quick-link-card">
+                <div class="quick-link-icon quick-link-icon-gold">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                </div>
+                <div class="quick-link-info">
+                    <h3 class="quick-link-title">Reytinglar</h3>
+                    <p class="quick-link-desc">Berilgan va olingan baholar</p>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="quick-link-arrow">
                     <polyline points="9 18 15 12 9 6"/>
                 </svg>
             </Link>
@@ -609,13 +626,16 @@ const savePin = async () => {
     cursor: not-allowed;
 }
 
-/* Addresses Section */
-.addresses-section {
+/* Quick Links Section */
+.quick-links-section {
     padding: 16px;
     padding-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.addresses-card {
+.quick-link-card {
     display: flex;
     align-items: center;
     gap: 14px;
@@ -626,12 +646,12 @@ const savePin = async () => {
     transition: all 0.2s;
 }
 
-.addresses-card:hover {
+.quick-link-card:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.addresses-icon {
+.quick-link-icon {
     width: 44px;
     height: 44px;
     display: flex;
@@ -642,24 +662,29 @@ const savePin = async () => {
     color: #C8A951;
 }
 
-.addresses-info {
+.quick-link-icon-gold {
+    background: linear-gradient(135deg, #C8A951 0%, #B8993F 100%);
+    color: white;
+}
+
+.quick-link-info {
     flex: 1;
 }
 
-.addresses-title {
+.quick-link-title {
     font-size: 15px;
     font-weight: 600;
     color: #1a1a2e;
     margin: 0 0 2px;
 }
 
-.addresses-desc {
+.quick-link-desc {
     font-size: 13px;
     color: #6b7280;
     margin: 0;
 }
 
-.addresses-arrow {
+.quick-link-arrow {
     color: #9ca3af;
 }
 

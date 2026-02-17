@@ -168,6 +168,11 @@ const saveName = async () => {
                             <circle cx="12" cy="10" r="3"/>
                         </svg>
                     </Link>
+                    <Link href="/app/ratings" class="ma-icon-btn ma-icon-ratings">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                    </Link>
                     <Link href="/app/profile" class="ma-icon-btn">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
@@ -358,6 +363,10 @@ const saveName = async () => {
 }
 
 .ma-icon-btn:first-child {
+    color: var(--gold);
+}
+
+.ma-icon-ratings {
     color: var(--gold);
 }
 

@@ -95,6 +95,7 @@ class OrderMapper
                 'action' => $log->action,
                 'created_at' => $log->created_at->format('d.m.Y H:i'),
             ])->toArray() : [],
+            'is_rated' => self::isRatedByCustomer($order),
         ];
     }
 
@@ -297,5 +298,16 @@ class OrderMapper
     protected static function canCancel(Order $order): bool
     {
         return in_array($order->status, ['NEW', 'CONFIRMING', 'CONFIRMED', 'WAITING_PAYMENT']);
+    }
+
+    /**
+     * Check if order has been rated by customer
+     */
+    protected static function isRatedByCustomer(Order $order): bool
+    {
+        return \App\Models\Rating::where('order_id', $order->id)
+            ->where('type', \App\Models\Rating::TYPE_CLIENT_TO_MASTER)
+            ->whereNotNull('rated_at')
+            ->exists();
     }
 }

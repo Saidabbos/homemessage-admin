@@ -73,6 +73,10 @@ Route::prefix('app')->group(function () {
     Route::put('/addresses/{address}', [MiniAppHomeController::class, 'addressUpdate'])->name('miniapp.addresses.update')->middleware('auth');
     Route::delete('/addresses/{address}', [MiniAppHomeController::class, 'addressDestroy'])->name('miniapp.addresses.destroy')->middleware('auth');
     Route::post('/addresses/{address}/default', [MiniAppHomeController::class, 'addressSetDefault'])->name('miniapp.addresses.default')->middleware('auth');
+    
+    // Ratings
+    Route::get('/ratings', [MiniAppHomeController::class, 'ratings'])->name('miniapp.ratings')->middleware('auth');
+    Route::post('/orders/{order}/rate', [MiniAppHomeController::class, 'rateOrder'])->name('miniapp.orders.rate')->middleware('auth');
 });
 
 // Default login redirect
