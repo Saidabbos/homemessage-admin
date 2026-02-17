@@ -1,7 +1,19 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
+import { Bar } from 'vue-chartjs';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 defineOptions({ layout: AdminLayout });
 
@@ -27,6 +39,67 @@ const formatMoney = (amount) => {
 const maxRevenue = props.masters?.length 
     ? Math.max(...props.masters.map(m => m.revenue || 0), 1) 
     : 1;
+
+// Chart configurations
+const ordersChartData = computed(() => ({
+    labels: props.masters?.slice(0, 8).map(m => m.name?.length > 10 ? m.name.substring(0, 10) + '...' : m.name) || [],
+    datasets: [{
+        label: 'Buyurtmalar',
+        data: props.masters?.slice(0, 8).map(m => m.total_orders) || [],
+        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+        borderRadius: 6,
+    }]
+}));
+
+const revenueChartData = computed(() => ({
+    labels: props.masters?.slice(0, 8).map(m => m.name?.length > 10 ? m.name.substring(0, 10) + '...' : m.name) || [],
+    datasets: [{
+        label: 'Daromad',
+        data: props.masters?.slice(0, 8).map(m => m.revenue / 1000) || [], // in thousands
+        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+        borderRadius: 6,
+    }]
+}));
+
+const horizontalBarOptions = {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: { display: false },
+    },
+    scales: {
+        x: {
+            grid: { display: false },
+            ticks: { stepSize: 1 }
+        },
+        y: {
+            grid: { display: false },
+        }
+    }
+};
+
+const revenueBarOptions = {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: { display: false },
+        tooltip: {
+            callbacks: {
+                label: (ctx) => formatMoney(ctx.raw * 1000) + ' so\'m'
+            }
+        }
+    },
+    scales: {
+        x: {
+            grid: { display: false },
+        },
+        y: {
+            grid: { display: false },
+        }
+    }
+};
 </script>
 
 <template>
@@ -80,6 +153,37 @@ const maxRevenue = props.masters?.length
             <div class="bg-white rounded-xl shadow-sm p-4">
                 <p class="text-2xl font-bold text-purple-600">{{ summary?.avg_orders || 0 }}</p>
                 <p class="text-sm text-gray-500">O'rtacha buyurtma/master</p>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Orders Chart -->
+            <div class="bg-white rounded-xl shadow-sm p-5">
+                <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    Buyurtmalar soni bo'yicha
+                </h3>
+                <div v-if="masters?.length" class="h-[250px]">
+                    <Bar :data="ordersChartData" :options="horizontalBarOptions" />
+                </div>
+                <div v-else class="text-gray-500 text-center py-12">Ma'lumot yo'q</div>
+            </div>
+
+            <!-- Revenue Chart -->
+            <div class="bg-white rounded-xl shadow-sm p-5">
+                <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Daromad bo'yicha (ming so'm)
+                </h3>
+                <div v-if="masters?.length" class="h-[250px]">
+                    <Bar :data="revenueChartData" :options="revenueBarOptions" />
+                </div>
+                <div v-else class="text-gray-500 text-center py-12">Ma'lumot yo'q</div>
             </div>
         </div>
 

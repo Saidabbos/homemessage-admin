@@ -40,7 +40,12 @@
     "all": "All",
     "min": "min",
     "sum": "UZS",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "filters": "Filters",
+    "apply": "Apply",
+    "dateFrom": "Date from",
+    "dateTo": "Date to",
+    "showing": "Showing {from} to {to} of {total}"
   },
   "translations": {
     "title": "Translations",
@@ -143,7 +148,8 @@
     "statistics": "Statistics",
     "system": "System",
     "settings": "Settings",
-    "online": "Online"
+    "online": "Online",
+    "auditLogs": "Audit Logs"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -978,5 +984,35 @@
     "submitting": "Submitting...",
     "submit": "Submit rating",
     "customerReadiness": "Readiness on time"
+  },
+  "auditLogs": {
+    "title": "Audit Logs",
+    "subtitle": "Track all system actions",
+    "totalRecords": "Total: {count} records",
+    "noRecords": "No records found",
+    "searchPlaceholder": "Search by comment or user...",
+    "date": "Date",
+    "user": "User",
+    "action": "Action",
+    "model": "Model",
+    "comment": "Comment",
+    "changes": "Changes",
+    "show": "Show",
+    "hide": "Hide",
+    "oldValues": "Old values",
+    "newValues": "New values",
+    "system": "System",
+    "actions": {
+      "created": "Created",
+      "updated": "Updated",
+      "deleted": "Deleted",
+      "statusChanged": "Status changed",
+      "slotChanged": "Slot changed",
+      "paymentReceived": "Payment received",
+      "noteAdded": "Note added",
+      "assigned": "Assigned",
+      "login": "Login",
+      "logout": "Logout"
+    }
   }
 }

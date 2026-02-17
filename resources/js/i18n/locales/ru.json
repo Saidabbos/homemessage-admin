@@ -40,7 +40,12 @@
     "all": "Все",
     "min": "мин",
     "sum": "сум",
-    "loading": "Загрузка..."
+    "loading": "Загрузка...",
+    "filters": "Фильтры",
+    "apply": "Применить",
+    "dateFrom": "Дата от",
+    "dateTo": "Дата до",
+    "showing": "Показаны {from}-{to} из {total}"
   },
   "translations": {
     "title": "Переводы",
@@ -143,7 +148,8 @@
     "statistics": "Статистика",
     "system": "Система",
     "settings": "Настройки",
-    "online": "Онлайн"
+    "online": "Онлайн",
+    "auditLogs": "История действий"
   },
   "dashboard": {
     "title": "Панель управления",
@@ -994,5 +1000,35 @@
     "submitting": "Отправка...",
     "submit": "Оценить",
     "customerReadiness": "Готовность вовремя"
+  },
+  "auditLogs": {
+    "title": "История действий",
+    "subtitle": "Отслеживание всех действий в системе",
+    "totalRecords": "Всего: {count} записей",
+    "noRecords": "Записи не найдены",
+    "searchPlaceholder": "Поиск по комментарию или пользователю...",
+    "date": "Дата",
+    "user": "Пользователь",
+    "action": "Действие",
+    "model": "Модель",
+    "comment": "Комментарий",
+    "changes": "Изменения",
+    "show": "Показать",
+    "hide": "Скрыть",
+    "oldValues": "Старые значения",
+    "newValues": "Новые значения",
+    "system": "Система",
+    "actions": {
+      "created": "Создано",
+      "updated": "Обновлено",
+      "deleted": "Удалено",
+      "statusChanged": "Статус изменён",
+      "slotChanged": "Время изменено",
+      "paymentReceived": "Оплата получена",
+      "noteAdded": "Комментарий добавлен",
+      "assigned": "Назначено",
+      "login": "Вход",
+      "logout": "Выход"
+    }
   }
 }

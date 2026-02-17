@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AuditLog;
 use App\Models\Order;
 use App\Models\OrderLog;
 use App\Repositories\OrderRepository;
@@ -46,6 +47,15 @@ class OrderService
                 OrderLog::ACTION_STATUS_CHANGED,
                 $oldStatus,
                 $newStatus,
+                $comment
+            );
+
+            // System-wide audit log
+            AuditLog::log(
+                $order,
+                AuditLog::ACTION_STATUS_CHANGED,
+                ['status' => $oldStatus],
+                ['status' => $newStatus],
                 $comment
             );
 
@@ -121,6 +131,15 @@ class OrderService
                 'rescheduled',
                 "{$oldDate} {$oldWindow}",
                 "{$newDate} {$newWindow}",
+                $comment
+            );
+
+            // System-wide audit log
+            AuditLog::log(
+                $order,
+                AuditLog::ACTION_SLOT_CHANGED,
+                ['booking_date' => $oldDate, 'window' => $oldWindow],
+                ['booking_date' => $newDate, 'window' => $newWindow],
                 $comment
             );
         });

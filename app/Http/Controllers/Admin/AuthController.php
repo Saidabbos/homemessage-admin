@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\LoginRequest;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -47,6 +48,9 @@ class AuthController extends Controller
 
             $request->session()->regenerate();
 
+            // Log the login
+            AuditLog::log($user, AuditLog::ACTION_LOGIN, null, null, 'Admin panelga kirdi');
+
             return redirect()->route('admin.dashboard')
                 ->with('success', 'Admin paneliga xush kelibsiz!');
         }
@@ -59,6 +63,13 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
+        $user = $this->guard()->user();
+        
+        // Log the logout before actually logging out
+        if ($user) {
+            AuditLog::log($user, AuditLog::ACTION_LOGOUT, null, null, 'Admin paneldan chiqdi');
+        }
+
         $this->guard()->logout();
 
         $request->session()->invalidate();

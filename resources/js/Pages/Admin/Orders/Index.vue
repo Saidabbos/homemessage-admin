@@ -195,7 +195,7 @@ const isRowVisible = (row) => {
         @click="statusFilter = statusFilter === status.value ? '' : status.value"
       >
         <div class="text-2xl font-bold text-[#1f2d3d]">{{ statusCounts[status.value] || 0 }}</div>
-        <div class="text-sm text-[#6c757d]">{{ status.label }}</div>
+        <div class="text-sm text-[#6c757d]">{{ t(`orderStatuses.${status.value}`) }}</div>
       </div>
     </div>
 
@@ -217,7 +217,7 @@ const isRowVisible = (row) => {
           >
             <option value="">{{ t('orders.allStatuses') }}</option>
             <option v-for="status in statuses" :key="status.value" :value="status.value">
-              {{ status.label }}
+              {{ t(`orderStatuses.${status.value}`) }}
             </option>
           </select>
           <select
@@ -226,7 +226,7 @@ const isRowVisible = (row) => {
           >
             <option value="">{{ t('orders.allPaymentStatuses') }}</option>
             <option v-for="status in paymentStatuses" :key="status.value" :value="status.value">
-              {{ status.label }}
+              {{ t(`paymentStatuses.${status.value}`) }}
             </option>
           </select>
           <select
@@ -335,7 +335,7 @@ const isRowVisible = (row) => {
                     class="inline-flex px-2 py-1 text-xs font-medium rounded"
                     :class="getStatusClass(row.order.status)"
                   >
-                    {{ statuses.find(s => s.value === row.order.status)?.label || row.order.status }}
+                    {{ t(`orderStatuses.${row.order.status}`) }}
                   </span>
                 </td>
                 <!-- Payment -->
@@ -344,7 +344,7 @@ const isRowVisible = (row) => {
                     class="inline-flex px-2 py-1 text-xs font-medium rounded"
                     :class="getPaymentStatusClass(row.order.payment_status)"
                   >
-                    {{ paymentStatuses.find(s => s.value === row.order.payment_status)?.label || row.order.payment_status }}
+                    {{ t(`paymentStatuses.${row.order.payment_status}`) }}
                   </span>
                 </td>
                 <!-- Actions -->

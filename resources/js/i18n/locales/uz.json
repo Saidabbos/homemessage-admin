@@ -40,7 +40,12 @@
     "all": "Barchasi",
     "min": "daqiqa",
     "sum": "so'm",
-    "loading": "Yuklanmoqda..."
+    "loading": "Yuklanmoqda...",
+    "filters": "Filtrlar",
+    "apply": "Qo'llash",
+    "dateFrom": "Sanadan",
+    "dateTo": "Sanagacha",
+    "showing": "{from} dan {to} gacha, jami: {total}"
   },
   "translations": {
     "title": "Tarjimalar",
@@ -143,7 +148,8 @@
     "statistics": "Statistika",
     "system": "Tizim",
     "settings": "Sozlamalar",
-    "online": "Online"
+    "online": "Online",
+    "auditLogs": "Amallar tarixi"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -987,8 +993,9 @@
       "paymentPaid": "To'langan",
       "paymentUnpaid": "To'lanmagan",
       "paymentPending": "Kutilmoqda",
-      "popularServices": "Mashhur xizmatlar (bu oy)",
-      "masterPerformance": "Master ishlashi (bu oy)",
+      "popularServices": "Xizmat turlari bo'yicha",
+      "masterPerformance": "Masterlar bo'yicha",
+      "byDays": "Kunlar bo'yicha",
       "noData": "Ma'lumot yo'q",
       "ordersCount": "buyurtma",
       "todayOrders": "Bugungi buyurtmalar",
@@ -1045,5 +1052,35 @@
     "submitting": "Yuborilmoqda...",
     "submit": "Baholash",
     "customerReadiness": "Vaqtida tayyorligi"
+  },
+  "auditLogs": {
+    "title": "Amallar Tarixi",
+    "subtitle": "Tizimdagi barcha amallarni kuzatish",
+    "totalRecords": "Jami: {count} ta yozuv",
+    "noRecords": "Hech qanday yozuv topilmadi",
+    "searchPlaceholder": "Izoh yoki foydalanuvchi bo'yicha qidirish...",
+    "date": "Sana",
+    "user": "Foydalanuvchi",
+    "action": "Amal",
+    "model": "Model",
+    "comment": "Izoh",
+    "changes": "O'zgarishlar",
+    "show": "Ko'rish",
+    "hide": "Yashirish",
+    "oldValues": "Eski qiymatlar",
+    "newValues": "Yangi qiymatlar",
+    "system": "Tizim",
+    "actions": {
+      "created": "Yaratildi",
+      "updated": "Yangilandi",
+      "deleted": "O'chirildi",
+      "statusChanged": "Status o'zgartirildi",
+      "slotChanged": "Vaqt o'zgartirildi",
+      "paymentReceived": "To'lov qabul qilindi",
+      "noteAdded": "Izoh qo'shildi",
+      "assigned": "Tayinlandi",
+      "login": "Kirdi",
+      "logout": "Chiqdi"
+    }
   }
 }

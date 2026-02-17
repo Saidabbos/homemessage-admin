@@ -14,7 +14,10 @@ class UserRepository extends BaseRepository
 
     public function getByRolePaginated(string $role, array $filters, int $perPage = 10): LengthAwarePaginator
     {
-        $query = $this->query()->role($role);
+        // Use whereHas to check role with 'web' guard explicitly
+        $query = $this->query()->whereHas('roles', function ($q) use ($role) {
+            $q->where('name', $role)->where('guard_name', 'web');
+        });
 
         $this->applySearch($query, $filters['search'] ?? null, ['name', 'email', 'phone']);
         $this->applyStatusFilter($query, $filters['status'] ?? null);

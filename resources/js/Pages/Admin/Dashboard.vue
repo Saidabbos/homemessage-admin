@@ -1,8 +1,21 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { Bar, Doughnut } from 'vue-chartjs';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+    ArcElement,
+} from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 defineOptions({ layout: AdminLayout });
 
@@ -64,6 +77,109 @@ const getRatingStars = (rating) => {
     const full = Math.floor(rating || 0);
     const half = (rating || 0) - full >= 0.5;
     return { full, half, empty: 5 - full - (half ? 1 : 0) };
+};
+
+// Chart configurations
+const servicesChartData = computed(() => ({
+    labels: props.popularServices?.map(s => s.name?.length > 15 ? s.name.substring(0, 15) + '...' : s.name) || [],
+    datasets: [{
+        data: props.popularServices?.map(s => s.orders_count) || [],
+        backgroundColor: [
+            'rgba(99, 102, 241, 0.8)',
+            'rgba(139, 92, 246, 0.8)',
+            'rgba(168, 85, 247, 0.8)',
+            'rgba(217, 70, 239, 0.8)',
+            'rgba(236, 72, 153, 0.8)',
+            'rgba(244, 114, 182, 0.8)',
+        ],
+        borderRadius: 6,
+    }]
+}));
+
+const mastersChartData = computed(() => ({
+    labels: props.masterPerformance?.map(m => m.name?.length > 12 ? m.name.substring(0, 12) + '...' : m.name) || [],
+    datasets: [{
+        label: t('admin.dashboard.ordersCount'),
+        data: props.masterPerformance?.map(m => m.orders_count) || [],
+        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+        borderRadius: 6,
+    }]
+}));
+
+const daysChartData = computed(() => ({
+    labels: props.ordersTrend?.map(d => d.day) || [],
+    datasets: [{
+        label: t('admin.dashboard.trendOrders'),
+        data: props.ordersTrend?.map(d => d.orders) || [],
+        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+        borderRadius: 6,
+    }]
+}));
+
+const horizontalBarOptions = {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: { display: false },
+    },
+    scales: {
+        x: {
+            grid: { display: false },
+            ticks: { stepSize: 1 }
+        },
+        y: {
+            grid: { display: false },
+        }
+    }
+};
+
+const verticalBarOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: { display: false },
+    },
+    scales: {
+        x: { grid: { display: false } },
+        y: { 
+            grid: { color: 'rgba(0,0,0,0.05)' },
+            ticks: { stepSize: 1 }
+        }
+    }
+};
+
+const paymentChartData = computed(() => ({
+    labels: [
+        t('admin.dashboard.paymentPaid'),
+        t('admin.dashboard.paymentUnpaid'),
+        t('admin.dashboard.paymentPending')
+    ],
+    datasets: [{
+        data: [
+            props.paymentStats?.paid || 0,
+            props.paymentStats?.unpaid || 0,
+            props.paymentStats?.pending || 0
+        ],
+        backgroundColor: [
+            'rgba(34, 197, 94, 0.8)',
+            'rgba(239, 68, 68, 0.8)',
+            'rgba(234, 179, 8, 0.8)'
+        ],
+        borderWidth: 0,
+    }]
+}));
+
+const doughnutOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            position: 'bottom',
+            labels: { padding: 15, usePointStyle: true }
+        }
+    },
+    cutout: '60%'
 };
 </script>
 
@@ -177,79 +293,9 @@ const getRatingStars = (rating) => {
             </div>
         </div>
 
-        <!-- Orders Trend Chart -->
-        <div class="bg-white rounded-xl shadow-sm p-5 mb-6">
-            <h2 class="font-semibold text-gray-800 mb-4 flex items-center">
-                <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
-                </svg>
-                {{ t('admin.dashboard.trendTitle') }}
-            </h2>
-            <div class="flex items-end justify-between h-40 gap-2">
-                <div v-for="day in ordersTrend" :key="day.date" class="flex-1 flex flex-col items-center">
-                    <div class="w-full flex flex-col items-center gap-1 flex-1 justify-end">
-                        <span class="text-xs font-semibold text-gray-700">{{ day.orders }}</span>
-                        <div 
-                            class="w-full bg-blue-500 rounded-t transition-all"
-                            :style="{ height: (day.orders / maxTrendOrders * 100) + 'px', minHeight: day.orders > 0 ? '8px' : '2px' }"
-                        ></div>
-                    </div>
-                    <div class="mt-2 text-center">
-                        <p class="text-xs font-medium text-gray-600">{{ day.day }}</p>
-                        <p class="text-xs text-gray-400">{{ day.date }}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center justify-center gap-6 text-sm">
-                <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 bg-blue-500 rounded"></span>
-                    <span class="text-gray-600">{{ t('admin.dashboard.trendOrders') }}</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats Row: Payment + Services + Master Performance -->
+        <!-- Stats Row: Services + Masters + Days Charts -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <!-- Payment Stats -->
-            <div class="bg-white rounded-xl shadow-sm p-5">
-                <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                    </svg>
-                    {{ t('admin.dashboard.paymentStatus') }}
-                </h3>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                            <span class="text-gray-600">{{ t('admin.dashboard.paymentPaid') }}</span>
-                        </div>
-                        <span class="font-semibold text-green-600">{{ paymentStats?.paid || 0 }}</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 bg-red-500 rounded-full"></span>
-                            <span class="text-gray-600">{{ t('admin.dashboard.paymentUnpaid') }}</span>
-                        </div>
-                        <span class="font-semibold text-red-600">{{ paymentStats?.unpaid || 0 }}</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 bg-yellow-500 rounded-full"></span>
-                            <span class="text-gray-600">{{ t('admin.dashboard.paymentPending') }}</span>
-                        </div>
-                        <span class="font-semibold text-yellow-600">{{ paymentStats?.pending || 0 }}</span>
-                    </div>
-                </div>
-                <!-- Progress bar -->
-                <div class="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden flex">
-                    <div class="bg-green-500 h-full" :style="{ width: (paymentStats?.paid / (paymentStats?.paid + paymentStats?.unpaid + paymentStats?.pending || 1) * 100) + '%' }"></div>
-                    <div class="bg-yellow-500 h-full" :style="{ width: (paymentStats?.pending / (paymentStats?.paid + paymentStats?.unpaid + paymentStats?.pending || 1) * 100) + '%' }"></div>
-                    <div class="bg-red-500 h-full" :style="{ width: (paymentStats?.unpaid / (paymentStats?.paid + paymentStats?.unpaid + paymentStats?.pending || 1) * 100) + '%' }"></div>
-                </div>
-            </div>
-
-            <!-- Popular Services -->
+            <!-- Popular Services Chart -->
             <div class="bg-white rounded-xl shadow-sm p-5">
                 <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
                     <svg class="w-5 h-5 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,51 +303,42 @@ const getRatingStars = (rating) => {
                     </svg>
                     {{ t('admin.dashboard.popularServices') }}
                 </h3>
-                <div v-if="popularServices?.length" class="space-y-3">
-                    <div v-for="(service, i) in popularServices" :key="service.id" class="flex items-center gap-3">
-                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                            :class="i === 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'">
-                            {{ i + 1 }}
-                        </span>
-                        <span class="flex-1 text-gray-700 truncate">{{ service.name }}</span>
-                        <span class="font-semibold text-gray-800">{{ service.orders_count }}</span>
-                    </div>
+                <div v-if="popularServices?.length" class="h-[200px]">
+                    <Bar :data="servicesChartData" :options="horizontalBarOptions" />
                 </div>
-                <div v-else class="text-center text-gray-500 py-4 text-sm">
+                <div v-else class="text-center text-gray-500 py-12 text-sm">
                     {{ t('admin.dashboard.noData') }}
                 </div>
             </div>
 
-            <!-- Master Performance -->
+            <!-- Master Performance Chart -->
             <div class="bg-white rounded-xl shadow-sm p-5">
                 <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    <svg class="w-5 h-5 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                     {{ t('admin.dashboard.masterPerformance') }}
                 </h3>
-                <div v-if="masterPerformance?.length" class="space-y-3">
-                    <div v-for="master in masterPerformance" :key="master.id" class="flex items-center gap-3">
-                        <img v-if="master.photo" :src="master.photo" class="w-8 h-8 rounded-full object-cover" />
-                        <div v-else class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
-                            {{ master.name?.charAt(0) }}
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-800 truncate">{{ master.name }}</p>
-                            <p class="text-xs text-gray-500">{{ master.orders_count }} {{ t('admin.dashboard.ordersCount') }}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm font-semibold text-green-600">{{ formatMoney(master.revenue) }}</p>
-                            <div v-if="master.rating" class="flex items-center justify-end">
-                                <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                </svg>
-                                <span class="text-xs text-gray-600 ml-1">{{ master.rating }}</span>
-                            </div>
-                        </div>
-                    </div>
+                <div v-if="masterPerformance?.length" class="h-[200px]">
+                    <Bar :data="mastersChartData" :options="horizontalBarOptions" />
                 </div>
-                <div v-else class="text-center text-gray-500 py-4 text-sm">
+                <div v-else class="text-center text-gray-500 py-12 text-sm">
+                    {{ t('admin.dashboard.noData') }}
+                </div>
+            </div>
+
+            <!-- Days Chart -->
+            <div class="bg-white rounded-xl shadow-sm p-5">
+                <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    {{ t('admin.dashboard.byDays') }}
+                </h3>
+                <div v-if="ordersTrend?.length" class="h-[200px]">
+                    <Bar :data="daysChartData" :options="verticalBarOptions" />
+                </div>
+                <div v-else class="text-center text-gray-500 py-12 text-sm">
                     {{ t('admin.dashboard.noData') }}
                 </div>
             </div>

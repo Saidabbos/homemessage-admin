@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PressureLevelController;
 use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Public\LandingController;
 use App\Http\Controllers\Public\MasterController as PublicMasterController;
 use App\Http\Controllers\Public\CustomerAuthController;
@@ -245,6 +246,9 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin'])->group(function () {
     Route::get('reports', [ReportController::class, 'index'])->name('admin.reports.index');
     Route::get('reports/export', [ReportController::class, 'export'])->name('admin.reports.export');
     Route::get('reports/masters', [ReportController::class, 'masters'])->name('admin.reports.masters');
+
+    // Audit Logs
+    Route::get('audit-logs', [AuditLogController::class, 'index'])->name('admin.audit-logs.index');
 
     // Orders (view and manage only, no create)
     Route::get('orders', [OrderController::class, 'index'])->name('admin.orders.index');

@@ -1,7 +1,20 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
+import { Bar, Doughnut } from 'vue-chartjs';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+    ArcElement,
+} from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 defineOptions({ layout: AdminLayout });
 
@@ -86,6 +99,89 @@ const getPaymentColor = (status) => {
 };
 
 const showOrders = ref(false);
+
+// Chart configurations
+const servicesChartData = computed(() => ({
+    labels: props.byServiceType?.map(s => s.name?.length > 15 ? s.name.substring(0, 15) + '...' : s.name) || [],
+    datasets: [{
+        data: props.byServiceType?.map(s => s.count) || [],
+        backgroundColor: [
+            'rgba(99, 102, 241, 0.8)',
+            'rgba(139, 92, 246, 0.8)',
+            'rgba(168, 85, 247, 0.8)',
+            'rgba(217, 70, 239, 0.8)',
+            'rgba(236, 72, 153, 0.8)',
+            'rgba(244, 114, 182, 0.8)',
+            'rgba(251, 146, 60, 0.8)',
+            'rgba(234, 179, 8, 0.8)',
+        ],
+        borderRadius: 6,
+    }]
+}));
+
+const mastersChartData = computed(() => ({
+    labels: props.byMaster?.slice(0, 6).map(m => m.name?.length > 12 ? m.name.substring(0, 12) + '...' : m.name) || [],
+    datasets: [{
+        data: props.byMaster?.slice(0, 6).map(m => m.count) || [],
+        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+        borderRadius: 6,
+    }]
+}));
+
+const daysChartData = computed(() => ({
+    labels: props.byDay?.slice(-14).map(d => {
+        // Handle different date formats
+        if (!d.date) return '-';
+        // If date is already formatted like "16.02.2026" or "16.02"
+        if (typeof d.date === 'string' && d.date.includes('.')) {
+            const parts = d.date.split('.');
+            return parts.length >= 2 ? `${parts[0]}.${parts[1]}` : d.date;
+        }
+        // If date is ISO format like "2026-02-16"
+        const date = new Date(d.date);
+        if (isNaN(date.getTime())) return d.date;
+        return `${date.getDate()}.${String(date.getMonth() + 1).padStart(2, '0')}`;
+    }) || [],
+    datasets: [{
+        label: 'Buyurtmalar',
+        data: props.byDay?.slice(-14).map(d => d.count) || [],
+        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+        borderRadius: 6,
+    }]
+}));
+
+const horizontalBarOptions = {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: { display: false },
+    },
+    scales: {
+        x: {
+            grid: { display: false },
+            ticks: { stepSize: 1 }
+        },
+        y: {
+            grid: { display: false },
+        }
+    }
+};
+
+const verticalBarOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: { display: false },
+    },
+    scales: {
+        x: { grid: { display: false } },
+        y: { 
+            grid: { color: 'rgba(0,0,0,0.05)' },
+            ticks: { stepSize: 1 }
+        }
+    }
+};
 </script>
 
 <template>
@@ -196,49 +292,46 @@ const showOrders = ref(false);
 
         <!-- Charts Row -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <!-- By Service Type -->
+            <!-- By Service Type Chart -->
             <div class="bg-white rounded-xl shadow-sm p-5">
-                <h3 class="font-semibold text-gray-800 mb-4">Xizmat turlari bo'yicha</h3>
-                <div v-if="byServiceType?.length" class="space-y-3">
-                    <div v-for="item in byServiceType" :key="item.name" class="flex items-center justify-between">
-                        <span class="text-gray-700 truncate flex-1">{{ item.name }}</span>
-                        <div class="text-right ml-2">
-                            <span class="font-semibold text-gray-800">{{ item.count }}</span>
-                            <span class="text-xs text-gray-500 ml-2">{{ formatMoney(item.revenue) }}</span>
-                        </div>
-                    </div>
+                <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                    Xizmat turlari bo'yicha
+                </h3>
+                <div v-if="byServiceType?.length" class="h-[220px]">
+                    <Bar :data="servicesChartData" :options="horizontalBarOptions" />
                 </div>
-                <div v-else class="text-gray-500 text-center py-4">Ma'lumot yo'q</div>
+                <div v-else class="text-gray-500 text-center py-12">Ma'lumot yo'q</div>
             </div>
 
-            <!-- By Master -->
+            <!-- By Master Chart -->
             <div class="bg-white rounded-xl shadow-sm p-5">
-                <h3 class="font-semibold text-gray-800 mb-4">Masterlar bo'yicha</h3>
-                <div v-if="byMaster?.length" class="space-y-3">
-                    <div v-for="item in byMaster.slice(0, 5)" :key="item.name" class="flex items-center justify-between">
-                        <span class="text-gray-700 truncate flex-1">{{ item.name }}</span>
-                        <div class="text-right ml-2">
-                            <span class="font-semibold text-gray-800">{{ item.count }}</span>
-                            <span class="text-xs text-green-600 ml-2">{{ formatMoney(item.revenue) }}</span>
-                        </div>
-                    </div>
+                <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    Masterlar bo'yicha
+                </h3>
+                <div v-if="byMaster?.length" class="h-[220px]">
+                    <Bar :data="mastersChartData" :options="horizontalBarOptions" />
                 </div>
-                <div v-else class="text-gray-500 text-center py-4">Ma'lumot yo'q</div>
+                <div v-else class="text-gray-500 text-center py-12">Ma'lumot yo'q</div>
             </div>
 
             <!-- By Day Chart -->
             <div class="bg-white rounded-xl shadow-sm p-5">
-                <h3 class="font-semibold text-gray-800 mb-4">Kunlar bo'yicha</h3>
-                <div v-if="byDay?.length" class="space-y-2 max-h-48 overflow-y-auto">
-                    <div v-for="item in byDay" :key="item.date" class="flex items-center justify-between text-sm">
-                        <span class="text-gray-600">{{ item.date }}</span>
-                        <div>
-                            <span class="font-medium text-gray-800">{{ item.count }} ta</span>
-                            <span class="text-green-600 ml-2">{{ formatMoney(item.revenue) }}</span>
-                        </div>
-                    </div>
+                <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    Kunlar bo'yicha
+                </h3>
+                <div v-if="byDay?.length" class="h-[220px]">
+                    <Bar :data="daysChartData" :options="verticalBarOptions" />
                 </div>
-                <div v-else class="text-gray-500 text-center py-4">Ma'lumot yo'q</div>
+                <div v-else class="text-gray-500 text-center py-12">Ma'lumot yo'q</div>
             </div>
         </div>
 
