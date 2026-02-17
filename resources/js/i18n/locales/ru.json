@@ -45,7 +45,12 @@
     "apply": "Применить",
     "dateFrom": "Дата от",
     "dateTo": "Дата до",
-    "showing": "Показаны {from}-{to} из {total}"
+    "showing": "Показаны {from}-{to} из {total}",
+    "info": "Информация",
+    "sortOrder": "Порядок сортировки",
+    "basicInfo": "Основная информация",
+    "new": "Новый",
+    "details": "Детали"
   },
   "translations": {
     "title": "Переводы",
@@ -992,9 +997,22 @@
     "CANCELLED": "Отменён"
   },
   "pressureLevels": {
+    "title": "Уровни давления",
+    "singular": "Уровень давления",
+    "new": "Новый уровень давления",
+    "newSubtitle": "Создать новый уровень давления",
+    "edit": "Редактировать уровень давления",
+    "confirmDelete": "Вы уверены, что хотите удалить этот уровень давления?",
     "light": "Лёгкий",
     "medium": "Средний",
     "heavy": "Сильный"
+  },
+  "ratings": {
+    "title": "Оценки",
+    "singular": "Оценка",
+    "details": "Детали оценки",
+    "info": "Информация об оценке",
+    "confirmDelete": "Вы уверены, что хотите удалить эту оценку?"
   },
   "orderActions": {
     "created": "Заказ создан",
@@ -1064,6 +1082,58 @@
       "assigned": "Назначено",
       "login": "Вход",
       "logout": "Выход"
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Панель диспетчера",
+      "subtitle": "Заказы и статусы на сегодня",
+      "statusNew": "Новые",
+      "statusConfirming": "Подтверждаются",
+      "statusConfirmed": "Подтверждённые",
+      "statusInProgress": "В процессе",
+      "statusCompletedToday": "Завершено сегодня",
+      "revenueToday": "Сегодня",
+      "revenueWeek": "На этой неделе",
+      "revenueMonth": "В этом месяце",
+      "revenueTotal": "Общий доход",
+      "sum": "сум",
+      "trendTitle": "Статистика за 7 дней",
+      "trendOrders": "Заказы",
+      "paymentStatus": "Статус оплаты",
+      "paymentPaid": "Оплачено",
+      "paymentUnpaid": "Не оплачено",
+      "paymentPending": "Ожидание",
+      "popularServices": "По типам услуг",
+      "masterPerformance": "По мастерам",
+      "byDays": "По дням",
+      "noData": "Нет данных",
+      "ordersCount": "заказов",
+      "todayOrders": "Заказы на сегодня",
+      "viewAll": "Все",
+      "noOrdersToday": "Заказов на сегодня нет",
+      "upcomingOrders": "Предстоящие заказы",
+      "noUpcoming": "Нет предстоящих заказов",
+      "generalStats": "Общая статистика",
+      "totalOrders": "Всего заказов",
+      "activeMasters": "Активные мастера",
+      "customers": "Клиенты",
+      "serviceTypes": "Типы услуг",
+      "quickActions": "Быстрые действия",
+      "viewNewOrders": "Посмотреть новые заказы",
+      "mastersSchedule": "Расписание мастеров",
+      "customersList": "Список клиентов",
+      "ratingStats": "Статистика оценок",
+      "masterRating": "Рейтинг мастера",
+      "clientRating": "Рейтинг клиента",
+      "totalRatings": "Всего оценок",
+      "pendingRatings": "Ожидание",
+      "topMasters": "Лучшие мастера",
+      "noRatingsYet": "Оценок пока нет",
+      "ratingsCount": "оценок",
+      "recentRatings": "Последние оценки",
+      "clientToMaster": "Клиент → Мастер",
+      "masterToClient": "Мастер → Клиент"
     }
   }
 }

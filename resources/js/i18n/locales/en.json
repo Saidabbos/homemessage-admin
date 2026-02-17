@@ -45,7 +45,12 @@
     "apply": "Apply",
     "dateFrom": "Date from",
     "dateTo": "Date to",
-    "showing": "Showing {from} to {to} of {total}"
+    "showing": "Showing {from} to {to} of {total}",
+    "info": "Info",
+    "sortOrder": "Sort Order",
+    "basicInfo": "Basic Information",
+    "new": "New",
+    "details": "Details"
   },
   "translations": {
     "title": "Translations",
@@ -977,9 +982,22 @@
     "CANCELLED": "Cancelled"
   },
   "pressureLevels": {
+    "title": "Pressure Levels",
+    "singular": "Pressure Level",
+    "new": "New Pressure Level",
+    "newSubtitle": "Create a new pressure level",
+    "edit": "Edit Pressure Level",
+    "confirmDelete": "Are you sure you want to delete this pressure level?",
     "light": "Light",
     "medium": "Medium",
     "heavy": "Heavy"
+  },
+  "ratings": {
+    "title": "Ratings",
+    "singular": "Rating",
+    "details": "Rating Details",
+    "info": "Rating Information",
+    "confirmDelete": "Are you sure you want to delete this rating?"
   },
   "orderActions": {
     "created": "Order created",
@@ -1049,6 +1067,58 @@
       "assigned": "Assigned",
       "login": "Login",
       "logout": "Logout"
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Dispatcher Dashboard",
+      "subtitle": "Today's orders and statuses",
+      "statusNew": "New",
+      "statusConfirming": "Confirming",
+      "statusConfirmed": "Confirmed",
+      "statusInProgress": "In Progress",
+      "statusCompletedToday": "Completed Today",
+      "revenueToday": "Today",
+      "revenueWeek": "This Week",
+      "revenueMonth": "This Month",
+      "revenueTotal": "Total Revenue",
+      "sum": "UZS",
+      "trendTitle": "Last 7 Days Statistics",
+      "trendOrders": "Orders",
+      "paymentStatus": "Payment Status",
+      "paymentPaid": "Paid",
+      "paymentUnpaid": "Unpaid",
+      "paymentPending": "Pending",
+      "popularServices": "By Service Type",
+      "masterPerformance": "By Masters",
+      "byDays": "By Days",
+      "noData": "No data",
+      "ordersCount": "orders",
+      "todayOrders": "Today's Orders",
+      "viewAll": "All",
+      "noOrdersToday": "No orders for today",
+      "upcomingOrders": "Upcoming Orders",
+      "noUpcoming": "No upcoming orders",
+      "generalStats": "General Statistics",
+      "totalOrders": "Total Orders",
+      "activeMasters": "Active Masters",
+      "customers": "Customers",
+      "serviceTypes": "Service Types",
+      "quickActions": "Quick Actions",
+      "viewNewOrders": "View New Orders",
+      "mastersSchedule": "Masters Schedule",
+      "customersList": "Customers List",
+      "ratingStats": "Rating Statistics",
+      "masterRating": "Master Rating",
+      "clientRating": "Client Rating",
+      "totalRatings": "Total Ratings",
+      "pendingRatings": "Pending",
+      "topMasters": "Top Masters",
+      "noRatingsYet": "No ratings yet",
+      "ratingsCount": "ratings",
+      "recentRatings": "Recent Ratings",
+      "clientToMaster": "Client → Master",
+      "masterToClient": "Master → Client"
     }
   }
 }

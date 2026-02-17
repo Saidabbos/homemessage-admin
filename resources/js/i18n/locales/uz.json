@@ -45,7 +45,12 @@
     "apply": "Qo'llash",
     "dateFrom": "Sanadan",
     "dateTo": "Sanagacha",
-    "showing": "{from} dan {to} gacha, jami: {total}"
+    "showing": "{from} dan {to} gacha, jami: {total}",
+    "info": "Ma'lumot",
+    "sortOrder": "Tartib raqami",
+    "basicInfo": "Asosiy ma'lumotlar",
+    "new": "Yangi",
+    "details": "Tafsilotlar"
   },
   "translations": {
     "title": "Tarjimalar",
@@ -992,9 +997,22 @@
     "CANCELLED": "Bekor qilingan"
   },
   "pressureLevels": {
+    "title": "Bosim Darajalari",
+    "singular": "Bosim darajasi",
+    "new": "Yangi bosim darajasi",
+    "newSubtitle": "Yangi bosim darajasini yaratish",
+    "edit": "Bosim darajasini tahrirlash",
+    "confirmDelete": "Haqiqatan ham bu bosim darajasini o'chirmoqchimisiz?",
     "light": "Yengil",
     "medium": "O'rtacha",
     "heavy": "Kuchli"
+  },
+  "ratings": {
+    "title": "Baholar",
+    "singular": "Baho",
+    "details": "Baho tafsilotlari",
+    "info": "Baho ma'lumotlari",
+    "confirmDelete": "Haqiqatan ham bu bahoni o'chirmoqchimisiz?"
   },
   "orderActions": {
     "created": "Buyurtma yaratildi",
