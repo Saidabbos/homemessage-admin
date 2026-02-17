@@ -2,12 +2,15 @@
 import { ref } from 'vue';
 import { useForm, router, Link } from '@inertiajs/vue3';
 import MiniAppLayout from '@/Layouts/MiniAppLayout.vue';
+import SidebarMenu from '@/Components/MiniApp/SidebarMenu.vue';
 
 defineOptions({ layout: MiniAppLayout });
 
 const props = defineProps({
     user: Object,
 });
+
+const showSidebar = ref(false);
 
 const form = useForm({
     name: props.user.name || '',
@@ -133,15 +136,25 @@ const savePin = async () => {
 
 <template>
     <div class="profile-page">
+        <!-- Sidebar Menu -->
+        <SidebarMenu :show="showSidebar" :user="user" @close="showSidebar = false" />
+
         <!-- Header -->
         <header class="profile-header">
+            <button class="menu-btn" @click="showSidebar = true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
+            <h1 class="header-title">Profil</h1>
             <Link href="/app" class="back-btn">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M15 18l-6-6 6-6"/>
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
                 </svg>
             </Link>
-            <h1 class="header-title">Profil</h1>
-            <div class="header-space"></div>
         </header>
 
         <!-- Avatar Section -->
@@ -424,6 +437,7 @@ const savePin = async () => {
     z-index: 50;
 }
 
+.menu-btn,
 .back-btn {
     width: 40px;
     height: 40px;
@@ -442,10 +456,6 @@ const savePin = async () => {
     font-size: 16px;
     font-weight: 600;
     color: var(--navy);
-}
-
-.header-space {
-    width: 40px;
 }
 
 /* Avatar Section */

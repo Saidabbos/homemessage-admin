@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import MiniAppLayout from '@/Layouts/MiniAppLayout.vue';
+import SidebarMenu from '@/Components/MiniApp/SidebarMenu.vue';
 
 defineOptions({ layout: MiniAppLayout });
 
@@ -11,7 +12,10 @@ const props = defineProps({
     summary: { type: Object, default: () => ({ average: null, count: 0 }) },
     counts: { type: Object, default: () => ({ received: 0, given: 0 }) },
     pendingOrders: { type: Array, default: () => [] },
+    user: Object,
 });
+
+const showSidebar = ref(false);
 
 const activeTab = ref(props.tab);
 
@@ -31,15 +35,25 @@ const rateOrder = (orderId) => {
 
 <template>
     <div class="ratings-page">
+        <!-- Sidebar Menu -->
+        <SidebarMenu :show="showSidebar" :user="user" @close="showSidebar = false" />
+
         <!-- Header -->
         <header class="ratings-header">
-            <Link href="/app" class="back-btn">
+            <button class="menu-btn" @click="showSidebar = true">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M15 18l-6-6 6-6"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
+            <h1 class="header-title">Reytinglar</h1>
+            <Link href="/app" class="home-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
                 </svg>
             </Link>
-            <h1 class="header-title">Reytinglar</h1>
-            <div class="header-space"></div>
         </header>
 
         <!-- Summary Card -->
@@ -186,7 +200,8 @@ const rateOrder = (orderId) => {
     z-index: 50;
 }
 
-.back-btn {
+.menu-btn,
+.home-btn {
     width: 40px;
     height: 40px;
     display: flex;
@@ -197,16 +212,13 @@ const rateOrder = (orderId) => {
     border-radius: 12px;
     color: var(--text);
     text-decoration: none;
+    cursor: pointer;
 }
 
 .header-title {
     font-size: 16px;
     font-weight: 600;
     color: var(--text);
-}
-
-.header-space {
-    width: 40px;
 }
 
 /* Summary Card */

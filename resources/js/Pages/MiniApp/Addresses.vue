@@ -2,12 +2,16 @@
 import { ref, nextTick } from 'vue';
 import { useForm, router, Link } from '@inertiajs/vue3';
 import MiniAppLayout from '@/Layouts/MiniAppLayout.vue';
+import SidebarMenu from '@/Components/MiniApp/SidebarMenu.vue';
 
 defineOptions({ layout: MiniAppLayout });
 
 const props = defineProps({
     addresses: { type: Array, default: () => [] },
+    user: Object,
 });
+
+const showSidebar = ref(false);
 
 // Modal state
 const showModal = ref(false);
@@ -217,13 +221,18 @@ const detectLocation = async () => {
 
 <template>
     <div class="addresses-page">
+        <!-- Sidebar Menu -->
+        <SidebarMenu :show="showSidebar" :user="user" @close="showSidebar = false" />
+
         <!-- Header -->
         <header class="page-header">
-            <Link href="/app" class="back-btn">
+            <button @click="showSidebar = true" class="menu-btn">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M15 18l-6-6 6-6"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
                 </svg>
-            </Link>
+            </button>
             <h1 class="header-title">Manzillarim</h1>
             <button @click="openAddModal" class="add-btn">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -436,7 +445,7 @@ const detectLocation = async () => {
     z-index: 50;
 }
 
-.back-btn, .add-btn {
+.menu-btn, .add-btn {
     width: 40px;
     height: 40px;
     display: flex;

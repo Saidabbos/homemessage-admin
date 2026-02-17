@@ -596,13 +596,19 @@ class HomeController extends Controller
      */
     public function addresses()
     {
-        $addresses = Auth::user()->addresses()
+        $user = Auth::user();
+        $addresses = $user->addresses()
             ->orderByDesc('is_default')
             ->orderBy('name')
             ->get();
 
         return Inertia::render('MiniApp/Addresses', [
             'addresses' => $addresses,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'phone' => $user->phone,
+            ],
         ]);
     }
 
@@ -790,6 +796,11 @@ class HomeController extends Controller
                 'given' => $givenCount,
             ],
             'pendingOrders' => $pendingOrders,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'phone' => $user->phone,
+            ],
         ]);
     }
 
