@@ -4,6 +4,7 @@ namespace App\Http\Controllers\MiniApp;
 
 use App\Http\Controllers\Controller;
 use App\Mappers\OrderMapper;
+use App\Models\CustomerAddress;
 use App\Models\User;
 use App\Repositories\MasterRepository;
 use App\Repositories\ServiceTypeRepository;
@@ -584,5 +585,117 @@ class HomeController extends Controller
             'success' => true,
             'message' => 'PIN kod o\'chirildi',
         ]);
+    }
+
+    /**
+     * Display user's addresses
+     */
+    public function addresses()
+    {
+        $addresses = Auth::user()->addresses()
+            ->orderByDesc('is_default')
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('MiniApp/Addresses', [
+            'addresses' => $addresses,
+        ]);
+    }
+
+    /**
+     * Store a new address
+     */
+    public function addressStore(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:50',
+            'address' => 'required|string|max:500',
+            'entrance' => 'nullable|string|max:20',
+            'floor' => 'nullable|string|max:20',
+            'apartment' => 'nullable|string|max:20',
+            'landmark' => 'nullable|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'is_default' => 'boolean',
+        ]);
+
+        $validated['user_id'] = Auth::id();
+        $address = CustomerAddress::create($validated);
+
+        if ($validated['is_default'] ?? false || Auth::user()->addresses()->count() === 1) {
+            $address->setAsDefault();
+        }
+
+        return redirect()->route('miniapp.addresses')
+            ->with('success', 'Manzil qo\'shildi');
+    }
+
+    /**
+     * Update an address
+     */
+    public function addressUpdate(Request $request, CustomerAddress $address)
+    {
+        if ($address->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:50',
+            'address' => 'required|string|max:500',
+            'entrance' => 'nullable|string|max:20',
+            'floor' => 'nullable|string|max:20',
+            'apartment' => 'nullable|string|max:20',
+            'landmark' => 'nullable|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'is_default' => 'boolean',
+        ]);
+
+        $address->update($validated);
+
+        if ($validated['is_default'] ?? false) {
+            $address->setAsDefault();
+        }
+
+        return redirect()->route('miniapp.addresses')
+            ->with('success', 'Manzil yangilandi');
+    }
+
+    /**
+     * Delete an address
+     */
+    public function addressDestroy(CustomerAddress $address)
+    {
+        if ($address->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $wasDefault = $address->is_default;
+        $address->delete();
+
+        if ($wasDefault) {
+            $newDefault = Auth::user()->addresses()->first();
+            if ($newDefault) {
+                $newDefault->setAsDefault();
+            }
+        }
+
+        return redirect()->route('miniapp.addresses')
+            ->with('success', 'Manzil o\'chirildi');
+    }
+
+    /**
+     * Set address as default
+     */
+    public function addressSetDefault(CustomerAddress $address)
+    {
+        if ($address->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $address->setAsDefault();
+
+        return redirect()->route('miniapp.addresses')
+            ->with('success', 'Asosiy manzil o\'zgartirildi');
     }
 }

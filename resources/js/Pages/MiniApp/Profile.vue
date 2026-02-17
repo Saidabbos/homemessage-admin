@@ -269,6 +269,25 @@ const savePin = async () => {
             </div>
         </div>
 
+        <!-- Addresses Section -->
+        <div class="addresses-section">
+            <Link href="/app/addresses" class="addresses-card">
+                <div class="addresses-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                </div>
+                <div class="addresses-info">
+                    <h3 class="addresses-title">Manzillarim</h3>
+                    <p class="addresses-desc">Saqlangan manzillarni boshqarish</p>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="addresses-arrow">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </Link>
+        </div>
+
         <!-- Logout Section -->
         <div class="logout-section">
             <button class="logout-btn" @click="logout">
@@ -588,6 +607,60 @@ const savePin = async () => {
 .submit-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+/* Addresses Section */
+.addresses-section {
+    padding: 16px;
+    padding-top: 8px;
+}
+
+.addresses-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.addresses-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.addresses-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(200, 169, 81, 0.15) 0%, rgba(200, 169, 81, 0.05) 100%);
+    border-radius: 12px;
+    color: #C8A951;
+}
+
+.addresses-info {
+    flex: 1;
+}
+
+.addresses-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin: 0 0 2px;
+}
+
+.addresses-desc {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+}
+
+.addresses-arrow {
+    color: #9ca3af;
 }
 
 /* Logout Section */

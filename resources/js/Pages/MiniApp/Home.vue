@@ -162,6 +162,12 @@ const saveName = async () => {
                             <line x1="3" y1="10" x2="21" y2="10"/>
                         </svg>
                     </button>
+                    <Link href="/app/addresses" class="ma-icon-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                    </Link>
                     <Link href="/app/profile" class="ma-icon-btn">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>

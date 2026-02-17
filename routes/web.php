@@ -66,6 +66,13 @@ Route::prefix('app')->group(function () {
     Route::post('/orders/{order}/cancel', [MiniAppHomeController::class, 'orderCancel'])->name('miniapp.orders.cancel')->middleware('auth');
     Route::get('/profile', [MiniAppHomeController::class, 'profile'])->name('miniapp.profile')->middleware('auth');
     Route::put('/profile', [MiniAppHomeController::class, 'profileUpdate'])->name('miniapp.profile.update')->middleware('auth');
+    
+    // Addresses
+    Route::get('/addresses', [MiniAppHomeController::class, 'addresses'])->name('miniapp.addresses')->middleware('auth');
+    Route::post('/addresses', [MiniAppHomeController::class, 'addressStore'])->name('miniapp.addresses.store')->middleware('auth');
+    Route::put('/addresses/{address}', [MiniAppHomeController::class, 'addressUpdate'])->name('miniapp.addresses.update')->middleware('auth');
+    Route::delete('/addresses/{address}', [MiniAppHomeController::class, 'addressDestroy'])->name('miniapp.addresses.destroy')->middleware('auth');
+    Route::post('/addresses/{address}/default', [MiniAppHomeController::class, 'addressSetDefault'])->name('miniapp.addresses.default')->middleware('auth');
 });
 
 // Default login redirect
