@@ -23,6 +23,13 @@ class BatchOrderRequest extends FormRequest
             'orders.*.total_duration' => 'required|integer|min:30',
             'orders.*.pressure_level' => 'required|in:soft,medium,hard,any',
             'orders.*.notes' => 'nullable|string|max:1000',
+            // Address fields (shared for all orders in batch)
+            'address' => 'required|string|max:500',
+            'entrance' => 'nullable|string|max:20',
+            'floor' => 'nullable|string|max:20',
+            'apartment' => 'nullable|string|max:20',
+            'landmark' => 'nullable|string|max:255',
+            'customer_address_id' => 'nullable|exists:customer_addresses,id',
         ];
     }
 }

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { router, Link, usePage } from '@inertiajs/vue3';
 import MiniAppLayout from '@/Layouts/MiniAppLayout.vue';
 
@@ -29,6 +29,68 @@ const booking = ref({
     slot: null,
     pressure_level: 'medium',
     notes: '',
+});
+
+// ==================== Address ====================
+
+const savedAddresses = ref([]);
+const selectedAddressId = ref(null);
+const showManualAddress = ref(false);
+const manualAddress = ref({
+    address: '',
+    entrance: '',
+    floor: '',
+    apartment: '',
+    landmark: '',
+});
+
+const loadAddresses = async () => {
+    try {
+        const response = await fetch('/api/user/addresses');
+        const data = await response.json();
+        savedAddresses.value = data.addresses || [];
+        
+        // Auto-select default address
+        const defaultAddr = savedAddresses.value.find(a => a.is_default);
+        if (defaultAddr) {
+            selectedAddressId.value = defaultAddr.id;
+        } else if (savedAddresses.value.length > 0) {
+            selectedAddressId.value = savedAddresses.value[0].id;
+        }
+    } catch (e) {
+        console.error('Failed to load addresses:', e);
+    }
+};
+
+const selectedAddress = computed(() => 
+    savedAddresses.value.find(a => a.id === selectedAddressId.value)
+);
+
+const addressForSubmit = computed(() => {
+    if (showManualAddress.value) {
+        return manualAddress.value;
+    }
+    if (selectedAddress.value) {
+        return {
+            address: selectedAddress.value.address,
+            entrance: selectedAddress.value.entrance || '',
+            floor: selectedAddress.value.floor || '',
+            apartment: selectedAddress.value.apartment || '',
+            landmark: selectedAddress.value.landmark || '',
+        };
+    }
+    return null;
+});
+
+const hasValidAddress = computed(() => {
+    if (showManualAddress.value) {
+        return manualAddress.value.address.trim().length > 5;
+    }
+    return selectedAddressId.value !== null;
+});
+
+onMounted(() => {
+    loadAddresses();
 });
 
 // ==================== Service Selection ====================
@@ -300,6 +362,11 @@ const createdGroupId = ref(null);
 
 const submitCart = async () => {
     if (cart.value.length === 0) return;
+    if (!hasValidAddress.value) {
+        submitError.value = 'Manzilni kiriting';
+        return;
+    }
+    
     submitting.value = true;
     submitError.value = null;
 
@@ -316,6 +383,7 @@ const submitCart = async () => {
             notes: item.notes,
         }));
 
+        const addr = addressForSubmit.value;
         const response = await fetch('/api/public/orders/batch', {
             method: 'POST',
             headers: {
@@ -323,7 +391,14 @@ const submitCart = async () => {
                 'Accept': 'application/json',
                 'X-CSRF-TOKEN': csrfToken,
             },
-            body: JSON.stringify({ orders }),
+            body: JSON.stringify({ 
+                orders,
+                address: addr.address,
+                entrance: addr.entrance || null,
+                floor: addr.floor || null,
+                apartment: addr.apartment || null,
+                landmark: addr.landmark || null,
+            }),
         });
 
         const data = await response.json();
@@ -658,6 +733,95 @@ const pressureLevels = [
                     Yana master qo'shish
                 </button>
 
+                <!-- Address Selection -->
+                <div class="bk-address-section">
+                    <h3 class="bk-address-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        Manzil
+                    </h3>
+
+                    <!-- Saved Addresses -->
+                    <div v-if="savedAddresses.length > 0 && !showManualAddress" class="bk-saved-addresses">
+                        <div 
+                            v-for="addr in savedAddresses" 
+                            :key="addr.id"
+                            class="bk-address-card"
+                            :class="{ selected: selectedAddressId === addr.id }"
+                            @click="selectedAddressId = addr.id"
+                        >
+                            <div class="bk-address-radio">
+                                <div class="bk-radio-dot" v-if="selectedAddressId === addr.id"></div>
+                            </div>
+                            <div class="bk-address-info">
+                                <span class="bk-address-name">{{ addr.name }}</span>
+                                <span class="bk-address-text">{{ addr.full_address }}</span>
+                            </div>
+                            <span v-if="addr.is_default" class="bk-address-default">Asosiy</span>
+                        </div>
+
+                        <button class="bk-manual-address-btn" @click="showManualAddress = true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            Boshqa manzil kiritish
+                        </button>
+                    </div>
+
+                    <!-- Manual Address Input -->
+                    <div v-if="savedAddresses.length === 0 || showManualAddress" class="bk-manual-address">
+                        <div v-if="savedAddresses.length > 0" class="bk-back-to-saved">
+                            <button @click="showManualAddress = false">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M15 18l-6-6 6-6"/>
+                                </svg>
+                                Saqlangan manzillar
+                            </button>
+                        </div>
+
+                        <div class="bk-address-form">
+                            <div class="bk-form-group">
+                                <input 
+                                    v-model="manualAddress.address" 
+                                    type="text" 
+                                    class="bk-input"
+                                    placeholder="Manzil (ko'cha, uy raqami) *"
+                                />
+                            </div>
+                            <div class="bk-form-row">
+                                <input 
+                                    v-model="manualAddress.entrance" 
+                                    type="text" 
+                                    class="bk-input bk-input-small"
+                                    placeholder="Kirish"
+                                />
+                                <input 
+                                    v-model="manualAddress.floor" 
+                                    type="text" 
+                                    class="bk-input bk-input-small"
+                                    placeholder="Qavat"
+                                />
+                                <input 
+                                    v-model="manualAddress.apartment" 
+                                    type="text" 
+                                    class="bk-input bk-input-small"
+                                    placeholder="Xonadon"
+                                />
+                            </div>
+                            <div class="bk-form-group">
+                                <input 
+                                    v-model="manualAddress.landmark" 
+                                    type="text" 
+                                    class="bk-input"
+                                    placeholder="Mo'ljal (ixtiyoriy)"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="bk-cart-summary">
                     <div class="bk-cart-total">
                         <span>Jami</span>
@@ -742,7 +906,7 @@ const pressureLevels = [
                     <span class="bk-price-label">Jami</span>
                     <span class="bk-price-value">{{ formatPrice(cartTotal) }} so'm</span>
                 </div>
-                <button class="bk-btn-primary" :disabled="submitting" @click="submitCart">
+                <button class="bk-btn-primary" :disabled="submitting || !hasValidAddress" @click="submitCart">
                     <span v-if="submitting">Yuborilmoqda...</span>
                     <span v-else>Buyurtma berish</span>
                 </button>
@@ -1498,6 +1662,179 @@ const pressureLevels = [
     font-size: 14px;
     color: #EF4444;
     text-align: center;
+}
+
+/* Address Section */
+.bk-address-section {
+    margin-top: 20px;
+    padding: 16px;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 16px;
+}
+
+.bk-address-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--navy);
+    margin: 0 0 14px;
+}
+
+.bk-address-title svg {
+    color: var(--gold);
+}
+
+.bk-saved-addresses {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bk-address-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(200,169,81,0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.bk-address-card:hover {
+    border-color: var(--gold);
+}
+
+.bk-address-card.selected {
+    background: rgba(200,169,81,0.1);
+    border-color: var(--gold);
+}
+
+.bk-address-radio {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.bk-radio-dot {
+    width: 10px;
+    height: 10px;
+    background: var(--gold);
+    border-radius: 50%;
+}
+
+.bk-address-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.bk-address-name {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+}
+
+.bk-address-text {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bk-address-default {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 4px 8px;
+    background: var(--gold);
+    color: white;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.bk-manual-address-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1px dashed var(--gold);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gold);
+    cursor: pointer;
+}
+
+.bk-back-to-saved {
+    margin-bottom: 12px;
+}
+
+.bk-back-to-saved button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.5);
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--navy);
+    cursor: pointer;
+}
+
+.bk-address-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bk-form-group {
+    width: 100%;
+}
+
+.bk-form-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.bk-input {
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--navy);
+}
+
+.bk-input:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+.bk-input::placeholder {
+    color: var(--text-muted);
+}
+
+.bk-input-small {
+    padding: 10px 12px;
+    font-size: 13px;
 }
 
 /* Payment */

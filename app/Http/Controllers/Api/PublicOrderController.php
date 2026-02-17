@@ -124,6 +124,15 @@ class PublicOrderController extends Controller
                 $groupId = 'GRP-' . strtoupper(Str::random(12));
                 $createdOrders = [];
 
+                // Address data (shared across all orders in batch)
+                $addressData = [
+                    'address' => $validated['address'],
+                    'entrance' => $validated['entrance'] ?? null,
+                    'floor' => $validated['floor'] ?? null,
+                    'apartment' => $validated['apartment'] ?? null,
+                    'landmark' => $validated['landmark'] ?? null,
+                ];
+
                 foreach ($validated['orders'] as $orderData) {
                     $duration = ServiceTypeDuration::findOrFail($orderData['duration_id']);
 
@@ -146,6 +155,8 @@ class PublicOrderController extends Controller
                         'dispatcher_notes' => $orderData['notes'],
                         'status' => Order::STATUS_NEW,
                         'payment_status' => Order::PAY_NOT_PAID,
+                        // Address fields
+                        ...$addressData,
                     ]);
 
                     $createdOrders[] = [
@@ -158,6 +169,7 @@ class PublicOrderController extends Controller
                     'group_id' => $groupId,
                     'count' => count($createdOrders),
                     'customer_id' => $customer->id,
+                    'address' => $addressData['address'],
                 ]);
 
                 return response()->json([

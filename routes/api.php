@@ -78,6 +78,32 @@ Route::middleware('web')->group(function () {
     Route::post('/public/orders', [PublicOrderController::class, 'store']);
     Route::post('/public/orders/batch', [PublicOrderController::class, 'storeBatch']);
 
+    // User's saved addresses
+    Route::get('/user/addresses', function () {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['addresses' => []]);
+        }
+        
+        $addresses = $user->addresses()
+            ->orderByDesc('is_default')
+            ->orderBy('name')
+            ->get()
+            ->map(fn($a) => [
+                'id' => $a->id,
+                'name' => $a->name,
+                'address' => $a->address,
+                'entrance' => $a->entrance,
+                'floor' => $a->floor,
+                'apartment' => $a->apartment,
+                'landmark' => $a->landmark,
+                'is_default' => $a->is_default,
+                'full_address' => $a->address . ($a->entrance ? ", kirish: {$a->entrance}" : '') . ($a->floor ? ", qavat: {$a->floor}" : '') . ($a->apartment ? ", xonadon: {$a->apartment}" : ''),
+            ]);
+        
+        return response()->json(['addresses' => $addresses]);
+    });
+
     // Public payment endpoints (booking flow)
     Route::post('/public/payment/create', [PublicPaymentController::class, 'create']);
     Route::get('/public/payment/status/{orderId}', [PublicPaymentController::class, 'status']);
