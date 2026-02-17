@@ -116,4 +116,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(AuditLog::class);
     }
+
+    /**
+     * Get the user's saved addresses
+     */
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(CustomerAddress::class);
+    }
+
+    /**
+     * Get the user's default address
+     */
+    public function defaultAddress()
+    {
+        return $this->addresses()->default()->first();
+    }
 }

@@ -96,6 +96,14 @@ Route::prefix('customer')->middleware(['auth', 'role:customer'])->group(function
     Route::put('/profile', [\App\Http\Controllers\Customer\ProfileController::class, 'update'])->name('customer.profile.update');
     Route::post('/pin/set', [\App\Http\Controllers\Customer\ProfileController::class, 'setPin'])->name('customer.pin.set');
     Route::post('/pin/remove', [\App\Http\Controllers\Customer\ProfileController::class, 'removePin'])->name('customer.pin.remove');
+    
+    // Addresses
+    Route::get('/addresses', [\App\Http\Controllers\Customer\AddressController::class, 'index'])->name('customer.addresses.index');
+    Route::post('/addresses', [\App\Http\Controllers\Customer\AddressController::class, 'store'])->name('customer.addresses.store');
+    Route::put('/addresses/{address}', [\App\Http\Controllers\Customer\AddressController::class, 'update'])->name('customer.addresses.update');
+    Route::delete('/addresses/{address}', [\App\Http\Controllers\Customer\AddressController::class, 'destroy'])->name('customer.addresses.destroy');
+    Route::post('/addresses/{address}/default', [\App\Http\Controllers\Customer\AddressController::class, 'setDefault'])->name('customer.addresses.default');
+    
     Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
 });
 

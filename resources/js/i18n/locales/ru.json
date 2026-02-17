@@ -749,6 +749,8 @@
     "navMasters": "Мастера",
     "navHistory": "История",
     "navFavorites": "Избранные",
+    "navAddresses": "Адреса",
+    "navRatings": "Оценки",
     "navSettings": "Настройки",
     "totalSessions": "Всего сеансов",
     "upcoming": "Предстоящие",
@@ -827,6 +829,28 @@
       "orderRef": "Заказ",
       "fromMaster": "От мастера",
       "toMaster": "Мастеру"
+    },
+    "addresses": {
+      "title": "Мои адреса",
+      "subtitle": "Управление сохранёнными адресами",
+      "add": "Добавить адрес",
+      "edit": "Редактировать адрес",
+      "name": "Название",
+      "namePlaceholder": "например: Дом, Работа",
+      "address": "Адрес",
+      "addressPlaceholder": "Введите полный адрес",
+      "entrance": "Подъезд",
+      "floor": "Этаж",
+      "apartment": "Квартира",
+      "landmark": "Ориентир",
+      "landmarkPlaceholder": "Ближайший ориентир...",
+      "default": "Основной",
+      "setDefault": "Сделать основным",
+      "makeDefault": "Установить как основной адрес",
+      "empty": "Нет сохранённых адресов",
+      "emptyHint": "Сохраните адреса для удобного заказа",
+      "addFirst": "Добавить первый адрес",
+      "confirmDelete": "Вы действительно хотите удалить этот адрес?"
     }
   },
   "master": {

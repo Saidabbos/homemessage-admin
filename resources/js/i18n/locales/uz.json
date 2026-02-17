@@ -749,6 +749,8 @@
     "navMasters": "Masterlar",
     "navHistory": "Tarix",
     "navFavorites": "Sevimlilar",
+    "navAddresses": "Manzillar",
+    "navRatings": "Baholar",
     "navSettings": "Sozlamalar",
     "totalSessions": "Jami seanslar",
     "upcoming": "Yaqinlashayotgan",
@@ -827,6 +829,28 @@
       "orderRef": "Buyurtma",
       "fromMaster": "Masterdan",
       "toMaster": "Masterga"
+    },
+    "addresses": {
+      "title": "Mening manzillarim",
+      "subtitle": "Saqlangan manzillarni boshqarish",
+      "add": "Manzil qo'shish",
+      "edit": "Manzilni tahrirlash",
+      "name": "Nomi",
+      "namePlaceholder": "masalan: Uy, Ish",
+      "address": "Manzil",
+      "addressPlaceholder": "To'liq manzilni kiriting",
+      "entrance": "Kirish",
+      "floor": "Qavat",
+      "apartment": "Xonadon",
+      "landmark": "Mo'ljal",
+      "landmarkPlaceholder": "Yaqin joylashgan ob'ekt...",
+      "default": "Asosiy",
+      "setDefault": "Asosiy qilish",
+      "makeDefault": "Asosiy manzil sifatida belgilash",
+      "empty": "Saqlangan manzillar yo'q",
+      "emptyHint": "Qulay buyurtma berish uchun manzillaringizni saqlang",
+      "addFirst": "Birinchi manzilni qo'shish",
+      "confirmDelete": "Haqiqatan ham bu manzilni o'chirmoqchimisiz?"
     }
   },
   "master": {
