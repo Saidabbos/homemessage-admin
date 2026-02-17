@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch, onMounted, nextTick } from 'vue'
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3'
 import { useI18n } from 'vue-i18n'
 
@@ -13,6 +13,12 @@ const props = defineProps({
 // Modal state
 const showModal = ref(false)
 const editingAddress = ref(null)
+const mapContainer = ref(null)
+let map = null
+let marker = null
+
+// Default center: Tashkent
+const defaultCenter = [41.2995, 69.2401]
 
 const form = useForm({
     name: '',
@@ -21,6 +27,8 @@ const form = useForm({
     floor: '',
     apartment: '',
     landmark: '',
+    latitude: null,
+    longitude: null,
     is_default: false,
 })
 
@@ -28,7 +36,10 @@ const openAddModal = () => {
     editingAddress.value = null
     form.reset()
     form.is_default = props.addresses.length === 0
+    form.latitude = null
+    form.longitude = null
     showModal.value = true
+    nextTick(() => initMap())
 }
 
 const openEditModal = (address) => {
@@ -39,8 +50,11 @@ const openEditModal = (address) => {
     form.floor = address.floor || ''
     form.apartment = address.apartment || ''
     form.landmark = address.landmark || ''
+    form.latitude = address.latitude
+    form.longitude = address.longitude
     form.is_default = address.is_default
     showModal.value = true
+    nextTick(() => initMap())
 }
 
 const closeModal = () => {
@@ -48,6 +62,90 @@ const closeModal = () => {
     editingAddress.value = null
     form.reset()
     form.clearErrors()
+    // Clean up map
+    if (map) {
+        map.remove()
+        map = null
+        marker = null
+    }
+}
+
+// Initialize map
+const initMap = async () => {
+    // Wait for DOM
+    await nextTick()
+    
+    if (!mapContainer.value) return
+    
+    // Clean up existing map
+    if (map) {
+        map.remove()
+        map = null
+        marker = null
+    }
+    
+    // Dynamic import Leaflet
+    const L = await import('leaflet')
+    await import('leaflet/dist/leaflet.css')
+    
+    // Fix marker icon issue
+    delete L.Icon.Default.prototype._getIconUrl
+    L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    })
+    
+    // Center on existing coordinates or default
+    const center = form.latitude && form.longitude 
+        ? [form.latitude, form.longitude] 
+        : defaultCenter
+    
+    // Create map
+    map = L.map(mapContainer.value).setView(center, 15)
+    
+    // Add tile layer (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map)
+    
+    // Add marker if we have coordinates
+    if (form.latitude && form.longitude) {
+        marker = L.marker([form.latitude, form.longitude], { draggable: true }).addTo(map)
+        marker.on('dragend', onMarkerDrag)
+    }
+    
+    // Click to place marker
+    map.on('click', onMapClick)
+}
+
+const onMapClick = async (e) => {
+    const L = await import('leaflet')
+    
+    form.latitude = e.latlng.lat
+    form.longitude = e.latlng.lng
+    
+    if (marker) {
+        marker.setLatLng(e.latlng)
+    } else {
+        marker = L.marker(e.latlng, { draggable: true }).addTo(map)
+        marker.on('dragend', onMarkerDrag)
+    }
+}
+
+const onMarkerDrag = (e) => {
+    const latlng = e.target.getLatLng()
+    form.latitude = latlng.lat
+    form.longitude = latlng.lng
+}
+
+const clearLocation = () => {
+    form.latitude = null
+    form.longitude = null
+    if (marker) {
+        marker.remove()
+        marker = null
+    }
 }
 
 const saveAddress = () => {
@@ -203,6 +301,10 @@ const customer = page.props.auth?.user || {}
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                                 {{ address.landmark }}
                             </p>
+                            <p v-if="address.latitude && address.longitude" class="cd-address-coords">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                                {{ t('customer.addresses.hasLocation') }}
+                            </p>
                         </div>
 
                         <div class="cd-address-actions">
@@ -288,6 +390,23 @@ const customer = page.props.auth?.user || {}
                                 class="cd-form-input"
                                 :placeholder="t('customer.addresses.landmarkPlaceholder')"
                             />
+                        </div>
+
+                        <!-- Map Picker -->
+                        <div class="cd-form-group">
+                            <label class="cd-form-label">
+                                {{ t('customer.addresses.location') }}
+                                <span class="cd-form-hint">{{ t('customer.addresses.locationHint') }}</span>
+                            </label>
+                            <div ref="mapContainer" class="cd-map-container"></div>
+                            <div v-if="form.latitude && form.longitude" class="cd-location-info">
+                                <span class="cd-location-coords">
+                                    📍 {{ form.latitude.toFixed(6) }}, {{ form.longitude.toFixed(6) }}
+                                </span>
+                                <button type="button" @click="clearLocation" class="cd-btn-link cd-btn-danger">
+                                    {{ t('customer.addresses.clearLocation') }}
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Default checkbox -->
@@ -646,6 +765,47 @@ const customer = page.props.auth?.user || {}
     font-size: 0.9rem;
     color: #6b7280;
     margin-top: 0.25rem;
+}
+
+/* Map styles */
+.cd-map-container {
+    height: 250px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    background: #f3f4f6;
+}
+
+.cd-location-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(200, 169, 81, 0.1);
+    border-radius: 6px;
+}
+
+.cd-location-coords {
+    font-size: 0.85rem;
+    color: #1B2B5A;
+    font-family: monospace;
+}
+
+.cd-form-hint {
+    font-weight: 400;
+    font-size: 0.8rem;
+    color: #9ca3af;
+    margin-left: 0.5rem;
+}
+
+.cd-address-coords {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.85rem;
+    color: #C8A951;
+    margin-top: 0.5rem;
 }
 
 @media (max-width: 640px) {

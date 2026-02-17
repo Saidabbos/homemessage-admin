@@ -850,7 +850,11 @@
       "empty": "Saqlangan manzillar yo'q",
       "emptyHint": "Qulay buyurtma berish uchun manzillaringizni saqlang",
       "addFirst": "Birinchi manzilni qo'shish",
-      "confirmDelete": "Haqiqatan ham bu manzilni o'chirmoqchimisiz?"
+      "confirmDelete": "Haqiqatan ham bu manzilni o'chirmoqchimisiz?",
+      "location": "Joylashuv",
+      "locationHint": "(xaritadan tanlang)",
+      "clearLocation": "Tozalash",
+      "hasLocation": "Xaritada belgilangan"
     }
   },
   "master": {

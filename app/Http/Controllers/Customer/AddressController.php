@@ -42,6 +42,8 @@ class AddressController extends Controller
             'floor' => 'nullable|string|max:20',
             'apartment' => 'nullable|string|max:20',
             'landmark' => 'nullable|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'is_default' => 'boolean',
         ]);
 
@@ -82,6 +84,8 @@ class AddressController extends Controller
             'floor' => 'nullable|string|max:20',
             'apartment' => 'nullable|string|max:20',
             'landmark' => 'nullable|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'is_default' => 'boolean',
         ]);
 

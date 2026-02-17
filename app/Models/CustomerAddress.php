@@ -15,6 +15,8 @@ class CustomerAddress extends Model
         'floor',
         'apartment',
         'landmark',
+        'latitude',
+        'longitude',
         'is_default',
     ];
 

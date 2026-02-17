@@ -844,7 +844,11 @@
       "empty": "No saved addresses",
       "emptyHint": "Save your addresses for easier booking",
       "addFirst": "Add your first address",
-      "confirmDelete": "Are you sure you want to delete this address?"
+      "confirmDelete": "Are you sure you want to delete this address?",
+      "location": "Location",
+      "locationHint": "(pick from map)",
+      "clearLocation": "Clear",
+      "hasLocation": "Marked on map"
     }
   },
   "master": {
