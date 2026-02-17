@@ -176,7 +176,6 @@ const detectLocation = async () => {
             form.latitude = latitude;
             form.longitude = longitude;
             
-            // Update map
             if (map) {
                 const L = await import('leaflet');
                 map.setView([latitude, longitude], 16);
@@ -301,177 +300,203 @@ const detectLocation = async () => {
         </div>
 
         <!-- Add/Edit Modal -->
-        <Teleport to="body">
-            <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
-                <div class="modal">
-                    <div class="modal-header">
-                        <h3>{{ editingAddress ? 'Manzilni tahrirlash' : 'Manzil qo\'shish' }}</h3>
-                        <button @click="closeModal" class="close-btn">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18"/>
-                                <line x1="6" y1="6" x2="18" y2="18"/>
-                            </svg>
-                        </button>
+        <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3>{{ editingAddress ? 'Manzilni tahrirlash' : 'Manzil qo\'shish' }}</h3>
+                    <button @click="closeModal" class="modal-close">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <form @submit.prevent="saveAddress" class="modal-body">
+                    <!-- Name -->
+                    <div class="form-group">
+                        <label class="form-label">Nomi *</label>
+                        <input 
+                            v-model="form.name" 
+                            type="text" 
+                            class="form-input"
+                            :class="{ error: form.errors.name }"
+                            placeholder="masalan: Uy, Ish"
+                        />
+                        <span v-if="form.errors.name" class="error-text">{{ form.errors.name }}</span>
                     </div>
 
-                    <form @submit.prevent="saveAddress" class="modal-body">
-                        <!-- Name -->
-                        <div class="form-group">
-                            <label>Nomi *</label>
-                            <input 
-                                v-model="form.name" 
-                                type="text" 
-                                placeholder="masalan: Uy, Ish"
-                                :class="{ error: form.errors.name }"
-                            />
-                            <span v-if="form.errors.name" class="error-text">{{ form.errors.name }}</span>
-                        </div>
-
-                        <!-- Address -->
-                        <div class="form-group">
-                            <label>Manzil *</label>
-                            <textarea 
-                                v-model="form.address" 
-                                placeholder="To'liq manzilni kiriting"
-                                rows="2"
-                                :class="{ error: form.errors.address }"
-                            ></textarea>
-                            <span v-if="form.errors.address" class="error-text">{{ form.errors.address }}</span>
-                        </div>
-
-                        <!-- Details Row -->
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Kirish</label>
-                                <input v-model="form.entrance" type="text" placeholder="1" />
-                            </div>
-                            <div class="form-group">
-                                <label>Qavat</label>
-                                <input v-model="form.floor" type="text" placeholder="2" />
-                            </div>
-                            <div class="form-group">
-                                <label>Xonadon</label>
-                                <input v-model="form.apartment" type="text" placeholder="15" />
-                            </div>
-                        </div>
-
-                        <!-- Landmark -->
-                        <div class="form-group">
-                            <label>Mo'ljal</label>
-                            <input v-model="form.landmark" type="text" placeholder="Yaqin joylashgan ob'ekt" />
-                        </div>
-
-                        <!-- Map -->
-                        <div class="form-group">
-                            <div class="map-header">
-                                <label>Joylashuv</label>
-                                <button type="button" @click="detectLocation" class="detect-btn" :disabled="locating">
-                                    <svg v-if="!locating" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <circle cx="12" cy="12" r="10"/>
-                                        <circle cx="12" cy="12" r="3"/>
-                                        <line x1="12" y1="2" x2="12" y2="6"/>
-                                        <line x1="12" y1="18" x2="12" y2="22"/>
-                                        <line x1="2" y1="12" x2="6" y2="12"/>
-                                        <line x1="18" y1="12" x2="22" y2="12"/>
-                                    </svg>
-                                    <span v-if="locating" class="loading-spinner"></span>
-                                    {{ locating ? 'Aniqlanmoqda...' : 'Mening joylashuvim' }}
-                                </button>
-                            </div>
-                            <div ref="mapContainer" class="map-container"></div>
-                            <p v-if="locationError" class="location-error">{{ locationError }}</p>
-                            <div v-if="form.latitude && form.longitude" class="location-info">
-                                <span>📍 {{ form.latitude.toFixed(5) }}, {{ form.longitude.toFixed(5) }}</span>
-                                <button type="button" @click="clearLocation" class="clear-btn">Tozalash</button>
-                            </div>
-                        </div>
-
-                        <!-- Default checkbox -->
-                        <label class="checkbox-label">
-                            <input v-model="form.is_default" type="checkbox" />
-                            <span>Asosiy manzil sifatida belgilash</span>
-                        </label>
-                    </form>
-
-                    <div class="modal-footer">
-                        <button @click="closeModal" class="secondary-btn">Bekor qilish</button>
-                        <button @click="saveAddress" class="primary-btn" :disabled="form.processing">
-                            {{ form.processing ? 'Saqlanmoqda...' : 'Saqlash' }}
-                        </button>
+                    <!-- Address -->
+                    <div class="form-group">
+                        <label class="form-label">Manzil *</label>
+                        <textarea 
+                            v-model="form.address" 
+                            class="form-input form-textarea"
+                            :class="{ error: form.errors.address }"
+                            placeholder="To'liq manzilni kiriting"
+                            rows="2"
+                        ></textarea>
+                        <span v-if="form.errors.address" class="error-text">{{ form.errors.address }}</span>
                     </div>
+
+                    <!-- Details Row -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Kirish</label>
+                            <input v-model="form.entrance" type="text" class="form-input" placeholder="1" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Qavat</label>
+                            <input v-model="form.floor" type="text" class="form-input" placeholder="2" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Xonadon</label>
+                            <input v-model="form.apartment" type="text" class="form-input" placeholder="15" />
+                        </div>
+                    </div>
+
+                    <!-- Landmark -->
+                    <div class="form-group">
+                        <label class="form-label">Mo'ljal</label>
+                        <input v-model="form.landmark" type="text" class="form-input" placeholder="Yaqin joylashgan ob'ekt" />
+                    </div>
+
+                    <!-- Map -->
+                    <div class="form-group">
+                        <div class="map-header">
+                            <label class="form-label">Joylashuv</label>
+                            <button type="button" @click="detectLocation" class="detect-btn" :disabled="locating">
+                                <svg v-if="!locating" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                    <line x1="12" y1="2" x2="12" y2="6"/>
+                                    <line x1="12" y1="18" x2="12" y2="22"/>
+                                    <line x1="2" y1="12" x2="6" y2="12"/>
+                                    <line x1="18" y1="12" x2="22" y2="12"/>
+                                </svg>
+                                <span v-if="locating" class="loading-spinner"></span>
+                                {{ locating ? 'Aniqlanmoqda...' : 'Joylashuvim' }}
+                            </button>
+                        </div>
+                        <div ref="mapContainer" class="map-container"></div>
+                        <p v-if="locationError" class="error-text">{{ locationError }}</p>
+                        <div v-if="form.latitude && form.longitude" class="location-info">
+                            <span>📍 {{ form.latitude.toFixed(5) }}, {{ form.longitude.toFixed(5) }}</span>
+                            <button type="button" @click="clearLocation" class="clear-btn">Tozalash</button>
+                        </div>
+                    </div>
+
+                    <!-- Default checkbox -->
+                    <label class="checkbox-label">
+                        <input v-model="form.is_default" type="checkbox" class="checkbox" />
+                        <span>Asosiy manzil sifatida belgilash</span>
+                    </label>
+                </form>
+
+                <div class="modal-footer">
+                    <button @click="closeModal" class="secondary-btn">Bekor qilish</button>
+                    <button @click="saveAddress" class="primary-btn" :disabled="form.processing">
+                        {{ form.processing ? 'Saqlanmoqda...' : 'Saqlash' }}
+                    </button>
                 </div>
             </div>
-        </Teleport>
+        </div>
+
+        <!-- Success Toast -->
+        <div v-if="$page.props.flash?.success" class="toast-success">
+            {{ $page.props.flash.success }}
+        </div>
     </div>
 </template>
 
 <style scoped>
 .addresses-page {
+    --navy: #1B2B5A;
+    --gold: #C8A951;
+    --cream: #F5F2ED;
+    --cream-dark: #EDE8DF;
+    --text-muted: #8B8680;
+
     min-height: 100vh;
-    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-    color: #fff;
+    background: var(--cream);
+    font-family: 'Manrope', -apple-system, sans-serif;
+    padding-bottom: 40px;
 }
 
+/* Header */
 .page-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
+    padding: 12px 16px;
+    background: white;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 50;
 }
 
 .back-btn, .add-btn {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--cream);
     border: none;
-    border-radius: 10px;
-    color: #fff;
+    border-radius: 12px;
+    color: var(--navy);
     cursor: pointer;
+    text-decoration: none;
+}
+
+.add-btn {
+    background: var(--gold);
+    color: white;
 }
 
 .header-title {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
+    color: var(--navy);
 }
 
+/* Content */
 .content {
-    padding: 20px;
+    padding: 16px;
 }
 
 /* Empty State */
 .empty-state {
     text-align: center;
     padding: 60px 20px;
+    background: white;
+    border-radius: 16px;
 }
 
 .empty-icon {
     width: 80px;
     height: 80px;
     margin: 0 auto 20px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--cream);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text-muted);
 }
 
 .empty-state h3 {
     font-size: 18px;
-    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--navy);
+    margin: 0 0 8px;
 }
 
 .empty-state p {
-    color: rgba(255, 255, 255, 0.6);
-    margin-bottom: 24px;
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 0 0 24px;
 }
 
 /* Address List */
@@ -482,15 +507,14 @@ const detectLocation = async () => {
 }
 
 .address-card {
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
+    background: white;
+    border-radius: 16px;
     padding: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .address-card.is-default {
-    border-color: #C8A951;
-    background: rgba(200, 169, 81, 0.1);
+    border: 2px solid var(--gold);
 }
 
 .address-header {
@@ -505,24 +529,27 @@ const detectLocation = async () => {
     align-items: center;
     gap: 8px;
     font-weight: 600;
+    color: var(--navy);
 }
 
 .address-name svg {
-    color: #C8A951;
+    color: var(--gold);
 }
 
 .default-badge {
-    font-size: 12px;
+    font-size: 11px;
+    font-weight: 600;
     padding: 4px 10px;
-    background: rgba(200, 169, 81, 0.2);
-    color: #C8A951;
+    background: linear-gradient(135deg, var(--gold), #D4B96A);
+    color: white;
     border-radius: 20px;
 }
 
 .address-text {
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--navy);
     font-size: 14px;
-    margin-bottom: 8px;
+    margin: 0 0 8px;
+    line-height: 1.4;
 }
 
 .address-details {
@@ -530,51 +557,59 @@ const detectLocation = async () => {
     flex-wrap: wrap;
     gap: 12px;
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-muted);
     margin-bottom: 8px;
 }
 
-.address-landmark, .address-coords {
+.address-landmark {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text-muted);
+    margin: 0;
 }
 
 .address-coords {
-    color: #C8A951;
+    font-size: 13px;
+    color: var(--gold);
+    margin: 4px 0 0;
 }
 
 .address-actions {
     display: flex;
-    gap: 12px;
+    gap: 16px;
     margin-top: 12px;
     padding-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--cream);
 }
 
 .action-btn {
     background: none;
     border: none;
-    color: #C8A951;
+    color: var(--navy);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     padding: 0;
 }
 
+.action-btn:hover {
+    color: var(--gold);
+}
+
 .action-btn.danger {
-    color: #ef4444;
+    color: #EF4444;
 }
 
 /* Buttons */
 .primary-btn {
-    background: linear-gradient(135deg, #C8A951 0%, #B8983F 100%);
-    color: #fff;
+    background: var(--gold);
+    color: white;
     border: none;
-    padding: 12px 24px;
-    border-radius: 10px;
-    font-size: 14px;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
+    transition: all 0.2s;
 }
 
 .primary-btn:disabled {
@@ -582,12 +617,12 @@ const detectLocation = async () => {
 }
 
 .secondary-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: var(--cream);
+    color: var(--navy);
     border: none;
-    padding: 12px 24px;
-    border-radius: 10px;
-    font-size: 14px;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 15px;
     font-weight: 500;
     cursor: pointer;
 }
@@ -596,14 +631,14 @@ const detectLocation = async () => {
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.4);
     display: flex;
     align-items: flex-end;
     z-index: 100;
 }
 
 .modal {
-    background: #1a1a2e;
+    background: white;
     width: 100%;
     max-height: 90vh;
     border-radius: 20px 20px 0 0;
@@ -617,20 +652,27 @@ const detectLocation = async () => {
     align-items: center;
     justify-content: space-between;
     padding: 16px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--cream);
 }
 
 .modal-header h3 {
     font-size: 18px;
     font-weight: 600;
+    color: var(--navy);
+    margin: 0;
 }
 
-.close-btn {
-    background: none;
+.modal-close {
+    background: var(--cream);
     border: none;
-    color: rgba(255, 255, 255, 0.6);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
     cursor: pointer;
-    padding: 4px;
 }
 
 .modal-body {
@@ -643,7 +685,8 @@ const detectLocation = async () => {
     display: flex;
     gap: 12px;
     padding: 16px 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--cream);
+    background: white;
 }
 
 .modal-footer button {
@@ -655,49 +698,50 @@ const detectLocation = async () => {
     margin-bottom: 16px;
 }
 
-.form-group label {
+.form-label {
     display: block;
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
+    color: var(--navy);
     margin-bottom: 8px;
 }
 
-.form-group label .hint {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.4);
-}
-
-.form-group input,
-.form-group textarea {
+.form-input {
     width: 100%;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
     padding: 12px 14px;
-    color: #fff;
+    background: var(--cream);
+    border: 1px solid transparent;
+    border-radius: 10px;
     font-size: 14px;
+    font-family: inherit;
+    color: var(--navy);
+    transition: all 0.2s;
 }
 
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-    color: rgba(255, 255, 255, 0.3);
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
+.form-input:focus {
     outline: none;
-    border-color: #C8A951;
+    border-color: var(--gold);
+    background: white;
 }
 
-.form-group input.error,
-.form-group textarea.error {
-    border-color: #ef4444;
+.form-input.error {
+    border-color: #EF4444;
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.form-input::placeholder {
+    color: var(--text-muted);
 }
 
 .error-text {
     font-size: 12px;
-    color: #ef4444;
-    margin-top: 4px;
+    color: #EF4444;
+    margin: 4px 0 0;
+    display: block;
 }
 
 .form-row {
@@ -711,13 +755,14 @@ const detectLocation = async () => {
     align-items: center;
     gap: 10px;
     font-size: 14px;
+    color: var(--navy);
     cursor: pointer;
 }
 
-.checkbox-label input {
-    width: 18px;
-    height: 18px;
-    accent-color: #C8A951;
+.checkbox {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--gold);
 }
 
 /* Map */
@@ -728,7 +773,7 @@ const detectLocation = async () => {
     margin-bottom: 8px;
 }
 
-.map-header label {
+.map-header .form-label {
     margin-bottom: 0;
 }
 
@@ -736,10 +781,10 @@ const detectLocation = async () => {
     display: flex;
     align-items: center;
     gap: 6px;
-    background: rgba(200, 169, 81, 0.2);
-    border: 1px solid rgba(200, 169, 81, 0.3);
-    color: #C8A951;
-    padding: 6px 12px;
+    background: var(--cream);
+    border: 1px solid var(--gold);
+    color: var(--navy);
+    padding: 8px 12px;
     border-radius: 8px;
     font-size: 12px;
     font-weight: 500;
@@ -747,8 +792,12 @@ const detectLocation = async () => {
     transition: all 0.2s;
 }
 
+.detect-btn svg {
+    color: var(--gold);
+}
+
 .detect-btn:hover:not(:disabled) {
-    background: rgba(200, 169, 81, 0.3);
+    background: rgba(200, 169, 81, 0.1);
 }
 
 .detect-btn:disabled {
@@ -759,8 +808,8 @@ const detectLocation = async () => {
 .loading-spinner {
     width: 14px;
     height: 14px;
-    border: 2px solid rgba(200, 169, 81, 0.3);
-    border-top-color: #C8A951;
+    border: 2px solid var(--cream-dark);
+    border-top-color: var(--gold);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
@@ -770,16 +819,10 @@ const detectLocation = async () => {
 }
 
 .map-container {
-    height: 200px;
-    border-radius: 10px;
+    height: 180px;
+    border-radius: 12px;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.location-error {
-    color: #ef4444;
-    font-size: 12px;
-    margin-top: 6px;
+    background: var(--cream);
 }
 
 .location-info {
@@ -787,17 +830,47 @@ const detectLocation = async () => {
     align-items: center;
     justify-content: space-between;
     margin-top: 8px;
-    padding: 8px 12px;
-    background: rgba(200, 169, 81, 0.15);
+    padding: 10px 12px;
+    background: rgba(200, 169, 81, 0.1);
     border-radius: 8px;
     font-size: 13px;
+    color: var(--navy);
 }
 
 .clear-btn {
     background: none;
     border: none;
-    color: #ef4444;
+    color: #EF4444;
     font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
+}
+
+/* Toast */
+.toast-success {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #10B981;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 200;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
 }
 </style>
