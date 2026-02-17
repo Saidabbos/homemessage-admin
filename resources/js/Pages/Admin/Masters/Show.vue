@@ -1,20 +1,31 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+
 defineOptions({ layout: AdminLayout });
 
 const { t, locale } = useI18n();
 
-const props = defineProps({
-  master: Object,
-});
+const props = defineProps<{
+  master: any;
+}>();
 
 const activeTab = ref('uz');
 
-const getTranslation = (item, field) => {
+const languageTabs = [
+  { key: 'uz', label: "O'zbek" },
+  { key: 'ru', label: 'Русский' },
+  { key: 'en', label: 'English' },
+];
+
+const getTranslation = (item: any, field: string) => {
   if (!item[field]) return '';
   if (typeof item[field] === 'string') return item[field];
   return item[field][locale.value] || item[field]['uz'] || Object.values(item[field])[0] || '';
@@ -22,186 +33,159 @@ const getTranslation = (item, field) => {
 </script>
 
 <template>
-  <div>
-    <!-- Content Header -->
-    <div class="mb-4">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 class="text-2xl font-semibold text-[#1f2d3d]">{{ master.full_name }}</h1>
-          <p class="text-sm text-[#6c757d] mt-1">{{ t('masters.info') }}</p>
-        </div>
-        <nav class="mt-2 sm:mt-0">
-          <ol class="flex items-center text-sm">
-            <li><Link href="/admin/dashboard" class="text-[#007bff]">{{ t('common.home') }}</Link></li>
-            <li class="mx-2 text-[#6c757d]">/</li>
-            <li><Link href="/admin/masters" class="text-[#007bff]">{{ t('masters.title') }}</Link></li>
-            <li class="mx-2 text-[#6c757d]">/</li>
-            <li class="text-[#6c757d]">{{ master.full_name }}</li>
-          </ol>
-        </nav>
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight">{{ master.full_name }}</h1>
+        <p class="text-muted-foreground">{{ t('masters.info', 'Master ma\'lumotlari') }}</p>
       </div>
+      <Button variant="outline" as-child>
+        <Link :href="route('admin.masters.index')">{{ t('common.back', 'Orqaga') }}</Link>
+      </Button>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Profile Card -->
       <div class="lg:col-span-1">
-        <div class="bg-white rounded shadow-sm">
-          <div class="p-6 text-center border-b border-gray-200">
-            <img
-              :src="master.photo_url"
-              :alt="master.full_name"
-              class="w-32 h-32 rounded-full mx-auto border-4 border-gray-200 object-cover"
-            />
-            <h3 class="mt-4 text-xl font-semibold text-[#1f2d3d]">{{ master.full_name }}</h3>
-            <p class="text-[#6c757d]">{{ master.gender === 'male' ? t('masters.male') : t('masters.female') }}</p>
-            <div class="mt-2">
-              <span
-                v-if="master.status"
-                class="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full bg-[#d4edda] text-[#155724]"
-              >
-                {{ t('common.active') }}
-              </span>
-              <span
-                v-else
-                class="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full bg-[#f8d7da] text-[#721c24]"
-              >
-                {{ t('common.inactive') }}
-              </span>
+        <Card>
+          <CardContent class="pt-6">
+            <div class="text-center">
+              <img
+                :src="master.photo_url"
+                :alt="master.full_name"
+                class="w-32 h-32 rounded-full mx-auto border-4 border-muted object-cover"
+              />
+              <h3 class="mt-4 text-xl font-semibold">{{ master.full_name }}</h3>
+              <p class="text-muted-foreground">{{ master.gender === 'male' ? t('masters.male', 'Erkak') : t('masters.female', 'Ayol') }}</p>
+              <div class="mt-2">
+                <Badge :variant="master.status ? 'default' : 'destructive'">
+                  {{ master.status ? t('common.active', 'Faol') : t('common.inactive', 'Nofaol') }}
+                </Badge>
+              </div>
             </div>
-          </div>
 
-          <!-- Actions -->
-          <div class="p-4 border-t border-gray-200">
-            <Link
-              :href="route('admin.masters.edit', master.id)"
-              class="block w-full px-4 py-2 bg-[#ffc107] text-[#1f2d3d] font-medium rounded hover:bg-[#e0a800] transition text-center"
-            >
-              {{ t('common.edit') }}
-            </Link>
-            <Link
-              href="/admin/masters"
-              class="block w-full mt-2 px-4 py-2 bg-[#6c757d] text-white font-medium rounded hover:bg-[#5a6268] transition text-center"
-            >
-              {{ t('common.back') }}
-            </Link>
-          </div>
-        </div>
+            <Separator class="my-6" />
+
+            <div class="space-y-2">
+              <Button class="w-full" as-child>
+                <Link :href="route('admin.masters.edit', master.id)">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                  </svg>
+                  {{ t('common.edit', 'Tahrirlash') }}
+                </Link>
+              </Button>
+              <Button variant="outline" class="w-full" as-child>
+                <Link :href="route('admin.masters.index')">{{ t('common.back', 'Orqaga') }}</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <!-- Details -->
-      <div class="lg:col-span-2">
+      <div class="lg:col-span-2 space-y-6">
         <!-- Contact Info -->
-        <div class="bg-white rounded shadow-sm">
-          <div class="px-4 py-3 border-b border-gray-200 bg-[#17a2b8]">
-            <h3 class="font-semibold text-white">{{ t('masters.contactInfo') }}</h3>
-          </div>
-          <div class="p-4">
+        <Card>
+          <CardHeader>
+            <CardTitle class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+              {{ t('masters.contactInfo', 'Aloqa ma\'lumotlari') }}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="text-sm text-[#6c757d]">{{ t('masters.phone') }}</label>
-                <p class="font-medium text-[#1f2d3d]">
-                  <a :href="'tel:' + master.phone" class="text-[#007bff] hover:underline">{{ master.phone }}</a>
+                <p class="text-sm text-muted-foreground">{{ t('masters.phone', 'Telefon') }}</p>
+                <p class="font-medium">
+                  <a :href="'tel:' + master.phone" class="text-primary hover:underline">{{ master.phone }}</a>
                 </p>
               </div>
               <div>
-                <label class="text-sm text-[#6c757d]">{{ t('masters.email') }}</label>
-                <p class="font-medium text-[#1f2d3d]">
-                  <a v-if="master.email" :href="'mailto:' + master.email" class="text-[#007bff] hover:underline">{{ master.email }}</a>
-                  <span v-else class="text-[#6c757d]">-</span>
+                <p class="text-sm text-muted-foreground">{{ t('masters.email', 'Email') }}</p>
+                <p class="font-medium">
+                  <a v-if="master.email" :href="'mailto:' + master.email" class="text-primary hover:underline">{{ master.email }}</a>
+                  <span v-else class="text-muted-foreground">-</span>
                 </p>
               </div>
               <div>
-                <label class="text-sm text-[#6c757d]">{{ t('masters.birthDate') }}</label>
-                <p class="font-medium text-[#1f2d3d]">{{ master.birth_date || '-' }}</p>
+                <p class="text-sm text-muted-foreground">{{ t('masters.birthDate', 'Tug\'ilgan sana') }}</p>
+                <p class="font-medium">{{ master.birth_date || '-' }}</p>
               </div>
               <div>
-                <label class="text-sm text-[#6c757d]">{{ t('masters.experience') }}</label>
-                <p class="font-medium text-[#1f2d3d]">{{ master.experience_years }} {{ t('masters.years') }}</p>
+                <p class="text-sm text-muted-foreground">{{ t('masters.experience', 'Tajriba') }}</p>
+                <p class="font-medium">{{ master.experience_years }} {{ t('masters.years', 'yil') }}</p>
               </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         <!-- Services -->
-        <div class="bg-white rounded shadow-sm mt-4">
-          <div class="px-4 py-3 border-b border-gray-200">
-            <h3 class="font-semibold text-[#1f2d3d]">{{ t('masters.services') }}</h3>
-          </div>
-          <div class="p-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>{{ t('masters.services', 'Xizmatlar') }}</CardTitle>
+          </CardHeader>
+          <CardContent>
             <div v-if="master.service_types && master.service_types.length > 0" class="flex flex-wrap gap-2">
-              <span
-                v-for="service in master.service_types"
-                :key="service.id"
-                class="px-3 py-1 bg-[#e7f3ff] text-[#007bff] text-sm font-medium rounded-full"
-              >
+              <Badge v-for="service in master.service_types" :key="service.id" variant="secondary">
                 {{ getTranslation(service, 'name') }}
-              </span>
+              </Badge>
             </div>
-            <p v-else class="text-[#6c757d]">{{ t('masters.noServices') }}</p>
-          </div>
-        </div>
+            <p v-else class="text-muted-foreground">{{ t('masters.noServices', 'Xizmatlar yo\'q') }}</p>
+          </CardContent>
+        </Card>
 
         <!-- Oils -->
-        <div class="bg-white rounded shadow-sm mt-4">
-          <div class="px-4 py-3 border-b border-gray-200">
-            <h3 class="font-semibold text-[#1f2d3d]">{{ t('masters.oils') }}</h3>
-          </div>
-          <div class="p-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>{{ t('masters.oils', 'Yog\'lar') }}</CardTitle>
+          </CardHeader>
+          <CardContent>
             <div v-if="master.oils && master.oils.length > 0" class="flex flex-wrap gap-2">
-              <span
-                v-for="oil in master.oils"
-                :key="oil.id"
-                class="px-3 py-1 bg-[#d4edda] text-[#155724] text-sm font-medium rounded-full"
-              >
+              <Badge v-for="oil in master.oils" :key="oil.id" variant="outline" class="bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800">
                 {{ getTranslation(oil, 'name') }}
-              </span>
+              </Badge>
             </div>
-            <p v-else class="text-[#6c757d]">{{ t('masters.noOils') }}</p>
-          </div>
-        </div>
+            <p v-else class="text-muted-foreground">{{ t('masters.noOils', 'Yog\'lar yo\'q') }}</p>
+          </CardContent>
+        </Card>
 
         <!-- Bio -->
-        <div class="bg-white rounded shadow-sm mt-4">
-          <div class="px-4 py-3 border-b border-gray-200">
-            <h3 class="font-semibold text-[#1f2d3d]">{{ t('masters.bio') }}</h3>
-          </div>
-          <div class="p-4">
-            <!-- Language Tabs -->
-            <div class="flex border-b border-gray-200 mb-4">
-              <button
-                @click="activeTab = 'uz'"
-                :class="['px-4 py-2 text-sm font-medium border-b-2 -mb-px', activeTab === 'uz' ? 'border-[#007bff] text-[#007bff]' : 'border-transparent text-[#6c757d] hover:text-[#1f2d3d]']"
+        <Card>
+          <CardHeader>
+            <CardTitle>{{ t('masters.bio', 'Biografiya') }}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="flex gap-2 mb-4">
+              <Button
+                v-for="tab in languageTabs"
+                :key="tab.key"
+                type="button"
+                :variant="activeTab === tab.key ? 'default' : 'outline'"
+                size="sm"
+                @click="activeTab = tab.key"
               >
-                O'zbek
-              </button>
-              <button
-                @click="activeTab = 'ru'"
-                :class="['px-4 py-2 text-sm font-medium border-b-2 -mb-px', activeTab === 'ru' ? 'border-[#007bff] text-[#007bff]' : 'border-transparent text-[#6c757d] hover:text-[#1f2d3d]']"
-              >
-                Русский
-              </button>
-              <button
-                @click="activeTab = 'en'"
-                :class="['px-4 py-2 text-sm font-medium border-b-2 -mb-px', activeTab === 'en' ? 'border-[#007bff] text-[#007bff]' : 'border-transparent text-[#6c757d] hover:text-[#1f2d3d]']"
-              >
-                English
-              </button>
+                {{ tab.label }}
+              </Button>
             </div>
 
             <div v-show="activeTab === 'uz'">
-              <p v-if="master.bio?.uz" class="text-[#1f2d3d] whitespace-pre-line">{{ master.bio.uz }}</p>
-              <p v-else class="text-[#6c757d] italic">{{ t('translations.noDescription') }}</p>
+              <p v-if="master.bio?.uz" class="whitespace-pre-line">{{ master.bio.uz }}</p>
+              <p v-else class="text-muted-foreground italic">{{ t('translations.noDescription', 'Tavsif yo\'q') }}</p>
             </div>
             <div v-show="activeTab === 'ru'">
-              <p v-if="master.bio?.ru" class="text-[#1f2d3d] whitespace-pre-line">{{ master.bio.ru }}</p>
-              <p v-else class="text-[#6c757d] italic">{{ t('translations.noDescription') }}</p>
+              <p v-if="master.bio?.ru" class="whitespace-pre-line">{{ master.bio.ru }}</p>
+              <p v-else class="text-muted-foreground italic">{{ t('translations.noDescription', 'Tavsif yo\'q') }}</p>
             </div>
             <div v-show="activeTab === 'en'">
-              <p v-if="master.bio?.en" class="text-[#1f2d3d] whitespace-pre-line">{{ master.bio.en }}</p>
-              <p v-else class="text-[#6c757d] italic">{{ t('translations.noDescription') }}</p>
+              <p v-if="master.bio?.en" class="whitespace-pre-line">{{ master.bio.en }}</p>
+              <p v-else class="text-muted-foreground italic">{{ t('translations.noDescription', 'Tavsif yo\'q') }}</p>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   </div>
