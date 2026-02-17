@@ -5,7 +5,27 @@ import { Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Pagination from '@/Components/UI/Pagination.vue';
 
-// Simple debounce function
+// shadcn-vue components
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
 const debounce = (fn, delay) => {
   let timeoutId;
   return (...args) => {
@@ -58,25 +78,37 @@ const resetFilters = () => {
   masterFilter.value = '';
 };
 
-const getStatusClass = (status) => {
-  const classes = {
-    'NEW': 'bg-blue-100 text-blue-800',
-    'CONFIRMING': 'bg-yellow-100 text-yellow-800',
-    'CONFIRMED': 'bg-green-100 text-green-800',
-    'IN_PROGRESS': 'bg-purple-100 text-purple-800',
-    'COMPLETED': 'bg-gray-100 text-gray-800',
-    'CANCELLED': 'bg-red-100 text-red-800',
+const getStatusVariant = (status) => {
+  const variants = {
+    'NEW': 'default',
+    'CONFIRMING': 'secondary',
+    'CONFIRMED': 'default',
+    'IN_PROGRESS': 'secondary',
+    'COMPLETED': 'outline',
+    'CANCELLED': 'destructive',
   };
-  return classes[status] || 'bg-gray-100 text-gray-600';
+  return variants[status] || 'outline';
 };
 
-const getPaymentStatusClass = (status) => {
-  const classes = {
-    'NOT_PAID': 'bg-red-100 text-red-800',
-    'PAID': 'bg-green-100 text-green-800',
-    'REFUNDED': 'bg-yellow-100 text-yellow-800',
+const getStatusColor = (status) => {
+  const colors = {
+    'NEW': 'bg-blue-500/10 text-blue-700 hover:bg-blue-500/20',
+    'CONFIRMING': 'bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20',
+    'CONFIRMED': 'bg-green-500/10 text-green-700 hover:bg-green-500/20',
+    'IN_PROGRESS': 'bg-purple-500/10 text-purple-700 hover:bg-purple-500/20',
+    'COMPLETED': 'bg-gray-500/10 text-gray-700 hover:bg-gray-500/20',
+    'CANCELLED': 'bg-red-500/10 text-red-700 hover:bg-red-500/20',
   };
-  return classes[status] || 'bg-gray-100 text-gray-600';
+  return colors[status] || 'bg-gray-500/10 text-gray-700';
+};
+
+const getPaymentColor = (status) => {
+  const colors = {
+    'NOT_PAID': 'bg-red-500/10 text-red-700',
+    'PAID': 'bg-green-500/10 text-green-700',
+    'REFUNDED': 'bg-yellow-500/10 text-yellow-700',
+  };
+  return colors[status] || 'bg-gray-500/10 text-gray-700';
 };
 
 const formatDate = (date) => {
@@ -91,17 +123,15 @@ const formatArrivalWindow = (order) => {
   return `${start} – ${end}`;
 };
 
-// Tree table: group orders by booking_group_id
-const groupColors = ['#007bff', '#28a745', '#fd7e14', '#6f42c1', '#e83e8c', '#17a2b8'];
+// Tree table
+const groupColors = ['#3b82f6', '#22c55e', '#f97316', '#8b5cf6', '#ec4899', '#06b6d4'];
 const expandedGroups = ref({});
 
 const treeRows = computed(() => {
   const rows = [];
   const grouped = {};
-  const singles = [];
   let colorIdx = 0;
 
-  // Separate grouped vs single orders
   props.orders.data.forEach(order => {
     if (order.booking_group_id && order.group_count > 1) {
       if (!grouped[order.booking_group_id]) {
@@ -112,19 +142,15 @@ const treeRows = computed(() => {
         colorIdx++;
       }
       grouped[order.booking_group_id].orders.push(order);
-    } else {
-      singles.push({ type: 'single', order });
     }
   });
 
-  // Build tree rows preserving original order
   const seen = {};
   props.orders.data.forEach(order => {
     if (order.booking_group_id && order.group_count > 1) {
       if (!seen[order.booking_group_id]) {
         seen[order.booking_group_id] = true;
         const group = grouped[order.booking_group_id];
-        // Parent row (first order in group)
         rows.push({
           type: 'parent',
           order: group.orders[0],
@@ -132,7 +158,6 @@ const treeRows = computed(() => {
           groupColor: group.color,
           childCount: group.orders.length,
         });
-        // Child rows (remaining orders)
         for (let i = 1; i < group.orders.length; i++) {
           rows.push({
             type: 'child',
@@ -155,7 +180,7 @@ const toggleGroup = (groupId) => {
 };
 
 const isExpanded = (groupId) => {
-  return expandedGroups.value[groupId] !== false; // default expanded
+  return expandedGroups.value[groupId] !== false;
 };
 
 const isRowVisible = (row) => {
@@ -165,217 +190,195 @@ const isRowVisible = (row) => {
 </script>
 
 <template>
-  <div>
-    <!-- Content Header -->
-    <div class="mb-4">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 class="text-2xl font-semibold text-[#1f2d3d]">
-            {{ isNewOrdersPage ? t('orders.newOrders') : t('orders.title') }}
-          </h1>
-          <p class="text-sm text-[#6c757d] mt-1">{{ t('orders.subtitle') }}</p>
-        </div>
-        <nav class="mt-2 sm:mt-0">
-          <ol class="flex items-center text-sm">
-            <li><Link href="/admin/dashboard" class="text-[#007bff]">{{ t('common.home') }}</Link></li>
-            <li class="mx-2 text-[#6c757d]">/</li>
-            <li class="text-[#6c757d]">{{ t('orders.title') }}</li>
-          </ol>
-        </nav>
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight">
+          {{ isNewOrdersPage ? t('orders.newOrders') : t('orders.title') }}
+        </h1>
+        <p class="text-muted-foreground">{{ t('orders.subtitle') }}</p>
       </div>
     </div>
 
     <!-- Status Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
-      <div
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <Card
         v-for="status in statuses"
         :key="status.value"
-        class="bg-white rounded shadow-sm p-4 cursor-pointer hover:shadow-md transition"
-        :class="{ 'ring-2 ring-[#007bff]': statusFilter === status.value }"
+        class="cursor-pointer transition-all hover:shadow-md"
+        :class="{ 'ring-2 ring-primary': statusFilter === status.value }"
         @click="statusFilter = statusFilter === status.value ? '' : status.value"
       >
-        <div class="text-2xl font-bold text-[#1f2d3d]">{{ statusCounts[status.value] || 0 }}</div>
-        <div class="text-sm text-[#6c757d]">{{ t(`orderStatuses.${status.value}`) }}</div>
-      </div>
+        <CardContent class="p-4">
+          <div class="text-2xl font-bold">{{ statusCounts[status.value] || 0 }}</div>
+          <p class="text-xs text-muted-foreground">{{ t(`orderStatuses.${status.value}`) }}</p>
+        </CardContent>
+      </Card>
     </div>
 
     <!-- Main Card -->
-    <div class="bg-white rounded shadow-sm">
-      <!-- Filters -->
-      <div class="px-4 py-3 bg-[#f8f9fa] border-b border-gray-200">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          <input
+    <Card>
+      <CardHeader class="pb-4">
+        <div class="flex flex-col lg:flex-row lg:items-center gap-4">
+          <Input
             v-model="search"
-            type="text"
             :placeholder="t('orders.searchPlaceholder')"
-            class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-[#007bff] focus:border-[#007bff]"
+            class="lg:w-64"
           />
-          <select
-            v-if="!isNewOrdersPage"
-            v-model="statusFilter"
-            class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-[#007bff] focus:border-[#007bff]"
-          >
-            <option value="">{{ t('orders.allStatuses') }}</option>
-            <option v-for="status in statuses" :key="status.value" :value="status.value">
-              {{ t(`orderStatuses.${status.value}`) }}
-            </option>
-          </select>
-          <select
-            v-model="paymentStatusFilter"
-            class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-[#007bff] focus:border-[#007bff]"
-          >
-            <option value="">{{ t('orders.allPaymentStatuses') }}</option>
-            <option v-for="status in paymentStatuses" :key="status.value" :value="status.value">
-              {{ t(`paymentStatuses.${status.value}`) }}
-            </option>
-          </select>
-          <select
-            v-model="masterFilter"
-            class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-[#007bff] focus:border-[#007bff]"
-          >
-            <option value="">{{ t('orders.allMasters') }}</option>
-            <option v-for="master in masters" :key="master.id" :value="master.id">
-              {{ master.first_name }} {{ master.last_name }}
-            </option>
-          </select>
-          <button
-            @click="resetFilters"
-            class="px-4 py-2 text-sm text-[#6c757d] hover:text-[#1f2d3d] border border-gray-300 rounded hover:bg-gray-50 transition"
-          >
+          <Select v-if="!isNewOrdersPage" v-model="statusFilter">
+            <SelectTrigger class="lg:w-48">
+              <SelectValue :placeholder="t('orders.allStatuses')" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">{{ t('orders.allStatuses') }}</SelectItem>
+              <SelectItem v-for="status in statuses" :key="status.value" :value="status.value">
+                {{ t(`orderStatuses.${status.value}`) }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <Select v-model="paymentStatusFilter">
+            <SelectTrigger class="lg:w-48">
+              <SelectValue :placeholder="t('orders.allPaymentStatuses')" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">{{ t('orders.allPaymentStatuses') }}</SelectItem>
+              <SelectItem v-for="status in paymentStatuses" :key="status.value" :value="status.value">
+                {{ t(`paymentStatuses.${status.value}`) }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <Select v-model="masterFilter">
+            <SelectTrigger class="lg:w-48">
+              <SelectValue :placeholder="t('orders.allMasters')" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">{{ t('orders.allMasters') }}</SelectItem>
+              <SelectItem v-for="master in masters" :key="master.id" :value="String(master.id)">
+                {{ master.first_name }} {{ master.last_name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="outline" @click="resetFilters">
             {{ t('common.reset') }}
-          </button>
+          </Button>
         </div>
-      </div>
+      </CardHeader>
 
-      <!-- Table -->
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-[#f8f9fa] border-b border-gray-200">
-            <tr>
-              <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('orders.orderNumber') }}</th>
-              <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('orders.customer') }}</th>
-              <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('orders.master') }}</th>
-              <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('orders.dateTime') }}</th>
-              <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('orders.service') }}</th>
-              <th class="px-4 py-3 text-center font-semibold text-[#6c757d]">{{ t('common.status') }}</th>
-              <th class="px-4 py-3 text-center font-semibold text-[#6c757d]">{{ t('orders.payment') }}</th>
-              <th class="px-4 py-3 text-center font-semibold text-[#6c757d]">{{ t('common.actions') }}</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
+      <CardContent class="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{{ t('orders.orderNumber') }}</TableHead>
+              <TableHead>{{ t('orders.customer') }}</TableHead>
+              <TableHead>{{ t('orders.master') }}</TableHead>
+              <TableHead>{{ t('orders.dateTime') }}</TableHead>
+              <TableHead>{{ t('orders.service') }}</TableHead>
+              <TableHead class="text-center">{{ t('common.status') }}</TableHead>
+              <TableHead class="text-center">{{ t('orders.payment') }}</TableHead>
+              <TableHead class="text-center">{{ t('common.actions') }}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             <template v-for="row in treeRows" :key="row.order.id">
-              <tr
+              <TableRow
                 v-if="isRowVisible(row)"
-                class="hover:bg-[#f8f9fa] transition-colors"
-                :style="row.type !== 'single' ? { borderLeft: `4px solid ${row.groupColor}` } : {}"
+                class="transition-colors"
+                :style="row.type !== 'single' ? { borderLeft: `3px solid ${row.groupColor}` } : {}"
                 :class="{
-                  'bg-[#f0f4ff]': row.type === 'parent',
-                  'bg-[#fafbff]': row.type === 'child',
+                  'bg-muted/30': row.type === 'parent',
+                  'bg-muted/10': row.type === 'child',
                 }"
               >
                 <!-- Order Number -->
-                <td class="px-4 py-3 font-medium text-[#007bff]">
+                <TableCell class="font-medium">
                   <div class="flex items-center gap-2">
-                    <!-- Tree toggle for parent rows -->
                     <button
                       v-if="row.type === 'parent'"
                       @click="toggleGroup(row.groupId)"
-                      class="flex items-center justify-center w-5 h-5 rounded hover:bg-gray-200 transition-colors"
+                      class="flex items-center justify-center w-5 h-5 rounded hover:bg-muted transition-colors"
                     >
                       <svg
-                        class="w-4 h-4 text-[#6c757d] transition-transform"
+                        class="w-4 h-4 text-muted-foreground transition-transform"
                         :class="{ 'rotate-90': isExpanded(row.groupId) }"
                         fill="none" stroke="currentColor" viewBox="0 0 24 24"
                       >
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                       </svg>
                     </button>
-                    <!-- Tree indent for child rows -->
-                    <span v-if="row.type === 'child'" class="flex items-center w-5 pl-1">
-                      <svg class="w-3.5 h-3.5 text-gray-300" viewBox="0 0 16 16" fill="none">
-                        <path d="M4 0v10h12" stroke="currentColor" stroke-width="1.5" fill="none" />
-                      </svg>
-                    </span>
-                    <Link :href="route('admin.orders.show', row.order.id)" class="flex items-center gap-2">
+                    <span v-if="row.type === 'child'" class="w-5 pl-2 text-muted-foreground">└</span>
+                    <Link :href="route('admin.orders.show', row.order.id)" class="text-primary hover:underline flex items-center gap-2">
                       {{ row.order.order_number }}
-                      <span
+                      <Badge
                         v-if="row.type === 'parent'"
-                        class="inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded"
-                        :style="{ backgroundColor: row.groupColor + '18', color: row.groupColor }"
+                        variant="outline"
+                        class="text-xs"
+                        :style="{ borderColor: row.groupColor, color: row.groupColor }"
                       >
-                        <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                         {{ row.childCount }}
-                      </span>
+                      </Badge>
                     </Link>
                   </div>
-                </td>
+                </TableCell>
                 <!-- Customer -->
-                <td class="px-4 py-3">
-                  <div class="font-medium text-[#1f2d3d]">{{ row.order.customer?.name || '-' }}</div>
-                  <div class="text-xs text-[#6c757d]">{{ row.order.customer?.phone || row.order.contact_phone }}</div>
-                </td>
+                <TableCell>
+                  <div class="font-medium">{{ row.order.customer?.name || '-' }}</div>
+                  <div class="text-xs text-muted-foreground">{{ row.order.customer?.phone || row.order.contact_phone }}</div>
+                </TableCell>
                 <!-- Master -->
-                <td class="px-4 py-3">
+                <TableCell>
                   {{ row.order.master?.first_name }} {{ row.order.master?.last_name }}
-                </td>
+                </TableCell>
                 <!-- Date/Time -->
-                <td class="px-4 py-3">
+                <TableCell>
                   <div class="font-medium">{{ formatDate(row.order.booking_date) }}</div>
-                  <div class="text-xs text-[#6c757d]">{{ formatArrivalWindow(row.order) }}</div>
-                </td>
+                  <div class="text-xs text-muted-foreground">{{ formatArrivalWindow(row.order) }}</div>
+                </TableCell>
                 <!-- Service -->
-                <td class="px-4 py-3">
+                <TableCell>
                   {{ row.order.service_type?.name?.uz || row.order.service_type?.name }}
-                </td>
+                </TableCell>
                 <!-- Status -->
-                <td class="px-4 py-3 text-center">
-                  <span
-                    class="inline-flex px-2 py-1 text-xs font-medium rounded"
-                    :class="getStatusClass(row.order.status)"
-                  >
+                <TableCell class="text-center">
+                  <Badge :class="getStatusColor(row.order.status)">
                     {{ t(`orderStatuses.${row.order.status}`) }}
-                  </span>
-                </td>
+                  </Badge>
+                </TableCell>
                 <!-- Payment -->
-                <td class="px-4 py-3 text-center">
-                  <span
-                    class="inline-flex px-2 py-1 text-xs font-medium rounded"
-                    :class="getPaymentStatusClass(row.order.payment_status)"
-                  >
+                <TableCell class="text-center">
+                  <Badge :class="getPaymentColor(row.order.payment_status)">
                     {{ t(`paymentStatuses.${row.order.payment_status}`) }}
-                  </span>
-                </td>
+                  </Badge>
+                </TableCell>
                 <!-- Actions -->
-                <td class="px-4 py-3 text-center">
-                  <Link
-                    :href="route('admin.orders.show', row.order.id)"
-                    class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-[#007bff] hover:bg-[#e7f3ff] rounded transition"
-                  >
-                    {{ t('common.view') }}
-                  </Link>
-                </td>
-              </tr>
+                <TableCell class="text-center">
+                  <Button variant="ghost" size="sm" as-child>
+                    <Link :href="route('admin.orders.show', row.order.id)">
+                      {{ t('common.view') }}
+                    </Link>
+                  </Button>
+                </TableCell>
+              </TableRow>
             </template>
-            <tr v-if="orders.data.length === 0">
-              <td colspan="8" class="px-4 py-12 text-center text-[#6c757d]">
+            <TableRow v-if="orders.data.length === 0">
+              <TableCell colspan="8" class="h-24 text-center text-muted-foreground">
                 {{ t('orders.emptyMessage') }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </CardContent>
 
       <!-- Pagination -->
-      <div v-if="orders.data.length > 0" class="px-4 py-3 bg-[#f8f9fa] border-t border-gray-200">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <p class="text-sm text-[#6c757d]">
-            {{ t('common.total') }}: {{ orders.total }} {{ t('common.records') }}
-          </p>
-          <Pagination :links="orders.links" />
-        </div>
+      <div v-if="orders.data.length > 0" class="flex items-center justify-between px-6 py-4 border-t">
+        <p class="text-sm text-muted-foreground">
+          {{ t('common.total') }}: {{ orders.total }} {{ t('common.records') }}
+        </p>
+        <Pagination :links="orders.links" />
       </div>
-    </div>
+    </Card>
   </div>
 </template>
