@@ -148,6 +148,63 @@ const clearLocation = () => {
     }
 }
 
+// Geolocation
+const locating = ref(false)
+const locationError = ref('')
+
+const detectLocation = async () => {
+    if (!navigator.geolocation) {
+        locationError.value = t('customer.addresses.geoNotSupported')
+        return
+    }
+    
+    locating.value = true
+    locationError.value = ''
+    
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const { latitude, longitude } = position.coords
+            form.latitude = latitude
+            form.longitude = longitude
+            
+            if (map) {
+                const L = await import('leaflet')
+                map.setView([latitude, longitude], 16)
+                
+                if (marker) {
+                    marker.setLatLng([latitude, longitude])
+                } else {
+                    marker = L.marker([latitude, longitude], { draggable: true }).addTo(map)
+                    marker.on('dragend', onMarkerDrag)
+                }
+            }
+            
+            locating.value = false
+        },
+        (error) => {
+            locating.value = false
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    locationError.value = t('customer.addresses.geoPermissionDenied')
+                    break
+                case error.POSITION_UNAVAILABLE:
+                    locationError.value = t('customer.addresses.geoUnavailable')
+                    break
+                case error.TIMEOUT:
+                    locationError.value = t('customer.addresses.geoTimeout')
+                    break
+                default:
+                    locationError.value = t('customer.addresses.geoError')
+            }
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    )
+}
+
 const saveAddress = () => {
     if (editingAddress.value) {
         form.put(`/customer/addresses/${editingAddress.value.id}`, {
@@ -394,11 +451,25 @@ const customer = page.props.auth?.user || {}
 
                         <!-- Map Picker -->
                         <div class="cd-form-group">
-                            <label class="cd-form-label">
-                                {{ t('customer.addresses.location') }}
-                                <span class="cd-form-hint">{{ t('customer.addresses.locationHint') }}</span>
-                            </label>
+                            <div class="cd-map-header">
+                                <label class="cd-form-label">
+                                    {{ t('customer.addresses.location') }}
+                                </label>
+                                <button type="button" @click="detectLocation" class="cd-detect-btn" :disabled="locating">
+                                    <svg v-if="!locating" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                        <line x1="12" y1="2" x2="12" y2="6"/>
+                                        <line x1="12" y1="18" x2="12" y2="22"/>
+                                        <line x1="2" y1="12" x2="6" y2="12"/>
+                                        <line x1="18" y1="12" x2="22" y2="12"/>
+                                    </svg>
+                                    <span v-if="locating" class="cd-loading-spinner"></span>
+                                    {{ locating ? t('customer.addresses.detecting') : t('customer.addresses.detectLocation') }}
+                                </button>
+                            </div>
                             <div ref="mapContainer" class="cd-map-container"></div>
+                            <p v-if="locationError" class="cd-location-error">{{ locationError }}</p>
                             <div v-if="form.latitude && form.longitude" class="cd-location-info">
                                 <span class="cd-location-coords">
                                     📍 {{ form.latitude.toFixed(6) }}, {{ form.longitude.toFixed(6) }}
@@ -768,6 +839,64 @@ const customer = page.props.auth?.user || {}
 }
 
 /* Map styles */
+.cd-map-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.cd-map-header .cd-form-label {
+    margin-bottom: 0;
+}
+
+.cd-detect-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(200, 169, 81, 0.1);
+    border: 1px solid rgba(200, 169, 81, 0.3);
+    color: #1B2B5A;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cd-detect-btn svg {
+    color: #C8A951;
+}
+
+.cd-detect-btn:hover:not(:disabled) {
+    background: rgba(200, 169, 81, 0.2);
+}
+
+.cd-detect-btn:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.cd-loading-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(200, 169, 81, 0.3);
+    border-top-color: #C8A951;
+    border-radius: 50%;
+    animation: cd-spin 0.8s linear infinite;
+}
+
+@keyframes cd-spin {
+    to { transform: rotate(360deg); }
+}
+
+.cd-location-error {
+    color: #ef4444;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+}
+
 .cd-map-container {
     height: 250px;
     border-radius: 10px;

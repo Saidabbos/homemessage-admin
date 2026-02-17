@@ -848,7 +848,14 @@
       "location": "Location",
       "locationHint": "(pick from map)",
       "clearLocation": "Clear",
-      "hasLocation": "Marked on map"
+      "hasLocation": "Marked on map",
+      "detectLocation": "My location",
+      "detecting": "Detecting...",
+      "geoNotSupported": "Geolocation not supported",
+      "geoPermissionDenied": "Location permission denied",
+      "geoUnavailable": "Location unavailable",
+      "geoTimeout": "Timeout, please try again",
+      "geoError": "An error occurred"
     }
   },
   "master": {

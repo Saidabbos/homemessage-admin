@@ -854,7 +854,14 @@
       "location": "Joylashuv",
       "locationHint": "(xaritadan tanlang)",
       "clearLocation": "Tozalash",
-      "hasLocation": "Xaritada belgilangan"
+      "hasLocation": "Xaritada belgilangan",
+      "detectLocation": "Mening joylashuvim",
+      "detecting": "Aniqlanmoqda...",
+      "geoNotSupported": "Geolokatsiya qo'llab-quvvatlanmaydi",
+      "geoPermissionDenied": "Joylashuvga ruxsat berilmadi",
+      "geoUnavailable": "Joylashuv aniqlanmadi",
+      "geoTimeout": "Vaqt tugadi, qayta urinib ko'ring",
+      "geoError": "Xatolik yuz berdi"
     }
   },
   "master": {

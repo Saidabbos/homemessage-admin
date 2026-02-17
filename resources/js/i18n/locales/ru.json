@@ -854,7 +854,14 @@
       "location": "Местоположение",
       "locationHint": "(выберите на карте)",
       "clearLocation": "Очистить",
-      "hasLocation": "Отмечено на карте"
+      "hasLocation": "Отмечено на карте",
+      "detectLocation": "Моё местоположение",
+      "detecting": "Определяется...",
+      "geoNotSupported": "Геолокация не поддерживается",
+      "geoPermissionDenied": "Доступ к местоположению запрещён",
+      "geoUnavailable": "Местоположение недоступно",
+      "geoTimeout": "Время истекло, попробуйте снова",
+      "geoError": "Произошла ошибка"
     }
   },
   "master": {

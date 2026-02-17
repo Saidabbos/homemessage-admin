@@ -156,6 +156,64 @@ const clearLocation = () => {
         marker = null;
     }
 };
+
+// Geolocation
+const locating = ref(false);
+const locationError = ref('');
+
+const detectLocation = async () => {
+    if (!navigator.geolocation) {
+        locationError.value = 'Geolokatsiya qo\'llab-quvvatlanmaydi';
+        return;
+    }
+    
+    locating.value = true;
+    locationError.value = '';
+    
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const { latitude, longitude } = position.coords;
+            form.latitude = latitude;
+            form.longitude = longitude;
+            
+            // Update map
+            if (map) {
+                const L = await import('leaflet');
+                map.setView([latitude, longitude], 16);
+                
+                if (marker) {
+                    marker.setLatLng([latitude, longitude]);
+                } else {
+                    marker = L.marker([latitude, longitude], { draggable: true }).addTo(map);
+                    marker.on('dragend', onMarkerDrag);
+                }
+            }
+            
+            locating.value = false;
+        },
+        (error) => {
+            locating.value = false;
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    locationError.value = 'Joylashuvga ruxsat berilmadi';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    locationError.value = 'Joylashuv aniqlanmadi';
+                    break;
+                case error.TIMEOUT:
+                    locationError.value = 'Vaqt tugadi, qayta urinib ko\'ring';
+                    break;
+                default:
+                    locationError.value = 'Xatolik yuz berdi';
+            }
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+};
 </script>
 
 <template>
@@ -305,8 +363,23 @@ const clearLocation = () => {
 
                         <!-- Map -->
                         <div class="form-group">
-                            <label>Joylashuv <span class="hint">(xaritadan tanlang)</span></label>
+                            <div class="map-header">
+                                <label>Joylashuv</label>
+                                <button type="button" @click="detectLocation" class="detect-btn" :disabled="locating">
+                                    <svg v-if="!locating" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                        <line x1="12" y1="2" x2="12" y2="6"/>
+                                        <line x1="12" y1="18" x2="12" y2="22"/>
+                                        <line x1="2" y1="12" x2="6" y2="12"/>
+                                        <line x1="18" y1="12" x2="22" y2="12"/>
+                                    </svg>
+                                    <span v-if="locating" class="loading-spinner"></span>
+                                    {{ locating ? 'Aniqlanmoqda...' : 'Mening joylashuvim' }}
+                                </button>
+                            </div>
                             <div ref="mapContainer" class="map-container"></div>
+                            <p v-if="locationError" class="location-error">{{ locationError }}</p>
                             <div v-if="form.latitude && form.longitude" class="location-info">
                                 <span>📍 {{ form.latitude.toFixed(5) }}, {{ form.longitude.toFixed(5) }}</span>
                                 <button type="button" @click="clearLocation" class="clear-btn">Tozalash</button>
@@ -648,11 +721,65 @@ const clearLocation = () => {
 }
 
 /* Map */
+.map-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.map-header label {
+    margin-bottom: 0;
+}
+
+.detect-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(200, 169, 81, 0.2);
+    border: 1px solid rgba(200, 169, 81, 0.3);
+    color: #C8A951;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.detect-btn:hover:not(:disabled) {
+    background: rgba(200, 169, 81, 0.3);
+}
+
+.detect-btn:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.loading-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(200, 169, 81, 0.3);
+    border-top-color: #C8A951;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
 .map-container {
     height: 200px;
     border-radius: 10px;
     overflow: hidden;
     background: rgba(255, 255, 255, 0.1);
+}
+
+.location-error {
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 6px;
 }
 
 .location-info {
