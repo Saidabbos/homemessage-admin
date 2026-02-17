@@ -61,9 +61,9 @@ const rateOrder = (orderId) => {
             <div class="summary-rating">
                 <span class="summary-num">{{ summary.average ?? '-' }}</span>
                 <div class="summary-stars">
-                    <svg v-for="s in 5" :key="s" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" 
-                        :fill="s <= Math.round(summary.average || 0) ? '#C8A951' : '#3f3f46'" 
-                        :stroke="s <= Math.round(summary.average || 0) ? '#C8A951' : '#3f3f46'" stroke-width="1">
+                    <svg v-for="s in 5" :key="s" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" 
+                        :fill="s <= Math.round(summary.average || 0) ? '#ffffff' : 'rgba(255,255,255,0.3)'" 
+                        stroke="none">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                     </svg>
                 </div>
@@ -128,15 +128,15 @@ const rateOrder = (orderId) => {
 
                     <div class="rating-stars">
                         <div class="stars">
-                            <svg v-for="s in 5" :key="s" width="14" height="14" viewBox="0 0 24 24" 
-                                :fill="s <= rating.overall_rating ? '#C8A951' : '#3f3f46'" stroke-width="1">
+                            <svg v-for="s in 5" :key="s" width="16" height="16" viewBox="0 0 24 24" 
+                                :fill="s <= rating.overall_rating ? '#C8A951' : '#EDE8DF'" stroke="none">
                                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                             </svg>
                         </div>
                         <div v-if="rating.punctuality_rating" class="sub-ratings">
-                            <span>Vaqtdanlik: {{ rating.punctuality_rating }}/5</span>
-                            <span>Professional: {{ rating.professionalism_rating }}/5</span>
-                            <span>Tozalik: {{ rating.cleanliness_rating }}/5</span>
+                            <span>⏱ {{ rating.punctuality_rating }}/5</span>
+                            <span>👔 {{ rating.professionalism_rating }}/5</span>
+                            <span>✨ {{ rating.cleanliness_rating }}/5</span>
                         </div>
                     </div>
 
@@ -173,17 +173,16 @@ const rateOrder = (orderId) => {
 <style scoped>
 .ratings-page {
     --gold: #C8A951;
+    --gold-light: #D4B76A;
     --navy: #1B2B5A;
-    --bg: #18181b;
-    --card: #27272a;
-    --border: #3f3f46;
-    --text: #fafafa;
-    --text-muted: #a1a1aa;
+    --cream: #F5F2ED;
+    --cream-dark: #EDE8DF;
+    --text-muted: #8B8680;
 
     min-height: 100vh;
-    background: var(--bg);
+    background: var(--cream);
     font-family: 'Manrope', -apple-system, sans-serif;
-    color: var(--text);
+    color: var(--navy);
     padding-bottom: 40px;
 }
 
@@ -193,8 +192,8 @@ const rateOrder = (orderId) => {
     align-items: center;
     justify-content: space-between;
     padding: 12px 16px;
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
+    background: white;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
     position: sticky;
     top: 0;
     z-index: 50;
@@ -207,10 +206,10 @@ const rateOrder = (orderId) => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg);
+    background: var(--cream);
     border: none;
     border-radius: 12px;
-    color: var(--text);
+    color: var(--navy);
     text-decoration: none;
     cursor: pointer;
 }
@@ -218,19 +217,20 @@ const rateOrder = (orderId) => {
 .header-title {
     font-size: 16px;
     font-weight: 600;
-    color: var(--text);
+    color: var(--navy);
 }
 
 /* Summary Card */
 .summary-card {
     margin: 16px;
     padding: 20px;
-    background: linear-gradient(135deg, var(--gold) 0%, #B8993F 100%);
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
     border-radius: 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
+    box-shadow: 0 4px 16px rgba(200, 169, 81, 0.3);
 }
 
 .summary-rating {
@@ -242,7 +242,7 @@ const rateOrder = (orderId) => {
 .summary-num {
     font-size: 32px;
     font-weight: 700;
-    color: var(--navy);
+    color: white;
 }
 
 .summary-stars {
@@ -250,10 +250,14 @@ const rateOrder = (orderId) => {
     gap: 4px;
 }
 
+.summary-stars svg {
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+}
+
 .summary-count {
     font-size: 14px;
-    color: var(--navy);
-    opacity: 0.8;
+    color: white;
+    opacity: 0.9;
 }
 
 /* Pending Section */
@@ -262,9 +266,11 @@ const rateOrder = (orderId) => {
 }
 
 .section-title {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     margin-bottom: 12px;
 }
 
@@ -279,21 +285,22 @@ const rateOrder = (orderId) => {
     align-items: center;
     gap: 12px;
     padding: 12px;
-    background: var(--card);
-    border-radius: 12px;
-    border: 1px solid var(--border);
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .pending-avatar {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     overflow: hidden;
-    background: var(--bg);
+    background: var(--cream);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    color: var(--text-muted);
 }
 
 .pending-avatar img {
@@ -313,7 +320,7 @@ const rateOrder = (orderId) => {
 .pending-name {
     font-size: 14px;
     font-weight: 600;
-    color: var(--text);
+    color: var(--navy);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -331,15 +338,16 @@ const rateOrder = (orderId) => {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 12px;
+    padding: 10px 14px;
     background: var(--gold);
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 13px;
     font-weight: 600;
-    color: var(--navy);
+    color: white;
     cursor: pointer;
     white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(200, 169, 81, 0.3);
 }
 
 /* Tabs */
@@ -352,10 +360,10 @@ const rateOrder = (orderId) => {
 
 .tab {
     flex: 1;
-    padding: 10px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
+    padding: 12px;
+    background: white;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 12px;
     font-size: 14px;
     font-weight: 500;
     color: var(--text-muted);
@@ -366,7 +374,8 @@ const rateOrder = (orderId) => {
 .tab.active {
     background: var(--gold);
     border-color: var(--gold);
-    color: var(--navy);
+    color: white;
+    box-shadow: 0 2px 8px rgba(200, 169, 81, 0.3);
 }
 
 /* Ratings Content */
@@ -381,10 +390,10 @@ const rateOrder = (orderId) => {
 }
 
 .rating-card {
-    padding: 14px;
-    background: var(--card);
-    border-radius: 14px;
-    border: 1px solid var(--border);
+    padding: 16px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .rating-top {
@@ -398,20 +407,21 @@ const rateOrder = (orderId) => {
 .rating-left {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     min-width: 0;
 }
 
 .rating-avatar {
-    width: 38px;
-    height: 38px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     overflow: hidden;
-    background: var(--bg);
+    background: var(--cream);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    color: var(--text-muted);
 }
 
 .rating-avatar img {
@@ -422,9 +432,9 @@ const rateOrder = (orderId) => {
 
 .rating-name {
     display: block;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
-    color: var(--text);
+    color: var(--navy);
 }
 
 .rating-meta {
@@ -454,18 +464,18 @@ const rateOrder = (orderId) => {
 .sub-ratings {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    font-size: 11px;
+    gap: 10px;
+    font-size: 12px;
     color: var(--text-muted);
 }
 
 .rating-feedback {
-    font-size: 13px;
-    color: var(--text);
+    font-size: 14px;
+    color: var(--navy);
     line-height: 1.5;
     margin: 0;
-    padding-top: 8px;
-    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    border-top: 1px solid var(--cream);
 }
 
 /* Empty State */
@@ -474,14 +484,16 @@ const rateOrder = (orderId) => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 48px 16px;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 16px;
     color: var(--text-muted);
     text-align: center;
 }
 
 .empty-state svg {
-    margin-bottom: 12px;
-    opacity: 0.5;
+    margin-bottom: 16px;
+    color: var(--cream-dark);
 }
 
 .empty-state p {
@@ -499,15 +511,15 @@ const rateOrder = (orderId) => {
 }
 
 .pag-btn {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--text);
+    background: white;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 12px;
+    color: var(--navy);
     cursor: pointer;
 }
 
