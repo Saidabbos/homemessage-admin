@@ -1318,6 +1318,162 @@
     }
 }
 
+/* Address Section */
+.bk-saved-addresses {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.bk-address-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.bk-address-card:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(30, 41, 59, 0.7);
+}
+
+.bk-address-card.selected {
+    border-color: var(--gold-primary, #c8a951);
+    background: rgba(200, 169, 81, 0.1);
+}
+
+.bk-address-radio {
+    flex-shrink: 0;
+    padding-top: 2px;
+}
+
+.bk-radio {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.bk-radio.checked {
+    border-color: var(--gold-primary, #c8a951);
+    background: var(--gold-primary, #c8a951);
+    box-shadow: inset 0 0 0 3px #0f172a;
+}
+
+.bk-address-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.bk-address-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #fff;
+}
+
+.bk-address-text {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.4;
+}
+
+.bk-address-badge {
+    flex-shrink: 0;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--gold-primary, #c8a951);
+    background: rgba(200, 169, 81, 0.15);
+    border-radius: 6px;
+}
+
+.bk-manual-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    background: transparent;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.bk-manual-btn:hover {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.bk-manual-address {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.bk-back-to-saved {
+    align-self: flex-start;
+    padding: 0;
+    font-size: 13px;
+    color: var(--gold-primary, #c8a951);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.bk-back-to-saved:hover {
+    opacity: 0.8;
+}
+
+.bk-address-field {
+    width: 100%;
+}
+
+.bk-address-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.bk-input {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #fff;
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.bk-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.bk-input:focus {
+    border-color: var(--gold-primary, #c8a951);
+    background: rgba(30, 41, 59, 0.7);
+}
+
+.bk-input-sm {
+    padding: 12px 14px;
+}
+
 /* Mobile */
 @media (max-width: 640px) {
     .bk-topbar {
@@ -1416,5 +1572,19 @@
 
     .bk-cart-header-label {
         font-size: 14px;
+    }
+
+    .bk-address-row {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .bk-input {
+        padding: 12px 14px;
+        font-size: 13px;
+    }
+
+    .bk-address-card {
+        padding: 14px;
     }
 }

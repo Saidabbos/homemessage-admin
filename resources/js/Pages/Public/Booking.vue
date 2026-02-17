@@ -20,6 +20,18 @@ const step = ref(1);
 // Single service selection (replaces per-person system)
 const selectedService = ref(null); // { service_id, duration_id }
 
+// Address state
+const savedAddresses = ref([]);
+const selectedAddressId = ref(null);
+const showManualAddress = ref(false);
+const manualAddress = ref({
+    address: '',
+    entrance: '',
+    floor: '',
+    apartment: '',
+    landmark: '',
+});
+
 // Cart state
 const cart = ref([]);
 
@@ -336,6 +348,18 @@ const submitCart = async () => {
             notes: item.notes,
         }));
 
+        // Address data (optional)
+        const addr = addressForSubmit.value;
+        const payload = { orders };
+        if (addr?.address) {
+            payload.address = addr.address;
+            payload.entrance = addr.entrance;
+            payload.floor = addr.floor;
+            payload.apartment = addr.apartment;
+            payload.landmark = addr.landmark;
+            payload.customer_address_id = addr.customer_address_id;
+        }
+
         const response = await fetch('/api/public/orders/batch', {
             method: 'POST',
             headers: {
@@ -343,7 +367,7 @@ const submitCart = async () => {
                 'X-CSRF-TOKEN': csrfToken,
                 'Accept': 'application/json',
             },
-            body: JSON.stringify({ orders }),
+            body: JSON.stringify(payload),
         });
 
         const result = await response.json();
@@ -368,6 +392,57 @@ const pressureLevels = [
     { value: 'medium', label: "O'rtacha", icon: 'waves' },
     { value: 'hard', label: 'Kuchli', icon: 'zap' },
 ];
+
+// ==================== Address ====================
+
+const loadSavedAddresses = async () => {
+    if (!authUser.value) return;
+    try {
+        const response = await fetch('/api/user/addresses');
+        const data = await response.json();
+        savedAddresses.value = data.addresses || [];
+        // Auto-select default address
+        const defaultAddr = savedAddresses.value.find(a => a.is_default);
+        if (defaultAddr) {
+            selectedAddressId.value = defaultAddr.id;
+        }
+    } catch (e) {
+        console.error('Failed to load addresses:', e);
+    }
+};
+
+// Load addresses on mount
+loadSavedAddresses();
+
+const selectedAddress = computed(() => {
+    if (!selectedAddressId.value) return null;
+    return savedAddresses.value.find(a => a.id === selectedAddressId.value);
+});
+
+const addressForSubmit = computed(() => {
+    if (showManualAddress.value || savedAddresses.value.length === 0) {
+        // Manual address
+        return {
+            address: manualAddress.value.address,
+            entrance: manualAddress.value.entrance,
+            floor: manualAddress.value.floor,
+            apartment: manualAddress.value.apartment,
+            landmark: manualAddress.value.landmark,
+            customer_address_id: null,
+        };
+    } else if (selectedAddress.value) {
+        // Saved address
+        return {
+            address: selectedAddress.value.address,
+            entrance: selectedAddress.value.entrance,
+            floor: selectedAddress.value.floor,
+            apartment: selectedAddress.value.apartment,
+            landmark: selectedAddress.value.landmark,
+            customer_address_id: selectedAddress.value.id,
+        };
+    }
+    return null;
+});
 
 const getTranslated = (field) => {
     if (typeof field === 'string') return field;
@@ -685,13 +760,93 @@ const getServiceIcon = (service) => {
                                 <span class="bk-confirm-value">{{ customer?.phone || '-' }}</span>
                             </div>
                         </div>
+                    </div>
 
+                    <!-- Address Section (Optional) -->
+                    <div class="bk-section" style="margin-top: 24px;">
+                        <h3 class="bk-section-title">Manzil (ixtiyoriy)</h3>
+                        
+                        <!-- Saved Addresses -->
+                        <div v-if="savedAddresses.length > 0 && !showManualAddress" class="bk-saved-addresses">
+                            <div
+                                v-for="addr in savedAddresses"
+                                :key="addr.id"
+                                class="bk-address-card"
+                                :class="{ selected: selectedAddressId === addr.id }"
+                                @click="selectedAddressId = addr.id"
+                            >
+                                <div class="bk-address-radio">
+                                    <div class="bk-radio" :class="{ checked: selectedAddressId === addr.id }"></div>
+                                </div>
+                                <div class="bk-address-info">
+                                    <span class="bk-address-name">{{ addr.name }}</span>
+                                    <span class="bk-address-text">{{ addr.full_address }}</span>
+                                </div>
+                                <span v-if="addr.is_default" class="bk-address-badge">Asosiy</span>
+                            </div>
+                            <button class="bk-manual-btn" @click="showManualAddress = true; selectedAddressId = null">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                Boshqa manzil kiritish
+                            </button>
+                        </div>
+
+                        <!-- Manual Address Input -->
+                        <div v-if="showManualAddress || savedAddresses.length === 0" class="bk-manual-address">
+                            <button 
+                                v-if="savedAddresses.length > 0" 
+                                class="bk-back-to-saved" 
+                                @click="showManualAddress = false"
+                            >
+                                ← Saqlangan manzillar
+                            </button>
+                            <div class="bk-address-field">
+                                <input
+                                    v-model="manualAddress.address"
+                                    type="text"
+                                    class="bk-input"
+                                    placeholder="Manzil (ko'cha, uy)"
+                                />
+                            </div>
+                            <div class="bk-address-row">
+                                <input
+                                    v-model="manualAddress.entrance"
+                                    type="text"
+                                    class="bk-input bk-input-sm"
+                                    placeholder="Kirish"
+                                />
+                                <input
+                                    v-model="manualAddress.floor"
+                                    type="text"
+                                    class="bk-input bk-input-sm"
+                                    placeholder="Qavat"
+                                />
+                                <input
+                                    v-model="manualAddress.apartment"
+                                    type="text"
+                                    class="bk-input bk-input-sm"
+                                    placeholder="Xonadon"
+                                />
+                            </div>
+                            <div class="bk-address-field">
+                                <input
+                                    v-model="manualAddress.landmark"
+                                    type="text"
+                                    class="bk-input"
+                                    placeholder="Mo'ljal (ixtiyoriy)"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bk-section" style="margin-top: 16px;">
                         <div class="bk-notes-group">
                             <label class="bk-notes-label">Qo'shimcha izoh (ixtiyoriy)</label>
                             <textarea
                                 v-model="booking.notes"
                                 class="bk-notes-textarea"
-                                placeholder="Masalan: 5-qavat, 25-xonadon"
+                                placeholder="Masalan: allergiyalarim bor..."
                                 rows="3"
                             ></textarea>
                         </div>
