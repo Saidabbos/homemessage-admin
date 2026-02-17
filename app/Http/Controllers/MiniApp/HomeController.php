@@ -769,7 +769,7 @@ class HomeController extends Controller
                     ->whereNotNull('rated_at');
             })
             ->with(['master', 'serviceType'])
-            ->latest('completed_at')
+            ->latest('updated_at')
             ->take(5)
             ->get()
             ->map(fn ($o) => [
@@ -778,7 +778,7 @@ class HomeController extends Controller
                 'master_name' => $o->master?->full_name,
                 'master_photo' => $o->master?->photo_url,
                 'service_name' => $o->serviceType?->getTranslation('name', $locale),
-                'completed_at' => $o->completed_at?->format('d.m.Y'),
+                'completed_at' => $o->booking_date?->format('d.m.Y'),
             ]);
 
         return Inertia::render('MiniApp/Ratings', [

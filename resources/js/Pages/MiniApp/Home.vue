@@ -3,10 +3,13 @@ import { ref, computed, onMounted } from 'vue';
 import { router, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import MiniAppLayout from '@/Layouts/MiniAppLayout.vue';
+import SidebarMenu from '@/Components/MiniApp/SidebarMenu.vue';
 
 defineOptions({ layout: MiniAppLayout });
 
 const { t } = useI18n();
+
+const showSidebar = ref(false);
 
 const props = defineProps({
     services: Array,
@@ -143,9 +146,19 @@ const saveName = async () => {
             </div>
         </div>
 
+        <!-- Sidebar Menu -->
+        <SidebarMenu :show="showSidebar" :user="user" @close="showSidebar = false" />
+
         <!-- Header -->
         <header class="ma-header">
             <div class="ma-header-top">
+                <button class="ma-menu-btn" @click="showSidebar = true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <line x1="3" y1="12" x2="21" y2="12"/>
+                        <line x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
+                </button>
                 <div class="ma-logo">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V9m-4.5 3a4.5 4.5 0 1 0 4.5 4.5M7.5 12H9m3 4.5a4.5 4.5 0 1 1-4.5-4.5M12 16.5V15m4.5-3a4.5 4.5 0 1 0-4.5-4.5M16.5 12H15"/>
@@ -153,33 +166,14 @@ const saveName = async () => {
                     </svg>
                     <span>HOMEMASSAGE</span>
                 </div>
-                <div class="ma-header-actions">
-                    <button class="ma-icon-btn" @click="goToOrders">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                            <line x1="16" y1="2" x2="16" y2="6"/>
-                            <line x1="8" y1="2" x2="8" y2="6"/>
-                            <line x1="3" y1="10" x2="21" y2="10"/>
-                        </svg>
-                    </button>
-                    <Link href="/app/addresses" class="ma-icon-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                            <circle cx="12" cy="10" r="3"/>
-                        </svg>
-                    </Link>
-                    <Link href="/app/ratings" class="ma-icon-btn ma-icon-ratings">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                        </svg>
-                    </Link>
-                    <Link href="/app/profile" class="ma-icon-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-                            <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                    </Link>
-                </div>
+                <button class="ma-icon-btn" @click="goToOrders">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </button>
             </div>
         </header>
 
@@ -321,10 +315,29 @@ const saveName = async () => {
 .ma-header-top {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 12px;
+}
+
+.ma-menu-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: white;
+    border: 1px solid rgba(0,0,0,0.06);
+    color: var(--navy);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ma-menu-btn:hover {
+    background: var(--cream-dark);
 }
 
 .ma-logo {
+    flex: 1;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -343,11 +356,6 @@ const saveName = async () => {
     color: var(--navy);
 }
 
-.ma-header-actions {
-    display: flex;
-    gap: 8px;
-}
-
 .ma-icon-btn {
     width: 40px;
     height: 40px;
@@ -357,25 +365,13 @@ const saveName = async () => {
     border-radius: 12px;
     background: white;
     border: 1px solid rgba(0,0,0,0.06);
-    color: var(--navy);
+    color: var(--gold);
     cursor: pointer;
     transition: all 0.2s;
 }
 
-.ma-icon-btn:first-child {
-    color: var(--gold);
-}
-
-.ma-icon-ratings {
-    color: var(--gold);
-}
-
 .ma-icon-btn:hover {
     background: var(--cream-dark);
-}
-
-.ma-logout {
-    color: var(--text-muted);
 }
 
 /* Hero */
