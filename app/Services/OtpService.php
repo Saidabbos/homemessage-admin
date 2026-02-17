@@ -167,10 +167,15 @@ class OtpService
     }
 
     /**
-     * Generate random 6-digit OTP code
+     * Generate 6-digit OTP code
+     * Uses fixed code from env if OTP_TEST_CODE is set
      */
     protected function generateCode(): string
     {
+        if ($testCode = config('auth.otp.test_code')) {
+            return $testCode;
+        }
+
         return str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
     }
 

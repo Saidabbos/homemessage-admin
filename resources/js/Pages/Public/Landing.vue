@@ -1,5 +1,5 @@
 <script setup>
-import { Head, Link, usePage } from '@inertiajs/vue3'
+import { Head, Link, usePage, router } from '@inertiajs/vue3'
 import { useI18n } from 'vue-i18n'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
@@ -7,13 +7,6 @@ const { t } = useI18n()
 
 const page = usePage()
 const authUser = computed(() => page.props.auth?.user)
-const canBook = computed(() => !authUser.value || authUser.value.role === 'customer')
-const dashboardUrl = computed(() => {
-    if (!authUser.value) return '/auth/login'
-    if (authUser.value.role === 'master') return '/master/dashboard'
-    if (authUser.value.role === 'customer') return '/customer/dashboard'
-    return '/admin/dashboard'
-})
 
 const props = defineProps({
     serviceTypes: Array,
@@ -25,6 +18,22 @@ const props = defineProps({
 
 const mobileMenuOpen = ref(false)
 const navScrolled = ref(false)
+const userDropdownOpen = ref(false)
+const userDropdownRef = ref(null)
+
+const toggleUserDropdown = () => {
+    userDropdownOpen.value = !userDropdownOpen.value
+}
+
+const closeUserDropdown = (e) => {
+    if (userDropdownRef.value && !userDropdownRef.value.contains(e.target)) {
+        userDropdownOpen.value = false
+    }
+}
+
+const logout = () => {
+    router.post('/customer/logout')
+}
 
 const heroTitle = props.hero?.title || t('landing.hero.title')
 const heroSubtitle = props.hero?.subtitle || t('landing.hero.subtitle')
@@ -147,6 +156,7 @@ onMounted(() => {
     if (scrollContainer.value) {
         scrollContainer.value.addEventListener('scroll', handleScroll, { passive: true })
     }
+    document.addEventListener('click', closeUserDropdown)
 })
 
 onUnmounted(() => {
@@ -154,6 +164,7 @@ onUnmounted(() => {
         scrollContainer.value.removeEventListener('scroll', handleScroll)
     }
     if (rafId) cancelAnimationFrame(rafId)
+    document.removeEventListener('click', closeUserDropdown)
 })
 
 const defaultMasters = [
@@ -285,16 +296,43 @@ function submitContact() {
 
                 <!-- Desktop Right -->
                 <div class="nav-right">
-                    <Link v-if="canBook" href="/booking" class="nav-cta">
+                    <Link href="/booking" class="nav-cta">
                         <span>{{ t('landing.nav.bookNow') }}</span>
                     </Link>
 
                     <!-- Auth: logged in -->
-                    <div v-if="authUser" class="nav-user">
-                        <Link :href="dashboardUrl" class="nav-user-link">
-                            <span class="nav-avatar">{{ authUser.avatar }}</span>
-                            <span class="nav-username">{{ authUser.name }}</span>
-                        </Link>
+                    <div v-if="authUser" class="nav-user" ref="userDropdownRef">
+                        <button class="nav-user-btn" @click.stop="toggleUserDropdown">
+                            <span class="nav-avatar">{{ authUser.avatar || authUser.phone?.slice(-2) }}</span>
+                            <span class="nav-username">{{ authUser.name || authUser.phone }}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{ rotated: userDropdownOpen }">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                        <div v-if="userDropdownOpen" class="nav-user-dropdown">
+                            <div class="dropdown-header">
+                                <span class="dropdown-name">{{ authUser.name || authUser.phone }}</span>
+                                <span class="dropdown-phone" v-if="authUser.name && authUser.phone">{{ authUser.phone }}</span>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <Link href="/customer/dashboard" class="dropdown-item" @click="userDropdownOpen = false">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                                {{ t('public.nav.dashboard') }}
+                            </Link>
+                            <Link href="/customer/orders" class="dropdown-item" @click="userDropdownOpen = false">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                {{ t('public.nav.orders') }}
+                            </Link>
+                            <Link href="/customer/profile" class="dropdown-item" @click="userDropdownOpen = false">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                {{ t('public.nav.profile') }}
+                            </Link>
+                            <div class="dropdown-divider"></div>
+                            <button @click="logout" class="dropdown-item dropdown-logout">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                                {{ t('public.nav.logout') }}
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Auth: not logged in -->
@@ -323,14 +361,28 @@ function submitContact() {
                     <Link href="/masters" class="mobile-menu-link" @click="mobileMenuOpen = false">{{ t('landing.nav.masters') }}</Link>
                     <a href="#testimonials" class="mobile-menu-link" @click="mobileMenuOpen = false">{{ t('landing.nav.testimonials') }}</a>
                     <a href="#contact" class="mobile-menu-link" @click="mobileMenuOpen = false">{{ t('landing.nav.about') }}</a>
-                    <Link v-if="canBook" href="/booking" class="mobile-menu-cta" @click="mobileMenuOpen = false">{{ t('landing.nav.bookNow') }}</Link>
+                    <Link href="/booking" class="mobile-menu-cta" @click="mobileMenuOpen = false">{{ t('landing.nav.bookNow') }}</Link>
 
                     <!-- Mobile Auth -->
                     <div class="mobile-menu-divider"></div>
-                    <Link v-if="authUser" :href="dashboardUrl" class="mobile-menu-user" @click="mobileMenuOpen = false">
-                        <span class="mobile-menu-avatar">{{ authUser.avatar }}</span>
-                        <span>{{ authUser.name }}</span>
-                    </Link>
+                    <template v-if="authUser">
+                        <div class="mobile-menu-user-info">
+                            <span class="mobile-menu-avatar">{{ authUser.avatar || authUser.phone?.slice(-2) }}</span>
+                            <span>{{ authUser.name || authUser.phone }}</span>
+                        </div>
+                        <Link href="/customer/dashboard" class="mobile-menu-link" @click="mobileMenuOpen = false">
+                            {{ t('public.nav.dashboard') }}
+                        </Link>
+                        <Link href="/customer/orders" class="mobile-menu-link" @click="mobileMenuOpen = false">
+                            {{ t('public.nav.orders') }}
+                        </Link>
+                        <Link href="/customer/profile" class="mobile-menu-link" @click="mobileMenuOpen = false">
+                            {{ t('public.nav.profile') }}
+                        </Link>
+                        <button @click="logout" class="mobile-menu-logout">
+                            {{ t('public.nav.logout') }}
+                        </button>
+                    </template>
                     <Link v-else href="/auth/login" class="mobile-menu-login" @click="mobileMenuOpen = false">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
                         <span>{{ t('auth.login') }}</span>
@@ -361,7 +413,7 @@ function submitContact() {
                         <p class="hero-sub" v-html="heroSubtitle.replace(/\n/g, '<br>')"></p>
 
                         <div class="hero-ctas">
-                            <Link v-if="canBook" href="/booking" class="hero-cta-primary">
+                            <Link href="/booking" class="hero-cta-primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>
                                 </svg>

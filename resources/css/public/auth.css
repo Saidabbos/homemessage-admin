@@ -399,6 +399,120 @@
     cursor: not-allowed;
 }
 
+/* ── Method Selection (Step 2) ── */
+.method-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.method-btn {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 18px 20px;
+    background: rgba(255, 255, 255, 0.37);
+    border: 1.5px solid rgba(27, 43, 90, 0.09);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.method-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.56);
+    border-color: rgba(200, 169, 81, 0.37);
+}
+
+.method-btn:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.method-icon {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(200, 169, 81, 0.12);
+    border-radius: 14px;
+    flex-shrink: 0;
+}
+
+.method-icon svg {
+    color: #C8A951;
+}
+
+.method-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.method-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1B2B5A;
+}
+
+.method-desc {
+    font-size: 12px;
+    color: rgba(27, 43, 90, 0.44);
+}
+
+.method-arrow {
+    color: rgba(27, 43, 90, 0.25);
+    transition: transform 0.2s ease;
+}
+
+.method-btn:hover .method-arrow {
+    transform: translateX(4px);
+    color: #C8A951;
+}
+
+.method-loading {
+    color: rgba(27, 43, 90, 0.37);
+    font-size: 16px;
+}
+
+/* ── PIN Input (Step 3) ── */
+.pin-digits-row {
+    justify-content: center;
+    gap: 14px;
+}
+
+.pin-digit {
+    width: 56px;
+    height: 64px;
+    font-size: 26px;
+}
+
+/* Link Button */
+.otp-link-btn {
+    background: none;
+    border: none;
+    color: #C8A951;
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px 16px;
+    transition: color 0.2s ease;
+}
+
+.otp-link-btn:hover:not(:disabled) {
+    color: #d4b76a;
+}
+
+.otp-link-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* ── Responsive ── */
 @media (max-width: 1024px) {
     .otp-left {
@@ -438,5 +552,24 @@
     .otp-hero-img {
         width: 100%;
         height: 240px;
+    }
+
+    .method-btn {
+        padding: 14px 16px;
+    }
+
+    .method-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .pin-digit {
+        width: 48px;
+        height: 56px;
+        font-size: 22px;
+    }
+
+    .pin-digits-row {
+        gap: 10px;
     }
 }

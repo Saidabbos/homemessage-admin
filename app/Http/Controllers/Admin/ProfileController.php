@@ -15,16 +15,21 @@ class ProfileController extends Controller
         protected ProfileService $profileService
     ) {}
 
+    protected function guard()
+    {
+        return Auth::guard('admin');
+    }
+
     public function index()
     {
         return Inertia::render('Admin/Profile/Index', [
-            'user' => Auth::user(),
+            'user' => $this->guard()->user(),
         ]);
     }
 
     public function update(UpdateProfileRequest $request)
     {
-        $this->profileService->updateProfile(Auth::user(), $request->validated());
+        $this->profileService->updateProfile($this->guard()->user(), $request->validated());
 
         return redirect()->route('admin.profile.index')
             ->with('success', 'Profil muvaffaqiyatli yangilandi');
@@ -34,7 +39,7 @@ class ProfileController extends Controller
     {
         $validated = $request->validated();
 
-        if (!$this->profileService->updatePassword(Auth::user(), $validated['current_password'], $validated['password'])) {
+        if (!$this->profileService->updatePassword($this->guard()->user(), $validated['current_password'], $validated['password'])) {
             return back()->withErrors([
                 'current_password' => 'Joriy parol noto\'g\'ri',
             ]);

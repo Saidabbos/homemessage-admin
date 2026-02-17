@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Master\StoreBlockedTimeRequest;
 use App\Models\Master;
 use App\Models\MasterBlockedTime;
 use Illuminate\Http\Request;
@@ -44,15 +45,9 @@ class MasterBlockedTimeController extends Controller
     /**
      * Store a new blocked time
      */
-    public function store(Request $request, Master $master)
+    public function store(StoreBlockedTimeRequest $request, Master $master)
     {
-        $validated = $request->validate([
-            'blocked_date' => 'required|date|after_or_equal:today',
-            'start_time' => 'nullable|date_format:H:i',
-            'end_time' => 'nullable|date_format:H:i|after:start_time',
-            'reason' => 'nullable|string|max:255',
-            'is_full_day' => 'boolean',
-        ]);
+        $validated = $request->validated();
 
         // Kun bo'yi bloklash
         if ($request->boolean('is_full_day')) {
@@ -78,7 +73,7 @@ class MasterBlockedTimeController extends Controller
             'start_time' => $validated['start_time'] ?? null,
             'end_time' => $validated['end_time'] ?? null,
             'reason' => $validated['reason'] ?? null,
-            'created_by' => Auth::id(),
+            'created_by' => Auth::guard('admin')->id(),
         ]);
 
         return response()->json([

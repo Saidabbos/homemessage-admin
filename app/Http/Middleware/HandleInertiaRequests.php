@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
 
@@ -28,6 +29,20 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
+     * Get the authenticated user based on route context
+     */
+    protected function getAuthUser(Request $request)
+    {
+        // For admin routes, use admin guard
+        if ($request->is('admin/*') || $request->is('admin')) {
+            return Auth::guard('admin')->user();
+        }
+        
+        // For other routes, use default web guard
+        return Auth::guard('web')->user();
+    }
+
+    /**
      * Define the props that are shared by default.
      *
      * @see https://inertiajs.com/shared-data
@@ -36,18 +51,18 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        \Log::info('HandleInertiaRequests::share() called');
         $parentShare = parent::share($request);
-        \Log::info('parent::share() completed');
+        $user = $this->getAuthUser($request);
 
         return array_merge($parentShare, [
             'auth' => [
-                'user' => $request->user() ? [
-                    'id' => $request->user()->id,
-                    'name' => $request->user()->name,
-                    'email' => $request->user()->email,
-                    'avatar' => substr($request->user()->name, 0, 1),
-                    'role' => $request->user()->getRoleNames()->first() ?? 'User',
+                'user' => $user ? [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'avatar' => substr($user->name ?? $user->phone ?? '', 0, 1),
+                    'role' => $user->getRoleNames()->first() ?? 'User',
                 ] : null,
             ],
             'flash' => [

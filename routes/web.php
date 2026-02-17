@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PressureLevelController;
 use App\Http\Controllers\Admin\TestimonialController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Public\LandingController;
 use App\Http\Controllers\Public\MasterController as PublicMasterController;
 use App\Http\Controllers\Public\CustomerAuthController;
@@ -54,8 +55,16 @@ Route::prefix('app')->group(function () {
     Route::post('/auto-login', [MiniAppHomeController::class, 'autoLogin'])->name('miniapp.auto-login');
     Route::post('/link-telegram', [MiniAppHomeController::class, 'linkTelegram'])->name('miniapp.link-telegram')->middleware('auth');
     Route::post('/logout', [MiniAppHomeController::class, 'logout'])->name('miniapp.logout')->middleware('auth');
+    Route::post('/save-name', [MiniAppHomeController::class, 'saveName'])->name('miniapp.save-name')->middleware('auth');
+    Route::post('/pin/set', [MiniAppHomeController::class, 'setPin'])->name('miniapp.pin.set')->middleware('auth');
+    Route::post('/pin/remove', [MiniAppHomeController::class, 'removePin'])->name('miniapp.pin.remove')->middleware('auth');
     Route::get('/book', [MiniAppHomeController::class, 'booking'])->name('miniapp.booking')->middleware('auth');
     Route::get('/booking-success', [MiniAppHomeController::class, 'bookingSuccess'])->name('miniapp.booking-success')->middleware('auth');
+    Route::get('/orders', [MiniAppHomeController::class, 'orders'])->name('miniapp.orders')->middleware('auth');
+    Route::get('/orders/{order}', [MiniAppHomeController::class, 'orderShow'])->name('miniapp.orders.show')->middleware('auth');
+    Route::post('/orders/{order}/cancel', [MiniAppHomeController::class, 'orderCancel'])->name('miniapp.orders.cancel')->middleware('auth');
+    Route::get('/profile', [MiniAppHomeController::class, 'profile'])->name('miniapp.profile')->middleware('auth');
+    Route::put('/profile', [MiniAppHomeController::class, 'profileUpdate'])->name('miniapp.profile.update')->middleware('auth');
 });
 
 // Default login redirect
@@ -68,6 +77,8 @@ Route::prefix('auth')->group(function () {
     Route::get('/login', [CustomerAuthController::class, 'showLogin'])->name('customer.login');
     Route::post('/otp/send', [CustomerAuthController::class, 'sendOtp'])->name('customer.otp.send');
     Route::post('/otp/verify', [CustomerAuthController::class, 'verifyOtp'])->name('customer.otp.verify');
+    Route::post('/pin/check', [CustomerAuthController::class, 'checkPin'])->name('customer.pin.check');
+    Route::post('/pin/login', [CustomerAuthController::class, 'loginWithPin'])->name('customer.pin.login');
 });
 
 // Customer Protected Routes
@@ -75,10 +86,15 @@ Route::prefix('customer')->middleware(['auth', 'role:customer'])->group(function
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('customer.dashboard');
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('customer.orders');
     Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('customer.orders.show');
+    Route::post('/orders/{order}/cancel', [CustomerOrderController::class, 'cancel'])->name('customer.orders.cancel');
     Route::get('/ratings', [CustomerRatingController::class, 'index'])->name('customer.ratings');
     Route::post('/orders/{order}/rate', [CustomerRatingController::class, 'createAndRedirect'])->name('customer.orders.rate');
     Route::get('/favorites', [CustomerFavoriteController::class, 'index'])->name('customer.favorites');
     Route::post('/favorites/{master}/toggle', [CustomerFavoriteController::class, 'toggle'])->name('customer.favorites.toggle');
+    Route::get('/profile', [\App\Http\Controllers\Customer\ProfileController::class, 'edit'])->name('customer.profile');
+    Route::put('/profile', [\App\Http\Controllers\Customer\ProfileController::class, 'update'])->name('customer.profile.update');
+    Route::post('/pin/set', [\App\Http\Controllers\Customer\ProfileController::class, 'setPin'])->name('customer.pin.set');
+    Route::post('/pin/remove', [\App\Http\Controllers\Customer\ProfileController::class, 'removePin'])->name('customer.pin.remove');
     Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
 });
 
@@ -90,6 +106,8 @@ Route::prefix('master')->middleware(['auth', 'role:master'])->group(function () 
     Route::get('/ratings', [MasterRatingController::class, 'index'])->name('master.ratings');
     Route::post('/orders/{order}/rate', [MasterRatingController::class, 'createAndRedirect'])->name('master.orders.rate');
     Route::get('/profile', [MasterProfileController::class, 'index'])->name('master.profile');
+    Route::get('/profile/edit', [MasterProfileController::class, 'edit'])->name('master.profile.edit');
+    Route::put('/profile', [MasterProfileController::class, 'update'])->name('master.profile.update');
     Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('master.logout');
 });
 
@@ -101,7 +119,7 @@ Route::prefix('admin')->group(function () {
 });
 
 // Admin Protected Routes
-Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
+Route::prefix('admin')->middleware(['auth:admin', 'admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     // Service Types CRUD
@@ -222,6 +240,11 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('profile', [ProfileController::class, 'index'])->name('admin.profile.index');
     Route::put('profile', [ProfileController::class, 'update'])->name('admin.profile.update');
     Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('admin.profile.password');
+
+    // Reports
+    Route::get('reports', [ReportController::class, 'index'])->name('admin.reports.index');
+    Route::get('reports/export', [ReportController::class, 'export'])->name('admin.reports.export');
+    Route::get('reports/masters', [ReportController::class, 'masters'])->name('admin.reports.masters');
 
     // Orders (view and manage only, no create)
     Route::get('orders', [OrderController::class, 'index'])->name('admin.orders.index');

@@ -3,8 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Order;
+use App\Http\Requests\Admin\Order\AddNoteRequest;
+use App\Http\Requests\Admin\Order\CancelRequest;
+use App\Http\Requests\Admin\Order\GeneratePaymentLinkRequest;
+use App\Http\Requests\Admin\Order\RescheduleRequest;
+use App\Http\Requests\Admin\Order\SaveConfirmationRequest;
+use App\Http\Requests\Admin\Order\SaveQaRequest;
+use App\Http\Requests\Admin\Order\UpdateStatusRequest;
 use App\Models\Master;
+use App\Models\Order;
 use App\Repositories\OrderRepository;
 use App\Services\OrderService;
 use App\Services\PaymentService;
@@ -71,22 +78,10 @@ class OrderController extends Controller
     /**
      * Update order status
      */
-    public function updateStatus(Request $request, Order $order)
+    public function updateStatus(UpdateStatusRequest $request, Order $order)
     {
-        $validated = $request->validate([
-            'status' => 'required|in:' . implode(',', [
-                Order::STATUS_NEW,
-                Order::STATUS_CONFIRMING,
-                Order::STATUS_CONFIRMED,
-                Order::STATUS_IN_PROGRESS,
-                Order::STATUS_COMPLETED,
-                Order::STATUS_CANCELLED,
-            ]),
-            'comment' => 'nullable|string|max:500',
-        ]);
-
         try {
-            $this->orderService->updateStatus($order, $validated['status'], $validated['comment'] ?? null);
+            $this->orderService->updateStatus($order, $request->status, $request->comment);
             return back()->with('success', 'Status muvaffaqiyatli yangilandi');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
@@ -96,22 +91,15 @@ class OrderController extends Controller
     /**
      * Reschedule order (change date/time)
      */
-    public function reschedule(Request $request, Order $order)
+    public function reschedule(RescheduleRequest $request, Order $order)
     {
-        $validated = $request->validate([
-            'booking_date' => 'required|date',
-            'arrival_window_start' => 'required|date_format:H:i',
-            'arrival_window_end' => 'required|date_format:H:i|after:arrival_window_start',
-            'comment' => 'nullable|string|max:500',
-        ]);
-
         try {
             $this->orderService->reschedule(
                 $order,
-                $validated['booking_date'],
-                $validated['arrival_window_start'],
-                $validated['arrival_window_end'],
-                $validated['comment'] ?? null
+                $request->booking_date,
+                $request->arrival_window_start,
+                $request->arrival_window_end,
+                $request->comment
             );
             return back()->with('success', 'Vaqt muvaffaqiyatli o\'zgartirildi');
         } catch (\Exception $e) {
@@ -122,13 +110,9 @@ class OrderController extends Controller
     /**
      * Add dispatcher note
      */
-    public function addNote(Request $request, Order $order)
+    public function addNote(AddNoteRequest $request, Order $order)
     {
-        $validated = $request->validate([
-            'note' => 'required|string|max:1000',
-        ]);
-
-        $this->orderService->addNote($order, $validated['note']);
+        $this->orderService->addNote($order, $request->note);
 
         return back()->with('success', 'Izoh qo\'shildi');
     }
@@ -136,14 +120,10 @@ class OrderController extends Controller
     /**
      * Cancel order
      */
-    public function cancel(Request $request, Order $order)
+    public function cancel(CancelRequest $request, Order $order)
     {
-        $validated = $request->validate([
-            'reason' => 'required|string|max:500',
-        ]);
-
         try {
-            $this->orderService->cancel($order, $validated['reason']);
+            $this->orderService->cancel($order, $request->reason);
             return back()->with('success', 'Buyurtma bekor qilindi');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
@@ -153,24 +133,10 @@ class OrderController extends Controller
     /**
      * Save confirmation form (Block C - Анкета подтверждения)
      */
-    public function saveConfirmation(Request $request, Order $order)
+    public function saveConfirmation(SaveConfirmationRequest $request, Order $order)
     {
-        $validated = $request->validate([
-            'call_outcome' => 'required|in:pending,confirmed,reschedule,no_answer,cancelled',
-            'conf_entrance' => 'nullable|string|max:50',
-            'conf_floor' => 'nullable|string|max:20',
-            'conf_elevator' => 'boolean',
-            'conf_parking' => 'nullable|string|max:200',
-            'conf_landmark' => 'nullable|string|max:200',
-            'conf_onsite_phone' => 'nullable|string|max:20',
-            'conf_constraints' => 'nullable|string|max:500',
-            'conf_space_ok' => 'boolean',
-            'conf_pets' => 'boolean',
-            'conf_note_to_master' => 'nullable|string|max:1000',
-        ]);
-
         try {
-            $this->orderService->saveConfirmation($order, $validated);
+            $this->orderService->saveConfirmation($order, $request->validated());
             return back()->with('success', 'Anketa muvaffaqiyatli saqlandi');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
@@ -180,13 +146,8 @@ class OrderController extends Controller
     /**
      * Generate payment link for order
      */
-    public function generatePaymentLink(Request $request, Order $order)
+    public function generatePaymentLink(GeneratePaymentLinkRequest $request, Order $order)
     {
-        $validated = $request->validate([
-            'provider' => 'required|in:payme,click',
-        ]);
-
-        // Check if order can be paid
         if (!$order->canBePaid()) {
             return response()->json([
                 'success' => false,
@@ -194,7 +155,7 @@ class OrderController extends Controller
             ], 400);
         }
 
-        $link = $this->paymentService->generateDirectPaymentLink($order, $validated['provider']);
+        $link = $this->paymentService->generateDirectPaymentLink($order, $request->provider);
 
         if (!$link) {
             return response()->json([
@@ -206,7 +167,7 @@ class OrderController extends Controller
         return response()->json([
             'success' => true,
             'link' => $link,
-            'provider' => $validated['provider'],
+            'provider' => $request->provider,
             'amount' => number_format($order->total_amount, 0, '', ' ') . ' so\'m',
         ]);
     }
@@ -342,23 +303,16 @@ class OrderController extends Controller
     /**
      * Save QA ratings
      */
-    public function saveQa(Request $request, Order $order)
+    public function saveQa(SaveQaRequest $request, Order $order)
     {
-        $validated = $request->validate([
-            'qa_overall_rating' => 'required|integer|min:1|max:5',
-            'qa_punctuality_rating' => 'required|integer|min:1|max:5',
-            'qa_professionalism_rating' => 'required|integer|min:1|max:5',
-            'qa_feedback' => 'nullable|string|max:1000',
-        ]);
-
         $order->update([
-            'qa_overall_rating' => $validated['qa_overall_rating'],
-            'qa_punctuality_rating' => $validated['qa_punctuality_rating'],
-            'qa_professionalism_rating' => $validated['qa_professionalism_rating'],
-            'qa_feedback' => $validated['qa_feedback'] ?? null,
+            'qa_overall_rating' => $request->qa_overall_rating,
+            'qa_punctuality_rating' => $request->qa_punctuality_rating,
+            'qa_professionalism_rating' => $request->qa_professionalism_rating,
+            'qa_feedback' => $request->qa_feedback,
             'qa_completed' => true,
             'qa_completed_at' => now(),
-            'qa_completed_by' => auth()->id(),
+            'qa_completed_by' => \Illuminate\Support\Facades\Auth::guard('admin')->id(),
         ]);
 
         return redirect()->back()->with('success', 'Baho saqlandi');

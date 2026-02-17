@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import MiniAppLayout from '@/Layouts/MiniAppLayout.vue';
 
@@ -11,9 +11,15 @@ const props = defineProps({
 
 const tg = ref(null);
 const tgUser = ref(null);
-const step = ref('phone');
+const step = ref('phone'); // 'phone', 'method', 'otp', 'pin'
 const countdown = ref(0);
 let countdownInterval = null;
+
+// PIN state
+const hasPin = ref(false);
+const pinCode = ref('');
+const pinError = ref('');
+const pinLoading = ref(false);
 
 const form = useForm({
     phone: '+998',
@@ -62,8 +68,88 @@ onMounted(async () => {
 });
 
 const formattedPhone = computed(() => form.phone.replace(/[^\d+]/g, ''));
+const canCheckPhone = computed(() => formattedPhone.value.length >= 13);
 const canSendOtp = computed(() => formattedPhone.value.length >= 13 && countdown.value === 0);
 const canVerify = computed(() => form.code.length === 6);
+const canVerifyPin = computed(() => pinCode.value.length === 4);
+
+// Check if phone has PIN when moving to next step
+const checkPhoneAndProceed = async () => {
+    if (!canCheckPhone.value) return;
+    
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        const response = await fetch('/auth/pin/check', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ phone: form.phone }),
+        });
+        
+        const result = await response.json();
+        hasPin.value = result.has_pin;
+        
+        if (result.has_pin) {
+            // User has PIN - show method selection
+            step.value = 'method';
+        } else {
+            // No PIN - go directly to OTP
+            sendOtp();
+        }
+    } catch (e) {
+        // On error, fallback to OTP
+        sendOtp();
+    }
+};
+
+const choosePin = () => {
+    pinCode.value = '';
+    pinError.value = '';
+    step.value = 'pin';
+};
+
+const chooseOtp = () => {
+    sendOtp();
+};
+
+const loginWithPin = async () => {
+    if (!canVerifyPin.value) return;
+    
+    pinLoading.value = true;
+    pinError.value = '';
+    
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        const response = await fetch('/auth/pin/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ 
+                phone: form.phone,
+                pin: pinCode.value,
+            }),
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            window.location.href = result.redirect || '/app';
+        } else {
+            pinError.value = result.message || 'Noto\'g\'ri PIN kod';
+            pinCode.value = '';
+        }
+    } catch (e) {
+        pinError.value = 'Xatolik yuz berdi';
+    } finally {
+        pinLoading.value = false;
+    }
+};
 
 const sendOtp = async () => {
     if (!canSendOtp.value) return;
@@ -106,6 +192,15 @@ const formatPhone = (e) => {
     }
     if (value.length > 13) value = value.slice(0, 13);
     form.phone = value;
+};
+
+const goBack = () => {
+    if (step.value === 'method' || step.value === 'otp' || step.value === 'pin') {
+        step.value = 'phone';
+        pinCode.value = '';
+        pinError.value = '';
+        form.code = '';
+    }
 };
 </script>
 
@@ -152,6 +247,7 @@ const formatPhone = (e) => {
                             :value="form.phone"
                             @input="formatPhone"
                             placeholder="+998 90 123 45 67"
+                            @keyup.enter="checkPhoneAndProceed"
                         />
                     </div>
                     <p v-if="form.errors.phone" class="error-text">{{ form.errors.phone }}</p>
@@ -159,11 +255,94 @@ const formatPhone = (e) => {
 
                 <button 
                     class="submit-btn" 
-                    :disabled="!canSendOtp || form.processing"
-                    @click="sendOtp"
+                    :disabled="!canCheckPhone || form.processing"
+                    @click="checkPhoneAndProceed"
                 >
-                    {{ form.processing ? 'Yuborilmoqda...' : 'Kodni olish' }}
+                    {{ form.processing ? 'Yuborilmoqda...' : 'Davom etish' }}
                 </button>
+            </div>
+
+            <!-- Method Selection Step (when user has PIN) -->
+            <div v-if="step === 'method'" class="form-content">
+                <div class="method-header">
+                    <p class="method-phone">{{ form.phone }}</p>
+                    <p class="method-hint">Kirish usulini tanlang</p>
+                </div>
+
+                <div class="method-options">
+                    <button class="method-btn" @click="choosePin">
+                        <div class="method-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                        </div>
+                        <div class="method-text">
+                            <span class="method-title">PIN kod</span>
+                            <span class="method-desc">Tez kirish</span>
+                        </div>
+                        <svg class="method-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m9 18 6-6-6-6"/>
+                        </svg>
+                    </button>
+
+                    <button class="method-btn" @click="chooseOtp">
+                        <div class="method-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                        </div>
+                        <div class="method-text">
+                            <span class="method-title">SMS kod</span>
+                            <span class="method-desc">Bir martalik kod</span>
+                        </div>
+                        <svg class="method-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m9 18 6-6-6-6"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <button class="link-btn back-btn" @click="goBack">
+                    ← Raqamni o'zgartirish
+                </button>
+            </div>
+
+            <!-- PIN Step -->
+            <div v-if="step === 'pin'" class="form-content">
+                <div class="input-group">
+                    <label class="input-label">PIN kod</label>
+                    <p class="input-hint">4 xonali PIN kodingizni kiriting</p>
+                    <div class="otp-wrapper glass">
+                        <input
+                            type="password"
+                            class="otp-input pin-input-field"
+                            v-model="pinCode"
+                            placeholder="••••"
+                            maxlength="4"
+                            inputmode="numeric"
+                            @keyup.enter="loginWithPin"
+                        />
+                    </div>
+                    <p v-if="pinError" class="error-text">{{ pinError }}</p>
+                </div>
+
+                <button 
+                    class="submit-btn" 
+                    :disabled="!canVerifyPin || pinLoading"
+                    @click="loginWithPin"
+                >
+                    {{ pinLoading ? 'Tekshirilmoqda...' : 'Kirish' }}
+                </button>
+
+                <div class="secondary-actions">
+                    <button class="link-btn" @click="chooseOtp">
+                        SMS kod bilan kirish
+                    </button>
+                    <span class="divider">•</span>
+                    <button class="link-btn" @click="goBack">
+                        Raqamni o'zgartirish
+                    </button>
+                </div>
             </div>
 
             <!-- OTP Step -->
@@ -179,6 +358,7 @@ const formatPhone = (e) => {
                             placeholder="••••••"
                             maxlength="6"
                             inputmode="numeric"
+                            @keyup.enter="verifyOtp"
                         />
                     </div>
                     <p v-if="form.errors.code" class="error-text">{{ form.errors.code }}</p>
@@ -201,7 +381,7 @@ const formatPhone = (e) => {
                         {{ countdown > 0 ? `Qayta yuborish (${countdown}s)` : 'Qayta yuborish' }}
                     </button>
                     <span class="divider">•</span>
-                    <button class="link-btn" @click="step = 'phone'">
+                    <button class="link-btn" @click="goBack">
                         Raqamni o'zgartirish
                     </button>
                 </div>
@@ -489,6 +669,101 @@ const formatPhone = (e) => {
 
 .divider {
     color: rgba(255, 255, 255, 0.3);
+}
+
+/* Method Selection */
+.method-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.method-phone {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 4px;
+}
+
+.method-hint {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0;
+}
+
+.method-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.method-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.method-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(184, 163, 105, 0.5);
+}
+
+.method-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(184, 163, 105, 0.2);
+    border-radius: 12px;
+    color: #B8A369;
+}
+
+.method-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.method-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.method-desc {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.method-arrow {
+    color: rgba(255, 255, 255, 0.4);
+    transition: transform 0.2s;
+}
+
+.method-btn:hover .method-arrow {
+    transform: translateX(4px);
+    color: #B8A369;
+}
+
+.back-btn {
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+}
+
+/* PIN input */
+.pin-input-field {
+    letter-spacing: 12px;
 }
 
 /* Footer */

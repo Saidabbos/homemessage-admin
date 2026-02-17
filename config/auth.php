@@ -40,6 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
     ],
 
     /*
@@ -142,6 +146,7 @@ return [
         'verify_block_minutes' => 15, // Block duration after max attempts
         'max_send_per_hour' => 5, // Max SMS sends per hour per phone
         'send_cooldown_seconds' => 60, // Cooldown between sends (60 seconds)
+        'test_code' => env('OTP_TEST_CODE'), // Fixed OTP for testing
     ],
 
 ];

@@ -5,16 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Master\StoreMasterRequest;
 use App\Http\Requests\Admin\Master\UpdateMasterRequest;
+use App\Mappers\OrderMapper;
 use App\Models\Master;
+use App\Models\Order;
 use App\Repositories\MasterRepository;
 use App\Repositories\OilRepository;
 use App\Repositories\PressureLevelRepository;
 use App\Repositories\ServiceTypeRepository;
 use App\Services\MasterService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\Order;
-use Carbon\Carbon;
 
 class MasterController extends Controller
 {
@@ -103,21 +104,7 @@ class MasterController extends Controller
         // Group orders by date for calendar markers
         $ordersByDate = $orders->groupBy(function ($order) {
             return Carbon::parse($order->booking_date)->format('Y-m-d');
-        })->map(function ($dayOrders) {
-            return $dayOrders->map(function ($order) {
-                return [
-                    'id' => $order->id,
-                    'order_number' => $order->order_number,
-                    'time_start' => substr($order->arrival_window_start, 0, 5),
-                    'time_end' => substr($order->arrival_window_end, 0, 5),
-                    'duration_minutes' => $order->duration?->minutes ?? 60,
-                    'service_name' => $order->serviceType?->name ?? '-',
-                    'customer_name' => $order->customer?->name ?? '-',
-                    'status' => $order->status,
-                    'payment_status' => $order->payment_status,
-                ];
-            });
-        });
+        })->map(fn($dayOrders) => OrderMapper::collection($dayOrders, 'toMasterDayItem'));
 
         return Inertia::render('Admin/Masters/Schedule', [
             'master' => $master,

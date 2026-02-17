@@ -7,6 +7,7 @@ const { t } = useI18n();
 
 const props = defineProps({
     groupId: String,
+    source: String, // 'miniapp' or null
     orders: Array,
     totalAmount: Number,
     providers: Array,
@@ -113,11 +114,17 @@ const retryPayment = () => {
 };
 
 const goToSuccess = () => {
-    router.visit('/booking/success?group_id=' + props.groupId);
+    const sourceParam = props.source ? `&source=${props.source}` : '';
+    router.visit('/booking/success?group_id=' + props.groupId + sourceParam);
 };
 
 const goToOrders = () => {
-    router.visit('/customer/orders');
+    // If from miniapp, go to miniapp orders
+    if (props.source === 'miniapp') {
+        router.visit('/app/orders');
+    } else {
+        router.visit('/customer/orders');
+    }
 };
 
 const goHome = () => {

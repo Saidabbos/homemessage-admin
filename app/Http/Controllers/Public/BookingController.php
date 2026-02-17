@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Mappers\OrderMapper;
 use App\Models\Order;
 use App\Repositories\ServiceTypeRepository;
 use App\Repositories\MasterRepository;
@@ -49,9 +50,10 @@ class BookingController extends Controller
     /**
      * Display the payment page after order creation.
      */
-    public function payment(string $groupId)
+    public function payment(Request $request, string $groupId)
     {
         $user = auth()->user();
+        $source = $request->query('source'); // 'miniapp' or null
 
         if (!$user || !$user->hasRole('customer')) {
             return redirect()->route('public.booking');
@@ -66,9 +68,12 @@ class BookingController extends Controller
             return redirect()->route('public.booking');
         }
 
-        // If all orders already paid, go to success
+        // If all orders already paid, redirect appropriately
         $allPaid = $orders->every(fn($o) => $o->payment_status === Order::PAY_PAID);
         if ($allPaid) {
+            if ($source === 'miniapp') {
+                return redirect('/app/orders');
+            }
             return redirect()->route('public.booking.success', ['group_id' => $groupId]);
         }
 
@@ -76,20 +81,8 @@ class BookingController extends Controller
 
         return Inertia::render('Public/BookingPayment', [
             'groupId' => $groupId,
-            'orders' => $orders->map(fn($order) => [
-                'id' => $order->id,
-                'order_number' => $order->order_number,
-                'service_name' => $order->serviceType?->getTranslation('name', $locale) ?? '',
-                'master_name' => $order->master?->full_name ?? '',
-                'master_photo' => $order->master?->photo_url,
-                'duration_minutes' => $order->duration?->duration ?? 60,
-                'total_amount' => $order->total_amount,
-                'booking_date' => $order->booking_date?->format('d.m.Y'),
-                'arrival_window' => $order->arrival_window_start
-                    ? substr($order->arrival_window_start, 0, 5) . '-' . substr($order->arrival_window_end ?? '', 0, 5)
-                    : '',
-                'payment_status' => $order->payment_status,
-            ]),
+            'source' => $source,
+            'orders' => OrderMapper::collection($orders, 'toPaymentItem'),
             'totalAmount' => $orders->sum('total_amount'),
             'providers' => $this->paymentService->getAvailableProviders(),
             'paymentEnabled' => $this->paymentService->isEnabled(),
@@ -104,26 +97,25 @@ class BookingController extends Controller
     public function success(Request $request)
     {
         $groupId = $request->query('group_id');
-        $orders = [];
+        $source = $request->query('source');
+
+        // If from miniapp, redirect to miniapp orders
+        if ($source === 'miniapp') {
+            return redirect('/app/orders');
+        }
+
+        $orders = collect([]);
 
         if ($groupId && auth()->check()) {
-            $locale = app()->getLocale();
             $orders = Order::where('booking_group_id', $groupId)
                 ->where('customer_id', auth()->id())
                 ->with(['serviceType', 'master'])
-                ->get()
-                ->map(fn($order) => [
-                    'order_number' => $order->order_number,
-                    'service_name' => $order->serviceType?->getTranslation('name', $locale) ?? '',
-                    'master_name' => $order->master?->full_name ?? '',
-                    'total_amount' => $order->total_amount,
-                    'payment_status' => $order->payment_status,
-                ]);
+                ->get();
         }
 
         return Inertia::render('Public/BookingSuccess', [
             'groupId' => $groupId,
-            'orders' => $orders,
+            'orders' => OrderMapper::collection($orders, 'toBookingSuccess'),
         ]);
     }
 }

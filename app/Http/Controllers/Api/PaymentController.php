@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\CancelPaymentRequest;
+use App\Http\Requests\Api\CreatePaymentRequest;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Services\PaymentService;
@@ -33,7 +35,7 @@ class PaymentController extends Controller
     /**
      * Create payment for order
      */
-    public function create(Request $request): JsonResponse
+    public function create(CreatePaymentRequest $request): JsonResponse
     {
         if (!$this->paymentService->isEnabled()) {
             return response()->json([
@@ -42,12 +44,7 @@ class PaymentController extends Controller
             ], 503);
         }
 
-        $validated = $request->validate([
-            'order_number' => 'required|string',
-            'provider' => 'required|in:payme,click',
-        ]);
-
-        $order = Order::where('order_number', $validated['order_number'])
+        $order = Order::where('order_number', $request->order_number)
             ->where('customer_id', Auth::id())
             ->first();
 
@@ -72,7 +69,7 @@ class PaymentController extends Controller
             ], 400);
         }
 
-        $payment = $this->paymentService->createPayment($order, $validated['provider']);
+        $payment = $this->paymentService->createPayment($order, $request->provider);
 
         return response()->json([
             'success' => true,
@@ -105,13 +102,9 @@ class PaymentController extends Controller
     /**
      * Cancel payment
      */
-    public function cancel(Request $request): JsonResponse
+    public function cancel(CancelPaymentRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'transaction_id' => 'required|string',
-        ]);
-
-        $payment = Payment::where('transaction_id', $validated['transaction_id'])
+        $payment = Payment::where('transaction_id', $request->transaction_id)
             ->whereHas('order', fn($q) => $q->where('customer_id', Auth::id()))
             ->first();
 

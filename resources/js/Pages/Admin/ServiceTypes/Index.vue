@@ -137,8 +137,8 @@ const hasActiveFilters = () => search.value || status.value;
                 <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">#</th>
                 <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('common.image') }}</th>
                 <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('common.name') }}</th>
-                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">Davomiyliklar</th>
-                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">Narx oralig'i</th>
+                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('serviceTypes.durations') }}</th>
+                <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('serviceTypes.priceRange') }}</th>
                 <th class="px-4 py-3 text-left font-semibold text-[#6c757d]">{{ t('common.status') }}</th>
                 <th class="px-4 py-3 text-center font-semibold text-[#6c757d]">{{ t('common.actions') }}</th>
               </tr>

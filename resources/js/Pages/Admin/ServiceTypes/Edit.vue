@@ -1,10 +1,13 @@
 <script setup>
 import { ref } from 'vue';
 import { useForm, Link, router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import ImageUpload from '@/Components/Admin/ImageUpload.vue';
 
 defineOptions({ layout: AdminLayout });
+
+const { t } = useI18n();
 
 const props = defineProps({
   serviceType: Object,
@@ -71,7 +74,7 @@ const submit = () => {
 };
 
 const deleteServiceType = () => {
-  if (confirm('Haqiqatan ham bu massage turini o\'chirmoqchimisiz?')) {
+  if (confirm(t('serviceTypes.confirmDelete'))) {
     router.delete(route('admin.service-types.destroy', props.serviceType.id));
   }
 };
@@ -87,16 +90,16 @@ const hasTranslationErrors = (locale) => {
     <div class="mb-4">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="text-2xl font-semibold text-[#1f2d3d]">Tahrirlash</h1>
+          <h1 class="text-2xl font-semibold text-[#1f2d3d]">{{ t('common.edit') }}</h1>
           <p class="text-sm text-[#6c757d] mt-1">{{ serviceType.uz?.name || serviceType.name }}</p>
         </div>
         <nav class="mt-2 sm:mt-0">
           <ol class="flex items-center text-sm">
-            <li><Link href="/admin/dashboard" class="text-[#007bff]">Bosh sahifa</Link></li>
+            <li><Link href="/admin/dashboard" class="text-[#007bff]">{{ t('common.home') }}</Link></li>
             <li class="mx-2 text-[#6c757d]">/</li>
-            <li><Link href="/admin/service-types" class="text-[#007bff]">Massage Turlari</Link></li>
+            <li><Link href="/admin/service-types" class="text-[#007bff]">{{ t('serviceTypes.title') }}</Link></li>
             <li class="mx-2 text-[#6c757d]">/</li>
-            <li class="text-[#6c757d]">Tahrirlash</li>
+            <li class="text-[#6c757d]">{{ t('common.edit') }}</li>
           </ol>
         </nav>
       </div>
@@ -200,14 +203,14 @@ const hasTranslationErrors = (locale) => {
                 <svg class="w-4 h-4 mr-2 text-[#17a2b8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Davomiylik va Narxlar
+                {{ t('serviceTypes.durationsAndPrices') }}
               </h3>
               <button type="button" @click="addDuration"
                 class="inline-flex items-center px-3 py-1.5 bg-[#28a745] text-white text-sm rounded hover:bg-[#218838] transition">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Qo'shish
+                {{ t('common.addNew') }}
               </button>
             </div>
             <div class="p-4">
@@ -220,7 +223,7 @@ const hasTranslationErrors = (locale) => {
                   
                   <!-- Duration Input -->
                   <div class="flex-1">
-                    <label class="block text-xs text-[#6c757d] mb-1">Davomiylik (daq)</label>
+                    <label class="block text-xs text-[#6c757d] mb-1">{{ t('serviceTypes.duration') }} ({{ t('serviceTypes.min') }})</label>
                     <input v-model.number="duration.duration" type="number" min="15" max="480" step="15"
                       class="w-full px-2 py-1.5 border rounded text-sm focus:ring-1 focus:ring-[#007bff]"
                       :class="form.errors[`durations.${index}.duration`] ? 'border-[#dc3545]' : 'border-gray-300'" />
@@ -228,7 +231,7 @@ const hasTranslationErrors = (locale) => {
 
                   <!-- Price Input -->
                   <div class="flex-1">
-                    <label class="block text-xs text-[#6c757d] mb-1">Narx (so'm)</label>
+                    <label class="block text-xs text-[#6c757d] mb-1">{{ t('serviceTypes.price') }} ({{ t('serviceTypes.sum') }})</label>
                     <input v-model.number="duration.price" type="number" min="0" step="1000"
                       class="w-full px-2 py-1.5 border rounded text-sm focus:ring-1 focus:ring-[#007bff]"
                       :class="form.errors[`durations.${index}.price`] ? 'border-[#dc3545]' : 'border-gray-300'" />
@@ -236,14 +239,14 @@ const hasTranslationErrors = (locale) => {
 
                   <!-- Default Checkbox -->
                   <div class="flex flex-col items-center">
-                    <label class="block text-xs text-[#6c757d] mb-1">Asosiy</label>
+                    <label class="block text-xs text-[#6c757d] mb-1">{{ t('serviceTypes.default') }}</label>
                     <input type="radio" :checked="duration.is_default" @change="setDefault(index)"
                       class="w-4 h-4 text-[#007bff] border-gray-300 focus:ring-[#007bff]" />
                   </div>
 
                   <!-- Status Toggle -->
                   <div class="flex flex-col items-center">
-                    <label class="block text-xs text-[#6c757d] mb-1">Faol</label>
+                    <label class="block text-xs text-[#6c757d] mb-1">{{ t('common.active') }}</label>
                     <input v-model="duration.status" type="checkbox"
                       class="w-4 h-4 text-[#28a745] border-gray-300 rounded focus:ring-[#28a745]" />
                   </div>
@@ -296,17 +299,17 @@ const hasTranslationErrors = (locale) => {
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                 </svg>
-                Yangilash
+                {{ t('common.update') }}
               </h3>
             </div>
             <div class="p-4">
               <div class="flex items-center justify-between mb-4">
-                <span class="text-sm text-[#1f2d3d]">Status</span>
+                <span class="text-sm text-[#1f2d3d]">{{ t('common.status') }}</span>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input v-model="form.status" type="checkbox" class="sr-only peer">
                   <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#007bff] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#28a745]"></div>
                   <span class="ml-2 text-sm font-medium" :class="form.status ? 'text-[#28a745]' : 'text-[#6c757d]'">
-                    {{ form.status ? 'Faol' : 'Nofaol' }}
+                    {{ form.status ? t('common.active') : t('common.inactive') }}
                   </span>
                 </label>
               </div>
@@ -320,21 +323,21 @@ const hasTranslationErrors = (locale) => {
                   <svg v-else class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                   </svg>
-                  Yangilash
+                  {{ t('common.update') }}
                 </button>
                 <Link href="/admin/service-types"
                   class="w-full inline-flex items-center justify-center px-4 py-2 bg-[#6c757d] text-white text-sm font-medium rounded hover:bg-[#5a6268] transition">
                   <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                   </svg>
-                  Orqaga
+                  {{ t('common.back') }}
                 </Link>
                 <button type="button" @click="deleteServiceType"
                   class="w-full inline-flex items-center justify-center px-4 py-2 bg-[#dc3545] text-white text-sm font-medium rounded hover:bg-[#c82333] transition">
                   <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                   </svg>
-                  O'chirish
+                  {{ t('common.delete') }}
                 </button>
               </div>
             </div>
@@ -371,15 +374,15 @@ const hasTranslationErrors = (locale) => {
                 <span class="font-medium text-[#1f2d3d]">#{{ serviceType.id }}</span>
               </div>
               <div class="flex justify-between">
-                <span>Davomiyliklar:</span>
+                <span>{{ t('serviceTypes.durations') }}:</span>
                 <span class="font-medium text-[#1f2d3d]">{{ form.durations.length }} ta</span>
               </div>
               <div class="flex justify-between">
-                <span>Yaratilgan:</span>
+                <span>{{ t('common.createdAt') }}:</span>
                 <span>{{ new Date(serviceType.created_at).toLocaleDateString('uz-UZ') }}</span>
               </div>
               <div class="flex justify-between">
-                <span>Yangilangan:</span>
+                <span>{{ t('common.updatedAt') }}:</span>
                 <span>{{ new Date(serviceType.updated_at).toLocaleDateString('uz-UZ') }}</span>
               </div>
             </div>

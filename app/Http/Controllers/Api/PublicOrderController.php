@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\BatchOrderRequest;
+use App\Http\Requests\Api\CreatePublicOrderRequest;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\ServiceTypeDuration;
@@ -21,41 +23,14 @@ class PublicOrderController extends Controller
     /**
      * Create a new order from public booking.
      */
-    public function store(Request $request)
+    public function store(CreatePublicOrderRequest $request)
     {
-        if (!auth()->check()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Iltimos, avval tizimga kiring',
-            ], 401);
-        }
-
-        if (!auth()->user()->hasRole('customer')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Faqat mijozlar buyurtma bera oladi',
-            ], 403);
-        }
-
         Log::info('PublicOrderController@store: Creating public order', [
             'user_id' => auth()->id(),
             'request' => $request->all(),
         ]);
 
-        $validated = $request->validate([
-            'service_type_id' => 'required|exists:service_types,id',
-            'duration_id' => 'required|exists:service_type_durations,id',
-            'master_id' => 'required|exists:masters,id',
-            'date' => 'required|date',
-            'arrival_window_start' => 'required|string',
-            'people_count' => 'required|integer|min:1|max:5',
-            'total_duration' => 'required|integer|min:30',
-            'pressure_level' => 'required|in:soft,medium,hard,any',
-            'notes' => 'nullable|string|max:1000',
-            'services' => 'nullable|array',
-            'services.*.service_type_id' => 'required_with:services|exists:service_types,id',
-            'services.*.duration_id' => 'required_with:services|exists:service_type_durations,id',
-        ]);
+        $validated = $request->validated();
 
         try {
             return DB::transaction(function () use ($validated, $request) {
@@ -139,33 +114,9 @@ class PublicOrderController extends Controller
     /**
      * Create multiple orders from cart (batch submission).
      */
-    public function storeBatch(Request $request)
+    public function storeBatch(BatchOrderRequest $request)
     {
-        if (!auth()->check()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Iltimos, avval tizimga kiring',
-            ], 401);
-        }
-
-        if (!auth()->user()->hasRole('customer')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Faqat mijozlar buyurtma bera oladi',
-            ], 403);
-        }
-
-        $validated = $request->validate([
-            'orders' => 'required|array|min:1|max:10',
-            'orders.*.service_type_id' => 'required|exists:service_types,id',
-            'orders.*.duration_id' => 'required|exists:service_type_durations,id',
-            'orders.*.master_id' => 'required|exists:masters,id',
-            'orders.*.date' => 'required|date',
-            'orders.*.arrival_window_start' => 'required|string',
-            'orders.*.total_duration' => 'required|integer|min:30',
-            'orders.*.pressure_level' => 'required|in:soft,medium,hard,any',
-            'orders.*.notes' => 'nullable|string|max:1000',
-        ]);
+        $validated = $request->validated();
 
         try {
             return DB::transaction(function () use ($validated) {

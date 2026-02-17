@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Public\StoreRatingRequest;
 use App\Models\Rating;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -47,7 +48,7 @@ class RatingController extends Controller
     /**
      * Submit rating
      */
-    public function store(Request $request, string $token)
+    public function store(StoreRatingRequest $request, string $token)
     {
         $rating = Rating::where('token', $token)->firstOrFail();
 
@@ -56,16 +57,8 @@ class RatingController extends Controller
             return back()->with('error', 'Bu buyurtma allaqachon baholangan');
         }
 
-        $validated = $request->validate([
-            'overall_rating' => 'required|integer|min:1|max:5',
-            'punctuality_rating' => 'nullable|integer|min:1|max:5',
-            'professionalism_rating' => 'nullable|integer|min:1|max:5',
-            'cleanliness_rating' => 'nullable|integer|min:1|max:5',
-            'feedback' => 'nullable|string|max:1000',
-        ]);
-
         $rating->update([
-            ...$validated,
+            ...$request->validated(),
             'rated_at' => Carbon::now(),
         ]);
 

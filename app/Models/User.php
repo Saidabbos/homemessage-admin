@@ -31,6 +31,8 @@ class User extends Authenticatable
         'telegram_username',
         'telegram_first_name',
         'telegram_photo_url',
+        'pin_code',
+        'pin_set_at',
     ];
 
     /**
@@ -41,6 +43,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'pin_code',
     ];
 
     /**
@@ -54,7 +57,38 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'status' => 'boolean',
+            'pin_set_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Check if user has a PIN code set
+     */
+    public function hasPinCode(): bool
+    {
+        return !empty($this->pin_code);
+    }
+
+    /**
+     * Verify PIN code
+     */
+    public function verifyPinCode(string $pin): bool
+    {
+        if (!$this->hasPinCode()) {
+            return false;
+        }
+        return \Illuminate\Support\Facades\Hash::check($pin, $this->pin_code);
+    }
+
+    /**
+     * Set PIN code (will be hashed)
+     */
+    public function setPinCode(string $pin): void
+    {
+        $this->update([
+            'pin_code' => \Illuminate\Support\Facades\Hash::make($pin),
+            'pin_set_at' => now(),
+        ]);
     }
 
     /**

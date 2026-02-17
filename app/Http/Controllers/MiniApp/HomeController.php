@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\MiniApp;
 
 use App\Http\Controllers\Controller;
+use App\Mappers\OrderMapper;
 use App\Models\User;
 use App\Repositories\MasterRepository;
 use App\Repositories\ServiceTypeRepository;
@@ -51,7 +52,17 @@ class HomeController extends Controller
             return redirect()->route('miniapp.login');
         }
 
+        $user = Auth::user();
         $services = $this->serviceTypeRepository->getActiveWithDurations();
+
+        // Check if user needs to enter name (from flash or detect)
+        $needsName = session('needs_name', false);
+        if (!$needsName) {
+            // Auto-detect: name is empty, equals phone, or starts with +998
+            $needsName = empty($user->name) 
+                || $user->name === $user->phone 
+                || str_starts_with($user->name, '+998');
+        }
 
         return Inertia::render('MiniApp/Home', [
             'services' => $services->map(fn ($service) => [
@@ -67,6 +78,12 @@ class HomeController extends Controller
                     'is_default' => $d->is_default,
                 ])->values(),
             ]),
+            'needsName' => $needsName,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'phone' => $user->phone,
+            ],
         ]);
     }
 
@@ -97,8 +114,14 @@ class HomeController extends Controller
                 'name' => $master->full_name,
                 'photo_url' => $master->photo_url,
                 'experience' => $master->experience_years,
+                'rating' => $master->rating ?? 5.0,
                 'service_type_ids' => $master->serviceTypes->pluck('id')->toArray(),
             ]),
+            'payment' => [
+                'enabled' => config('services.payment.enabled', false),
+                'payme_enabled' => config('services.payme.enabled', false),
+                'click_enabled' => config('services.click.enabled', false),
+            ],
         ]);
     }
 
@@ -345,5 +368,221 @@ class HomeController extends Controller
         $request->session()->regenerateToken();
         
         return redirect()->route('miniapp.login');
+    }
+
+    /**
+     * Customer orders list
+     */
+    public function orders(Request $request)
+    {
+        $orders = \App\Models\Order::with(['master', 'serviceType', 'duration'])
+            ->where('customer_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return Inertia::render('MiniApp/Orders/Index', [
+            'orders' => [
+                'data' => OrderMapper::collection($orders->getCollection(), 'toListItem'),
+                'current_page' => $orders->currentPage(),
+                'last_page' => $orders->lastPage(),
+                'total' => $orders->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * Customer order detail
+     */
+    public function orderShow(\App\Models\Order $order)
+    {
+        // Check ownership
+        if ($order->customer_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $order->load(['master', 'serviceType', 'duration', 'oil']);
+
+        return Inertia::render('MiniApp/Orders/Show', [
+            'order' => OrderMapper::toDetail($order),
+            'payment' => [
+                'enabled' => $this->paymentService->isEnabled(),
+                'providers' => $this->paymentService->getAvailableProviders(),
+            ],
+        ]);
+    }
+
+    /**
+     * Cancel order request
+     */
+    public function orderCancel(\App\Models\Order $order)
+    {
+        // Check ownership
+        if ($order->customer_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // Check if can be cancelled
+        $cancellableStatuses = ['NEW', 'CONFIRMING', 'CONFIRMED', 'WAITING_PAYMENT'];
+        if (!in_array($order->status, $cancellableStatuses)) {
+            return back()->with('error', 'Bu buyurtmani bekor qilib bo\'lmaydi');
+        }
+
+        $order->update([
+            'status' => 'CANCELLED',
+            'cancelled_at' => now(),
+            'cancelled_by' => 'customer',
+        ]);
+
+        Log::info('MiniApp: Order cancelled by customer', [
+            'order_id' => $order->id,
+            'customer_id' => Auth::id(),
+        ]);
+
+        return redirect()->route('miniapp.orders')->with('success', 'Buyurtma bekor qilindi');
+    }
+
+    /**
+     * User profile page
+     */
+    public function profile()
+    {
+        $user = Auth::user();
+
+        return Inertia::render('MiniApp/Profile', [
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'phone' => $user->phone,
+                'email' => $user->email,
+                'locale' => $user->locale ?? 'uz',
+                'telegram_id' => $user->telegram_id,
+                'telegram_username' => $user->telegram_username,
+                'telegram_photo_url' => $user->telegram_photo_url,
+                'has_pin' => $user->hasPinCode(),
+                'pin_set_at' => $user->pin_set_at?->format('d.m.Y'),
+            ],
+        ]);
+    }
+
+    /**
+     * Update user profile
+     */
+    public function profileUpdate(\App\Http\Requests\MiniApp\UpdateProfileRequest $request)
+    {
+        $user = Auth::user();
+        $user->update($request->validated());
+
+        Log::info('MiniApp: Profile updated', [
+            'user_id' => $user->id,
+            'changes' => $request->validated(),
+        ]);
+
+        return back()->with('success', 'Profil yangilandi');
+    }
+
+    /**
+     * Save user name (quick update from name modal)
+     */
+    public function saveName(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|min:2',
+        ]);
+
+        $user = Auth::user();
+        $user->update(['name' => $request->input('name')]);
+
+        Log::info('MiniApp: Name saved', [
+            'user_id' => $user->id,
+            'name' => $request->input('name'),
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Set or update PIN code
+     */
+    public function setPin(Request $request)
+    {
+        $request->validate([
+            'pin' => 'required|string|size:4|regex:/^[0-9]+$/',
+            'current_pin' => 'nullable|string|size:4', // Required if already has PIN
+        ]);
+
+        $user = Auth::user();
+        $newPin = $request->input('pin');
+        $currentPin = $request->input('current_pin');
+
+        // If user already has PIN, verify current PIN first
+        if ($user->hasPinCode()) {
+            if (!$currentPin) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'current_pin_required',
+                    'message' => 'Joriy PIN kodni kiriting',
+                ], 400);
+            }
+            
+            if (!$user->verifyPinCode($currentPin)) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'invalid_current_pin',
+                    'message' => 'Joriy PIN kod noto\'g\'ri',
+                ], 401);
+            }
+        }
+
+        $user->setPinCode($newPin);
+
+        Log::info('MiniApp: PIN code set', [
+            'user_id' => $user->id,
+            'is_update' => $user->hasPinCode(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'PIN kod o\'rnatildi',
+        ]);
+    }
+
+    /**
+     * Remove PIN code
+     */
+    public function removePin(Request $request)
+    {
+        $request->validate([
+            'current_pin' => 'required|string|size:4',
+        ]);
+
+        $user = Auth::user();
+
+        if (!$user->hasPinCode()) {
+            return response()->json([
+                'success' => false,
+                'error' => 'no_pin',
+                'message' => 'PIN kod o\'rnatilmagan',
+            ], 400);
+        }
+
+        if (!$user->verifyPinCode($request->input('current_pin'))) {
+            return response()->json([
+                'success' => false,
+                'error' => 'invalid_pin',
+                'message' => 'PIN kod noto\'g\'ri',
+            ], 401);
+        }
+
+        $user->update([
+            'pin_code' => null,
+            'pin_set_at' => null,
+        ]);
+
+        Log::info('MiniApp: PIN code removed', ['user_id' => $user->id]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'PIN kod o\'chirildi',
+        ]);
     }
 }

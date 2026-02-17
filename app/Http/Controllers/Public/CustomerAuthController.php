@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Public\Auth\SendOtpRequest;
 use App\Http\Requests\Public\Auth\VerifyOtpRequest;
+use App\Models\User;
 use App\Services\CustomerAuthService;
 use App\Services\OtpService;
 use Illuminate\Http\Request;
@@ -81,26 +82,33 @@ class CustomerAuthController extends Controller
             return response()->json($result, 422);
         }
 
-        // Login or register customer
-        $user = $this->customerAuthService->loginOrRegister($phone, $request->validated('locale', 'uz'));
-
-        // Link Telegram account if data provided
+        // Prepare Telegram data if provided
+        $telegramData = null;
         $telegramId = $request->input('telegram_id');
-        if ($telegramId && !$user->telegram_id) {
-            $user->update([
-                'telegram_id' => $telegramId,
-                'telegram_username' => $request->input('telegram_username'),
-                'telegram_first_name' => $request->input('telegram_first_name'),
-                'telegram_photo_url' => $request->input('telegram_photo_url'),
-            ]);
-            \Illuminate\Support\Facades\Log::info('CustomerAuth: Telegram linked', [
-                'user_id' => $user->id,
-                'telegram_id' => $telegramId,
-            ]);
+        if ($telegramId) {
+            $telegramData = [
+                'id' => $telegramId,
+                'username' => $request->input('telegram_username'),
+                'first_name' => $request->input('telegram_first_name'),
+                'photo_url' => $request->input('telegram_photo_url'),
+            ];
         }
+
+        // Login or register customer (service handles Telegram linking)
+        $authResult = $this->customerAuthService->loginOrRegister(
+            $phone, 
+            $request->validated('locale', 'uz'),
+            $telegramData
+        );
+        
+        $user = $authResult['user'];
+        $isNew = $authResult['is_new'];
 
         // Create session
         Auth::login($user, true); // remember = true
+
+        // Check if new user needs to enter name (no Telegram name available)
+        $needsName = $isNew && $this->userNeedsNameInput($user);
 
         // Determine redirect based on role
         $defaultRoute = $user->hasRole('master') ? route('master.dashboard') : route('customer.dashboard');
@@ -108,17 +116,36 @@ class CustomerAuthController extends Controller
         // Return Inertia-compatible response
         if ($request->header('X-Inertia')) {
             // Redirect based on where request came from
-            $redirect = str_contains($request->header('referer', ''), '/app')
-                ? route('miniapp.home')
-                : $defaultRoute;
-            return redirect($redirect);
+            $isMiniApp = str_contains($request->header('referer', ''), '/app');
+            
+            if ($isMiniApp) {
+                // For Mini App: redirect to home, frontend will handle name input
+                return redirect()->route('miniapp.home')->with('needs_name', $needsName);
+            }
+            
+            return redirect($defaultRoute);
         }
 
         return response()->json([
             'success' => true,
             'redirect' => $defaultRoute,
+            'is_new' => $isNew,
+            'needs_name' => $needsName,
             'message' => __('auth.otp.login_success'),
         ]);
+    }
+
+    /**
+     * Check if user needs to input their name
+     * Returns true if name is not set or equals phone number
+     */
+    protected function userNeedsNameInput(User $user): bool
+    {
+        // Name is required if it's empty, equals phone, or starts with +998
+        $name = $user->name;
+        return empty($name) 
+            || $name === $user->phone 
+            || str_starts_with($name, '+998');
     }
 
     /**
@@ -133,5 +160,86 @@ class CustomerAuthController extends Controller
 
         return redirect()->route('customer.login')
             ->with('success', __('auth.otp.logout_success'));
+    }
+
+    /**
+     * Check if phone number has PIN code set
+     * Returns: { has_pin: bool, has_user: bool }
+     */
+    public function checkPin(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string',
+        ]);
+
+        $phone = $request->input('phone');
+        $user = User::where('phone', $phone)->first();
+
+        return response()->json([
+            'has_user' => $user !== null,
+            'has_pin' => $user?->hasPinCode() ?? false,
+        ]);
+    }
+
+    /**
+     * Login with PIN code (no OTP required)
+     */
+    public function loginWithPin(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string',
+            'pin' => 'required|string|size:4',
+        ]);
+
+        $phone = $request->input('phone');
+        $pin = $request->input('pin');
+
+        $user = User::where('phone', $phone)->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'error' => 'user_not_found',
+                'message' => 'Foydalanuvchi topilmadi',
+            ], 404);
+        }
+
+        if (!$user->hasPinCode()) {
+            return response()->json([
+                'success' => false,
+                'error' => 'no_pin',
+                'message' => 'PIN kod o\'rnatilmagan',
+            ], 400);
+        }
+
+        if (!$user->verifyPinCode($pin)) {
+            \Illuminate\Support\Facades\Log::warning('CustomerAuth: Invalid PIN attempt', [
+                'phone' => $phone,
+                'ip' => $request->ip(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'invalid_pin',
+                'message' => 'Noto\'g\'ri PIN kod',
+            ], 401);
+        }
+
+        // Login successful
+        Auth::login($user, true);
+
+        \Illuminate\Support\Facades\Log::info('CustomerAuth: PIN login successful', [
+            'user_id' => $user->id,
+            'phone' => $phone,
+        ]);
+
+        // Determine redirect
+        $isMiniApp = str_contains($request->header('referer', ''), '/app');
+        $defaultRoute = $user->hasRole('master') ? route('master.dashboard') : route('customer.dashboard');
+
+        return response()->json([
+            'success' => true,
+            'redirect' => $isMiniApp ? route('miniapp.home') : $defaultRoute,
+            'message' => 'Muvaffaqiyatli kirdingiz',
+        ]);
     }
 }

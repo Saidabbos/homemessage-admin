@@ -39,6 +39,14 @@ class ServiceType extends Model
     }
 
     /**
+     * Get all orders for this service type.
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
      * Get only active durations.
      */
     public function activeDurations(): HasMany

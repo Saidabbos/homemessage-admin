@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
+use App\Mappers\OrderMapper;
 use App\Models\Order;
 use App\Models\Rating;
 use Illuminate\Http\Request;
@@ -47,24 +48,7 @@ class OrderController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $locale = app()->getLocale();
-
-        $orders->getCollection()->transform(function ($order) use ($locale) {
-            return [
-                'id' => $order->id,
-                'order_number' => $order->order_number,
-                'booking_date' => $order->booking_date?->format('Y-m-d'),
-                'booking_date_formatted' => $order->booking_date?->translatedFormat('d M, Y'),
-                'arrival_time' => $order->arrival_window_start ? substr($order->arrival_window_start, 0, 5) : null,
-                'service_name' => $order->serviceType?->getTranslation('name', $locale) ?? '-',
-                'customer_name' => $order->customer?->name ?? '-',
-                'customer_phone' => $order->customer?->phone ?? '-',
-                'duration_minutes' => $order->duration?->duration ?? 60,
-                'total_amount' => (float) $order->total_amount,
-                'status' => $order->status,
-                'payment_status' => $order->payment_status,
-            ];
-        });
+        $orders->getCollection()->transform(fn($order) => OrderMapper::toMasterListItem($order));
 
         $statusCounts = Order::where('master_id', $master->id)
             ->selectRaw('status, COUNT(*) as count')
@@ -95,7 +79,6 @@ class OrderController extends Controller
         }
 
         $order->load(['customer', 'serviceType', 'duration', 'oil', 'logs']);
-        $locale = app()->getLocale();
 
         $customerRating = Rating::where('order_id', $order->id)
             ->where('type', Rating::TYPE_CLIENT_TO_MASTER)
@@ -108,46 +91,23 @@ class OrderController extends Controller
 
         $canRate = $order->isCompleted() && (!$masterRating || !$masterRating->isCompleted());
 
+        $customerRatingData = $customerRating ? [
+            'overall_rating' => $customerRating->overall_rating,
+            'punctuality_rating' => $customerRating->punctuality_rating,
+            'professionalism_rating' => $customerRating->professionalism_rating,
+            'cleanliness_rating' => $customerRating->cleanliness_rating,
+            'feedback' => $customerRating->feedback,
+            'rated_at' => $customerRating->rated_at->format('d.m.Y'),
+        ] : null;
+
+        $masterRatingData = $masterRating?->isCompleted() ? [
+            'overall_rating' => $masterRating->overall_rating,
+            'feedback' => $masterRating->feedback,
+            'rated_at' => $masterRating->rated_at->format('d.m.Y'),
+        ] : null;
+
         return Inertia::render('Master/Orders/Show', [
-            'order' => [
-                'id' => $order->id,
-                'order_number' => $order->order_number,
-                'booking_date_display' => $order->booking_date?->translatedFormat('d M, Y'),
-                'arrival_window' => $order->arrival_window_display,
-                'service_type' => $order->serviceType ? ['name' => $order->serviceType->getTranslation('name', $locale)] : null,
-                'duration' => $order->duration ? ['minutes' => $order->duration->duration] : null,
-                'oil' => $order->oil ? ['name' => $order->oil->getTranslation('name', $locale)] : null,
-                'people_count' => $order->people_count,
-                'pressure_level' => $order->pressure_level,
-                'total_amount' => (float) $order->total_amount,
-                'status' => $order->status,
-                'payment_status' => $order->payment_status,
-                'address' => $order->address,
-                'customer' => $order->customer ? [
-                    'name' => $order->customer->name,
-                    'phone' => $order->customer->phone,
-                ] : null,
-                'customer_rating' => $customerRating ? [
-                    'overall_rating' => $customerRating->overall_rating,
-                    'punctuality_rating' => $customerRating->punctuality_rating,
-                    'professionalism_rating' => $customerRating->professionalism_rating,
-                    'cleanliness_rating' => $customerRating->cleanliness_rating,
-                    'feedback' => $customerRating->feedback,
-                    'rated_at' => $customerRating->rated_at->format('d.m.Y'),
-                ] : null,
-                'logs' => $order->logs->map(fn ($log) => [
-                    'id' => $log->id,
-                    'action' => $log->action,
-                    'created_at' => $log->created_at->format('d.m.Y H:i'),
-                ]),
-                'created_at' => $order->created_at->format('d.m.Y H:i'),
-                'can_rate' => $canRate,
-                'master_rating' => $masterRating?->isCompleted() ? [
-                    'overall_rating' => $masterRating->overall_rating,
-                    'feedback' => $masterRating->feedback,
-                    'rated_at' => $masterRating->rated_at->format('d.m.Y'),
-                ] : null,
-            ],
+            'order' => OrderMapper::toMasterDetail($order, $customerRatingData, $masterRatingData, $canRate),
             'master' => [
                 'id' => $master->id,
                 'name' => $master->full_name,

@@ -44,6 +44,7 @@ class BookingSubmitController extends Controller
             'contact_phone' => 'required|string|max:20',
             'contact_name' => 'nullable|string|max:100',
             'comment' => 'nullable|string|max:1000',
+            'duration' => 'nullable|integer|min:30|max:180', // Custom duration in minutes
         ]);
 
         $date = Carbon::parse($validated['date']);
@@ -54,7 +55,8 @@ class BookingSubmitController extends Controller
 
         // Get service type
         $serviceType = ServiceType::findOrFail($validated['service_type_id']);
-        $duration = $serviceType->duration;
+        // Use custom duration if provided, otherwise use service type's default
+        $duration = $validated['duration'] ?? $serviceType->duration;
 
         // Get or auto-select master
         $master = null;
@@ -92,8 +94,18 @@ class BookingSubmitController extends Controller
             ], 422);
         }
 
-        // Calculate price
-        $basePrice = (int) $serviceType->price;
+        // Calculate price - find duration-specific price
+        $basePrice = 0;
+        if ($duration && $serviceType->durations) {
+            $durationRecord = $serviceType->durations()->where('duration', $duration)->first();
+            if ($durationRecord) {
+                $basePrice = (int) $durationRecord->price;
+            }
+        }
+        // Fallback to service type default price if no duration price found
+        if ($basePrice <= 0) {
+            $basePrice = (int) ($serviceType->price ?? 0);
+        }
         $totalAmount = $basePrice * $peopleCount;
 
         // Add oil price if selected
@@ -105,13 +117,17 @@ class BookingSubmitController extends Controller
         }
 
         try {
-            $order = DB::transaction(function () use ($validated, $master, $serviceType, $date, $totalAmount, $peopleCount, $pressureLevel) {
+            // Generate booking group ID for payment
+            $bookingGroupId = (string) \Illuminate\Support\Str::uuid();
+
+            $order = DB::transaction(function () use ($validated, $master, $serviceType, $date, $totalAmount, $peopleCount, $pressureLevel, $bookingGroupId) {
                 // Find or create customer
                 $customer = $this->findOrCreateCustomer($validated['contact_phone'], $validated['contact_name'] ?? null);
 
                 // Create order
                 $order = Order::create([
                     'order_number' => Order::generateOrderNumber(),
+                    'booking_group_id' => $bookingGroupId,
                     'customer_id' => $customer?->id,
                     'master_id' => $master->id,
                     'service_type_id' => $serviceType->id,
@@ -145,6 +161,7 @@ class BookingSubmitController extends Controller
                 'data' => [
                     'order_id' => $order->id,
                     'order_number' => $order->order_number,
+                    'booking_group_id' => $order->booking_group_id,
                     'status' => $order->status,
                     'total_amount' => $order->total_amount,
                     'total_formatted' => number_format($order->total_amount, 0, '', ' ') . ' so\'m',
@@ -154,6 +171,7 @@ class BookingSubmitController extends Controller
                     ],
                     'booking_date' => $order->booking_date->format('Y-m-d'),
                     'arrival_window' => $order->arrival_window_display,
+                    'payment_url' => '/booking/payment/' . $order->booking_group_id,
                 ],
             ], 201);
 

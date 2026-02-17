@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\LoginRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -10,11 +11,19 @@ use Inertia\Inertia;
 class AuthController extends Controller
 {
     /**
+     * Get the admin guard instance
+     */
+    protected function guard()
+    {
+        return Auth::guard('admin');
+    }
+
+    /**
      * Show admin login form
      */
     public function showLogin()
     {
-        if (Auth::check() && Auth::user()->hasAnyRole(['admin', 'dispatcher'])) {
+        if ($this->guard()->check() && $this->guard()->user()->hasAnyRole(['admin', 'dispatcher'])) {
             return redirect()->route('admin.dashboard');
         }
 
@@ -24,26 +33,19 @@ class AuthController extends Controller
     /**
      * Handle admin login
      */
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $validated = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|min:6',
-        ], [
-            'email.required' => 'Email majburiy',
-            'email.email' => 'Email noto\'g\'ri',
-            'password.required' => 'Parol majburiy',
-            'password.min' => 'Parol kamida 6 ta belgidan iborat bo\'lishi kerak',
-        ]);
+        // Attempt login with admin guard
+        if ($this->guard()->attempt($request->validated(), $request->remember)) {
+            $user = $this->guard()->user();
 
-        // Check if user exists and has admin role
-        if (Auth::attempt($validated, $request->remember)) {
-            $user = Auth::user();
-
+            // Check if user has admin or dispatcher role
             if (!$user->hasAnyRole(['admin', 'dispatcher'])) {
-                Auth::logout();
-                return back()->with('error', 'Siz admin hisobiga ega emassiz');
+                $this->guard()->logout();
+                return back()->with('error', 'Siz admin yoki dispetcher hisobiga ega emassiz');
             }
+
+            $request->session()->regenerate();
 
             return redirect()->route('admin.dashboard')
                 ->with('success', 'Admin paneliga xush kelibsiz!');
@@ -55,9 +57,13 @@ class AuthController extends Controller
     /**
      * Handle admin logout
      */
-    public function logout()
+    public function logout(Request $request)
     {
-        Auth::logout();
+        $this->guard()->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
         return redirect()->route('admin.login')
             ->with('success', 'Chiqib ketdingiz');
     }

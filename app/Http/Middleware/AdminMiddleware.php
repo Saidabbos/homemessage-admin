@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
@@ -15,14 +16,16 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Check if user is authenticated
-        if (!auth()->check()) {
+        // Check if user is authenticated with admin guard
+        if (!Auth::guard('admin')->check()) {
             return redirect()->route('admin.login')
                 ->with('error', 'Avval login qiling');
         }
 
         // Check if user has admin or dispatcher role
-        if (!auth()->user()->hasAnyRole(['admin', 'dispatcher'])) {
+        $user = Auth::guard('admin')->user();
+        if (!$user->hasAnyRole(['admin', 'dispatcher'])) {
+            Auth::guard('admin')->logout();
             abort(403, 'Sizda bu sahifaga kirish ruxsati yo\'q');
         }
 

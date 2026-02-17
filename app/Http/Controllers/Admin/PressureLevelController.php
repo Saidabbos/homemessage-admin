@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\PressureLevel\StorePressureLevelRequest;
+use App\Http\Requests\Admin\PressureLevel\UpdatePressureLevelRequest;
 use App\Models\PressureLevel;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -39,19 +41,9 @@ class PressureLevelController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StorePressureLevelRequest $request)
     {
-        $validated = $request->validate([
-            'slug' => 'required|string|unique:pressure_levels',
-            'uz.name' => 'required|string',
-            'ru.name' => 'required|string',
-            'en.name' => 'required|string',
-            'uz.description' => 'nullable|string',
-            'ru.description' => 'nullable|string',
-            'en.description' => 'nullable|string',
-            'sort_order' => 'integer|min:0',
-            'status' => 'boolean',
-        ]);
+        $validated = $request->validated();
 
         PressureLevel::create([
             'slug' => $validated['slug'],
@@ -96,19 +88,9 @@ class PressureLevelController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PressureLevel $pressureLevel)
+    public function update(UpdatePressureLevelRequest $request, PressureLevel $pressureLevel)
     {
-        $validated = $request->validate([
-            'slug' => "required|string|unique:pressure_levels,slug,{$pressureLevel->id}",
-            'uz.name' => 'required|string',
-            'ru.name' => 'required|string',
-            'en.name' => 'required|string',
-            'uz.description' => 'nullable|string',
-            'ru.description' => 'nullable|string',
-            'en.description' => 'nullable|string',
-            'sort_order' => 'integer|min:0',
-            'status' => 'boolean',
-        ]);
+        $validated = $request->validated();
 
         $pressureLevel->update([
             'slug' => $validated['slug'],

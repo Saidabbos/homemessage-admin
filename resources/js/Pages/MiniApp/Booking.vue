@@ -1,20 +1,23 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, Link, usePage } from '@inertiajs/vue3';
 import MiniAppLayout from '@/Layouts/MiniAppLayout.vue';
 
 defineOptions({ layout: MiniAppLayout });
 
+const page = usePage();
+
 const props = defineProps({
     services: Array,
     masters: Array,
+    payment: Object,
 });
 
-// Wizard state: 1 | 2 | 3 | 'cart'
+// Wizard state: 1 | 2 | 3 | 'cart' | 'payment'
 const step = ref(1);
 
-// Single service selection (replaces per-person system)
-const selectedService = ref(null); // { service_id, duration_id }
+// Single service selection
+const selectedService = ref(null);
 
 // Cart state
 const cart = ref([]);
@@ -58,6 +61,15 @@ const setDuration = (serviceId, durationId) => {
     }
 };
 
+const getServiceIcon = (service) => {
+    const name = getTranslated(service?.name).toLowerCase();
+    if (name.includes('classic') || name.includes('klassik')) return 'classic';
+    if (name.includes('sport')) return 'sport';
+    if (name.includes('relax') || name.includes('rileks')) return 'relax';
+    if (name.includes('aroma')) return 'aroma';
+    return 'classic';
+};
+
 // ==================== Computed ====================
 
 const currentItemDuration = computed(() => {
@@ -85,16 +97,30 @@ const selectedMaster = computed(() =>
     props.masters?.find(m => m.id === booking.value.master_id)
 );
 
+const masterSearch = ref('');
+
 const filteredMasters = computed(() => {
-    if (selectedServiceIds.value.length === 0) return props.masters || [];
-    return (props.masters || []).filter(m =>
-        selectedServiceIds.value.some(serviceId =>
-            (m.service_type_ids || []).includes(serviceId)
-        )
-    );
+    let masters = props.masters || [];
+    
+    if (selectedServiceIds.value.length > 0) {
+        masters = masters.filter(m =>
+            selectedServiceIds.value.some(serviceId =>
+                (m.service_type_ids || []).includes(serviceId)
+            )
+        );
+    }
+    
+    if (masterSearch.value.trim()) {
+        const q = masterSearch.value.toLowerCase().trim();
+        masters = masters.filter(m =>
+            (m.name || '').toLowerCase().includes(q) ||
+            (m.first_name || '').toLowerCase().includes(q)
+        );
+    }
+    
+    return masters;
 });
 
-// Reset master/date/slot when service changes
 watch(() => selectedService.value?.service_id, () => {
     booking.value.master_id = null;
     booking.value.date = null;
@@ -103,11 +129,11 @@ watch(() => selectedService.value?.service_id, () => {
 
 // ==================== Dates & Slots ====================
 
+const dayNames = ['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan'];
+const monthNames = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn', 'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
+
 const availableDates = computed(() => {
     const dates = [];
-    const dayNames = ['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan'];
-    const monthNames = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyn', 'Iyl', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
-
     for (let i = 0; i < 7; i++) {
         const d = new Date();
         d.setDate(d.getDate() + i);
@@ -116,7 +142,6 @@ const availableDates = computed(() => {
             dayName: dayNames[d.getDay()],
             day: d.getDate(),
             month: monthNames[d.getMonth()],
-            display: `${d.getDate()}-${monthNames[d.getMonth()]}`,
             fullLabel: `${d.getDate()}-${monthNames[d.getMonth()]}, ${dayNames[d.getDay()]}`,
         });
     }
@@ -152,21 +177,41 @@ watch(
     }
 );
 
-// ==================== Formatting ====================
+// ==================== Grouped Slots ====================
 
-const formatPrice = (price) => {
-    const num = Number(price) || 0;
-    return new Intl.NumberFormat('uz-UZ').format(num);
+const getSlotPeriod = (time) => {
+    const hour = parseInt(time.split(':')[0], 10);
+    if (hour < 12) return 'morning';
+    if (hour < 17) return 'day';
+    return 'evening';
 };
 
-const slotDisplay = computed(() => {
-    if (!booking.value.slot) return '';
-    const [hours, minutes] = booking.value.slot.split(':').map(Number);
-    const endMinutes = minutes + 30;
-    const endHours = hours + Math.floor(endMinutes / 60);
-    const endMins = endMinutes % 60;
-    return `${booking.value.slot}–${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
+const periodLabels = { morning: 'Ertalab', day: 'Kunduzi', evening: 'Kechqurun' };
+const periodIcons = { morning: 'sun-rise', day: 'sun', evening: 'moon' };
+
+const groupedSlots = computed(() => {
+    const groups = { morning: [], day: [], evening: [] };
+    for (const slot of availableSlots.value) {
+        groups[getSlotPeriod(slot.start)].push(slot);
+    }
+    return Object.entries(groups)
+        .filter(([_, slots]) => slots.length > 0)
+        .map(([period, slots]) => ({ period, label: periodLabels[period], icon: periodIcons[period], slots }));
 });
+
+// ==================== Formatting ====================
+
+const formatPrice = (price) => new Intl.NumberFormat('uz-UZ').format(Number(price) || 0);
+
+const formatSlotRange = (start) => {
+    if (!start) return '';
+    const [h, m] = start.split(':').map(Number);
+    const endM = m + 30;
+    const endH = h + Math.floor(endM / 60);
+    return `${start}–${String(endH).padStart(2, '0')}:${String(endM % 60).padStart(2, '0')}`;
+};
+
+const slotDisplay = computed(() => formatSlotRange(booking.value.slot));
 
 const selectedDateLabel = computed(() => {
     const d = availableDates.value.find(d => d.value === booking.value.date);
@@ -181,13 +226,6 @@ const getTranslated = (field) => {
     return '';
 };
 
-const selectedServiceSummary = computed(() => {
-    if (!selectedService.value) return '';
-    const service = getServiceById(selectedService.value.service_id);
-    const duration = getSelectedDuration(selectedService.value.service_id);
-    return `${getTranslated(service?.name)}, ${duration?.duration || 60} daq`;
-});
-
 // ==================== Navigation ====================
 
 const canProceedStep1 = computed(() =>
@@ -199,14 +237,14 @@ const canProceedStep2 = computed(() =>
 );
 
 const nextStep = () => { if (step.value < 3) step.value++; };
-
 const prevStep = () => {
-    if (step.value === 'cart') {
-        step.value = 3;
-    } else if (step.value > 1) {
-        step.value--;
-    }
+    if (step.value === 'payment') step.value = 'cart';
+    else if (step.value === 'cart') step.value = 3;
+    else if (step.value > 1) step.value--;
+    else router.visit('/app');
 };
+
+const goBack = () => prevStep();
 
 // ==================== Cart ====================
 
@@ -227,7 +265,6 @@ const addToCart = () => {
         slot: booking.value.slot,
         pressure_level: booking.value.pressure_level,
         notes: booking.value.notes,
-        // Snapshot for display
         service_name: getTranslated(service?.name),
         duration_minutes: duration?.duration || 60,
         price: Number(duration?.price) || 0,
@@ -244,24 +281,14 @@ const addToCart = () => {
 
 const removeFromCart = (itemId) => {
     cart.value = cart.value.filter(item => item.id !== itemId);
-    if (cart.value.length === 0) {
-        resetWizard();
-    }
+    if (cart.value.length === 0) resetWizard();
 };
 
-const bookAnotherMaster = () => {
-    resetWizard();
-};
+const bookAnotherMaster = () => resetWizard();
 
 const resetWizard = () => {
     selectedService.value = null;
-    booking.value = {
-        master_id: null,
-        date: null,
-        slot: null,
-        pressure_level: 'medium',
-        notes: '',
-    };
+    booking.value = { master_id: null, date: null, slot: null, pressure_level: 'medium', notes: '' };
     step.value = 1;
 };
 
@@ -269,16 +296,15 @@ const resetWizard = () => {
 
 const submitting = ref(false);
 const submitError = ref(null);
+const createdGroupId = ref(null);
 
 const submitCart = async () => {
     if (cart.value.length === 0) return;
-
     submitting.value = true;
     submitError.value = null;
 
     try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-
         const orders = cart.value.map(item => ({
             service_type_id: item.service_id,
             duration_id: item.duration_id,
@@ -301,504 +327,536 @@ const submitCart = async () => {
         });
 
         const data = await response.json();
-
         if (data.success) {
-            const groupId = data.group_id || '';
-            cart.value = [];
-            router.visit(`/app/booking-success?group_id=${groupId}`);
+            createdGroupId.value = data.group_id;
+            // If payment is enabled, go to payment step
+            if (props.payment?.enabled) {
+                step.value = 'payment';
+            } else {
+                // Redirect to success page
+                router.visit(`/app/booking-success?group_id=${data.group_id || ''}`);
+            }
         } else {
             submitError.value = data.message || 'Xatolik yuz berdi';
         }
     } catch (e) {
-        console.error('Cart submission failed:', e);
         submitError.value = 'Xatolik yuz berdi. Qayta urinib ko\'ring.';
     }
     submitting.value = false;
 };
 
+// ==================== Payment ====================
+
+const payLater = () => {
+    router.visit('/app/orders');
+};
+
+const payWithPayme = () => {
+    window.location.href = `/booking/payment/${createdGroupId.value}?provider=payme&source=miniapp`;
+};
+
+const payWithClick = () => {
+    window.location.href = `/booking/payment/${createdGroupId.value}?provider=click&source=miniapp`;
+};
+
 // ==================== Constants ====================
 
 const pressureLevels = [
-    { value: 'soft', label: 'Yengil' },
-    { value: 'medium', label: "O'rtacha" },
-    { value: 'hard', label: 'Kuchli' },
-    { value: 'any', label: "Farqi yo'q" },
+    { value: 'soft', label: 'Yengil', icon: 'feather' },
+    { value: 'medium', label: "O'rtacha", icon: 'waves' },
+    { value: 'hard', label: 'Kuchli', icon: 'zap' },
 ];
 </script>
 
 <template>
     <div class="bk-page">
-        <!-- Background circles -->
-        <div class="bg-circles">
-            <div class="circle c1"></div>
-            <div class="circle c2"></div>
-            <div class="circle c3"></div>
-        </div>
-
         <!-- Header -->
-        <header class="bk-header glass">
-            <button class="bk-back glass-btn" @click="step === 'cart' ? prevStep() : (step > 1 ? prevStep() : router.visit('/app'))">
+        <header class="bk-header">
+            <button class="bk-back-btn" @click="goBack">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    <path d="M15 18l-6-6 6-6"/>
                 </svg>
             </button>
-            <h1 class="bk-title">
-                <span v-if="step === 1">Xizmat tanlang</span>
-                <span v-else-if="step === 2">Usta va vaqt tanlang</span>
-                <span v-else-if="step === 3">Tasdiqlash</span>
-                <span v-else>Savat</span>
-            </h1>
-            <div class="bk-header-right">
-                <button
-                    v-if="step !== 'cart' && cartItemCount > 0"
-                    class="bk-cart-btn glass-btn"
-                    @click="step = 'cart'"
-                >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
-                    </svg>
-                    <span class="bk-cart-badge">{{ cartItemCount }}</span>
-                </button>
-                <span v-else class="bk-step-num">
-                    <template v-if="step !== 'cart'">{{ step }}/3</template>
-                </span>
+
+            <!-- Stepper -->
+            <div v-if="step !== 'cart' && step !== 'payment'" class="bk-stepper">
+                <div class="bk-step" :class="{ active: step >= 1, done: step > 1 }">
+                    <span class="bk-step-circle">
+                        <svg v-if="step > 1" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg>
+                        <span v-else>1</span>
+                    </span>
+                    <span class="bk-step-label">Xizmat</span>
+                </div>
+                <div class="bk-step-line" :class="{ active: step > 1 }"></div>
+                <div class="bk-step" :class="{ active: step >= 2, done: step > 2 }">
+                    <span class="bk-step-circle">
+                        <svg v-if="step > 2" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg>
+                        <span v-else>2</span>
+                    </span>
+                    <span class="bk-step-label">Vaqt</span>
+                </div>
+                <div class="bk-step-line" :class="{ active: step > 2 }"></div>
+                <div class="bk-step" :class="{ active: step >= 3 }">
+                    <span class="bk-step-circle">3</span>
+                    <span class="bk-step-label">Tasdiqlash</span>
+                </div>
             </div>
+
+            <span v-else-if="step === 'cart'" class="bk-header-title">Savat</span>
+            <span v-else class="bk-header-title">To'lov</span>
+
+            <!-- Cart Button -->
+            <button v-if="step !== 'cart' && step !== 'payment' && cartItemCount > 0" class="bk-cart-btn" @click="step = 'cart'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+                </svg>
+                <span class="bk-cart-badge">{{ cartItemCount }}</span>
+            </button>
+            <div v-else class="bk-header-space"></div>
         </header>
 
         <!-- Step 1: Service Selection -->
         <div v-if="step === 1" class="bk-content">
-            <!-- Service Cards -->
-            <div class="service-list">
-                <div
-                    v-for="service in services"
-                    :key="service.id"
-                    class="service-card glass"
-                    :class="{ selected: isServiceSelected(service.id) }"
-                    @click="toggleService(service.id)"
-                >
-                    <div class="service-img">
-                        <img v-if="service.image_url" :src="service.image_url" :alt="getTranslated(service.name)" />
-                        <div v-else class="service-img-placeholder">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
-                            </svg>
+            <!-- Services -->
+            <section class="bk-section">
+                <h2 class="bk-section-title">Massaj turi</h2>
+                <div class="bk-service-grid">
+                    <div
+                        v-for="service in services"
+                        :key="service.id"
+                        class="bk-service-card"
+                        :class="{ selected: isServiceSelected(service.id) }"
+                        @click="toggleService(service.id)"
+                    >
+                        <div class="bk-service-icon">
+                            <svg v-if="getServiceIcon(service) === 'classic'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                            <svg v-else-if="getServiceIcon(service) === 'sport'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg>
+                            <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </div>
+                        <span class="bk-service-name">{{ getTranslated(service.name) }}</span>
+                        <div v-if="isServiceSelected(service.id)" class="bk-service-check">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg>
                         </div>
                     </div>
-                    <div class="service-info">
-                        <h3 class="service-name">{{ getTranslated(service.name) }}</h3>
-                        <p class="service-desc">{{ getTranslated(service.description) }}</p>
-                        <span class="service-price">{{ formatPrice(service.durations?.[0]?.price || 0) }} - {{ formatPrice(service.durations?.[service.durations.length - 1]?.price || 0) }} UZS</span>
-                    </div>
-                    <div v-if="isServiceSelected(service.id)" class="service-check">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                            <polyline points="20,6 9,17 4,12"/>
-                        </svg>
-                    </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Duration Selection -->
-            <div v-if="selectedService" class="section">
-                <h3 class="section-title">
-                    {{ getTranslated(getServiceById(selectedService.service_id)?.name) }} - Davomiyligi
-                </h3>
-                <div class="chip-row">
+            <!-- Duration -->
+            <section v-if="selectedService" class="bk-section">
+                <h2 class="bk-section-title">Davomiylik</h2>
+                <div class="bk-chip-row">
                     <button
                         v-for="dur in getServiceById(selectedService.service_id)?.durations"
                         :key="dur.id"
-                        class="chip glass"
+                        class="bk-chip"
                         :class="{ selected: selectedService.duration_id === dur.id }"
                         @click="setDuration(selectedService.service_id, dur.id)"
                     >
-                        {{ dur.duration }} min
+                        {{ dur.duration }} min · {{ formatPrice(dur.price) }}
                     </button>
                 </div>
-            </div>
+            </section>
 
             <!-- Pressure Level -->
-            <div class="section">
-                <h3 class="section-title">Kuch darajasi</h3>
-                <div class="chip-row">
+            <section class="bk-section">
+                <h2 class="bk-section-title">Bosim kuchi</h2>
+                <div class="bk-pressure-grid">
                     <button
                         v-for="level in pressureLevels"
                         :key="level.value"
-                        class="chip glass"
+                        class="bk-pressure-card"
                         :class="{ selected: booking.pressure_level === level.value }"
                         @click="booking.pressure_level = level.value"
                     >
-                        {{ level.label }}
+                        <div class="bk-pressure-icon">
+                            <svg v-if="level.icon === 'feather'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.24 12.24a6 6 0 00-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/></svg>
+                            <svg v-else-if="level.icon === 'waves'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>
+                            <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        </div>
+                        <span>{{ level.label }}</span>
                     </button>
                 </div>
-            </div>
+            </section>
         </div>
 
-        <!-- Step 2: Master & Time Selection -->
+        <!-- Step 2: Master & Time -->
         <div v-if="step === 2" class="bk-content">
-            <!-- Master Selection -->
-            <div class="section">
-                <h3 class="section-title">Ustani tanlang</h3>
-                <div v-if="filteredMasters.length === 0" class="empty-hint">Bu xizmat uchun usta topilmadi</div>
-                <div v-else class="master-list">
+            <!-- Masters -->
+            <section class="bk-section">
+                <h2 class="bk-section-title">Master tanlang</h2>
+                <div class="bk-search-box">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input v-model="masterSearch" type="text" placeholder="Ism bo'yicha qidirish..." />
+                </div>
+                
+                <div v-if="filteredMasters.length === 0" class="bk-empty">Bu xizmat uchun master topilmadi</div>
+                <div v-else class="bk-master-list">
                     <div
                         v-for="master in filteredMasters"
                         :key="master.id"
-                        class="master-card glass"
+                        class="bk-master-card"
                         :class="{ selected: booking.master_id === master.id }"
+                        @click="booking.master_id = master.id"
                     >
-                        <div class="master-photo">
+                        <div class="bk-master-photo">
                             <img v-if="master.photo_url" :src="master.photo_url" :alt="master.name" />
-                            <span v-else class="master-initial">{{ master.name?.charAt(0) }}</span>
+                            <span v-else>{{ master.name?.charAt(0) }}</span>
                         </div>
-                        <span class="master-name">{{ master.name }}</span>
-                        <span class="master-exp">{{ master.experience || 3 }} yil</span>
-                        <button
-                            class="master-btn"
-                            :class="{ active: booking.master_id === master.id }"
-                            @click="booking.master_id = master.id; booking.slot = null;"
-                        >
-                            {{ booking.master_id === master.id ? 'Tanlangan' : 'Tanlash' }}
-                        </button>
+                        <div class="bk-master-info">
+                            <span class="bk-master-name">{{ master.name }}</span>
+                            <div class="bk-master-rating">
+                                <svg v-for="s in 5" :key="s" width="12" height="12" viewBox="0 0 24 24" fill="#C8A951"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                                <span>{{ master.rating || '5.0' }}</span>
+                            </div>
+                        </div>
+                        <div v-if="booking.master_id === master.id" class="bk-master-check">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Date Selection -->
-            <div class="section">
-                <h3 class="section-title">Sana tanlang</h3>
-                <div class="date-row">
+            <!-- Date -->
+            <section class="bk-section">
+                <h2 class="bk-section-title">Sana</h2>
+                <div class="bk-date-row">
                     <button
                         v-for="d in availableDates"
                         :key="d.value"
-                        class="date-chip glass"
+                        class="bk-date-card"
                         :class="{ selected: booking.date === d.value }"
                         @click="booking.date = d.value"
                     >
-                        <span class="date-day">{{ d.dayName }}</span>
-                        <span class="date-num">{{ d.display }}</span>
+                        <span class="bk-date-day">{{ d.dayName }}</span>
+                        <span class="bk-date-num">{{ d.day }}</span>
+                        <span class="bk-date-month">{{ d.month }}</span>
                     </button>
                 </div>
-            </div>
+            </section>
 
-            <!-- Time Slots -->
-            <div class="section">
-                <h3 class="section-title">Vaqt tanlang</h3>
-                <div v-if="!booking.master_id" class="empty-hint">Avval ustani tanlang</div>
-                <div v-else-if="!booking.date" class="empty-hint">Avval sanani tanlang</div>
-                <div v-else-if="loadingSlots" class="loading">
-                    <div class="spinner"></div>
+            <!-- Slots -->
+            <section class="bk-section">
+                <h2 class="bk-section-title">Vaqt oynasi</h2>
+                <div v-if="!booking.master_id" class="bk-empty">Avval masterni tanlang</div>
+                <div v-else-if="!booking.date" class="bk-empty">Avval sanani tanlang</div>
+                <div v-else-if="loadingSlots" class="bk-loading">
+                    <div class="bk-spinner"></div>
                 </div>
-                <div v-else-if="availableSlots.length === 0" class="empty-hint">Bu kunga vaqt yo'q</div>
-                <div v-else class="slots-grid">
-                    <button
-                        v-for="slot in availableSlots"
-                        :key="slot.start"
-                        class="slot-chip glass"
-                        :class="{
-                            selected: booking.slot === slot.start,
-                            disabled: slot.disabled
-                        }"
-                        :disabled="slot.disabled"
-                        @click="!slot.disabled && (booking.slot = slot.start)"
-                    >
-                        {{ slot.display }}
-                    </button>
+                <div v-else-if="availableSlots.length === 0" class="bk-empty">Bu kunga bo'sh vaqt yo'q</div>
+                <div v-else class="bk-slots-grouped">
+                    <div v-for="group in groupedSlots" :key="group.period" class="bk-slot-group">
+                        <div class="bk-slot-group-header">
+                            <svg v-if="group.icon === 'sun-rise'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/></svg>
+                            <svg v-else-if="group.icon === 'sun'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+                            <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                            <span>{{ group.label }}</span>
+                        </div>
+                        <div class="bk-slot-grid">
+                            <button
+                                v-for="slot in group.slots"
+                                :key="slot.start"
+                                class="bk-slot-btn"
+                                :class="{ selected: booking.slot === slot.start, disabled: slot.disabled }"
+                                :disabled="slot.disabled"
+                                @click="booking.slot = slot.start"
+                            >
+                                {{ formatSlotRange(slot.start) }}
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </section>
         </div>
 
         <!-- Step 3: Confirmation -->
         <div v-if="step === 3" class="bk-content">
-            <div class="confirm-box glass">
-                <h3 class="confirm-title">Buyurtma tafsilotlari</h3>
-
-                <div class="confirm-row">
-                    <span class="confirm-label">Xizmat:</span>
-                    <span class="confirm-value">{{ selectedServiceSummary }}</span>
+            <section class="bk-section">
+                <h2 class="bk-section-title">Buyurtma ma'lumotlari</h2>
+                <div class="bk-confirm-card">
+                    <div class="bk-confirm-row">
+                        <span class="bk-confirm-label">Xizmat</span>
+                        <span class="bk-confirm-value">{{ getTranslated(getServiceById(selectedService?.service_id)?.name) }}</span>
+                    </div>
+                    <div class="bk-confirm-row">
+                        <span class="bk-confirm-label">Davomiylik</span>
+                        <span class="bk-confirm-value">{{ currentItemDuration }} daqiqa</span>
+                    </div>
+                    <div class="bk-confirm-row">
+                        <span class="bk-confirm-label">Master</span>
+                        <span class="bk-confirm-value">{{ selectedMaster?.name }}</span>
+                    </div>
+                    <div class="bk-confirm-row">
+                        <span class="bk-confirm-label">Sana</span>
+                        <span class="bk-confirm-value">{{ selectedDateLabel }}</span>
+                    </div>
+                    <div class="bk-confirm-row">
+                        <span class="bk-confirm-label">Kelish oynasi</span>
+                        <span class="bk-confirm-value">{{ slotDisplay }}</span>
+                    </div>
+                    <div class="bk-confirm-row">
+                        <span class="bk-confirm-label">Bosim</span>
+                        <span class="bk-confirm-value">{{ pressureLevels.find(p => p.value === booking.pressure_level)?.label }}</span>
+                    </div>
+                    <div class="bk-confirm-divider"></div>
+                    <div class="bk-confirm-row bk-confirm-total">
+                        <span class="bk-confirm-label">Narxi</span>
+                        <span class="bk-confirm-value">{{ formatPrice(currentItemPrice) }} so'm</span>
+                    </div>
                 </div>
+            </section>
 
-                <div class="confirm-row">
-                    <span class="confirm-label">Usta:</span>
-                    <span class="confirm-value">{{ selectedMaster?.name }}</span>
-                </div>
-
-                <div class="confirm-row">
-                    <span class="confirm-label">Sana:</span>
-                    <span class="confirm-value">{{ selectedDateLabel }}</span>
-                </div>
-
-                <div class="confirm-row">
-                    <span class="confirm-label">Vaqt:</span>
-                    <span class="confirm-value">{{ slotDisplay }}</span>
-                </div>
-
-                <div class="confirm-row">
-                    <span class="confirm-label">Bosim:</span>
-                    <span class="confirm-value">{{ pressureLevels.find(p => p.value === booking.pressure_level)?.label }}</span>
-                </div>
-
-                <div class="confirm-total">
-                    <span class="confirm-label">Narxi:</span>
-                    <span class="confirm-price">{{ formatPrice(currentItemPrice) }} UZS</span>
-                </div>
-            </div>
-
-            <!-- Notes -->
-            <div class="section">
-                <h3 class="section-title">Qo'shimcha izoh</h3>
+            <section class="bk-section">
+                <h2 class="bk-section-title">Izoh (ixtiyoriy)</h2>
                 <textarea
                     v-model="booking.notes"
-                    class="notes-input glass"
-                    placeholder="Masalan: 5-qavat, 25-xonadon"
+                    class="bk-textarea"
                     rows="3"
+                    placeholder="Maxsus talablar yoki izohlar..."
                 ></textarea>
-            </div>
-
-            <div v-if="submitError" class="error-msg">{{ submitError }}</div>
+            </section>
         </div>
 
         <!-- Cart View -->
         <div v-if="step === 'cart'" class="bk-content">
-            <div v-if="cart.length === 0" class="cart-empty">
+            <div v-if="cart.length === 0" class="bk-cart-empty">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
                     <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
                 </svg>
                 <p>Savat bo'sh</p>
+                <button class="bk-btn-primary" @click="resetWizard">Xizmat tanlash</button>
             </div>
 
-            <div v-else class="cart-items">
-                <div
-                    v-for="item in cart"
-                    :key="item.id"
-                    class="cart-item glass"
-                >
-                    <div class="cart-item-top">
-                        <div class="cart-item-service">
-                            <h4>{{ item.service_name }}</h4>
-                            <span class="cart-item-duration">{{ item.duration_minutes }} min</span>
+            <div v-else>
+                <div class="bk-cart-items">
+                    <div v-for="item in cart" :key="item.id" class="bk-cart-item">
+                        <div class="bk-cart-item-photo">
+                            <img v-if="item.master_photo" :src="item.master_photo" :alt="item.master_name" />
+                            <span v-else>{{ item.master_name?.charAt(0) }}</span>
                         </div>
-                        <button class="cart-item-remove" @click="removeFromCart(item.id)">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="cart-item-details">
-                        <div class="cart-item-row">
-                            <span class="cart-item-label">Usta</span>
-                            <span class="cart-item-val">{{ item.master_name }}</span>
+                        <div class="bk-cart-item-info">
+                            <span class="bk-cart-item-service">{{ item.service_name }}</span>
+                            <span class="bk-cart-item-meta">{{ item.master_name }} · {{ item.duration_minutes }} min</span>
+                            <span class="bk-cart-item-time">{{ item.date_label }} · {{ item.slot_display }}</span>
                         </div>
-                        <div class="cart-item-row">
-                            <span class="cart-item-label">Sana</span>
-                            <span class="cart-item-val">{{ item.date_label }}</span>
+                        <div class="bk-cart-item-right">
+                            <span class="bk-cart-item-price">{{ formatPrice(item.price) }}</span>
+                            <button class="bk-cart-remove" @click="removeFromCart(item.id)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
                         </div>
-                        <div class="cart-item-row">
-                            <span class="cart-item-label">Vaqt</span>
-                            <span class="cart-item-val">{{ item.slot_display }}</span>
-                        </div>
-                        <div class="cart-item-row">
-                            <span class="cart-item-label">Bosim</span>
-                            <span class="cart-item-val">{{ item.pressure_label }}</span>
-                        </div>
-                    </div>
-                    <div class="cart-item-price">
-                        {{ formatPrice(item.price) }} UZS
                     </div>
                 </div>
 
-                <!-- Cart Total -->
-                <div class="cart-total glass">
-                    <span class="cart-total-label">Jami:</span>
-                    <span class="cart-total-value">{{ formatPrice(cartTotal) }} UZS</span>
-                </div>
-            </div>
+                <button class="bk-add-more" @click="bookAnotherMaster">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Yana master qo'shish
+                </button>
 
-            <div v-if="submitError" class="error-msg">{{ submitError }}</div>
+                <div class="bk-cart-summary">
+                    <div class="bk-cart-total">
+                        <span>Jami</span>
+                        <span>{{ formatPrice(cartTotal) }} so'm</span>
+                    </div>
+                </div>
+
+                <p v-if="submitError" class="bk-error">{{ submitError }}</p>
+            </div>
         </div>
 
-        <!-- Bottom Bar -->
-        <div class="bk-bottom glass">
-            <!-- Summary for steps 1-3 -->
-            <div v-if="step === 1 && selectedService" class="bottom-summary">
-                <div class="summary-text">
-                    <span class="summary-label">Tanlangan:</span>
-                    <span class="summary-value">{{ selectedServiceSummary }}</span>
+        <!-- Payment View -->
+        <div v-if="step === 'payment'" class="bk-content">
+            <section class="bk-section">
+                <div class="bk-payment-success">
+                    <div class="bk-payment-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="16,8 10,14 8,12"/>
+                        </svg>
+                    </div>
+                    <h2>Buyurtma qabul qilindi!</h2>
+                    <p>Endi to'lovni amalga oshiring</p>
                 </div>
-                <div class="summary-price">
-                    <span class="price-label">Narxi:</span>
-                    <span class="price-value">{{ formatPrice(currentItemPrice) }} UZS</span>
-                </div>
-            </div>
+            </section>
 
-            <div v-if="step === 2 && booking.slot" class="bottom-summary">
-                <div class="summary-text">
-                    <span class="summary-label">Tanlangan:</span>
-                    <span class="summary-value">{{ selectedServiceSummary }}</span>
-                    <span class="summary-detail">{{ slotDisplay }}, {{ selectedMaster?.name }}</span>
+            <section class="bk-section">
+                <h2 class="bk-section-title">To'lov usulini tanlang</h2>
+                <div class="bk-payment-options">
+                    <button v-if="payment?.payme_enabled" class="bk-payment-btn bk-payme" @click="payWithPayme">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        <span>Payme orqali to'lash</span>
+                        <span class="bk-payment-amount">{{ formatPrice(cartTotal) }} so'm</span>
+                    </button>
+                    <button v-if="payment?.click_enabled" class="bk-payment-btn bk-click" @click="payWithClick">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        <span>Click orqali to'lash</span>
+                        <span class="bk-payment-amount">{{ formatPrice(cartTotal) }} so'm</span>
+                    </button>
                 </div>
-                <div class="summary-price">
-                    <span class="price-label">Narxi:</span>
-                    <span class="price-value">{{ formatPrice(currentItemPrice) }} UZS</span>
-                </div>
-            </div>
+            </section>
 
-            <div v-if="step === 'cart' && cart.length > 0" class="bottom-summary">
-                <div class="summary-text">
-                    <span class="summary-label">Savat:</span>
-                    <span class="summary-value">{{ cartItemCount }} ta xizmat</span>
-                </div>
-                <div class="summary-price">
-                    <span class="price-label">Jami:</span>
-                    <span class="price-value">{{ formatPrice(cartTotal) }} UZS</span>
-                </div>
-            </div>
+            <button class="bk-pay-later" @click="payLater">
+                Keyinroq to'layman
+            </button>
+        </div>
 
-            <!-- Action Buttons -->
-            <div v-if="step !== 'cart'" class="bottom-actions">
-                <button
-                    v-if="step === 1"
-                    class="bk-btn"
-                    :disabled="!canProceedStep1"
-                    @click="nextStep"
-                >
+        <!-- Footer Actions -->
+        <footer class="bk-footer">
+            <div v-if="step === 1" class="bk-footer-content">
+                <div class="bk-footer-price" v-if="selectedService">
+                    <span class="bk-price-label">Narxi</span>
+                    <span class="bk-price-value">{{ formatPrice(currentItemPrice) }} so'm</span>
+                </div>
+                <button class="bk-btn-primary" :disabled="!canProceedStep1" @click="nextStep">
                     Davom etish
                 </button>
-                <button
-                    v-else-if="step === 2"
-                    class="bk-btn"
-                    :disabled="!canProceedStep2"
-                    @click="nextStep"
-                >
+            </div>
+
+            <div v-else-if="step === 2" class="bk-footer-content">
+                <div class="bk-footer-price" v-if="selectedService">
+                    <span class="bk-price-label">Narxi</span>
+                    <span class="bk-price-value">{{ formatPrice(currentItemPrice) }} so'm</span>
+                </div>
+                <button class="bk-btn-primary" :disabled="!canProceedStep2" @click="nextStep">
                     Davom etish
                 </button>
-                <button
-                    v-else-if="step === 3"
-                    class="bk-btn bk-btn-cart"
-                    @click="addToCart"
-                >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
-                    </svg>
+            </div>
+
+            <div v-else-if="step === 3" class="bk-footer-content">
+                <div class="bk-footer-price">
+                    <span class="bk-price-label">Jami</span>
+                    <span class="bk-price-value">{{ formatPrice(currentItemPrice) }} so'm</span>
+                </div>
+                <button class="bk-btn-primary" @click="addToCart">
                     Savatga qo'shish
                 </button>
             </div>
 
-            <div v-else class="bottom-actions cart-actions">
-                <button
-                    class="bk-btn bk-btn-secondary"
-                    @click="bookAnotherMaster"
-                >
-                    Boshqa usta tanlash
-                </button>
-                <button
-                    class="bk-btn"
-                    :disabled="cart.length === 0 || submitting"
-                    @click="submitCart"
-                >
-                    {{ submitting ? 'Yuborilmoqda...' : "To'lov qilish" }}
+            <div v-else-if="step === 'cart' && cart.length > 0" class="bk-footer-content">
+                <div class="bk-footer-price">
+                    <span class="bk-price-label">Jami</span>
+                    <span class="bk-price-value">{{ formatPrice(cartTotal) }} so'm</span>
+                </div>
+                <button class="bk-btn-primary" :disabled="submitting" @click="submitCart">
+                    <span v-if="submitting">Yuborilmoqda...</span>
+                    <span v-else>Buyurtma berish</span>
                 </button>
             </div>
-        </div>
+        </footer>
     </div>
 </template>
 
 <style scoped>
-/* Base */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap');
+
 .bk-page {
+    --navy: #1B2B5A;
+    --gold: #C8A951;
+    --cream: #F5F2ED;
+    --cream-dark: #E8E5DF;
+    --text-muted: #8B8680;
+
     min-height: 100vh;
-    padding-bottom: 180px;
-    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
-    position: relative;
-    overflow-x: hidden;
-}
-
-/* Background circles */
-.bg-circles {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    overflow: hidden;
-}
-
-.circle {
-    position: absolute;
-    border-radius: 50%;
-    background: linear-gradient(135deg, rgba(184, 163, 105, 0.3), rgba(107, 139, 164, 0.2));
-    filter: blur(60px);
-    animation: float 8s ease-in-out infinite;
-}
-
-.c1 { width: 200px; height: 200px; top: -50px; right: -50px; }
-.c2 { width: 150px; height: 150px; bottom: 200px; left: -40px; animation-delay: -2s; }
-.c3 { width: 100px; height: 100px; top: 40%; right: 10%; animation-delay: -4s; }
-
-@keyframes float {
-    0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
-    50% { transform: translateY(-30px) scale(1.1); opacity: 0.8; }
-}
-
-/* Glass effect */
-.glass {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.glass-btn {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: linear-gradient(160deg, #F0EBE2 0%, #E5E0D7 50%, #DDD8CF 100%);
+    font-family: 'Manrope', -apple-system, sans-serif;
+    padding-bottom: 100px;
 }
 
 /* Header */
 .bk-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 16px;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255,255,255,0.5);
     position: sticky;
     top: 0;
-    z-index: 100;
-    border-radius: 0 0 20px 20px;
+    z-index: 50;
 }
 
-.bk-back {
+.bk-back-btn {
     width: 40px;
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.6);
     border-radius: 12px;
-    color: #fff;
+    color: var(--navy);
     cursor: pointer;
-    transition: all 0.3s ease;
 }
 
-.bk-back:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.05);
-}
-
-.bk-title {
-    flex: 1;
-    font-size: 18px;
-    font-weight: 600;
-    color: #fff;
-    margin: 0;
-}
-
-.bk-header-right {
+.bk-stepper {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
 }
 
-.bk-step-num {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.5);
+.bk-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.bk-step-circle {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.6);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.3s;
+}
+
+.bk-step.active .bk-step-circle,
+.bk-step.done .bk-step-circle {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: white;
+}
+
+.bk-step-label {
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.bk-step.active .bk-step-label {
+    color: var(--navy);
+}
+
+.bk-step-line {
+    width: 20px;
+    height: 2px;
+    background: rgba(255,255,255,0.5);
+    margin: 0 4px;
+    margin-bottom: 14px;
+}
+
+.bk-step-line.active {
+    background: var(--gold);
+}
+
+.bk-header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--navy);
 }
 
 .bk-cart-btn {
@@ -808,715 +866,783 @@ const pressureLevels = [
     display: flex;
     align-items: center;
     justify-content: center;
+    background: var(--gold);
+    border: none;
     border-radius: 12px;
-    color: #B8A369;
+    color: white;
     cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.bk-cart-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
 }
 
 .bk-cart-badge {
     position: absolute;
-    top: 4px;
-    right: 4px;
-    min-width: 16px;
-    height: 16px;
+    top: -4px;
+    right: -4px;
+    width: 18px;
+    height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #B8A369;
-    color: #1a2a3a;
+    background: var(--navy);
+    border-radius: 50%;
     font-size: 10px;
     font-weight: 700;
-    border-radius: 8px;
-    padding: 0 4px;
+    color: white;
+}
+
+.bk-header-space {
+    width: 40px;
 }
 
 /* Content */
 .bk-content {
     padding: 16px;
-    position: relative;
-    z-index: 1;
 }
 
-/* Section */
-.section {
+.bk-section {
     margin-bottom: 24px;
 }
 
-.section-title {
-    font-size: 14px;
+.bk-section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--navy);
     margin: 0 0 12px;
 }
 
 /* Service Cards */
-.service-list {
+.bk-service-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.bk-service-card {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 24px;
-}
-
-.service-card {
-    display: flex;
-    gap: 12px;
-    padding: 14px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-.service-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(184, 163, 105, 0.1), transparent);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.service-card:hover::before,
-.service-card.selected::before {
-    opacity: 1;
-}
-
-.service-card.selected {
-    border-color: rgba(184, 163, 105, 0.5);
-    box-shadow: 0 0 30px rgba(184, 163, 105, 0.2);
-    transform: scale(1.02);
-}
-
-.service-img {
-    width: 72px;
-    height: 72px;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 12px;
+    background: rgba(255,255,255,0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.6);
     border-radius: 16px;
-    overflow: hidden;
-    flex-shrink: 0;
-    background: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.service-img img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.bk-service-card:hover {
+    background: rgba(255,255,255,0.6);
 }
 
-.service-img-placeholder {
-    width: 100%;
-    height: 100%;
+.bk-service-card.selected {
+    background: rgba(200,169,81,0.15);
+    border-color: var(--gold);
+}
+
+.bk-service-icon {
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255, 255, 255, 0.3);
+    background: rgba(255,255,255,0.5);
+    border-radius: 12px;
+    color: var(--gold);
 }
 
-.service-info {
-    flex: 1;
-    min-width: 0;
+.bk-service-card.selected .bk-service-icon {
+    background: var(--gold);
+    color: white;
 }
 
-.service-name {
-    font-size: 16px;
-    font-weight: 600;
-    color: #fff;
-    margin: 0 0 4px;
-}
-
-.service-desc {
+.bk-service-name {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.5);
-    margin: 0 0 6px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.service-price {
-    font-size: 14px;
     font-weight: 600;
-    color: #B8A369;
+    color: var(--navy);
+    text-align: center;
 }
 
-.service-check {
+.bk-service-check {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 8px;
+    right: 8px;
     width: 24px;
     height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #B8A369, #D4C89A);
+    background: var(--gold);
     border-radius: 50%;
-    color: #1a2a3a;
-    animation: popIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes popIn {
-    0% { transform: scale(0); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
+    color: white;
 }
 
 /* Chips */
-.chip-row {
+.bk-chip-row {
     display: flex;
-    gap: 10px;
     flex-wrap: wrap;
+    gap: 8px;
 }
 
-.chip {
-    padding: 12px 20px;
-    border-radius: 30px;
-    font-size: 14px;
-    color: #fff;
+.bk-chip {
+    padding: 10px 16px;
+    background: rgba(255,255,255,0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--navy);
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s;
 }
 
-.chip:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateY(-2px);
+.bk-chip:hover {
+    background: rgba(255,255,255,0.6);
 }
 
-.chip.selected {
-    background: linear-gradient(135deg, #B8A369, #D4C89A);
-    border-color: transparent;
-    color: #1a2a3a;
-    font-weight: 600;
-    box-shadow: 0 4px 20px rgba(184, 163, 105, 0.4);
+.bk-chip.selected {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: white;
 }
 
-/* Date Selection */
-.date-row {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding-bottom: 8px;
-    -webkit-overflow-scrolling: touch;
-}
-
-.date-row::-webkit-scrollbar { display: none; }
-
-.date-chip {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 12px 18px;
-    border-radius: 16px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    min-width: 70px;
-}
-
-.date-chip:hover {
-    transform: translateY(-3px);
-    background: rgba(255, 255, 255, 0.15);
-}
-
-.date-chip.selected {
-    background: linear-gradient(135deg, #B8A369, #D4C89A);
-    border-color: transparent;
-    box-shadow: 0 4px 20px rgba(184, 163, 105, 0.4);
-}
-
-.date-day {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
-    text-transform: uppercase;
-}
-
-.date-chip.selected .date-day {
-    color: rgba(26, 42, 58, 0.7);
-}
-
-.date-num {
-    font-size: 14px;
-    font-weight: 600;
-    color: #fff;
-    margin-top: 4px;
-}
-
-.date-chip.selected .date-num {
-    color: #1a2a3a;
-}
-
-/* Slots */
-.slots-grid {
+/* Pressure Grid */
+.bk-pressure-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
 }
 
-.slot-chip {
-    padding: 14px 8px;
-    border-radius: 14px;
-    font-size: 13px;
-    color: #fff;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    text-align: center;
-}
-
-.slot-chip:hover {
-    transform: scale(1.05);
-    background: rgba(255, 255, 255, 0.15);
-}
-
-.slot-chip.selected {
-    background: linear-gradient(135deg, #B8A369, #D4C89A);
-    border-color: transparent;
-    color: #1a2a3a;
-    font-weight: 600;
-    box-shadow: 0 4px 20px rgba(184, 163, 105, 0.4);
-}
-
-.slot-chip.disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    text-decoration: line-through;
-    background: rgba(255, 255, 255, 0.03);
-}
-
-.slot-chip.disabled:hover {
-    transform: none;
-    background: rgba(255, 255, 255, 0.03);
-}
-
-/* Master List */
-.master-list {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    padding-bottom: 8px;
-    -webkit-overflow-scrolling: touch;
-}
-
-.master-list::-webkit-scrollbar { display: none; }
-
-.master-card {
+.bk-pressure-card {
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 6px;
+    padding: 14px 8px;
+    background: rgba(255,255,255,0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.bk-pressure-card:hover {
+    background: rgba(255,255,255,0.6);
+}
+
+.bk-pressure-card.selected {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: white;
+}
+
+.bk-pressure-icon {
+    color: var(--gold);
+}
+
+.bk-pressure-card.selected .bk-pressure-icon {
+    color: white;
+}
+
+.bk-pressure-card span {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Search Box */
+.bk-search-box {
+    display: flex;
+    align-items: center;
     gap: 10px;
-    padding: 16px;
-    border-radius: 20px;
-    min-width: 110px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 12px;
+    margin-bottom: 12px;
 }
 
-.master-card:hover {
-    transform: translateY(-5px);
+.bk-search-box svg {
+    color: var(--text-muted);
 }
 
-.master-card.selected {
-    border-color: rgba(184, 163, 105, 0.5);
-    box-shadow: 0 8px 30px rgba(184, 163, 105, 0.3);
+.bk-search-box input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    color: var(--navy);
+    outline: none;
 }
 
-.master-photo {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
+.bk-search-box input::placeholder {
+    color: var(--text-muted);
+}
+
+/* Master List */
+.bk-master-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bk-master-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255,255,255,0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.bk-master-card:hover {
+    background: rgba(255,255,255,0.6);
+}
+
+.bk-master-card.selected {
+    background: rgba(200,169,81,0.15);
+    border-color: var(--gold);
+}
+
+.bk-master-photo {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
     overflow: hidden;
-    background: linear-gradient(135deg, #B8A369, #6B8BA4);
+    background: var(--gold);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    color: white;
+    font-weight: 600;
 }
 
-.master-photo img {
+.bk-master-photo img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.master-initial {
-    font-size: 24px;
-    font-weight: 600;
-    color: #fff;
+.bk-master-info {
+    flex: 1;
 }
 
-.master-name {
+.bk-master-name {
+    display: block;
     font-size: 14px;
     font-weight: 600;
-    color: #fff;
-    text-align: center;
+    color: var(--navy);
 }
 
-.master-exp {
+.bk-master-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.bk-master-rating span {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.1);
-    padding: 4px 10px;
-    border-radius: 12px;
-}
-
-.master-btn {
-    padding: 10px 20px;
-    background: linear-gradient(135deg, #B8A369, #D4C89A);
-    border: none;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #1a2a3a;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.master-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 15px rgba(184, 163, 105, 0.4);
-}
-
-.master-btn.active {
-    background: rgba(184, 163, 105, 0.3);
-    color: #B8A369;
-}
-
-/* Confirmation */
-.confirm-box {
-    border-radius: 24px;
-    padding: 24px;
-    margin-bottom: 24px;
-}
-
-.confirm-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #fff;
-    margin: 0 0 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.confirm-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-}
-
-.confirm-label {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.5);
-}
-
-.confirm-value {
-    font-size: 14px;
     font-weight: 500;
-    color: #fff;
+    color: var(--text-muted);
 }
 
-.confirm-total {
+.bk-master-check {
+    width: 28px;
+    height: 28px;
     display: flex;
-    justify-content: space-between;
-    padding-top: 16px;
-    margin-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    align-items: center;
+    justify-content: center;
+    background: var(--gold);
+    border-radius: 50%;
+    color: white;
 }
 
-.confirm-price {
-    font-size: 20px;
-    font-weight: 700;
-    color: #B8A369;
+/* Date Row */
+.bk-date-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* Notes */
-.notes-input {
-    width: 100%;
-    padding: 16px;
-    border-radius: 16px;
-    font-size: 14px;
-    color: #fff;
-    resize: none;
-    outline: none;
-    transition: all 0.3s ease;
-}
-
-.notes-input::placeholder {
-    color: rgba(255, 255, 255, 0.3);
-}
-
-.notes-input:focus {
-    border-color: rgba(184, 163, 105, 0.5);
-    box-shadow: 0 0 20px rgba(184, 163, 105, 0.2);
-}
-
-/* Cart */
-.cart-empty {
+.bk-date-card {
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 48px 24px;
-    color: rgba(255, 255, 255, 0.4);
-    text-align: center;
+    gap: 2px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.cart-empty p {
-    font-size: 16px;
-    margin: 0;
+.bk-date-card:hover {
+    background: rgba(255,255,255,0.6);
 }
 
-.cart-items {
+.bk-date-card.selected {
+    background: var(--gold);
+    border-color: var(--gold);
+}
+
+.bk-date-day {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.bk-date-card.selected .bk-date-day {
+    color: rgba(255,255,255,0.8);
+}
+
+.bk-date-num {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+}
+
+.bk-date-card.selected .bk-date-num {
+    color: white;
+}
+
+.bk-date-month {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.bk-date-card.selected .bk-date-month {
+    color: rgba(255,255,255,0.8);
+}
+
+/* Slots Grouped */
+.bk-slots-grouped {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-.cart-item {
-    border-radius: 20px;
-    padding: 16px;
-    position: relative;
+.bk-slot-group {
+    background: rgba(255,255,255,0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 14px;
+    padding: 12px;
 }
 
-.cart-item-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
-}
-
-.cart-item-service h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #fff;
-    margin: 0 0 4px;
-}
-
-.cart-item-duration {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.5);
-}
-
-.cart-item-remove {
-    width: 32px;
-    height: 32px;
+.bk-slot-group-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    background: rgba(220, 38, 38, 0.2);
-    border: 1px solid rgba(220, 38, 38, 0.3);
-    border-radius: 10px;
-    color: #FCA5A5;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.5);
+    color: var(--navy);
+    font-size: 13px;
+    font-weight: 600;
 }
 
-.cart-item-remove:hover {
-    background: rgba(220, 38, 38, 0.4);
-    transform: scale(1.1);
+.bk-slot-group-header svg {
+    color: var(--gold);
 }
 
-.cart-item-details {
-    display: flex;
-    flex-direction: column;
+.bk-slot-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 6px;
-    margin-bottom: 12px;
 }
 
-.cart-item-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-}
-
-.cart-item-label {
-    color: rgba(255, 255, 255, 0.4);
-}
-
-.cart-item-val {
-    color: rgba(255, 255, 255, 0.8);
+.bk-slot-btn {
+    padding: 10px 4px;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 10px;
+    font-size: 12px;
     font-weight: 500;
+    color: var(--navy);
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.cart-item-price {
-    font-size: 18px;
-    font-weight: 700;
-    color: #B8A369;
-    text-align: right;
-    padding-top: 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+.bk-slot-btn:hover:not(:disabled) {
+    border-color: var(--gold);
 }
 
-.cart-total {
+.bk-slot-btn.selected {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: white;
+}
+
+.bk-slot-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+/* Confirm Card */
+.bk-confirm-card {
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.bk-confirm-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 16px 20px;
-    border-radius: 16px;
-    margin-top: 8px;
+    padding: 8px 0;
 }
 
-.cart-total-label {
-    font-size: 16px;
+.bk-confirm-label {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.bk-confirm-value {
+    font-size: 14px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--navy);
 }
 
-.cart-total-value {
-    font-size: 22px;
-    font-weight: 700;
-    color: #B8A369;
+.bk-confirm-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.6);
+    margin: 8px 0;
 }
 
-/* Empty/Loading states */
-.empty-hint {
+.bk-confirm-total .bk-confirm-value {
+    color: var(--gold);
+    font-size: 16px;
+}
+
+/* Textarea */
+.bk-textarea {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--navy);
+    resize: none;
+}
+
+.bk-textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+/* Empty & Loading */
+.bk-empty {
     padding: 24px;
     text-align: center;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--text-muted);
     font-size: 14px;
 }
 
-.loading {
-    padding: 24px;
+.bk-loading {
     display: flex;
     justify-content: center;
+    padding: 24px;
 }
 
-.spinner {
+.bk-spinner {
     width: 32px;
     height: 32px;
-    border: 3px solid rgba(255, 255, 255, 0.1);
-    border-top-color: #B8A369;
+    border: 3px solid rgba(200,169,81,0.2);
+    border-top-color: var(--gold);
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
 
-/* Error */
-.error-msg {
-    padding: 14px 18px;
-    background: rgba(220, 38, 38, 0.2);
-    border: 1px solid rgba(220, 38, 38, 0.3);
-    border-radius: 14px;
-    color: #FCA5A5;
-    font-size: 14px;
-    margin-top: 16px;
-}
-
-/* Bottom Bar */
-.bk-bottom {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 16px;
-    border-radius: 24px 24px 0 0;
-    z-index: 100;
-}
-
-.bottom-summary {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 14px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.summary-text {
+/* Cart */
+.bk-cart-empty {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    align-items: center;
+    gap: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-muted);
 }
 
-.summary-label {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.4);
+.bk-cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.summary-value {
+.bk-cart-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 14px;
+}
+
+.bk-cart-item-photo {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+}
+
+.bk-cart-item-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.bk-cart-item-info {
+    flex: 1;
+}
+
+.bk-cart-item-service {
+    display: block;
     font-size: 14px;
-    font-weight: 500;
-    color: #fff;
+    font-weight: 600;
+    color: var(--navy);
 }
 
-.summary-detail {
+.bk-cart-item-meta,
+.bk-cart-item-time {
+    display: block;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--text-muted);
 }
 
-.summary-price {
+.bk-cart-item-right {
     text-align: right;
 }
 
-.price-label {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.4);
+.bk-cart-item-price {
     display: block;
-}
-
-.price-value {
-    font-size: 18px;
-    font-weight: 700;
-    color: #B8A369;
-}
-
-.bottom-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.cart-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.bk-btn {
-    flex: 1;
-    padding: 18px;
-    background: linear-gradient(135deg, #B8A369, #D4C89A);
-    border: none;
-    border-radius: 16px;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
-    color: #1a2a3a;
+    color: var(--gold);
+}
+
+.bk-cart-remove {
+    padding: 4px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 20px rgba(184, 163, 105, 0.4);
+}
+
+.bk-add-more {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    width: 100%;
+    padding: 14px;
+    margin-top: 12px;
+    background: rgba(255,255,255,0.4);
+    border: 1px dashed var(--gold);
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gold);
+    cursor: pointer;
 }
 
-.bk-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(184, 163, 105, 0.5);
+.bk-cart-summary {
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 14px;
 }
 
-.bk-btn:disabled {
-    opacity: 0.4;
+.bk-cart-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--navy);
+}
+
+.bk-error {
+    margin-top: 12px;
+    padding: 12px;
+    background: #FEF2F2;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #EF4444;
+    text-align: center;
+}
+
+/* Payment */
+.bk-payment-success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 32px 16px;
+    text-align: center;
+}
+
+.bk-payment-icon {
+    color: #10B981;
+}
+
+.bk-payment-success h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--navy);
+    margin: 0;
+}
+
+.bk-payment-success p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.bk-payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.bk-payment-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: white;
+    border: 2px solid transparent;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.bk-payment-btn span:first-of-type {
+    flex: 1;
+    text-align: left;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.bk-payment-amount {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.bk-payme {
+    border-color: #00CDBE;
+    color: #00CDBE;
+}
+
+.bk-payme:hover {
+    background: #E6FAF8;
+}
+
+.bk-click {
+    border-color: #0066FF;
+    color: #0066FF;
+}
+
+.bk-click:hover {
+    background: #E6F0FF;
+}
+
+.bk-pay-later {
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px;
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* Footer */
+.bk-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255,255,255,0.6);
+    padding: 12px 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    z-index: 100;
+}
+
+.bk-footer-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.bk-footer-price {
+    flex: 1;
+}
+
+.bk-price-label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.bk-price-value {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+}
+
+.bk-btn-primary {
+    flex: 1;
+    padding: 14px 24px;
+    background: var(--gold);
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.bk-btn-primary:hover:not(:disabled) {
+    background: #B8993F;
+}
+
+.bk-btn-primary:disabled {
+    opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
-}
-
-.bk-btn-cart {
-    background: linear-gradient(135deg, #B8A369, #D4C89A);
-}
-
-.bk-btn-secondary {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #fff;
-    box-shadow: none;
-    flex: 0.6;
-}
-
-.bk-btn-secondary:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.2);
-    box-shadow: none;
 }
 </style>

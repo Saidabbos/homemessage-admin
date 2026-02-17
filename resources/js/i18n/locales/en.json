@@ -101,13 +101,23 @@
     "new": "Add New",
     "edit": "Edit",
     "info": "Service information",
+    "basicInfo": "Basic Information",
     "duration": "Duration",
+    "durations": "Durations",
+    "durationsAndPrices": "Durations and Prices",
+    "priceRange": "Price range",
+    "price": "Price",
+    "default": "Default",
     "minutes": "minutes",
+    "min": "min",
+    "sum": "UZS",
     "addFirst": "Add First Service",
     "emptyMessage": "No massage types have been created yet",
     "confirmDelete": "Are you sure you want to delete this massage type?",
     "enterName": "Enter service name",
-    "enterDescription": "Enter service description"
+    "enterDescription": "Enter service description",
+    "actions": "Actions",
+    "statistics": "Statistics"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -120,15 +130,20 @@
     "orders": "Orders",
     "allOrders": "All orders",
     "newOrders": "New orders",
+    "testimonials": "Testimonials",
     "users": "Users",
     "clients": "Clients",
-    "masters": "Masters",
+    "masters": "Massage Therapists",
     "dispatchers": "Dispatchers",
+    "ratings": "Ratings",
     "reports": "Reports",
+    "ordersReport": "Orders Report",
+    "mastersReport": "Masters Report",
     "income": "Income",
     "statistics": "Statistics",
     "system": "System",
-    "settings": "Settings"
+    "settings": "Settings",
+    "online": "Online"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -287,8 +302,14 @@
     "role": "Role",
     "memberSince": "Member since",
     "name": "Name",
+    "name_placeholder": "Enter your name",
     "email": "Email",
+    "email_placeholder": "email{'@'}example.com",
     "phone": "Phone",
+    "phone_hint": "Phone number cannot be changed",
+    "language": "Language",
+    "save": "Save",
+    "updated": "Profile updated successfully",
     "enterName": "Enter name",
     "enterEmail": "Enter email",
     "updateProfile": "Update Profile",
@@ -503,6 +524,21 @@
     }
   },
   "public": {
+    "nav": {
+      "services": "Services",
+      "masters": "Masters",
+      "login": "Login",
+      "logout": "Logout",
+      "dashboard": "Dashboard",
+      "orders": "My Orders",
+      "profile": "Profile"
+    },
+    "footer": {
+      "tagline": "Premium massage services at your home",
+      "navigation": "Navigation",
+      "contact": "Contact",
+      "rights": "All rights reserved"
+    },
     "masters": {
       "title": "Our Masters",
       "badge": "Certified specialists",

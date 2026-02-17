@@ -1,15 +1,42 @@
 <script setup>
-import { Link } from '@inertiajs/vue3'
+import { Link, usePage, router } from '@inertiajs/vue3'
 import { useI18n } from 'vue-i18n'
-import { ref } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const { t, locale } = useI18n()
 const mobileMenuOpen = ref(false)
+const userDropdownOpen = ref(false)
+const dropdownRef = ref(null)
+
+const page = usePage()
+const user = computed(() => page.props.auth?.user)
 
 const switchLocale = (newLocale) => {
     locale.value = newLocale
     localStorage.setItem('locale', newLocale)
 }
+
+const toggleUserDropdown = () => {
+    userDropdownOpen.value = !userDropdownOpen.value
+}
+
+const closeDropdown = (e) => {
+    if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
+        userDropdownOpen.value = false
+    }
+}
+
+const logout = () => {
+    router.post('/customer/logout')
+}
+
+onMounted(() => {
+    document.addEventListener('click', closeDropdown)
+})
+
+onUnmounted(() => {
+    document.removeEventListener('click', closeDropdown)
+})
 </script>
 
 <template>
@@ -42,6 +69,45 @@ const switchLocale = (newLocale) => {
                     >RU</button>
                 </div>
 
+                <!-- User Menu (Desktop) -->
+                <div v-if="user" class="user-menu desktop-only" ref="dropdownRef">
+                    <button class="user-menu-btn" @click.stop="toggleUserDropdown">
+                        <span class="user-avatar">{{ user.name?.charAt(0) || user.phone?.slice(-2) }}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{ rotated: userDropdownOpen }">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+                    <div v-if="userDropdownOpen" class="user-dropdown">
+                        <div class="dropdown-header">
+                            <span class="dropdown-name">{{ user.name || user.phone }}</span>
+                            <span class="dropdown-phone" v-if="user.name">{{ user.phone }}</span>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <Link href="/customer/dashboard" class="dropdown-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            {{ t('public.nav.dashboard') }}
+                        </Link>
+                        <Link href="/customer/orders" class="dropdown-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            {{ t('public.nav.orders') }}
+                        </Link>
+                        <Link href="/customer/profile" class="dropdown-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            {{ t('public.nav.profile') }}
+                        </Link>
+                        <div class="dropdown-divider"></div>
+                        <button @click="logout" class="dropdown-item dropdown-item-danger">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            {{ t('public.nav.logout') }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Login Button (Desktop) -->
+                <Link v-else href="/customer/login" class="login-btn desktop-only">
+                    {{ t('public.nav.login') }}
+                </Link>
+
                 <!-- Mobile Menu Toggle -->
                 <button class="mobile-menu-toggle mobile-only" @click="mobileMenuOpen = !mobileMenuOpen">
                     <svg v-if="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -62,6 +128,17 @@ const switchLocale = (newLocale) => {
                     <button @click="switchLocale('uz')" class="lang-btn" :class="{ active: locale === 'uz' }">O'zbekcha</button>
                     <button @click="switchLocale('ru')" class="lang-btn" :class="{ active: locale === 'ru' }">Русский</button>
                 </div>
+                <!-- Mobile User Section -->
+                <div v-if="user" class="mobile-user">
+                    <div class="mobile-user-info">
+                        <span class="mobile-user-avatar">{{ user.name?.charAt(0) || user.phone?.slice(-2) }}</span>
+                        <span class="mobile-user-name">{{ user.name || user.phone }}</span>
+                    </div>
+                    <Link href="/customer/dashboard" class="mobile-link" @click="mobileMenuOpen = false">{{ t('public.nav.dashboard') }}</Link>
+                    <Link href="/customer/orders" class="mobile-link" @click="mobileMenuOpen = false">{{ t('public.nav.orders') }}</Link>
+                    <button @click="logout" class="mobile-link mobile-logout">{{ t('public.nav.logout') }}</button>
+                </div>
+                <Link v-else href="/customer/login" class="mobile-link mobile-link-login" @click="mobileMenuOpen = false">{{ t('public.nav.login') }}</Link>
             </div>
         </nav>
 
@@ -247,6 +324,179 @@ const switchLocale = (newLocale) => {
     flex: 1;
     padding: 0.75rem;
     font-size: 0.875rem;
+}
+
+/* User Menu */
+.user-menu {
+    position: relative;
+}
+
+.user-menu-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.user-menu-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.user-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #C9A55C 0%, #D4B76A 100%);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 50%;
+}
+
+.user-menu-btn svg {
+    color: #6a6a7a;
+    transition: transform 0.2s ease;
+}
+
+.user-menu-btn svg.rotated {
+    transform: rotate(180deg);
+}
+
+.user-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    min-width: 220px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    z-index: 200;
+}
+
+.dropdown-header {
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.dropdown-name {
+    display: block;
+    font-weight: 600;
+    color: #1a1a2e;
+}
+
+.dropdown-phone {
+    display: block;
+    font-size: 0.8125rem;
+    color: #6a6a7a;
+    margin-top: 0.25rem;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    color: #1a1a2e;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.dropdown-item svg {
+    color: #6a6a7a;
+}
+
+.dropdown-item-danger {
+    color: #dc3545;
+}
+
+.dropdown-item-danger svg {
+    color: #dc3545;
+}
+
+/* Login Button */
+.login-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: #1a1a2e;
+    text-decoration: none;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    transition: background 0.2s ease;
+}
+
+.login-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile User Section */
+.mobile-user {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.mobile-user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.mobile-user-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #C9A55C 0%, #D4B76A 100%);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 50%;
+}
+
+.mobile-user-name {
+    font-weight: 600;
+    color: #1a1a2e;
+}
+
+.mobile-logout {
+    color: #dc3545;
+    text-align: left;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.mobile-link-login {
+    background: rgba(0, 0, 0, 0.05);
+    text-align: center;
+    margin-top: 1rem;
 }
 
 /* Show/Hide based on viewport */

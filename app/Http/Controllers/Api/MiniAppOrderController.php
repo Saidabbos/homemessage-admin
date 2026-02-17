@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Order;
+use App\Http\Requests\Api\CreateMiniAppOrderRequest;
 use App\Models\Master;
+use App\Models\Order;
 use App\Models\ServiceTypeDuration;
 use App\Services\SlotCalculationService;
 use App\Services\TelegramNotificationService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +17,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Carbon\Carbon;
 
 class MiniAppOrderController extends Controller
 {
@@ -28,36 +29,17 @@ class MiniAppOrderController extends Controller
      * Create order(s) from Mini App
      * Supports multi-master booking - creates linked orders for each master
      */
-    public function store(Request $request): JsonResponse
+    public function store(CreateMiniAppOrderRequest $request): JsonResponse
     {
         Log::info('MiniApp: Order creation attempt', $request->all());
 
-        // Support both single master_id and array of master_ids
-        $hasMasterIds = $request->has('master_ids') && is_array($request->master_ids) && count($request->master_ids) > 0;
-
-        $validated = $request->validate([
-            'master_id' => $hasMasterIds ? 'nullable' : 'required|exists:masters,id',
-            'master_ids' => 'nullable|array|min:1|max:5',
-            'master_ids.*' => 'exists:masters,id',
-            'service_type_id' => 'required|exists:service_types,id',
-            'duration_id' => 'required|exists:service_type_durations,id',
-            'date' => 'required|date|after_or_equal:today',
-            'arrival_window_start' => 'required|date_format:H:i',
-            'people_count' => 'integer|min:1|max:5',
-            'pressure_level' => 'in:light,medium,strong,any',
-            'notes' => 'nullable|string|max:500',
-        ]);
+        $validated = $request->validated();
 
         // Get current user
         $user = Auth::user();
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Avval tizimga kiring',
-            ], 401);
-        }
 
         // Determine master IDs
+        $hasMasterIds = $request->has('master_ids') && is_array($request->master_ids) && count($request->master_ids) > 0;
         $masterIds = $hasMasterIds 
             ? $validated['master_ids'] 
             : [$validated['master_id']];

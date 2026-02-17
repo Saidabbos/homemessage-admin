@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Mappers\OrderMapper;
 use App\Models\Order;
 use App\Models\Rating;
 use Illuminate\Http\Request;
@@ -46,23 +47,7 @@ class OrderController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $locale = app()->getLocale();
-
-        $orders->getCollection()->transform(function ($order) use ($locale) {
-            return [
-                'id' => $order->id,
-                'order_number' => $order->order_number,
-                'booking_date' => $order->booking_date?->format('Y-m-d'),
-                'booking_date_formatted' => $order->booking_date?->translatedFormat('d M, Y'),
-                'arrival_time' => $order->arrival_window_start ? substr($order->arrival_window_start, 0, 5) : null,
-                'service_name' => $order->serviceType?->getTranslation('name', $locale) ?? '-',
-                'master_name' => $order->master?->full_name ?? '-',
-                'duration_minutes' => $order->duration?->duration ?? 60,
-                'total_amount' => (float) $order->total_amount,
-                'status' => $order->status,
-                'payment_status' => $order->payment_status,
-            ];
-        });
+        $orders->getCollection()->transform(fn($order) => OrderMapper::toListItem($order));
 
         // Status counts for tabs
         $statusCounts = Order::where('customer_id', $user->id)
@@ -95,7 +80,6 @@ class OrderController extends Controller
         }
 
         $order->load(['master', 'serviceType', 'duration', 'oil', 'logs']);
-        $locale = app()->getLocale();
 
         // Check if rating exists for this order
         $customerRating = Rating::where('order_id', $order->id)
@@ -104,53 +88,60 @@ class OrderController extends Controller
 
         $canRate = $order->isCompleted() && (!$customerRating || !$customerRating->isCompleted());
 
+        $ratingData = $customerRating?->isCompleted() ? [
+            'overall_rating' => $customerRating->overall_rating,
+            'punctuality_rating' => $customerRating->punctuality_rating,
+            'professionalism_rating' => $customerRating->professionalism_rating,
+            'cleanliness_rating' => $customerRating->cleanliness_rating,
+            'feedback' => $customerRating->feedback,
+            'rated_at' => $customerRating->rated_at->format('d.m.Y'),
+        ] : null;
+
         return Inertia::render('Customer/Orders/Show', [
-            'order' => [
-                'id' => $order->id,
-                'order_number' => $order->order_number,
-                'booking_date_display' => $order->booking_date?->translatedFormat('d M, Y'),
-                'arrival_window' => $order->arrival_window_display,
-                'service_type' => $order->serviceType ? [
-                    'name' => $order->serviceType->getTranslation('name', $locale),
-                ] : null,
-                'duration' => $order->duration ? ['minutes' => $order->duration->duration] : null,
-                'oil' => $order->oil ? ['name' => $order->oil->getTranslation('name', $locale)] : null,
-                'people_count' => $order->people_count,
-                'pressure_level' => $order->pressure_level,
-                'total_amount' => (float) $order->total_amount,
-                'status' => $order->status,
-                'payment_status' => $order->payment_status,
-                'address' => $order->address,
-                'entrance' => $order->entrance,
-                'floor' => $order->floor,
-                'apartment' => $order->apartment,
-                'landmark' => $order->landmark,
-                'master' => $order->master ? [
-                    'name' => $order->master->full_name,
-                    'phone' => $order->master->phone,
-                    'photo_url' => $order->master->photo_url,
-                ] : null,
-                'logs' => $order->logs->map(fn ($log) => [
-                    'id' => $log->id,
-                    'action' => $log->action,
-                    'created_at' => $log->created_at->format('d.m.Y H:i'),
-                ]),
-                'created_at' => $order->created_at->format('d.m.Y H:i'),
-                'can_rate' => $canRate,
-                'customer_rating' => $customerRating?->isCompleted() ? [
-                    'overall_rating' => $customerRating->overall_rating,
-                    'punctuality_rating' => $customerRating->punctuality_rating,
-                    'professionalism_rating' => $customerRating->professionalism_rating,
-                    'cleanliness_rating' => $customerRating->cleanliness_rating,
-                    'feedback' => $customerRating->feedback,
-                    'rated_at' => $customerRating->rated_at->format('d.m.Y'),
-                ] : null,
-            ],
+            'order' => OrderMapper::toCustomerDetail($order, $ratingData, $canRate),
             'customer' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'phone' => $user->phone,
             ],
+            'payment' => [
+                'enabled' => config('services.payment.enabled', false),
+                'payme_enabled' => config('services.payme.enabled', false),
+                'click_enabled' => config('services.click.enabled', false),
+            ],
         ]);
+    }
+
+    /**
+     * Cancel order by customer
+     */
+    public function cancel(Order $order)
+    {
+        $user = Auth::user();
+
+        if ($order->customer_id !== $user->id) {
+            abort(403);
+        }
+
+        $cancellableStatuses = ['NEW', 'CONFIRMING', 'CONFIRMED', 'WAITING_PAYMENT'];
+        if (!in_array($order->status, $cancellableStatuses)) {
+            return back()->with('error', 'Bu buyurtmani bekor qilib bo\'lmaydi');
+        }
+
+        $order->update([
+            'status' => 'CANCELLED',
+            'cancelled_at' => now(),
+            'cancelled_by' => 'customer',
+        ]);
+
+        // Log the action
+        $order->logs()->create([
+            'action' => 'cancelled_by_customer',
+            'user_id' => $user->id,
+            'user_type' => 'customer',
+            'notes' => 'Mijoz tomonidan bekor qilindi',
+        ]);
+
+        return redirect()->route('customer.orders')->with('success', 'Buyurtma bekor qilindi');
     }
 }

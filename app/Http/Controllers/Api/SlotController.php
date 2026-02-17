@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\GetMultiMasterSlotsRequest;
+use App\Http\Requests\Api\GetSlotsByDateRequest;
+use App\Http\Requests\Api\GetSlotsRequest;
 use App\Models\Master;
 use App\Services\SlotCalculationService;
 use Carbon\Carbon;
@@ -19,17 +22,11 @@ class SlotController extends Controller
     /**
      * Get available slots for booking
      */
-    public function available(Request $request): JsonResponse
+    public function available(GetSlotsRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'master_id' => 'required|exists:masters,id',
-            'date' => 'required|date|after_or_equal:today',
-            'duration' => 'sometimes|integer|min:30',
-        ]);
-
-        $master = Master::findOrFail($validated['master_id']);
-        $date = Carbon::parse($validated['date']);
-        $duration = $validated['duration'] ?? 60;
+        $master = Master::findOrFail($request->master_id);
+        $date = Carbon::parse($request->date);
+        $duration = $request->duration ?? 60;
 
         $slots = $this->slotCalculationService->getSlotsForMaster(
             $master,
@@ -46,19 +43,12 @@ class SlotController extends Controller
     /**
      * Get slots grouped by date for a date range
      */
-    public function byDate(Request $request): JsonResponse
+    public function byDate(GetSlotsByDateRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'master_id' => 'required|exists:masters,id',
-            'start_date' => 'required|date|after_or_equal:today',
-            'days' => 'sometimes|integer|min:1|max:14',
-            'duration' => 'sometimes|integer|min:30',
-        ]);
-
-        $master = Master::findOrFail($validated['master_id']);
-        $startDate = Carbon::parse($validated['start_date']);
-        $days = $validated['days'] ?? 7;
-        $duration = $validated['duration'] ?? 60;
+        $master = Master::findOrFail($request->master_id);
+        $startDate = Carbon::parse($request->start_date);
+        $days = $request->days ?? 7;
+        $duration = $request->duration ?? 60;
 
         $result = [];
         for ($i = 0; $i < $days; $i++) {
@@ -76,17 +66,11 @@ class SlotController extends Controller
     /**
      * Get slots available for ALL selected masters (multi-master booking)
      */
-    public function multiMaster(Request $request): JsonResponse
+    public function multiMaster(GetMultiMasterSlotsRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'master_ids' => 'required|string', // comma-separated
-            'date' => 'required|date|after_or_equal:today',
-            'duration' => 'sometimes|integer|min:30',
-        ]);
-
-        $masterIds = array_filter(array_map('intval', explode(',', $validated['master_ids'])));
-        $date = $validated['date'];
-        $duration = $validated['duration'] ?? 60;
+        $masterIds = array_filter(array_map('intval', explode(',', $request->master_ids)));
+        $date = $request->date;
+        $duration = $request->duration ?? 60;
 
         if (empty($masterIds)) {
             return response()->json([

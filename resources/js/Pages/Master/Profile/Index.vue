@@ -90,6 +90,10 @@ const logout = () => {
                             {{ master.rating }}
                         </div>
                     </div>
+                    <Link href="/master/profile/edit" class="mp-edit-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                        {{ t('common.edit') }}
+                    </Link>
                 </div>
 
                 <!-- Contact Information -->
@@ -164,3 +168,32 @@ const logout = () => {
         </main>
     </div>
 </template>
+
+<style scoped>
+.mp-header-card {
+    position: relative;
+}
+
+.mp-edit-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(251, 191, 36, 0.15);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 0.5rem;
+    color: #fbbf24;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.mp-edit-btn:hover {
+    background: rgba(251, 191, 36, 0.25);
+    border-color: rgba(251, 191, 36, 0.5);
+}
+</style>

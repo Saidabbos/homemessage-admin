@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { Head, Link, usePage, router } from '@inertiajs/vue3'
 import { useI18n } from 'vue-i18n'
 
@@ -9,7 +9,11 @@ const page = usePage()
 const props = defineProps({
     order: Object,
     customer: Object,
+    payment: Object,
 })
+
+const showCancelModal = ref(false)
+const cancelling = ref(false)
 
 const formatPrice = (amount) => {
     return new Intl.NumberFormat('uz-UZ').format(amount) + ' ' + t('common.sum')
@@ -23,6 +27,26 @@ const callMaster = () => {
 
 const goToRate = () => {
     router.post(`/customer/orders/${props.order.id}/rate`)
+}
+
+const payWithPayme = () => {
+    // Redirect to Payme payment page
+    window.location.href = `/booking/payment/${props.order.id}?provider=payme`
+}
+
+const payWithClick = () => {
+    // Redirect to Click payment page
+    window.location.href = `/booking/payment/${props.order.id}?provider=click`
+}
+
+const confirmCancel = () => {
+    cancelling.value = true
+    router.post(`/customer/orders/${props.order.id}/cancel`, {}, {
+        onFinish: () => {
+            cancelling.value = false
+            showCancelModal.value = false
+        }
+    })
 }
 
 const paymentBadgeClass = (status) => {
@@ -82,13 +106,17 @@ const logout = () => {
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
                         <span>{{ t('customer.navFavorites') }}</span>
                     </Link>
+                    <Link href="/customer/profile" class="cos-nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <span>{{ t('customer.navProfile') }}</span>
+                    </Link>
                 </nav>
             </div>
 
             <div class="cos-sidebar-bottom">
                 <div class="cos-sidebar-divider"></div>
                 <div class="cos-user-profile">
-                    <Link href="/customer/dashboard" class="cos-user-link">
+                    <Link href="/customer/profile" class="cos-user-link">
                         <div class="cos-user-avatar">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         </div>
@@ -133,6 +161,42 @@ const logout = () => {
                         <span :class="['cos-payment-badge', paymentBadgeClass(order.payment_status)]">
                             {{ t(`paymentStatuses.${order.payment_status}`) }}
                         </span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div v-if="order.can_pay || order.can_cancel" class="cos-full-row">
+                    <div class="cos-actions-bar">
+                        <!-- Pay Button -->
+                        <div v-if="order.can_pay && payment?.enabled" class="cos-pay-section">
+                            <span class="cos-pay-label">{{ t('orders.payNow') }}</span>
+                            <div class="cos-pay-buttons">
+                                <button v-if="payment.payme_enabled" @click="payWithPayme" class="cos-pay-btn cos-pay-payme">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                                        <line x1="1" y1="10" x2="23" y2="10"/>
+                                    </svg>
+                                    Payme
+                                </button>
+                                <button v-if="payment.click_enabled" @click="payWithClick" class="cos-pay-btn cos-pay-click">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                                        <line x1="1" y1="10" x2="23" y2="10"/>
+                                    </svg>
+                                    Click
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Cancel Button -->
+                        <button v-if="order.can_cancel" @click="showCancelModal = true" class="cos-cancel-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="15" y1="9" x2="9" y2="15"/>
+                                <line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                            {{ t('orders.cancelOrder') }}
+                        </button>
                     </div>
                 </div>
 
@@ -292,5 +356,212 @@ const logout = () => {
                 </div>
             </div>
         </main>
+
+        <!-- Cancel Confirmation Modal -->
+        <Teleport to="body">
+            <div v-if="showCancelModal" class="cos-modal-overlay" @click.self="showCancelModal = false">
+                <div class="cos-modal">
+                    <div class="cos-modal-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                    </div>
+                    <h3 class="cos-modal-title">{{ t('orders.cancelConfirmTitle') }}</h3>
+                    <p class="cos-modal-text">{{ t('orders.cancelConfirmText') }}</p>
+                    <div class="cos-modal-actions">
+                        <button @click="showCancelModal = false" class="cos-modal-btn cos-modal-btn-secondary">
+                            {{ t('common.no') }}
+                        </button>
+                        <button @click="confirmCancel" :disabled="cancelling" class="cos-modal-btn cos-modal-btn-danger">
+                            <span v-if="cancelling">{{ t('common.loading') }}...</span>
+                            <span v-else>{{ t('orders.yesCancel') }}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Teleport>
     </div>
 </template>
+
+<style scoped>
+/* Action Buttons */
+.cos-actions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 20px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.cos-pay-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cos-pay-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748B;
+}
+
+.cos-pay-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.cos-pay-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cos-pay-payme {
+    background: #00CDBE;
+    color: white;
+}
+
+.cos-pay-payme:hover {
+    background: #00B8AA;
+}
+
+.cos-pay-click {
+    background: #0066FF;
+    color: white;
+}
+
+.cos-pay-click:hover {
+    background: #0052CC;
+}
+
+.cos-cancel-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #EF4444;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cos-cancel-btn:hover {
+    background: #FEE2E2;
+}
+
+/* Modal */
+.cos-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.cos-modal {
+    background: white;
+    border-radius: 20px;
+    padding: 32px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+}
+
+.cos-modal-icon {
+    margin-bottom: 16px;
+    color: #F59E0B;
+}
+
+.cos-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1E293B;
+    margin: 0 0 8px;
+}
+
+.cos-modal-text {
+    font-size: 14px;
+    color: #64748B;
+    margin: 0 0 24px;
+}
+
+.cos-modal-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.cos-modal-btn {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cos-modal-btn-secondary {
+    background: #F1F5F9;
+    border: none;
+    color: #64748B;
+}
+
+.cos-modal-btn-secondary:hover {
+    background: #E2E8F0;
+}
+
+.cos-modal-btn-danger {
+    background: #EF4444;
+    border: none;
+    color: white;
+}
+
+.cos-modal-btn-danger:hover {
+    background: #DC2626;
+}
+
+.cos-modal-btn-danger:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .cos-actions-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .cos-pay-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .cos-pay-buttons {
+        flex-direction: column;
+    }
+
+    .cos-pay-btn,
+    .cos-cancel-btn {
+        justify-content: center;
+    }
+}
+</style>

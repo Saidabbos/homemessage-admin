@@ -128,11 +128,12 @@
 }
 
 .nav-user {
+    position: relative;
     display: flex;
     align-items: center;
 }
 
-.nav-user-link {
+.nav-user-btn {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -142,12 +143,21 @@
     border: 1px solid rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    text-decoration: none;
+    cursor: pointer;
     transition: all 0.2s;
 }
 
-.nav-user-link:hover {
+.nav-user-btn:hover {
     background: rgba(255, 255, 255, 0.4);
+}
+
+.nav-user-btn svg {
+    color: #1B2B5A;
+    transition: transform 0.2s;
+}
+
+.nav-user-btn svg.rotated {
+    transform: rotate(180deg);
 }
 
 .nav-avatar {
@@ -167,6 +177,75 @@
     font-size: 14px;
     font-weight: 500;
     color: #1B2B5A;
+}
+
+/* User Dropdown */
+.nav-user-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 220px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    z-index: 200;
+}
+
+.nav-user-dropdown .dropdown-header {
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.nav-user-dropdown .dropdown-name {
+    display: block;
+    font-weight: 600;
+    color: #1B2B5A;
+    font-size: 15px;
+}
+
+.nav-user-dropdown .dropdown-phone {
+    display: block;
+    font-size: 13px;
+    color: #6a6a7a;
+    margin-top: 4px;
+}
+
+.nav-user-dropdown .dropdown-divider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.nav-user-dropdown .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1B2B5A;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.nav-user-dropdown .dropdown-item:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.nav-user-dropdown .dropdown-item svg {
+    color: #6a6a7a;
+}
+
+.nav-user-dropdown .dropdown-logout {
+    color: #dc3545;
+}
+
+.nav-user-dropdown .dropdown-logout svg {
+    color: #dc3545;
 }
 
 .nav-login {
@@ -259,34 +338,48 @@
     margin: 8px 0;
 }
 
-.mobile-menu-user {
+.mobile-menu-user-info {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    border-radius: 12px;
-    text-decoration: none;
     color: #1B2B5A;
     font-size: 15px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.mobile-menu-user:hover {
-    background: rgba(200, 169, 81, 0.08);
+    font-weight: 600;
 }
 
 .mobile-menu-avatar {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: #C8A951;
     font-size: 14px;
     font-weight: 600;
     color: #1B2B5A;
+}
+
+.mobile-menu-logout {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: none;
+    border: none;
+    color: #dc3545;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+}
+
+.mobile-menu-logout:hover {
+    background: rgba(220, 53, 69, 0.08);
 }
 
 .mobile-menu-login {

@@ -10,6 +10,7 @@ use App\Models\Master;
 use App\Models\Rating;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -21,6 +22,8 @@ class DashboardController extends Controller
     {
         $today = Carbon::today();
         $tomorrow = Carbon::tomorrow();
+        $weekStart = Carbon::now()->startOfWeek();
+        $monthStart = Carbon::now()->startOfMonth();
 
         // Order stats by status
         $orderStats = [
@@ -87,6 +90,81 @@ class DashboardController extends Controller
             'total_service_types' => ServiceType::where('status', true)->count(),
         ];
 
+        // Revenue stats
+        $revenueStats = [
+            'today' => Order::whereDate('created_at', $today)
+                ->where('payment_status', 'PAID')
+                ->sum('total_amount'),
+            'week' => Order::whereBetween('created_at', [$weekStart, now()])
+                ->where('payment_status', 'PAID')
+                ->sum('total_amount'),
+            'month' => Order::whereBetween('created_at', [$monthStart, now()])
+                ->where('payment_status', 'PAID')
+                ->sum('total_amount'),
+            'total' => Order::where('payment_status', 'PAID')
+                ->sum('total_amount'),
+        ];
+
+        // Orders trend (last 7 days)
+        $ordersTrend = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::today()->subDays($i);
+            $ordersTrend[] = [
+                'date' => $date->format('d.m'),
+                'day' => $date->locale('uz')->isoFormat('dd'),
+                'orders' => Order::whereDate('created_at', $date)->count(),
+                'completed' => Order::whereDate('created_at', $date)
+                    ->where('status', Order::STATUS_COMPLETED)->count(),
+                'revenue' => Order::whereDate('created_at', $date)
+                    ->where('payment_status', 'PAID')
+                    ->sum('total_amount'),
+            ];
+        }
+
+        // Payment stats
+        $paymentStats = [
+            'paid' => Order::where('payment_status', 'PAID')->count(),
+            'unpaid' => Order::where('payment_status', 'UNPAID')
+                ->whereNotIn('status', [Order::STATUS_CANCELLED])
+                ->count(),
+            'pending' => Order::where('payment_status', 'PENDING')->count(),
+        ];
+
+        // Popular services (top 5)
+        $popularServices = ServiceType::withCount(['orders' => function ($q) use ($monthStart) {
+                $q->where('created_at', '>=', $monthStart);
+            }])
+            ->orderByDesc('orders_count')
+            ->limit(5)
+            ->get()
+            ->map(fn($s) => [
+                'id' => $s->id,
+                'name' => $s->name,
+                'orders_count' => $s->orders_count,
+            ]);
+
+        // Master performance (this month)
+        $masterPerformance = Master::where('status', true)
+            ->withCount(['orders' => function ($q) use ($monthStart) {
+                $q->where('status', Order::STATUS_COMPLETED)
+                    ->where('created_at', '>=', $monthStart);
+            }])
+            ->withSum(['orders' => function ($q) use ($monthStart) {
+                $q->where('payment_status', 'PAID')
+                    ->where('created_at', '>=', $monthStart);
+            }], 'total_amount')
+            ->orderByDesc('orders_count')
+            ->limit(5)
+            ->get()
+            ->map(fn($m) => [
+                'id' => $m->id,
+                'name' => $m->full_name,
+                'photo' => $m->photo,
+                'orders_count' => $m->orders_count,
+                'revenue' => $m->orders_sum_total_amount ?? 0,
+                'rating' => $m->rating ? round($m->rating, 1) : null,
+            ]);
+
         // Rating stats
         $ratingStats = [
             'total_ratings' => Rating::whereNotNull('rated_at')->count(),
@@ -140,6 +218,11 @@ class DashboardController extends Controller
             'ratingStats' => $ratingStats,
             'recentRatings' => $recentRatings,
             'topMasters' => $topMasters,
+            'revenueStats' => $revenueStats,
+            'ordersTrend' => $ordersTrend,
+            'paymentStats' => $paymentStats,
+            'popularServices' => $popularServices,
+            'masterPerformance' => $masterPerformance,
         ]);
     }
 }
