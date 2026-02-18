@@ -2,58 +2,67 @@
 /* Consistent animations for cards and buttons across the site */
 
 /* ==================== Card Hover Effect ==================== */
-/* Apply .hover-card class to any card element */
+/* Same animation as .card-glass-hover */
 .hover-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hover-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
-/* Glass card variant */
+/* Glass card variant - same cubic-bezier */
 .hover-card-glass {
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, backdrop-filter 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hover-card-glass:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
     background: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 }
 
 /* ==================== Button Hover Effects ==================== */
-/* Primary button - gold glow */
+/* Primary button - gold glow with card-glass-hover style */
 .hover-btn-primary {
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hover-btn-primary:hover {
-    transform: scale(1.03);
-    box-shadow: 0 6px 20px rgba(200, 169, 81, 0.5);
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 
+        0 15px 35px rgba(200, 169, 81, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-/* Secondary button - subtle lift */
+/* Secondary button - subtle lift with same timing */
 .hover-btn-secondary {
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hover-btn-secondary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 /* Ghost button - background fill */
 .hover-btn-ghost {
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hover-btn-ghost:hover {
     background: rgba(200, 169, 81, 0.1);
     color: #C8A951;
+    transform: translateY(-2px);
 }
 
 /* ==================== Image Hover Effect ==================== */
@@ -92,32 +101,36 @@
 /* ==================== Utility Classes ==================== */
 /* Add these to existing elements for quick hover effects */
 
-/* Lift on hover */
+/* Lift on hover - card-glass-hover style */
 .hover-lift {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hover-lift:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 /* Scale on hover */
 .hover-scale {
-    transition: transform 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hover-scale:hover {
-    transform: scale(1.03);
+    transform: scale(1.05);
 }
 
 /* Glow on hover (gold) */
 .hover-glow {
-    transition: box-shadow 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hover-glow:hover {
-    box-shadow: 0 6px 20px rgba(200, 169, 81, 0.4);
+    box-shadow: 
+        0 15px 35px rgba(200, 169, 81, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 /* Pulse animation */

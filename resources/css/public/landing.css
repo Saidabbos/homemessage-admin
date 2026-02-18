@@ -548,7 +548,7 @@
     border-radius: 28px;
     box-shadow: 0 4px 20px rgba(200, 169, 81, 0.31);
     text-decoration: none;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hero-cta-primary svg {
@@ -565,8 +565,10 @@
 }
 
 .hero-cta-primary:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 30px rgba(200, 169, 81, 0.45);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 
+        0 15px 35px rgba(200, 169, 81, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .hero-cta-secondary {
@@ -711,12 +713,14 @@
     border: 1px solid rgba(255, 255, 255, 0.38);
     border-radius: 20px;
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .service-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
     background: rgba(255, 255, 255, 0.5);
 }
 
@@ -1037,12 +1041,14 @@
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.38);
     border-radius: 20px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .testimonial-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
     background: rgba(255, 255, 255, 0.5);
 }
 

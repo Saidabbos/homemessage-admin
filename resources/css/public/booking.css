@@ -197,14 +197,16 @@
     border: 1.5px solid rgba(255, 255, 255, 0.5);
     border-radius: 16px;
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .bk-service-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-8px) scale(1.02);
     background: rgba(255, 255, 255, 0.5);
     border-color: rgba(255, 255, 255, 0.7);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .bk-service-card.selected {
@@ -613,8 +615,10 @@
 
 .bk-btn-next:hover:not(:disabled) {
     background: #b89940;
-    box-shadow: 0 12px 30px rgba(200, 169, 81, 0.5);
-    transform: translateY(-2px) scale(1.02);
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 
+        0 15px 35px rgba(200, 169, 81, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .bk-btn-next:disabled {
@@ -776,13 +780,15 @@
     border-radius: 16px;
     overflow: hidden;
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .bk-master-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-8px) scale(1.02);
     background: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .bk-master-card:hover .bk-master-img img {

@@ -465,13 +465,15 @@
     border-radius: 10px;
     background: #FAFAF8;
     text-decoration: none;
-    transition: all 0.25s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cd-booking-item:hover {
     background: #F5F2ED;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .cd-booking-avatar {
