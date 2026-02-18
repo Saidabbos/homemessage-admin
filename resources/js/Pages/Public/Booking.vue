@@ -467,6 +467,9 @@ const getServiceIcon = (service) => {
     <Head title="Buyurtma berish" />
 
     <div class="bk-page">
+        <!-- Liquid Glass Background Blobs -->
+        <div class="bg-blob-1" style="top: 5%; right: -150px; opacity: 0.4;"></div>
+        <div class="bg-blob-2" style="bottom: 20%; left: -100px; opacity: 0.3;"></div>
         <!-- Top Bar -->
         <div class="bk-topbar">
             <a href="/" class="bk-logo">HOMEMASSAGE</a>
@@ -544,10 +547,11 @@ const getServiceIcon = (service) => {
                         <h3 class="bk-section-title">Massaj turi</h3>
                         <div class="bk-service-grid">
                             <div
-                                v-for="service in services"
+                                v-for="(service, idx) in services"
                                 :key="service.id"
-                                class="bk-service-card"
+                                class="bk-service-card glass-card"
                                 :class="{ selected: isServiceSelected(service.id) }"
+                                :style="{ animationDelay: (idx * 0.05) + 's' }"
                                 @click="toggleService(service.id)"
                             >
                                 <div class="bk-service-icon">
@@ -644,10 +648,11 @@ const getServiceIcon = (service) => {
                             </button>
                             <div ref="mastersRef" class="bk-masters-track">
                                 <div
-                                    v-for="master in filteredMasters"
+                                    v-for="(master, idx) in filteredMasters"
                                     :key="master.id"
-                                    class="bk-master-card"
+                                    class="bk-master-card glass-card"
                                     :class="{ selected: booking.master_id === master.id }"
+                                    :style="{ animationDelay: (idx * 0.1) + 's' }"
                                     @click="booking.master_id = master.id"
                                 >
                                     <div class="bk-master-img">

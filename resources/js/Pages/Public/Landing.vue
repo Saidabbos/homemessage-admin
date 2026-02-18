@@ -273,6 +273,10 @@ function submitContact() {
 <template>
     <div class="landing-page">
         <Head :title="t('landing.title')" />
+        
+        <!-- Liquid Glass Background Blobs -->
+        <div class="bg-blob-1" style="top: 10%; right: -200px; opacity: 0.5;"></div>
+        <div class="bg-blob-2" style="top: 60%; left: -150px; opacity: 0.4;"></div>
 
         <!-- Fixed Navigation -->
         <nav class="fixed-nav" :class="{ scrolled: navScrolled }">
@@ -401,7 +405,7 @@ function submitContact() {
 
                 <div class="hero-content-wrapper">
                     <div class="hero-center">
-                        <div class="hero-badge">
+                        <div class="hero-badge glass-cream float-soft">
                             <svg class="hero-badge-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
                             </svg>
@@ -413,7 +417,7 @@ function submitContact() {
                         <p class="hero-sub" v-html="heroSubtitle.replace(/\n/g, '<br>')"></p>
 
                         <div class="hero-ctas">
-                            <Link href="/booking" class="hero-cta-primary">
+                            <Link href="/booking" class="hero-cta-primary btn-glass ripple glow-gold">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>
                                 </svg>
@@ -424,8 +428,8 @@ function submitContact() {
                             </a>
                         </div>
 
-                        <div class="hero-stats">
-                            <div class="hero-stat">
+                        <div class="hero-stats glass-cream">
+                            <div class="hero-stat animate-slide-up delay-100">
                                 <span class="hero-stat-num">5000+</span>
                                 <span class="hero-stat-label">{{ t('landing.stats.clients') }}</span>
                             </div>
@@ -458,7 +462,7 @@ function submitContact() {
 
                     <!-- Cards Grid -->
                     <div class="services-grid">
-                        <div v-for="(service, index) in services" :key="index" class="service-card">
+                        <div v-for="(service, index) in services" :key="index" class="service-card glass-card card-glass-hover" :style="{ animationDelay: (index * 0.1) + 's' }">
                             <div class="service-card-img" :style="{ backgroundImage: `url(${service.image})` }"></div>
                             <div class="service-card-body">
                                 <!-- Icon -->
@@ -524,7 +528,8 @@ function submitContact() {
                             v-for="(master, index) in mastersList"
                             :key="index"
                             :href="master.id ? `/masters/${master.id}` : '/masters'"
-                            class="master-card"
+                            class="master-card master-card glass-card card-glass-hover"
+                            :style="{ animationDelay: (index * 0.15) + 's' }"
                         >
                             <div class="master-card-img">
                                 <div v-if="master.photo_url" class="master-photo" :style="{ backgroundImage: `url(${master.photo_url})` }"></div>
