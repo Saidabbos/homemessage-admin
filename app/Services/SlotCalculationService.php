@@ -267,7 +267,7 @@ class SlotCalculationService
         
         $availableDurations = [];
         
-        foreach ([30, 45, 60, 90, 120] as $duration) {
+        foreach ([60, 90, 120] as $duration) {
             $visitCore = $this->calculateVisitCore($duration, $peopleCount);
             $endTime = $windowEnd->copy()->addMinutes($visitCore);
             
