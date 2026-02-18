@@ -15,9 +15,11 @@ class OrderService
         protected OrderRepository $orderRepository,
         protected ?TelegramNotificationService $telegramService = null,
         protected ?TelegramBotService $telegramBotService = null,
+        protected ?MasterNotificationService $masterNotificationService = null,
     ) {
         $this->telegramService = $telegramService ?? app(TelegramNotificationService::class);
         $this->telegramBotService = $telegramBotService ?? app(TelegramBotService::class);
+        $this->masterNotificationService = $masterNotificationService ?? app(MasterNotificationService::class);
     }
 
     /**
@@ -274,17 +276,31 @@ class OrderService
             return false;
         }
 
-        Log::info('OrderService: Sending READY notification to therapists', ['order_id' => $order->id]);
+        Log::info('OrderService: Sending READY notification to master', ['order_id' => $order->id]);
 
-        $result = $this->telegramService->notifyReady($order);
+        // Send direct notification to master (Telegram DM + SMS)
+        $masterResult = $this->masterNotificationService->notifyReady($order);
 
-        if ($result) {
+        Log::info('OrderService: Master notification results', [
+            'order_id' => $order->id,
+            'telegram' => $masterResult['telegram'] ?? false,
+            'sms' => $masterResult['sms'] ?? false,
+        ]);
+
+        // Also send to dispatchers group (legacy)
+        $groupResult = $this->telegramService->notifyReady($order);
+
+        // Mark as sent if at least one notification succeeded
+        $success = ($masterResult['telegram'] ?? false) || ($masterResult['sms'] ?? false) || $groupResult;
+
+        if ($success) {
+            $order->markReadySent();
             Log::info('OrderService: READY notification sent successfully', ['order_id' => $order->id]);
         } else {
             Log::warning('OrderService: Failed to send READY notification', ['order_id' => $order->id]);
         }
 
-        return $result;
+        return $success;
     }
 
     /**

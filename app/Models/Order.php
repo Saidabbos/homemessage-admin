@@ -76,6 +76,9 @@ class Order extends Model
         'qa_feedback',
         'qa_completed_at',
         'qa_completed_by',
+        // Auto-completion
+        'auto_completed',
+        'completed_at',
     ];
 
     protected $casts = [
@@ -86,6 +89,8 @@ class Order extends Model
         'confirmed_at' => 'datetime',
         'cancelled_at' => 'datetime',
         'ready_sent_at' => 'datetime',
+        'completed_at' => 'datetime',
+        'auto_completed' => 'boolean',
         'conf_elevator' => 'boolean',
         'conf_space_ok' => 'boolean',
         'conf_pets' => 'boolean',

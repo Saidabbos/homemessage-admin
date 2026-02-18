@@ -138,8 +138,11 @@ Route::prefix('webhook')->group(function () {
     Route::post('/click/prepare', [ClickController::class, 'prepare']);
     Route::post('/click/complete', [ClickController::class, 'complete']);
 
-    // Telegram
+    // Telegram (main bot - Mini App)
     Route::post('/telegram', [\App\Http\Controllers\Webhook\TelegramController::class, 'webhook']);
+    
+    // Telegram (therapist bot - masters)
+    Route::post('/therapist', [\App\Http\Controllers\Webhook\TherapistBotController::class, 'webhook']);
 });
 
 /*

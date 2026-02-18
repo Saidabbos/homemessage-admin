@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\ServiceType;
 use App\Models\User;
 use App\Services\SlotCalculationService;
+use App\Services\MasterNotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,8 +19,11 @@ use Illuminate\Validation\ValidationException;
 class BookingSubmitController extends Controller
 {
     public function __construct(
-        protected SlotCalculationService $slotService
-    ) {}
+        protected SlotCalculationService $slotService,
+        protected ?MasterNotificationService $masterNotificationService = null,
+    ) {
+        $this->masterNotificationService = $masterNotificationService ?? app(MasterNotificationService::class);
+    }
 
     /**
      * POST /api/v1/bookings
@@ -254,29 +258,37 @@ class BookingSubmitController extends Controller
         try {
             $order->load(['master', 'serviceType', 'oil']);
 
+            // 1. Send to OPS group (dispatchers)
             $message = $this->formatTelegramMessage($order);
             
-            // Get Telegram bot token and chat ID from config
             $botToken = config('services.telegram.ops_bot_token');
             $chatId = config('services.telegram.ops_group_id');
 
-            if (!$botToken || !$chatId) {
-                Log::warning('Telegram config not set, skipping notification');
-                return;
+            if ($botToken && $chatId) {
+                $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
+
+                $response = \Http::post($url, [
+                    'chat_id' => $chatId,
+                    'text' => $message,
+                    'parse_mode' => 'HTML',
+                ]);
+
+                if (!$response->successful()) {
+                    Log::error('Telegram OPS notification failed', [
+                        'order_id' => $order->id,
+                        'response' => $response->body(),
+                    ]);
+                }
             }
 
-            $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
-
-            $response = \Http::post($url, [
-                'chat_id' => $chatId,
-                'text' => $message,
-                'parse_mode' => 'HTML',
-            ]);
-
-            if (!$response->successful()) {
-                Log::error('Telegram notification failed', [
+            // 2. Notify master about assigned order (Telegram DM + SMS)
+            if ($order->master_id) {
+                $masterResult = $this->masterNotificationService->notifyAssigned($order);
+                Log::info('Master ASSIGNED notification sent', [
                     'order_id' => $order->id,
-                    'response' => $response->body(),
+                    'master_id' => $order->master_id,
+                    'telegram' => $masterResult['telegram'] ?? false,
+                    'sms' => $masterResult['sms'] ?? false,
                 ]);
             }
 

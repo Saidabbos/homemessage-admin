@@ -158,6 +158,7 @@ const hasActiveFilters = () => search.value || status.value || gender.value || s
               <TableHead>{{ t('masters.fullName') }}</TableHead>
               <TableHead>{{ t('masters.phone') }}</TableHead>
               <TableHead>{{ t('masters.experience') }}</TableHead>
+              <TableHead class="text-center">📲</TableHead>
               <TableHead>{{ t('common.status') }}</TableHead>
               <TableHead class="text-center">{{ t('common.actions') }}</TableHead>
             </TableRow>
@@ -184,6 +185,10 @@ const hasActiveFilters = () => search.value || status.value || gender.value || s
               </TableCell>
               <TableCell>
                 {{ master.experience_years }} {{ t('masters.years') }}
+              </TableCell>
+              <TableCell class="text-center">
+                <span v-if="master.telegram_id" class="text-green-600" :title="master.telegram_username ? '@' + master.telegram_username : 'Ulangan'">✅</span>
+                <span v-else class="text-muted-foreground" title="Ulanmagan">—</span>
               </TableCell>
               <TableCell>
                 <Badge v-if="master.status" class="bg-green-500/10 text-green-700">

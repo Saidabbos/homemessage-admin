@@ -18,6 +18,10 @@ class Master extends Model
         'first_name',
         'last_name',
         'phone',
+        'telegram_id',
+        'telegram_username',
+        'notify_telegram',
+        'notify_sms',
         'email',
         'photo',
         'bio',
@@ -42,7 +46,17 @@ class Master extends Model
             'experience_years' => 'integer',
             'pressure_levels' => 'array',
             'status' => 'boolean',
+            'notify_telegram' => 'boolean',
+            'notify_sms' => 'boolean',
         ];
+    }
+
+    /**
+     * Check if master has Telegram connected
+     */
+    public function hasTelegram(): bool
+    {
+        return !empty($this->telegram_id);
     }
 
     /**

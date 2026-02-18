@@ -16,6 +16,14 @@ class Kernel extends ConsoleKernel
         $schedule->command('otp:cleanup')
             ->dailyAt('02:00')
             ->timezone('Asia/Tashkent');
+
+        // Auto-update order statuses every 5 minutes
+        // CONFIRMED → IN_PROGRESS (slot vaqti kelganda)
+        // IN_PROGRESS → COMPLETED (seans + 1 soat o'tgach)
+        $schedule->command('orders:process-statuses')
+            ->everyFiveMinutes()
+            ->timezone('Asia/Tashkent')
+            ->withoutOverlapping();
     }
 
     /**

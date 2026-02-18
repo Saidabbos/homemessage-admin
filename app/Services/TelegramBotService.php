@@ -19,17 +19,28 @@ class TelegramBotService
     /**
      * Send a message
      */
-    public function sendMessage($chatId, string $text, ?array $keyboard = null): ?array
+    public function sendMessage($chatId, string $text, ?string $parseMode = 'HTML'): ?array
     {
         $data = [
             'chat_id' => $chatId,
             'text' => $text,
-            'parse_mode' => 'HTML',
+            'parse_mode' => $parseMode,
         ];
 
-        if ($keyboard) {
-            $data['reply_markup'] = json_encode($keyboard);
-        }
+        return $this->request('sendMessage', $data);
+    }
+
+    /**
+     * Send a message with keyboard (inline or reply)
+     */
+    public function sendMessageWithKeyboard($chatId, string $text, array $keyboard, ?string $parseMode = 'Markdown'): ?array
+    {
+        $data = [
+            'chat_id' => $chatId,
+            'text' => $text,
+            'parse_mode' => $parseMode,
+            'reply_markup' => json_encode($keyboard),
+        ];
 
         return $this->request('sendMessage', $data);
     }

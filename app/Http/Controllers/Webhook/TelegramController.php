@@ -248,14 +248,174 @@ class TelegramController extends Controller
         $chatId = $message['chat']['id'] ?? null;
         $text = $message['text'] ?? '';
 
+        // Handle contact sharing (for master registration)
+        if (isset($message['contact'])) {
+            return $this->handleContact($message);
+        }
+
         // Handle /start command
         if (str_starts_with($text, '/start')) {
+            return $this->handleStart($message);
+        }
+
+        // Handle /status command
+        if (str_starts_with($text, '/status')) {
+            return $this->handleStatus($message);
+        }
+
+        return response()->json(['ok' => true]);
+    }
+
+    /**
+     * Handle /start command - show registration button for masters
+     */
+    protected function handleStart(array $message)
+    {
+        $chatId = $message['chat']['id'];
+        $firstName = $message['from']['first_name'] ?? 'Salom';
+        $telegramId = $message['from']['id'];
+
+        // Check if already registered as master
+        $master = Master::where('telegram_id', $telegramId)->first();
+
+        if ($master) {
             $this->telegram->sendMessage($chatId, 
-                "👋 Salom! HomeMessage botiga xush kelibsiz.\n\n" .
-                "Bu bot orqali siz buyurtma va baholash bildirishnomalarini olasiz."
+                "👋 Salom, {$master->full_name}!\n\n" .
+                "✅ Siz allaqachon ro'yxatdan o'tgansiz.\n\n" .
+                "📲 *Bildirishnomalar:*\n" .
+                "• Telegram: " . ($master->notify_telegram ? '✅ Yoqilgan' : '❌ O\'chirilgan') . "\n" .
+                "• SMS: " . ($master->notify_sms ? '✅ Yoqilgan' : '❌ O\'chirilgan') . "\n\n" .
+                "Yangi buyurtmalar haqida xabar olasiz.",
+                'Markdown'
+            );
+            return response()->json(['ok' => true]);
+        }
+
+        $text = "👋 Salom, {$firstName}!\n\n"
+            . "*HomeMessage* massajchilar uchun xabar boti.\n\n"
+            . "🔗 *Hisobingizni ulash uchun* quyidagi tugmani bosib telefon raqamingizni yuboring.\n\n"
+            . "📱 Raqamingiz tizimda ro'yxatdan o'tgan bo'lishi kerak.";
+
+        $keyboard = [
+            'keyboard' => [
+                [
+                    ['text' => '📱 Telefon raqamni yuborish', 'request_contact' => true]
+                ]
+            ],
+            'resize_keyboard' => true,
+            'one_time_keyboard' => true,
+        ];
+
+        $this->telegram->sendMessageWithKeyboard($chatId, $text, $keyboard);
+
+        return response()->json(['ok' => true]);
+    }
+
+    /**
+     * Handle contact sharing - link master's telegram_id
+     */
+    protected function handleContact(array $message)
+    {
+        $chatId = $message['chat']['id'];
+        $contact = $message['contact'];
+        $phone = $contact['phone_number'];
+        $telegramUserId = $message['from']['id'];
+        $username = $message['from']['username'] ?? null;
+
+        // Normalize phone number
+        $normalizedPhone = $this->normalizePhone($phone);
+
+        Log::info('Master contact received', [
+            'chat_id' => $chatId,
+            'phone' => $normalizedPhone,
+            'telegram_id' => $telegramUserId,
+        ]);
+
+        // Find master by phone (try multiple formats)
+        $master = Master::where('phone', $normalizedPhone)
+            ->orWhere('phone', '+' . ltrim($normalizedPhone, '+'))
+            ->orWhere('phone', ltrim($normalizedPhone, '+'))
+            ->orWhere('phone', $phone)
+            ->first();
+
+        if (!$master) {
+            $this->telegram->sendMessage($chatId, 
+                "❌ Bu telefon raqami tizimda topilmadi.\n\n"
+                . "📞 *{$normalizedPhone}*\n\n"
+                . "Iltimos, admin bilan bog'laning yoki to'g'ri raqamni tekshiring.",
+                'Markdown'
+            );
+            return response()->json(['ok' => true]);
+        }
+
+        // Update master's telegram info
+        $master->update([
+            'telegram_id' => (string) $telegramUserId,
+            'telegram_username' => $username,
+        ]);
+
+        $keyboard = ['remove_keyboard' => true];
+
+        $this->telegram->sendMessageWithKeyboard($chatId, 
+            "✅ *Muvaffaqiyatli ulandi!*\n\n"
+            . "👤 {$master->full_name}\n"
+            . "📱 {$master->phone}\n\n"
+            . "Endi siz buyurtmalar haqida xabarlarni shu botda olasiz.\n\n"
+            . "📲 *Xabar turlari:*\n"
+            . "• 🆕 Yangi buyurtma tayinlanganda\n"
+            . "• ✅ Yo'lga chiqish vaqti kelganda\n"
+            . "• ❌ Buyurtma bekor qilinganda",
+            $keyboard
+        );
+
+        return response()->json(['ok' => true]);
+    }
+
+    /**
+     * Handle /status command - show connection status
+     */
+    protected function handleStatus(array $message)
+    {
+        $chatId = $message['chat']['id'];
+        $telegramId = $message['from']['id'];
+
+        $master = Master::where('telegram_id', $telegramId)->first();
+
+        if ($master) {
+            $this->telegram->sendMessage($chatId, 
+                "✅ *Ulangan*\n\n"
+                . "👤 {$master->full_name}\n"
+                . "📲 Telegram: " . ($master->notify_telegram ? '✅' : '❌') . "\n"
+                . "📱 SMS: " . ($master->notify_sms ? '✅' : '❌'),
+                'Markdown'
+            );
+        } else {
+            $this->telegram->sendMessage($chatId, 
+                "❌ Hisobingiz ulanmagan.\n\n/start buyrug'ini yuboring."
             );
         }
 
         return response()->json(['ok' => true]);
+    }
+
+    /**
+     * Normalize phone number to standard format
+     */
+    protected function normalizePhone(string $phone): string
+    {
+        // Remove all non-digit characters
+        $digits = preg_replace('/\D/', '', $phone);
+
+        // If starts with 998, return with +
+        if (str_starts_with($digits, '998')) {
+            return '+' . $digits;
+        }
+
+        // If 9 digits (local format), add +998
+        if (strlen($digits) === 9) {
+            return '+998' . $digits;
+        }
+
+        return '+' . $digits;
     }
 }

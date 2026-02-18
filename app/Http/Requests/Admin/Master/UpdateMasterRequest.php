@@ -33,6 +33,8 @@ class UpdateMasterRequest extends FormRequest
             'gender' => 'required|in:male,female',
             'experience_years' => 'required|integer|min:0|max:50',
             'status' => 'boolean',
+            'notify_telegram' => 'boolean',
+            'notify_sms' => 'boolean',
             'service_types' => 'nullable|array',
             'service_types.*' => 'exists:service_types,id',
             'oils' => 'nullable|array',
@@ -49,6 +51,8 @@ class UpdateMasterRequest extends FormRequest
     {
         $this->merge([
             'status' => $this->boolean('status'),
+            'notify_telegram' => $this->boolean('notify_telegram'),
+            'notify_sms' => $this->boolean('notify_sms'),
         ]);
     }
 }

@@ -34,6 +34,10 @@ const props = defineProps<{
     service_types: number[];
     oils: number[];
     pressure_levels: number[];
+    telegram_id?: string;
+    telegram_username?: string;
+    notify_telegram: boolean;
+    notify_sms: boolean;
     uz?: { bio: string };
     ru?: { bio: string };
     en?: { bio: string };
@@ -64,6 +68,8 @@ const form = useForm({
   gender: props.master.gender,
   experience_years: props.master.experience_years,
   status: props.master.status,
+  notify_telegram: props.master.notify_telegram ?? true,
+  notify_sms: props.master.notify_sms ?? true,
   service_types: props.master.service_types || [],
   oils: props.master.oils || [],
   pressure_levels: props.master.pressure_levels || [],
@@ -170,6 +176,40 @@ const getName = (item: { name: { uz?: string } | string }) => {
               <div class="flex items-center justify-between rounded-lg border p-4">
                 <Label>{{ t('common.active', 'Faol') }}</Label>
                 <Switch v-model:checked="form.status" />
+              </div>
+
+              <!-- Telegram Connection Status -->
+              <div class="rounded-lg border p-4 space-y-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <Label class="text-base font-medium">📲 Telegram</Label>
+                    <p class="text-sm text-muted-foreground">
+                      {{ master.telegram_id ? (master.telegram_username ? '@' + master.telegram_username : 'Ulangan') : 'Ulanmagan' }}
+                    </p>
+                  </div>
+                  <span v-if="master.telegram_id" class="text-green-600 text-xl">✅</span>
+                  <span v-else class="text-muted-foreground text-xl">❌</span>
+                </div>
+                
+                <div v-if="!master.telegram_id" class="text-sm text-muted-foreground bg-muted/50 p-3 rounded">
+                  Master @h_m_UZ_bot ga /start yuborishi va telefon raqamini ulashi kerak.
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t">
+                  <div>
+                    <Label>Telegram xabarlari</Label>
+                    <p class="text-xs text-muted-foreground">Buyurtmalar haqida Telegram DM</p>
+                  </div>
+                  <Switch v-model:checked="form.notify_telegram" :disabled="!master.telegram_id" />
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div>
+                    <Label>SMS xabarlari</Label>
+                    <p class="text-xs text-muted-foreground">Buyurtmalar haqida SMS</p>
+                  </div>
+                  <Switch v-model:checked="form.notify_sms" />
+                </div>
               </div>
 
               <!-- Service Types -->

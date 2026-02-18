@@ -109,9 +109,12 @@ const saveName = async () => {
 
 <template>
     <div class="ma-page">
+        <!-- Liquid Glass Background Blobs -->
+        <div class="bg-blob-1" style="top: -100px; right: -150px;"></div>
+        <div class="bg-blob-2" style="bottom: 100px; left: -100px;"></div>
         <!-- Name Input Modal -->
-        <div v-if="showNameModal" class="name-modal-overlay">
-            <div class="name-modal">
+        <div v-if="showNameModal" class="name-modal-overlay animate-fade-in">
+            <div class="name-modal glass-card animate-scale-in">
                 <div class="name-modal-header">
                     <div class="name-modal-icon">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -191,7 +194,7 @@ const saveName = async () => {
                 </h1>
                 <p class="ma-hero-subtitle">Uyingizda professional massaj xizmatidan bahramand bo'ling</p>
                 
-                <button class="ma-hero-cta" @click="goToBooking">
+                <button class="ma-hero-cta btn-glass ripple glow-gold" @click="goToBooking">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>
                     </svg>
@@ -201,7 +204,7 @@ const saveName = async () => {
         </section>
 
         <!-- Stats -->
-        <section class="ma-stats">
+        <section class="ma-stats glass-cream animate-slide-up delay-200">
             <div class="ma-stat">
                 <span class="ma-stat-num">5000+</span>
                 <span class="ma-stat-label">Mijozlar</span>
@@ -231,9 +234,10 @@ const saveName = async () => {
 
             <div class="ma-services-list">
                 <div 
-                    v-for="service in services" 
+                    v-for="(service, index) in services" 
                     :key="service.id"
-                    class="ma-service-card"
+                    class="ma-service-card glass-card card-glass-hover animate-slide-up"
+                    :style="{ animationDelay: (index * 0.1) + 's' }"
                     @click="goToBooking"
                 >
                     <div class="ma-service-img">
@@ -267,7 +271,7 @@ const saveName = async () => {
 
         <!-- Bottom Actions -->
         <div class="ma-bottom-actions">
-            <button class="ma-bottom-btn ma-bottom-orders" @click="goToOrders">
+            <button class="ma-bottom-btn ma-bottom-orders btn-glass-outline ripple" @click="goToOrders">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                     <polyline points="14 2 14 8 20 8"/>

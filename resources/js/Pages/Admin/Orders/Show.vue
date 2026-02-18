@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
@@ -57,6 +57,60 @@ const rescheduleForm = useForm({
   arrival_window_start: props.order.arrival_window_start?.substring(0, 5) || '',
   arrival_window_end: props.order.arrival_window_end?.substring(0, 5) || '',
   comment: '',
+});
+
+// Slots for reschedule
+const availableSlots = ref<Array<{ start: string; end: string; available: boolean }>>([]);
+const loadingSlots = ref(false);
+const selectedSlot = ref<string | null>(null);
+
+const loadAvailableSlots = async (date: string) => {
+  if (!date || !props.order.master_id) return;
+  
+  loadingSlots.value = true;
+  availableSlots.value = [];
+  selectedSlot.value = null;
+  
+  try {
+    const masterId = props.order.master_id;
+    const serviceTypeId = props.order.service_type_id;
+    const durationId = props.order.duration_id;
+    
+    const params = new URLSearchParams({
+      date,
+      service_type_id: serviceTypeId,
+      duration_id: durationId || '',
+    });
+    
+    const response = await fetch(`/api/masters/${masterId}/slots?${params}`);
+    const data = await response.json();
+    
+    availableSlots.value = data.slots || [];
+  } catch (e) {
+    console.error('Failed to load slots:', e);
+  } finally {
+    loadingSlots.value = false;
+  }
+};
+
+const selectSlot = (slot: { start: string; end: string }) => {
+  selectedSlot.value = slot.start;
+  rescheduleForm.arrival_window_start = slot.start;
+  rescheduleForm.arrival_window_end = slot.end;
+};
+
+// Watch for date changes in reschedule form
+watch(() => rescheduleForm.booking_date, (newDate) => {
+  if (newDate && showRescheduleModal.value) {
+    loadAvailableSlots(newDate);
+  }
+});
+
+// Load slots when modal opens
+watch(showRescheduleModal, (isOpen) => {
+  if (isOpen && rescheduleForm.booking_date) {
+    loadAvailableSlots(rescheduleForm.booking_date);
+  }
 });
 const noteForm = useForm({ note: '' });
 const cancelForm = useForm({ reason: '' });
@@ -301,11 +355,10 @@ const sendWorkOrderToMaster = async () => {
           </CardHeader>
           <CardContent>
             <div class="flex flex-wrap gap-2">
-              <Button v-for="status in availableStatuses" :key="status" variant="outline" size="sm"
+              <Button v-for="status in availableStatuses.filter(s => s !== 'CANCELLED')" :key="status" variant="outline" size="sm"
                 @click="openStatusModal(status)"
                 :class="{ 'border-green-500 text-green-700 hover:bg-green-50 dark:hover:bg-green-950': status === 'CONFIRMED' || status === 'COMPLETED',
-                          'border-yellow-500 text-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-950': status === 'CONFIRMING' || status === 'IN_PROGRESS',
-                          'border-red-500 text-red-700 hover:bg-red-50 dark:hover:bg-red-950': status === 'CANCELLED' }">
+                          'border-yellow-500 text-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-950': status === 'CONFIRMING' || status === 'IN_PROGRESS' }">
                 {{ getStatusLabel(status) }}
               </Button>
               <Button v-if="order.status !== 'CANCELLED' && order.status !== 'COMPLETED'"
@@ -553,17 +606,70 @@ const sendWorkOrderToMaster = async () => {
 
     <!-- Reschedule Modal -->
     <Dialog v-model:open="showRescheduleModal">
-      <DialogContent><DialogHeader><DialogTitle>{{ t('orders.changeTime', 'Vaqtni o\'zgartirish') }}</DialogTitle></DialogHeader>
+      <DialogContent class="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{{ t('orders.changeTime', 'Vaqtni o\'zgartirish') }}</DialogTitle>
+          <p class="text-sm text-muted-foreground">Master: {{ order.master?.full_name }}</p>
+        </DialogHeader>
         <div class="space-y-4">
-          <div class="space-y-2"><Label>{{ t('orders.date', 'Sana') }}</Label><Input type="date" v-model="rescheduleForm.booking_date" /></div>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="space-y-2"><Label>Kelish boshlanishi</Label><Input type="time" v-model="rescheduleForm.arrival_window_start" /></div>
-            <div class="space-y-2"><Label>Kelish tugashi</Label><Input type="time" v-model="rescheduleForm.arrival_window_end" /></div>
+          <div class="space-y-2">
+            <Label>{{ t('orders.date', 'Sana') }}</Label>
+            <Input type="date" v-model="rescheduleForm.booking_date" :min="new Date().toISOString().split('T')[0]" />
           </div>
-          <div class="space-y-2"><Label>{{ t('orders.comment', 'Izoh') }}</Label><Textarea v-model="rescheduleForm.comment" rows="2" /></div>
+          
+          <!-- Available Slots -->
+          <div v-if="rescheduleForm.booking_date" class="space-y-2">
+            <Label>Bo'sh vaqtlar</Label>
+            <div v-if="loadingSlots" class="text-sm text-muted-foreground py-4 text-center">
+              Yuklanmoqda...
+            </div>
+            <div v-else-if="availableSlots.length === 0" class="text-sm text-muted-foreground py-4 text-center border rounded-lg">
+              Bu sanada bo'sh vaqt yo'q
+            </div>
+            <div v-else class="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto p-1">
+              <button
+                v-for="slot in availableSlots"
+                :key="slot.start"
+                type="button"
+                class="px-3 py-2 text-sm rounded-lg border transition-all"
+                :class="[
+                  slot.available 
+                    ? selectedSlot === slot.start
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'hover:border-primary hover:bg-primary/5 cursor-pointer'
+                    : 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
+                ]"
+                :disabled="!slot.available"
+                @click="slot.available && selectSlot(slot)"
+              >
+                {{ slot.start.substring(0, 5) }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Manual time override -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <Label>Kelish boshlanishi</Label>
+              <Input type="time" v-model="rescheduleForm.arrival_window_start" />
+            </div>
+            <div class="space-y-2">
+              <Label>Kelish tugashi</Label>
+              <Input type="time" v-model="rescheduleForm.arrival_window_end" />
+            </div>
+          </div>
+          
+          <div class="space-y-2">
+            <Label>{{ t('orders.comment', 'Izoh') }}</Label>
+            <Textarea v-model="rescheduleForm.comment" rows="2" placeholder="Sabab..." />
+          </div>
         </div>
-        <DialogFooter><Button variant="outline" @click="showRescheduleModal = false">{{ t('common.cancel', 'Bekor') }}</Button>
-          <Button @click="submitReschedule" :disabled="rescheduleForm.processing">{{ t('common.save', 'Saqlash') }}</Button></DialogFooter>
+        <DialogFooter>
+          <Button variant="outline" @click="showRescheduleModal = false">{{ t('common.cancel', 'Bekor') }}</Button>
+          <Button @click="submitReschedule" :disabled="rescheduleForm.processing || !rescheduleForm.booking_date || !rescheduleForm.arrival_window_start">
+            {{ t('common.save', 'Saqlash') }}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
 
