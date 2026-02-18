@@ -1,0 +1,157 @@
+/* ==================== Global Hover Effects ==================== */
+/* Consistent animations for cards and buttons across the site */
+
+/* ==================== Card Hover Effect ==================== */
+/* Apply .hover-card class to any card element */
+.hover-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.hover-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* Glass card variant */
+.hover-card-glass {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, backdrop-filter 0.3s ease;
+}
+
+.hover-card-glass:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+/* ==================== Button Hover Effects ==================== */
+/* Primary button - gold glow */
+.hover-btn-primary {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.hover-btn-primary:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 20px rgba(200, 169, 81, 0.5);
+}
+
+/* Secondary button - subtle lift */
+.hover-btn-secondary {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.hover-btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Ghost button - background fill */
+.hover-btn-ghost {
+    transition: all 0.3s ease;
+}
+
+.hover-btn-ghost:hover {
+    background: rgba(200, 169, 81, 0.1);
+    color: #C8A951;
+}
+
+/* ==================== Image Hover Effect ==================== */
+/* Apply to image container, image inside will scale */
+.hover-img-zoom {
+    overflow: hidden;
+}
+
+.hover-img-zoom img {
+    transition: transform 0.4s ease;
+}
+
+.hover-img-zoom:hover img {
+    transform: scale(1.05);
+}
+
+/* ==================== Link Hover Effect ==================== */
+.hover-link {
+    transition: color 0.3s ease;
+}
+
+.hover-link:hover {
+    color: #C8A951;
+}
+
+/* ==================== Icon Hover Effect ==================== */
+.hover-icon {
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.hover-icon:hover {
+    transform: scale(1.1);
+    color: #C8A951;
+}
+
+/* ==================== Utility Classes ==================== */
+/* Add these to existing elements for quick hover effects */
+
+/* Lift on hover */
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* Scale on hover */
+.hover-scale {
+    transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+    transform: scale(1.03);
+}
+
+/* Glow on hover (gold) */
+.hover-glow {
+    transition: box-shadow 0.3s ease;
+}
+
+.hover-glow:hover {
+    box-shadow: 0 6px 20px rgba(200, 169, 81, 0.4);
+}
+
+/* Pulse animation */
+@keyframes hover-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+.hover-pulse:hover {
+    animation: hover-pulse 1s ease infinite;
+}
+
+/* Shine effect */
+.hover-shine {
+    position: relative;
+    overflow: hidden;
+}
+
+.hover-shine::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+.hover-shine:hover::before {
+    left: 100%;
+}

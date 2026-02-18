@@ -417,7 +417,8 @@
 
 .cd-qb-btn:hover {
     background: #F5F2ED;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .cd-qb-btn svg {
@@ -464,11 +465,13 @@
     border-radius: 10px;
     background: #FAFAF8;
     text-decoration: none;
-    transition: background 0.2s ease;
+    transition: all 0.25s ease;
 }
 
 .cd-booking-item:hover {
     background: #F5F2ED;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
 .cd-booking-avatar {

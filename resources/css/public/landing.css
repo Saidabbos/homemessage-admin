@@ -717,6 +717,7 @@
 .service-card:hover {
     transform: translateY(-6px);
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .service-card-img {
@@ -725,6 +726,11 @@
     background-size: cover;
     background-position: center;
     border-radius: 20px 20px 0 0;
+    transition: transform 0.4s ease;
+}
+
+.service-card:hover .service-card-img {
+    transform: scale(1.05);
 }
 
 .service-card-body {
@@ -1037,6 +1043,7 @@
 .testimonial-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .testimonial-quote-icon {
@@ -1248,8 +1255,8 @@
 }
 
 .contact-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(200, 169, 81, 0.4);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 30px rgba(200, 169, 81, 0.5);
 }
 
 .contact-submit:disabled {
@@ -1330,6 +1337,8 @@
 
 .contact-info-card:hover {
     transform: translateX(4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .contact-info-icon {

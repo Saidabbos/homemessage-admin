@@ -8,6 +8,10 @@ use Illuminate\Database\Seeder;
 
 class ServiceTypeSeeder extends Seeder
 {
+    /**
+     * Minimum duration: 60 minutes
+     * Price structure: Base price for 60 min, scaled for longer durations
+     */
     public function run(): void
     {
         $serviceTypes = [
@@ -25,7 +29,6 @@ class ServiceTypeSeeder extends Seeder
                 ],
                 'status' => true,
                 'durations' => [
-                    ['duration' => 30, 'price' => 80000, 'is_default' => false],
                     ['duration' => 60, 'price' => 150000, 'is_default' => true],
                     ['duration' => 90, 'price' => 220000, 'is_default' => false],
                     ['duration' => 120, 'price' => 280000, 'is_default' => false],
@@ -45,8 +48,8 @@ class ServiceTypeSeeder extends Seeder
                 ],
                 'status' => true,
                 'durations' => [
-                    ['duration' => 60, 'price' => 150000, 'is_default' => false],
-                    ['duration' => 90, 'price' => 200000, 'is_default' => true],
+                    ['duration' => 60, 'price' => 150000, 'is_default' => true],
+                    ['duration' => 90, 'price' => 200000, 'is_default' => false],
                     ['duration' => 120, 'price' => 260000, 'is_default' => false],
                 ],
             ],
@@ -64,9 +67,9 @@ class ServiceTypeSeeder extends Seeder
                 ],
                 'status' => true,
                 'durations' => [
-                    ['duration' => 45, 'price' => 140000, 'is_default' => false],
                     ['duration' => 60, 'price' => 180000, 'is_default' => true],
                     ['duration' => 90, 'price' => 260000, 'is_default' => false],
+                    ['duration' => 120, 'price' => 340000, 'is_default' => false],
                 ],
             ],
             [
@@ -85,6 +88,7 @@ class ServiceTypeSeeder extends Seeder
                 'durations' => [
                     ['duration' => 60, 'price' => 250000, 'is_default' => true],
                     ['duration' => 90, 'price' => 350000, 'is_default' => false],
+                    ['duration' => 120, 'price' => 450000, 'is_default' => false],
                 ],
             ],
             [
@@ -103,6 +107,7 @@ class ServiceTypeSeeder extends Seeder
                 'durations' => [
                     ['duration' => 60, 'price' => 280000, 'is_default' => true],
                     ['duration' => 90, 'price' => 400000, 'is_default' => false],
+                    ['duration' => 120, 'price' => 500000, 'is_default' => false],
                 ],
             ],
             [
@@ -119,9 +124,9 @@ class ServiceTypeSeeder extends Seeder
                 ],
                 'status' => true,
                 'durations' => [
-                    ['duration' => 30, 'price' => 70000, 'is_default' => false],
-                    ['duration' => 45, 'price' => 100000, 'is_default' => true],
-                    ['duration' => 60, 'price' => 120000, 'is_default' => false],
+                    ['duration' => 60, 'price' => 120000, 'is_default' => true],
+                    ['duration' => 90, 'price' => 170000, 'is_default' => false],
+                    ['duration' => 120, 'price' => 220000, 'is_default' => false],
                 ],
             ],
             [
@@ -138,9 +143,9 @@ class ServiceTypeSeeder extends Seeder
                 ],
                 'status' => true,
                 'durations' => [
-                    ['duration' => 30, 'price' => 60000, 'is_default' => false],
-                    ['duration' => 45, 'price' => 80000, 'is_default' => true],
-                    ['duration' => 60, 'price' => 100000, 'is_default' => false],
+                    ['duration' => 60, 'price' => 100000, 'is_default' => true],
+                    ['duration' => 90, 'price' => 140000, 'is_default' => false],
+                    ['duration' => 120, 'price' => 180000, 'is_default' => false],
                 ],
             ],
             [
@@ -157,9 +162,9 @@ class ServiceTypeSeeder extends Seeder
                 ],
                 'status' => true,
                 'durations' => [
-                    ['duration' => 45, 'price' => 130000, 'is_default' => false],
                     ['duration' => 60, 'price' => 170000, 'is_default' => true],
                     ['duration' => 90, 'price' => 240000, 'is_default' => false],
+                    ['duration' => 120, 'price' => 300000, 'is_default' => false],
                 ],
             ],
         ];
@@ -174,6 +179,11 @@ class ServiceTypeSeeder extends Seeder
                 ['slug' => $data['slug']],
                 $data
             );
+
+            // Remove old durations < 60 min
+            ServiceTypeDuration::where('service_type_id', $serviceType->id)
+                ->where('duration', '<', 60)
+                ->delete();
 
             // Sync durations
             foreach ($durations as $index => $duration) {

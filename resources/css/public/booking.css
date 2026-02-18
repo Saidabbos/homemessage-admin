@@ -201,8 +201,10 @@
 }
 
 .bk-service-card:hover {
-    background: rgba(255, 255, 255, 0.45);
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.5);
     border-color: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
 }
 
 .bk-service-card.selected {
@@ -611,8 +613,8 @@
 
 .bk-btn-next:hover:not(:disabled) {
     background: #b89940;
-    box-shadow: 0 10px 24px rgba(200, 169, 81, 0.35);
-    transform: translateY(-1px);
+    box-shadow: 0 12px 30px rgba(200, 169, 81, 0.5);
+    transform: translateY(-2px) scale(1.02);
 }
 
 .bk-btn-next:disabled {
@@ -778,7 +780,13 @@
 }
 
 .bk-master-card:hover {
-    background: rgba(255, 255, 255, 0.45);
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+
+.bk-master-card:hover .bk-master-img img {
+    transform: scale(1.05);
 }
 
 .bk-master-card.selected {
@@ -798,6 +806,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.4s ease;
 }
 
 .bk-master-info {

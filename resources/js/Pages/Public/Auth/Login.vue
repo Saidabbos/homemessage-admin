@@ -56,15 +56,52 @@ async function handleCheckPhone() {
             await sendOtp()
         }
     } catch (err) {
-        // Check if it's a network/CSRF error vs user not found
-        if (err.response?.status === 422 || err.response?.status === 404) {
-            // User validation error - send OTP
-            await sendOtp()
-        } else {
-            // Network/CSRF error - show error, don't auto-fallback
-            error.value = 'Tarmoq xatosi. Qayta urinib ko\'ring.'
-            console.error('PIN check error:', err)
+        console.error('PIN check error:', err.response?.status, err.message)
+        
+        // CSRF token mismatch (419) - refresh page to get new token and retry
+        if (err.response?.status === 419) {
+            try {
+                // Fetch login page to get fresh CSRF token
+                const pageResponse = await axios.get(window.location.href)
+                // Extract new CSRF token from response
+                const match = pageResponse.data.match(/name="csrf-token" content="([^"]+)"/)
+                if (match) {
+                    const newToken = match[1]
+                    document.head.querySelector('meta[name="csrf-token"]')?.setAttribute('content', newToken)
+                }
+                // Retry PIN check
+                const retryResponse = await axios.post(route('customer.pin.check'), {
+                    phone: '+998' + phone.value,
+                })
+                hasPin.value = retryResponse.data.has_pin
+                if (retryResponse.data.has_pin) {
+                    step.value = 2
+                } else {
+                    await sendOtp()
+                }
+                return
+            } catch (retryErr) {
+                console.error('PIN check retry failed:', retryErr)
+                // Still try OTP as fallback
+                await sendOtp()
+                return
+            }
         }
+        
+        // User not found (404) - new user, go to OTP
+        if (err.response?.status === 404) {
+            await sendOtp()
+            return
+        }
+        
+        // Validation error (422) - go to OTP
+        if (err.response?.status === 422) {
+            await sendOtp()
+            return
+        }
+        
+        // Other errors - show error message
+        error.value = 'Tarmoq xatosi. Qayta urinib ko\'ring.'
     } finally {
         loading.value = false
     }
