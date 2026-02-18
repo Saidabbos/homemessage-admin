@@ -326,6 +326,7 @@
 
 /* ==================== Master Card ==================== */
 .masters-page .mp-master-card {
+    position: relative;
     display: flex;
     flex-direction: column;
     border-radius: 24px;
@@ -337,6 +338,23 @@
     text-decoration: none;
     color: inherit;
     transition: all 0.3s ease;
+}
+
+.masters-page .mp-master-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(200, 169, 81, 0.1), transparent);
+    transition: left 0.6s ease;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.masters-page .mp-master-card:hover::before {
+    left: 100%;
 }
 
 .masters-page .mp-master-card:hover {
@@ -419,6 +437,7 @@
 }
 
 .masters-page .mp-card-cta {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -428,10 +447,30 @@
     background: #C8A951;
     box-shadow: 0 3px 12px rgba(200, 169, 81, 0.3);
     margin-top: 4px;
+    overflow: hidden;
     transition: all 0.3s;
 }
 
+.masters-page .mp-card-cta::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s ease;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.masters-page .mp-master-card:hover .mp-card-cta::before {
+    left: 100%;
+}
+
 .masters-page .mp-card-cta span {
+    position: relative;
+    z-index: 2;
     font-family: 'Manrope', sans-serif;
     font-size: 13px;
     font-weight: 600;
@@ -439,6 +478,8 @@
 }
 
 .masters-page .mp-card-cta svg {
+    position: relative;
+    z-index: 2;
     color: #1B2B5A;
 }
 

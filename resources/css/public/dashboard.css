@@ -457,6 +457,7 @@
 }
 
 .cd-booking-item {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -464,7 +465,25 @@
     border-radius: 10px;
     background: #FAFAF8;
     text-decoration: none;
+    overflow: hidden;
     transition: background 0.2s ease;
+}
+
+.cd-booking-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(200, 169, 81, 0.1), transparent);
+    transition: left 0.6s ease;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.cd-booking-item:hover::before {
+    left: 100%;
 }
 
 .cd-booking-item:hover {
