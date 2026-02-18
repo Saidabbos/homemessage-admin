@@ -126,7 +126,7 @@ class PublicOrderController extends Controller
 
                 // Address data (shared across all orders in batch)
                 $addressData = [
-                    'address' => $validated['address'],
+                    'address' => $validated['address'] ?? null,
                     'entrance' => $validated['entrance'] ?? null,
                     'floor' => $validated['floor'] ?? null,
                     'apartment' => $validated['apartment'] ?? null,
@@ -169,7 +169,7 @@ class PublicOrderController extends Controller
                     'group_id' => $groupId,
                     'count' => count($createdOrders),
                     'customer_id' => $customer->id,
-                    'address' => $addressData['address'],
+                    'address' => $addressData['address'] ?? 'not provided',
                 ]);
 
                 return response()->json([
