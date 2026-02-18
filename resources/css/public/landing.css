@@ -548,7 +548,7 @@
     border-radius: 28px;
     box-shadow: 0 4px 20px rgba(200, 169, 81, 0.31);
     text-decoration: none;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
 }
 
 .hero-cta-primary svg {
@@ -565,10 +565,8 @@
 }
 
 .hero-cta-primary:hover {
-    transform: translateY(-4px) scale(1.05);
-    box-shadow: 
-        0 15px 35px rgba(200, 169, 81, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+    box-shadow: 0 8px 30px rgba(200, 169, 81, 0.45);
 }
 
 .hero-cta-secondary {
@@ -713,15 +711,12 @@
     border: 1px solid rgba(255, 255, 255, 0.38);
     border-radius: 20px;
     overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .service-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 
-        0 25px 50px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    background: rgba(255, 255, 255, 0.5);
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
 }
 
 .service-card-img {
@@ -730,11 +725,6 @@
     background-size: cover;
     background-position: center;
     border-radius: 20px 20px 0 0;
-    transition: transform 0.4s ease;
-}
-
-.service-card:hover .service-card-img {
-    transform: scale(1.05);
 }
 
 .service-card-body {
@@ -1041,15 +1031,12 @@
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.38);
     border-radius: 20px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .testimonial-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 
-        0 25px 50px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    background: rgba(255, 255, 255, 0.5);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
 }
 
 .testimonial-quote-icon {
@@ -1261,8 +1248,8 @@
 }
 
 .contact-submit:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 30px rgba(200, 169, 81, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(200, 169, 81, 0.4);
 }
 
 .contact-submit:disabled {
@@ -1343,8 +1330,6 @@
 
 .contact-info-card:hover {
     transform: translateX(4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    background: rgba(255, 255, 255, 0.5);
 }
 
 .contact-info-icon {
