@@ -399,9 +399,10 @@ const goBack = () => {
     padding: 24px;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
+    background: linear-gradient(180deg, #EDE8DF 0%, #F5F2ED 50%, #EDE8DF 100%);
     position: relative;
     overflow: hidden;
+    font-family: 'Manrope', sans-serif;
 }
 
 /* Background circles */
@@ -415,33 +416,53 @@ const goBack = () => {
 .circle {
     position: absolute;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(184, 163, 105, 0.3), rgba(107, 139, 164, 0.2));
     filter: blur(60px);
     animation: float 8s ease-in-out infinite;
 }
 
-.c1 { width: 200px; height: 200px; top: -50px; right: -50px; }
-.c2 { width: 150px; height: 150px; bottom: 100px; left: -40px; animation-delay: -2s; }
-.c3 { width: 100px; height: 100px; top: 50%; right: 20%; animation-delay: -4s; }
+.c1 { 
+    width: 200px; 
+    height: 200px; 
+    top: -50px; 
+    right: -50px; 
+    background: radial-gradient(circle, rgba(200, 169, 81, 0.25) 0%, transparent 70%);
+}
+.c2 { 
+    width: 150px; 
+    height: 150px; 
+    bottom: 100px; 
+    left: -40px; 
+    background: radial-gradient(circle, rgba(27, 43, 90, 0.1) 0%, transparent 70%);
+    animation-delay: -2s; 
+}
+.c3 { 
+    width: 100px; 
+    height: 100px; 
+    top: 50%; 
+    right: 20%; 
+    background: radial-gradient(circle, rgba(200, 169, 81, 0.2) 0%, transparent 70%);
+    animation-delay: -4s; 
+}
 
 @keyframes float {
     0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
     50% { transform: translateY(-30px) scale(1.1); opacity: 0.8; }
 }
 
-/* Glass effect */
+/* Glass effect - cream/gold theme */
 .glass {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.45);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 8px 32px rgba(27, 43, 90, 0.08);
 }
 
 /* Auto-login */
 .auto-login {
     position: fixed;
     inset: 0;
-    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
+    background: linear-gradient(180deg, #EDE8DF 0%, #F5F2ED 50%, #EDE8DF 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -450,15 +471,17 @@ const goBack = () => {
 }
 
 .auto-login p {
-    color: rgba(255, 255, 255, 0.6);
+    color: #1B2B5A;
+    opacity: 0.6;
     margin-top: 16px;
+    font-family: 'Manrope', sans-serif;
 }
 
 .spinner {
     width: 48px;
     height: 48px;
-    border: 3px solid rgba(255, 255, 255, 0.1);
-    border-top-color: #B8A369;
+    border: 3px solid rgba(200, 169, 81, 0.2);
+    border-top-color: #C8A951;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -488,26 +511,44 @@ const goBack = () => {
     align-items: center;
     justify-content: center;
     border-radius: 24px;
-    color: #B8A369;
+    color: #C8A951;
     margin-bottom: 20px;
     transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.logo::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(200, 169, 81, 0.2), transparent);
+    transition: left 0.6s ease;
+}
+
+.logo:hover::before {
+    left: 100%;
 }
 
 .logo:hover {
     transform: scale(1.05);
-    box-shadow: 0 8px 30px rgba(184, 163, 105, 0.3);
+    box-shadow: 0 8px 30px rgba(200, 169, 81, 0.3);
 }
 
 .title {
+    font-family: 'Playfair Display', serif;
     font-size: 28px;
-    font-weight: 700;
-    color: #fff;
+    font-weight: 500;
+    color: #1B2B5A;
     margin: 0 0 8px;
 }
 
 .subtitle {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(27, 43, 90, 0.5);
     margin: 0;
 }
 
@@ -518,6 +559,23 @@ const goBack = () => {
     position: relative;
     z-index: 1;
     animation: fadeInUp 0.5s ease 0.2s both;
+    overflow: hidden;
+}
+
+.form-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(200, 169, 81, 0.1), transparent);
+    transition: left 0.6s ease;
+    z-index: -1;
+}
+
+.form-card:hover::before {
+    left: 100%;
 }
 
 @keyframes fadeInUp {
@@ -540,12 +598,12 @@ const goBack = () => {
 .input-label {
     font-size: 14px;
     font-weight: 600;
-    color: #fff;
+    color: #1B2B5A;
 }
 
 .input-hint {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(27, 43, 90, 0.5);
     margin: 0;
 }
 
@@ -558,14 +616,14 @@ const goBack = () => {
 }
 
 .input-wrapper:focus-within {
-    border-color: rgba(184, 163, 105, 0.5);
-    box-shadow: 0 0 20px rgba(184, 163, 105, 0.2);
+    border-color: rgba(200, 169, 81, 0.5);
+    box-shadow: 0 0 20px rgba(200, 169, 81, 0.15);
 }
 
 .input-icon {
     position: absolute;
     left: 16px;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(27, 43, 90, 0.4);
 }
 
 .input-field {
@@ -574,12 +632,13 @@ const goBack = () => {
     font-size: 17px;
     border: none;
     background: transparent;
-    color: #fff;
+    color: #1B2B5A;
     outline: none;
+    font-family: 'Manrope', sans-serif;
 }
 
 .input-field::placeholder {
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(27, 43, 90, 0.3);
 }
 
 .otp-wrapper {
@@ -588,8 +647,8 @@ const goBack = () => {
 }
 
 .otp-wrapper:focus-within {
-    border-color: rgba(184, 163, 105, 0.5);
-    box-shadow: 0 0 20px rgba(184, 163, 105, 0.2);
+    border-color: rgba(200, 169, 81, 0.5);
+    box-shadow: 0 0 20px rgba(200, 169, 81, 0.15);
 }
 
 .otp-input {
@@ -601,38 +660,57 @@ const goBack = () => {
     font-weight: 600;
     border: none;
     background: transparent;
-    color: #fff;
+    color: #1B2B5A;
     outline: none;
+    font-family: 'Manrope', sans-serif;
 }
 
 .otp-input::placeholder {
-    color: rgba(255, 255, 255, 0.2);
+    color: rgba(27, 43, 90, 0.2);
     letter-spacing: 10px;
 }
 
 .error-text {
-    color: #FCA5A5;
+    color: #DC2626;
     font-size: 13px;
     margin: 0;
 }
 
 .submit-btn {
+    position: relative;
     width: 100%;
     padding: 18px;
     font-size: 16px;
     font-weight: 600;
-    background: linear-gradient(135deg, #B8A369, #D4C89A);
-    color: #1a2a3a;
+    background: #C8A951;
+    color: #1B2B5A;
     border: none;
     border-radius: 16px;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 20px rgba(184, 163, 105, 0.4);
+    box-shadow: 0 4px 20px rgba(200, 169, 81, 0.35);
+    font-family: 'Manrope', sans-serif;
+    overflow: hidden;
+}
+
+.submit-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.submit-btn:hover:not(:disabled)::before {
+    left: 100%;
 }
 
 .submit-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(184, 163, 105, 0.5);
+    box-shadow: 0 8px 30px rgba(200, 169, 81, 0.5);
 }
 
 .submit-btn:disabled {
@@ -652,23 +730,24 @@ const goBack = () => {
     padding: 8px;
     font-size: 14px;
     background: transparent;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(27, 43, 90, 0.6);
     border: none;
     cursor: pointer;
     transition: color 0.3s ease;
+    font-family: 'Manrope', sans-serif;
 }
 
 .link-btn:hover:not(:disabled) {
-    color: #B8A369;
+    color: #C8A951;
 }
 
 .link-btn:disabled {
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(27, 43, 90, 0.3);
     cursor: not-allowed;
 }
 
 .divider {
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(27, 43, 90, 0.3);
 }
 
 /* Method Selection */
@@ -680,13 +759,13 @@ const goBack = () => {
 .method-phone {
     font-size: 16px;
     font-weight: 600;
-    color: #fff;
+    color: #1B2B5A;
     margin: 0 0 4px;
 }
 
 .method-hint {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(27, 43, 90, 0.5);
     margin: 0;
 }
 
@@ -698,36 +777,59 @@ const goBack = () => {
 }
 
 .method-btn {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 14px;
     padding: 16px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: 16px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
     text-align: left;
+    overflow: hidden;
+}
+
+.method-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(200, 169, 81, 0.15), transparent);
+    transition: left 0.6s ease;
+    z-index: 0;
+}
+
+.method-btn:hover::before {
+    left: 100%;
 }
 
 .method-btn:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(184, 163, 105, 0.5);
+    background: rgba(255, 255, 255, 0.65);
+    border-color: rgba(200, 169, 81, 0.4);
+    box-shadow: 0 8px 24px rgba(27, 43, 90, 0.08);
 }
 
 .method-icon {
+    position: relative;
+    z-index: 1;
     width: 48px;
     height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(184, 163, 105, 0.2);
+    background: rgba(200, 169, 81, 0.15);
     border-radius: 12px;
-    color: #B8A369;
+    color: #C8A951;
 }
 
 .method-text {
+    position: relative;
+    z-index: 1;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -737,22 +839,24 @@ const goBack = () => {
 .method-title {
     font-size: 15px;
     font-weight: 600;
-    color: #fff;
+    color: #1B2B5A;
 }
 
 .method-desc {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(27, 43, 90, 0.5);
 }
 
 .method-arrow {
-    color: rgba(255, 255, 255, 0.4);
-    transition: transform 0.2s;
+    position: relative;
+    z-index: 1;
+    color: rgba(27, 43, 90, 0.4);
+    transition: all 0.3s ease;
 }
 
 .method-btn:hover .method-arrow {
     transform: translateX(4px);
-    color: #B8A369;
+    color: #C8A951;
 }
 
 .back-btn {
@@ -772,7 +876,7 @@ const goBack = () => {
     padding-top: 24px;
     text-align: center;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(27, 43, 90, 0.4);
     position: relative;
     z-index: 1;
 }
