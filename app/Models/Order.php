@@ -65,7 +65,7 @@ class Order extends Model
         'confirmed_at',
         'ready_sent_at',
         'work_order_sent_at',
-        'cancel_reason',
+        'cancellation_reason',
         'cancelled_by',
         'cancelled_at',
         // QA fields

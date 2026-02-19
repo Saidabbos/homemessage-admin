@@ -186,8 +186,8 @@ class TherapistBotService
             . "📋 #{$order->order_number}\n"
             . "📅 Sana: {$date}\n";
 
-        if ($order->cancel_reason) {
-            $message .= "📝 Sabab: {$order->cancel_reason}";
+        if ($order->cancellation_reason) {
+            $message .= "📝 Sabab: {$order->cancellation_reason}";
         }
 
         return $this->sendMessage($master->telegram_id, $message);

@@ -74,7 +74,7 @@ class OrderService
                 $order->update([
                     'cancelled_by' => auth()->id(),
                     'cancelled_at' => now(),
-                    'cancel_reason' => $comment,
+                    'cancellation_reason' => $comment,
                 ]);
                 Log::info('OrderService: Order cancelled', ['order_id' => $order->id, 'reason' => $comment]);
             }
