@@ -215,6 +215,28 @@
     border-color: #C8A951;
 }
 
+/* Name Input */
+.otp-name-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.37);
+    border: 1px solid rgba(27, 43, 90, 0.09);
+    border-radius: 16px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    color: #1B2B5A;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.otp-name-input::placeholder {
+    color: rgba(27, 43, 90, 0.19);
+}
+
+.otp-name-input:focus {
+    border-color: #C8A951;
+}
+
 /* Submit Button */
 .otp-submit-btn {
     display: flex;

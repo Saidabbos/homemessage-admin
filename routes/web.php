@@ -266,6 +266,10 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin'])->group(function () {
     Route::get('reports/export', [ReportController::class, 'export'])->name('admin.reports.export');
     Route::get('reports/masters', [ReportController::class, 'masters'])->name('admin.reports.masters');
 
+    // Scheduler Monitor
+    Route::get('scheduler', [\App\Http\Controllers\Admin\SchedulerController::class, 'index'])->name('admin.scheduler.index');
+    Route::post('scheduler/run', [\App\Http\Controllers\Admin\SchedulerController::class, 'run'])->name('admin.scheduler.run');
+
     // Audit Logs
     Route::get('audit-logs', [AuditLogController::class, 'index'])->name('admin.audit-logs.index');
 

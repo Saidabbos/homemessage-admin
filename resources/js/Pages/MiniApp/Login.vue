@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
+import axios from 'axios';
 import MiniAppLayout from '@/Layouts/MiniAppLayout.vue';
 
 defineOptions({ layout: MiniAppLayout });
@@ -11,7 +12,7 @@ const props = defineProps({
 
 const tg = ref(null);
 const tgUser = ref(null);
-const step = ref('phone'); // 'phone', 'method', 'otp', 'pin'
+const step = ref('phone'); // 'phone', 'method', 'otp', 'pin', 'name'
 const countdown = ref(0);
 let countdownInterval = null;
 
@@ -29,6 +30,12 @@ const form = useForm({
     telegram_first_name: null,
     telegram_photo_url: null,
 });
+
+// Name input state (for new users)
+const nameInput = ref('');
+const nameError = ref('');
+const nameSaving = ref(false);
+const canSaveName = computed(() => nameInput.value.trim().length >= 2);
 
 const isAutoLogging = ref(false);
 
@@ -174,7 +181,53 @@ const verifyOtp = async () => {
         form.telegram_photo_url = tgData.photo_url || null;
     }
 
-    form.post('/auth/otp/verify', { preserveScroll: true });
+    try {
+        const response = await axios.post('/auth/otp/verify', {
+            phone: form.phone,
+            code: form.code,
+            telegram_id: form.telegram_id,
+            telegram_username: form.telegram_username,
+            telegram_first_name: form.telegram_first_name,
+            telegram_photo_url: form.telegram_photo_url,
+        });
+        
+        // Check if new user needs name input
+        if (response.data.needs_name) {
+            // Pre-fill with Telegram name if available
+            if (tgData?.first_name) {
+                nameInput.value = tgData.first_name;
+            }
+            step.value = 'name';
+        } else {
+            // Redirect to home
+            window.location.href = response.data.redirect || '/app';
+        }
+    } catch (e) {
+        form.errors.code = e.response?.data?.message || 'Noto\'g\'ri kod';
+    }
+};
+
+const saveName = async () => {
+    if (!canSaveName.value) return;
+    
+    nameSaving.value = true;
+    nameError.value = '';
+    
+    try {
+        const response = await axios.post('/app/save-name', { 
+            name: nameInput.value.trim() 
+        });
+        
+        if (response.data.success) {
+            window.location.href = '/app';
+        } else {
+            nameError.value = response.data.message || 'Xatolik yuz berdi';
+        }
+    } catch (e) {
+        nameError.value = e.response?.data?.message || 'Xatolik yuz berdi';
+    } finally {
+        nameSaving.value = false;
+    }
 };
 
 const startCountdown = () => {
@@ -385,6 +438,47 @@ const goBack = () => {
                         Raqamni o'zgartirish
                     </button>
                 </div>
+            </div>
+
+            <!-- Name Step (for new users) -->
+            <div v-if="step === 'name'" class="form-content">
+                <div class="welcome-header">
+                    <div class="welcome-icon glass">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <h2 class="welcome-title">Xush kelibsiz!</h2>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">Ismingiz</label>
+                    <p class="input-hint">Masterlar sizni qanday atashini kiriting</p>
+                    <div class="input-wrapper glass">
+                        <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <input
+                            type="text"
+                            class="input-field"
+                            v-model="nameInput"
+                            placeholder="Ismingizni kiriting"
+                            maxlength="50"
+                            @keyup.enter="saveName"
+                        />
+                    </div>
+                    <p v-if="nameError" class="error-text">{{ nameError }}</p>
+                </div>
+
+                <button 
+                    class="submit-btn" 
+                    :disabled="!canSaveName || nameSaving"
+                    @click="saveName"
+                >
+                    {{ nameSaving ? 'Saqlanmoqda...' : 'Davom etish' }}
+                </button>
             </div>
         </div>
 
@@ -868,6 +962,32 @@ const goBack = () => {
 /* PIN input */
 .pin-input-field {
     letter-spacing: 12px;
+}
+
+/* Welcome header for name step */
+.welcome-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.welcome-icon {
+    width: 72px;
+    height: 72px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #C8A951;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, rgba(200, 169, 81, 0.15) 0%, rgba(200, 169, 81, 0.05) 100%);
+}
+
+.welcome-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #1B2B5A;
+    margin: 0;
 }
 
 /* Footer */

@@ -6,7 +6,7 @@ import axios from 'axios'
 
 const { t, locale } = useI18n()
 
-// step: 1 = phone, 2 = method select, 3 = PIN, 4 = OTP
+// step: 1 = phone, 2 = method select, 3 = PIN, 4 = OTP, 5 = name
 const step = ref(1)
 const phone = ref('')
 const code = ref(['', '', '', '', '', ''])
@@ -19,6 +19,11 @@ const cooldownSeconds = ref(0)
 const otpInputRefs = ref([])
 const pinInputRefs = ref([])
 const hasPin = ref(false)
+
+// Name input state (for new users)
+const nameInput = ref('')
+const nameError = ref('')
+const redirectUrl = ref('/customer/dashboard')
 
 // Format countdown as mm:ss
 const formatTime = (seconds) => {
@@ -178,7 +183,13 @@ async function handleVerifyOtp() {
             code: codeStr,
         })
 
-        window.location.href = response.data.redirect
+        // Check if new user needs name input
+        if (response.data.needs_name) {
+            redirectUrl.value = response.data.redirect
+            step.value = 5
+        } else {
+            window.location.href = response.data.redirect
+        }
     } catch (err) {
         const data = err.response?.data
         error.value = data?.message || t('auth.otp.invalid_code')
@@ -189,6 +200,27 @@ async function handleVerifyOtp() {
             phone.value = ''
             code.value = ['', '', '', '', '', '']
         }
+    } finally {
+        loading.value = false
+    }
+}
+
+// Handle Save Name
+async function handleSaveName() {
+    const name = nameInput.value.trim()
+    if (name.length < 2) {
+        nameError.value = "Ism kamida 2 ta harfdan iborat bo'lishi kerak"
+        return
+    }
+
+    nameError.value = ''
+    loading.value = true
+
+    try {
+        await axios.post('/app/save-name', { name })
+        window.location.href = redirectUrl.value
+    } catch (err) {
+        nameError.value = err.response?.data?.message || 'Xatolik yuz berdi'
     } finally {
         loading.value = false
     }
@@ -470,8 +502,48 @@ onBeforeUnmount(() => {
                 </button>
             </div>
 
+            <!-- Step 5: Name Input -->
+            <div v-else-if="step === 5" class="otp-form-card">
+                <div class="otp-form-icon otp-form-icon-gold">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+
+                <div class="otp-form-title-block">
+                    <h1 class="otp-form-title">{{ t('auth.welcome') || 'Xush kelibsiz!' }}</h1>
+                    <p class="otp-form-desc">{{ t('auth.enterName') || 'Ismingizni kiriting' }}</p>
+                </div>
+
+                <div class="otp-input-block">
+                    <label class="otp-input-label">{{ t('auth.yourName') || 'Ismingiz' }}</label>
+                    <input
+                        v-model="nameInput"
+                        type="text"
+                        class="otp-name-input"
+                        :placeholder="t('auth.namePlaceholder') || 'Ismingizni kiriting'"
+                        maxlength="50"
+                        @keyup.enter="handleSaveName"
+                        :disabled="loading"
+                    />
+                    <p v-if="nameError" class="otp-error">{{ nameError }}</p>
+                </div>
+
+                <button
+                    class="otp-submit-btn"
+                    :class="{ disabled: loading || nameInput.trim().length < 2 }"
+                    :disabled="loading || nameInput.trim().length < 2"
+                    @click="handleSaveName"
+                >
+                    <span v-if="!loading">{{ t('common.continue') || 'Davom etish' }}</span>
+                    <span v-else>{{ t('common.loading') }}</span>
+                    <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </button>
+            </div>
+
             <!-- Step 4: OTP Code -->
-            <div v-else class="otp-form-card">
+            <div v-else-if="step === 4" class="otp-form-card">
                 <button class="otp-back-btn" @click="hasPin ? goBackToMethod() : goBackToPhone()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                     <span>{{ t('common.back') }}</span>

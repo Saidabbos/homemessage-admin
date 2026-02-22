@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Order;
+use App\Models\SchedulerRun;
 use App\Services\OrderService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -15,11 +16,20 @@ class ProcessOrderStatuses extends Command
 
     public function handle(OrderService $orderService): int
     {
+        $startTime = microtime(true);
         $now = Carbon::now();
         $today = $now->toDateString();
         $currentTime = $now->format('H:i:s');
 
+        // Create scheduler run record
+        $run = SchedulerRun::create([
+            'command' => 'orders:process-statuses',
+            'status' => 'running',
+            'started_at' => $now,
+        ]);
+
         $this->info("Processing orders at {$now}");
+        $details = ['to_in_progress' => [], 'to_completed' => []];
 
         // 1. CONFIRMED → IN_PROGRESS (slot vaqti kelganda)
         $toInProgress = Order::where('status', Order::STATUS_CONFIRMED)
@@ -37,6 +47,7 @@ class ProcessOrderStatuses extends Command
                     'arrival_window_start' => $order->arrival_window_start,
                 ]);
                 
+                $details['to_in_progress'][] = $order->order_number;
                 $this->line("  ✓ #{$order->order_number} → IN_PROGRESS");
             } catch (\Exception $e) {
                 Log::error('Failed to auto-transition order to IN_PROGRESS', [
@@ -75,6 +86,7 @@ class ProcessOrderStatuses extends Command
                     'order_number' => $order->order_number,
                 ]);
                 
+                $details['to_completed'][] = $order->order_number;
                 $this->line("  ✓ #{$order->order_number} → COMPLETED (auto)");
             } catch (\Exception $e) {
                 Log::error('Failed to auto-complete order', [
@@ -86,6 +98,16 @@ class ProcessOrderStatuses extends Command
         }
 
         $this->info("Done. IN_PROGRESS: {$toInProgress->count()}, COMPLETED: {$toCompleted->count()}");
+
+        // Update scheduler run record
+        $endTime = microtime(true);
+        $run->update([
+            'status' => 'success',
+            'records_processed' => $toInProgress->count() + $toCompleted->count(),
+            'details' => $details,
+            'finished_at' => now(),
+            'duration_ms' => (int)(($endTime - $startTime) * 1000),
+        ]);
 
         return Command::SUCCESS;
     }

@@ -107,17 +107,20 @@ class CustomerAuthController extends Controller
         // Create session
         Auth::login($user, true); // remember = true
 
-        // Check if new user needs to enter name (no Telegram name available)
-        $needsName = $isNew && $this->userNeedsNameInput($user);
+        // Check if user needs to enter name (new user or existing user with no proper name)
+        $needsName = $this->userNeedsNameInput($user);
 
-        // Determine redirect based on role
-        $defaultRoute = $user->hasRole('master') ? route('master.dashboard') : route('customer.dashboard');
+        // Determine redirect based on role and source
+        $isMiniApp = str_contains($request->header('referer', ''), '/app');
+        
+        if ($isMiniApp) {
+            $defaultRoute = route('miniapp.home');
+        } else {
+            $defaultRoute = $user->hasRole('master') ? route('master.dashboard') : route('customer.dashboard');
+        }
 
         // Return Inertia-compatible response
         if ($request->header('X-Inertia')) {
-            // Redirect based on where request came from
-            $isMiniApp = str_contains($request->header('referer', ''), '/app');
-            
             if ($isMiniApp) {
                 // For Mini App: redirect to home, frontend will handle name input
                 return redirect()->route('miniapp.home')->with('needs_name', $needsName);
