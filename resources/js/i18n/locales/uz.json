@@ -650,6 +650,7 @@
     "confirm_order": "Tasdiqlash",
     "select_date": "Sana tanlang",
     "select_time": "Vaqt tanlang",
+    "master_arrival_time": "Master kelish vaqti",
     "massage_type": "Massaj turi",
     "service_subtitle": "Massaj turi va parametrlarni belgilang",
     "master_time_subtitle": "Master, sana va vaqt oralig'ini tanlang",

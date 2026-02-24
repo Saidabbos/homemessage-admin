@@ -650,6 +650,7 @@
     "confirm_order": "Подтверждение",
     "select_date": "Выберите дату",
     "select_time": "Выберите время",
+    "master_arrival_time": "Время приезда мастера",
     "massage_type": "Тип массажа",
     "service_subtitle": "Выберите тип массажа и параметры",
     "master_time_subtitle": "Выберите мастера, дату и время",

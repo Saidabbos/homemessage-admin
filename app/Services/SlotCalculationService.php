@@ -24,7 +24,7 @@ class SlotCalculationService
 {
     // Konstantalar (daqiqalarda)
     public const SLOT_WINDOW = 30;            // Kelish oynasi kengligi (30 daqiqa)
-    public const SLOT_INTERVAL = 60;          // Slotlar orasidagi interval (har soat boshida)
+    public const SLOT_INTERVAL = 30;          // Slotlar orasidagi interval (har 30 daqiqada)
     public const TRAVEL = 30;                 // Yo'l vaqti
     public const PRE = 10;                    // Tayyorgarlik (stol, yog', opros)
     public const POST = 10;                   // Yig'ishtirish
@@ -66,9 +66,9 @@ class SlotCalculationService
         $shiftStart = $this->parseTime($date, $master->shift_start ?? '08:00');
         $shiftEnd = $this->parseTime($date, $master->shift_end ?? '22:00');
         
-        // Slotlarni har soat boshida generatsiya qilamiz (09:00, 10:00, 11:00...)
-        // Smena boshini eng yaqin soatga oshiramiz
-        $current = $shiftStart->copy()->ceilHour();
+        // Slotlarni har 30 daqiqada generatsiya qilamiz (09:00, 09:30, 10:00, 10:30...)
+        // Smena boshini eng yaqin 30 daqiqaga oshiramiz
+        $current = $this->ceilToInterval($shiftStart->copy(), self::SLOT_INTERVAL);
         
         while ($current->lt($shiftEnd)) {
             $windowStart = $current->copy();
@@ -403,6 +403,23 @@ class SlotCalculationService
     protected function parseTime(Carbon $date, string $time): Carbon
     {
         return Carbon::parse($date->format('Y-m-d') . ' ' . $time);
+    }
+
+    /**
+     * Vaqtni berilgan intervalga yuqoriga yaxlitlash
+     * Masalan: 09:15 -> 09:30 (30 daqiqalik interval uchun)
+     */
+    protected function ceilToInterval(Carbon $time, int $intervalMinutes): Carbon
+    {
+        $minutes = $time->minute;
+        $remainder = $minutes % $intervalMinutes;
+        
+        if ($remainder === 0 && $time->second === 0) {
+            return $time; // Allaqachon to'g'ri intervalda
+        }
+        
+        $minutesToAdd = $intervalMinutes - $remainder;
+        return $time->addMinutes($minutesToAdd)->second(0);
     }
 
     /**

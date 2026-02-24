@@ -131,7 +131,7 @@ class OrderController extends Controller
         $order->update([
             'status' => 'CANCELLED',
             'cancelled_at' => now(),
-            'cancelled_by' => 'customer',
+            'cancelled_by' => $user->id,
         ]);
 
         // Log the action

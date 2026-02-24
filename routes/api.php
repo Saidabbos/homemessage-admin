@@ -104,6 +104,76 @@ Route::middleware('web')->group(function () {
         return response()->json(['addresses' => $addresses]);
     });
 
+    // Save new address
+    Route::post('/user/addresses', function (\Illuminate\Http\Request $request) {
+        \Log::info('Save address request', ['input' => $request->all()]);
+        
+        $user = auth()->user();
+        if (!$user) {
+            \Log::warning('Save address: Unauthorized');
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+        
+        \Log::info('Save address: User found', ['user_id' => $user->id]);
+        
+        $validated = $request->validate([
+            'name' => 'nullable|string|max:100',
+            'address' => 'required|string|max:500',
+            'entrance' => 'nullable|string|max:20',
+            'floor' => 'nullable|string|max:20',
+            'apartment' => 'nullable|string|max:20',
+            'landmark' => 'nullable|string|max:255',
+            'lat' => 'nullable|numeric',
+            'lng' => 'nullable|numeric',
+        ]);
+        
+        \Log::info('Save address: Validated', ['validated' => $validated]);
+        
+        // Auto-generate name if not provided
+        $addressCount = $user->addresses()->count();
+        
+        $addressData = [
+            'name' => $validated['name'] ?? 'Manzil ' . ($addressCount + 1),
+            'address' => $validated['address'],
+            'entrance' => $validated['entrance'] ?? null,
+            'floor' => $validated['floor'] ?? null,
+            'apartment' => $validated['apartment'] ?? null,
+            'landmark' => $validated['landmark'] ?? null,
+            'latitude' => $validated['lat'] ?? null,
+            'longitude' => $validated['lng'] ?? null,
+        ];
+        
+        // If this is the first address, make it default
+        if ($addressCount === 0) {
+            $addressData['is_default'] = true;
+        }
+        
+        \Log::info('Save address: Creating/Updating', ['data' => $addressData]);
+        
+        // Use updateOrCreate to avoid duplicate name error
+        $address = $user->addresses()->updateOrCreate(
+            ['name' => $addressData['name']], // Find by name
+            $addressData // Update with all data
+        );
+        
+        \Log::info('Save address: Created', ['address_id' => $address->id]);
+        
+        return response()->json([
+            'success' => true,
+            'address' => [
+                'id' => $address->id,
+                'name' => $address->name,
+                'address' => $address->address,
+                'entrance' => $address->entrance,
+                'floor' => $address->floor,
+                'apartment' => $address->apartment,
+                'landmark' => $address->landmark,
+                'is_default' => $address->is_default,
+                'full_address' => $address->address . ($address->entrance ? ", kirish: {$address->entrance}" : '') . ($address->floor ? ", qavat: {$address->floor}" : '') . ($address->apartment ? ", xonadon: {$address->apartment}" : ''),
+            ],
+        ]);
+    });
+
     // Public payment endpoints (booking flow)
     Route::post('/public/payment/create', [PublicPaymentController::class, 'create']);
     Route::get('/public/payment/status/{orderId}', [PublicPaymentController::class, 'status']);

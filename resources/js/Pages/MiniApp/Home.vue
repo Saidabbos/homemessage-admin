@@ -4,10 +4,12 @@ import { router, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import MiniAppLayout from '@/Layouts/MiniAppLayout.vue';
 import SidebarMenu from '@/Components/MiniApp/SidebarMenu.vue';
+import { useCart } from '@/composables/useCart';
 
 defineOptions({ layout: MiniAppLayout });
 
 const { t } = useI18n();
+const { cartItemCount } = useCart();
 
 const showSidebar = ref(false);
 
@@ -65,6 +67,11 @@ const goToBooking = () => {
 
 const goToOrders = () => {
     router.visit('/app/orders');
+};
+
+const goToCart = () => {
+    // Go to booking page with cart view
+    router.visit('/app/book?view=cart');
 };
 
 const saveName = async () => {
@@ -169,13 +176,13 @@ const saveName = async () => {
                     </svg>
                     <span>HOMEMASSAGE</span>
                 </div>
-                <button class="ma-icon-btn" @click="goToOrders">
+                <button class="ma-cart-btn" @click="goToCart">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6"/>
-                        <line x1="8" y1="2" x2="8" y2="6"/>
-                        <line x1="3" y1="10" x2="21" y2="10"/>
+                        <circle cx="9" cy="21" r="1"/>
+                        <circle cx="20" cy="21" r="1"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
                     </svg>
+                    <span v-if="cartItemCount > 0" class="ma-cart-badge">{{ cartItemCount }}</span>
                 </button>
             </div>
         </header>
@@ -376,6 +383,43 @@ const saveName = async () => {
 
 .ma-icon-btn:hover {
     background: var(--cream-dark);
+}
+
+.ma-cart-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: white;
+    border: 1px solid rgba(0,0,0,0.06);
+    color: var(--gold);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ma-cart-btn:hover {
+    background: var(--cream-dark);
+}
+
+.ma-cart-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    background: #EF4444;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
 }
 
 /* Hero */

@@ -1,9 +1,11 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { useCart } from '@/composables/useCart';
 
 const { t } = useI18n();
+const { cart, cartTotal, cartItemCount, clearCart } = useCart();
 
 const page = usePage();
 const authUser = computed(() => page.props.auth?.user);
@@ -30,10 +32,18 @@ const manualAddress = ref({
     floor: '',
     apartment: '',
     landmark: '',
+    lat: null,
+    lng: null,
 });
 
-// Cart state
-const cart = ref([]);
+// Map state
+const showMap = ref(false);
+const mapContainerRef = ref(null);
+const detectingLocation = ref(false);
+const mapCenter = ref([41.2995, 69.2401]);
+const mapMarker = ref(null);
+let leafletMap = null;
+let leafletMarker = null;
 
 // Shared booking data
 const booking = ref({
@@ -93,11 +103,7 @@ const currentItemPrice = computed(() => {
     return Number(dur?.price) || 0;
 });
 
-const cartTotal = computed(() => {
-    return cart.value.reduce((sum, item) => sum + item.price, 0);
-});
-
-const cartItemCount = computed(() => cart.value.length);
+// cartTotal and cartItemCount come from useCart composable
 
 // Service IDs for master filtering
 const selectedServiceIds = computed(() => {
@@ -210,6 +216,29 @@ const loadSlots = async () => {
     }
     loadingSlots.value = false;
 };
+
+// Get slots that are already in cart for current master/date
+const cartBlockedSlots = computed(() => {
+    if (!booking.value.master_id || !booking.value.date) return new Set();
+    
+    const blocked = new Set();
+    for (const item of cart.value) {
+        if (item.master_id === booking.value.master_id && item.date === booking.value.date) {
+            blocked.add(item.slot);
+        }
+    }
+    return blocked;
+});
+
+// Process slots with cart blocking
+const processedSlots = computed(() => {
+    const blocked = cartBlockedSlots.value;
+    return availableSlots.value.map(slot => ({
+        ...slot,
+        disabled: slot.disabled || blocked.has(slot.start),
+        inCart: blocked.has(slot.start),
+    }));
+});
 
 // ==================== Formatting ====================
 
@@ -373,7 +402,7 @@ const submitCart = async () => {
         const result = await response.json();
 
         if (result.success) {
-            cart.value = [];
+            clearCart();
             router.visit('/booking/payment/' + result.group_id);
         } else {
             submitError.value = result.message || 'Xatolik yuz berdi';
@@ -443,6 +472,161 @@ const addressForSubmit = computed(() => {
     }
     return null;
 });
+
+// ==================== Map Functions ====================
+
+const initLeafletMap = async () => {
+    await nextTick();
+    if (!mapContainerRef.value || leafletMap) return;
+    
+    const L = await import('leaflet');
+    await import('leaflet/dist/leaflet.css');
+    
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    });
+    
+    const center = mapMarker.value || mapCenter.value;
+    leafletMap = L.map(mapContainerRef.value).setView(center, 15);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(leafletMap);
+    
+    if (mapMarker.value) {
+        leafletMarker = L.marker(mapMarker.value, { draggable: true }).addTo(leafletMap);
+        leafletMarker.on('dragend', async (e) => {
+            const latlng = e.target.getLatLng();
+            mapMarker.value = [latlng.lat, latlng.lng];
+            manualAddress.value.lat = latlng.lat;
+            manualAddress.value.lng = latlng.lng;
+            await reverseGeocode(latlng.lat, latlng.lng);
+        });
+    }
+    
+    leafletMap.on('click', async (e) => {
+        const { lat, lng } = e.latlng;
+        mapMarker.value = [lat, lng];
+        manualAddress.value.lat = lat;
+        manualAddress.value.lng = lng;
+        
+        if (leafletMarker) {
+            leafletMarker.setLatLng([lat, lng]);
+        } else {
+            const L = await import('leaflet');
+            leafletMarker = L.marker([lat, lng], { draggable: true }).addTo(leafletMap);
+            leafletMarker.on('dragend', async (e) => {
+                const latlng = e.target.getLatLng();
+                mapMarker.value = [latlng.lat, latlng.lng];
+                manualAddress.value.lat = latlng.lat;
+                manualAddress.value.lng = latlng.lng;
+                await reverseGeocode(latlng.lat, latlng.lng);
+            });
+        }
+        
+        await reverseGeocode(lat, lng);
+    });
+};
+
+const cleanupMap = () => {
+    if (leafletMap) {
+        leafletMap.remove();
+        leafletMap = null;
+        leafletMarker = null;
+    }
+};
+
+watch(showMap, async (visible) => {
+    if (visible) {
+        await nextTick();
+        initLeafletMap();
+    } else {
+        cleanupMap();
+    }
+});
+
+const reverseGeocode = async (lat, lng) => {
+    try {
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=uz`
+        );
+        const data = await response.json();
+        
+        if (data.display_name) {
+            const addr = data.address || {};
+            const parts = [];
+            if (addr.road) parts.push(addr.road);
+            if (addr.house_number) parts.push(addr.house_number);
+            if (addr.neighbourhood) parts.push(addr.neighbourhood);
+            if (addr.suburb) parts.push(addr.suburb);
+            
+            manualAddress.value.address = parts.length > 0 ? parts.join(', ') : data.display_name.split(',').slice(0, 3).join(',');
+        }
+    } catch (e) {
+        console.error('Geocode error:', e);
+    }
+};
+
+const detectLocation = async () => {
+    if (!navigator.geolocation) {
+        alert('Geolokatsiya qo\'llab-quvvatlanmaydi');
+        return;
+    }
+    
+    detectingLocation.value = true;
+    
+    try {
+        const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            });
+        });
+        
+        const { latitude, longitude } = position.coords;
+        mapCenter.value = [latitude, longitude];
+        mapMarker.value = [latitude, longitude];
+        manualAddress.value.lat = latitude;
+        manualAddress.value.lng = longitude;
+        
+        if (leafletMap) {
+            const L = await import('leaflet');
+            leafletMap.setView([latitude, longitude], 16);
+            
+            if (leafletMarker) {
+                leafletMarker.setLatLng([latitude, longitude]);
+            } else {
+                leafletMarker = L.marker([latitude, longitude], { draggable: true }).addTo(leafletMap);
+                leafletMarker.on('dragend', async (e) => {
+                    const latlng = e.target.getLatLng();
+                    mapMarker.value = [latlng.lat, latlng.lng];
+                    manualAddress.value.lat = latlng.lat;
+                    manualAddress.value.lng = latlng.lng;
+                    await reverseGeocode(latlng.lat, latlng.lng);
+                });
+            }
+        }
+        
+        await reverseGeocode(latitude, longitude);
+        
+        if (!showMap.value) {
+            showMap.value = true;
+        }
+    } catch (error) {
+        console.error('Location error:', error);
+        alert('Joylashuvni aniqlab bo\'lmadi');
+    } finally {
+        detectingLocation.value = false;
+    }
+};
+
+const confirmMapLocation = () => {
+    showMap.value = false;
+};
 
 const getTranslated = (field) => {
     if (typeof field === 'string') return field;
@@ -697,24 +881,26 @@ const getServiceIcon = (service) => {
 
                     <!-- Time Slots -->
                     <div v-if="booking.master_id && booking.date" class="bk-section">
-                        <label class="bk-field-label">Vaqt oralig'ini tanlang</label>
+                        <label class="bk-field-label">{{ t('booking.master_arrival_time') }}</label>
                         <div v-if="loadingSlots" class="bk-loading">
                             <div class="bk-spinner"></div>
                             <span>Yuklanmoqda...</span>
                         </div>
-                        <div v-else-if="availableSlots.length === 0" class="bk-empty">
+                        <div v-else-if="processedSlots.length === 0" class="bk-empty">
                             Bu kunga bo'sh vaqt yo'q
                         </div>
                         <div v-else class="bk-slots-grid">
                             <button
-                                v-for="slot in availableSlots"
+                                v-for="slot in processedSlots"
                                 :key="slot.start"
                                 class="bk-slot-btn"
-                                :class="{ selected: booking.slot === slot.start, disabled: slot.disabled }"
+                                :class="{ selected: booking.slot === slot.start, disabled: slot.disabled, 'in-cart': slot.inCart }"
                                 :disabled="slot.disabled"
                                 @click="!slot.disabled && (booking.slot = slot.start)"
+                                :title="slot.inCart ? 'Savatda mavjud' : ''"
                             >
                                 {{ formatSlotRange(slot.start) }}
+                                <span v-if="slot.inCart" class="slot-cart-badge">🛒</span>
                             </button>
                         </div>
                     </div>
@@ -842,6 +1028,60 @@ const getServiceIcon = (service) => {
                                     placeholder="Mo'ljal (ixtiyoriy)"
                                 />
                             </div>
+                            
+                            <!-- Map Button -->
+                            <div class="bk-map-actions">
+                                <button type="button" class="bk-map-btn" @click="showMap = true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                        <circle cx="12" cy="10" r="3"/>
+                                    </svg>
+                                    Xaritadan tanlash
+                                </button>
+                                <button type="button" class="bk-detect-btn" @click="detectLocation" :disabled="detectingLocation">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                    {{ detectingLocation ? 'Aniqlanmoqda...' : 'Joylashuvim' }}
+                                </button>
+                            </div>
+                            
+                            <div v-if="manualAddress.lat && manualAddress.lng" class="bk-location-badge">
+                                📍 Joylashuv belgilangan
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Map Modal -->
+                    <div v-if="showMap" class="bk-map-modal">
+                        <div class="bk-map-header">
+                            <button class="bk-map-close" @click="showMap = false">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
+                            <span class="bk-map-title">Xaritadan tanlang</span>
+                            <button class="bk-map-confirm" @click="confirmMapLocation" :disabled="!mapMarker">
+                                Tasdiqlash
+                            </button>
+                        </div>
+                        <div class="bk-map-container">
+                            <div ref="mapContainerRef" class="bk-leaflet-map"></div>
+                            <div class="bk-map-controls">
+                                <button class="bk-detect-location-btn" @click="detectLocation" :disabled="detectingLocation">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                    {{ detectingLocation ? 'Aniqlanmoqda...' : 'Mening joylashuvim' }}
+                                </button>
+                            </div>
+                            <p v-if="!mapMarker" class="bk-map-hint">Xaritaga bosib joylashuvni tanlang</p>
+                        </div>
+                        <div v-if="manualAddress.address" class="bk-map-address">
+                            📍 {{ manualAddress.address }}
                         </div>
                     </div>
 

@@ -647,6 +647,7 @@
     "confirm_order": "Confirm",
     "select_date": "Select date",
     "select_time": "Select time",
+    "master_arrival_time": "Master arrival time",
     "massage_type": "Massage type",
     "service_subtitle": "Select massage type and parameters",
     "master_time_subtitle": "Select master, date and time",

@@ -1648,3 +1648,188 @@
         padding: 14px;
     }
 }
+
+/* ==================== Map Styles ==================== */
+
+.bk-map-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.bk-map-btn,
+.bk-detect-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--cream);
+    border: 1px solid rgba(200, 169, 81, 0.3);
+    border-radius: 10px;
+    color: var(--navy);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.bk-map-btn:hover,
+.bk-detect-btn:hover {
+    background: rgba(200, 169, 81, 0.15);
+    border-color: var(--gold);
+}
+
+.bk-map-btn svg,
+.bk-detect-btn svg {
+    color: var(--gold);
+}
+
+.bk-detect-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.bk-location-badge {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 10px;
+    color: #059669;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* Map Modal */
+.bk-map-modal {
+    position: fixed;
+    inset: 0;
+    background: white;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.bk-map-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background: white;
+    border-bottom: 1px solid var(--cream);
+}
+
+.bk-map-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--navy);
+}
+
+.bk-map-close {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--cream);
+    border: none;
+    border-radius: 10px;
+    color: var(--navy);
+    cursor: pointer;
+}
+
+.bk-map-confirm {
+    padding: 10px 20px;
+    background: var(--gold);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.bk-map-confirm:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.bk-map-container {
+    flex: 1;
+    position: relative;
+    min-height: 300px;
+}
+
+.bk-leaflet-map {
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+}
+
+.bk-map-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+.bk-detect-location-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: white;
+    border: none;
+    border-radius: 24px;
+    color: var(--navy);
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+}
+
+.bk-detect-location-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.bk-detect-location-btn svg {
+    color: var(--gold);
+}
+
+.bk-map-hint {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 20px;
+    color: white;
+    font-size: 12px;
+    text-align: center;
+    z-index: 1000;
+    white-space: nowrap;
+}
+
+.bk-map-address {
+    padding: 16px;
+    background: var(--cream);
+    border-top: 1px solid rgba(200, 169, 81, 0.2);
+    font-size: 14px;
+    color: var(--navy);
+}
+
+/* Slot in cart state */
+.bk-slot-btn.in-cart {
+    background: rgba(200, 169, 81, 0.15);
+    border-color: var(--gold);
+    opacity: 0.6;
+    position: relative;
+}
+
+.slot-cart-badge {
+    font-size: 10px;
+    margin-left: 4px;
+}

@@ -128,11 +128,19 @@ const goToOrders = () => {
 };
 
 const goHome = () => {
-    router.visit('/');
+    if (props.source === 'miniapp') {
+        router.visit('/app');
+    } else {
+        router.visit('/customer/dashboard');
+    }
 };
 
 const goToBooking = () => {
-    router.visit('/booking');
+    if (props.source === 'miniapp') {
+        router.visit('/app/book');
+    } else {
+        router.visit('/booking');
+    }
 };
 </script>
 

@@ -1,7 +1,11 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { router, Link, usePage } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import MiniAppLayout from '@/Layouts/MiniAppLayout.vue';
+import { useCart } from '@/composables/useCart';
+
+const { t } = useI18n();
 
 defineOptions({ layout: MiniAppLayout });
 
@@ -19,15 +23,15 @@ const step = ref(1);
 // Single service selection
 const selectedService = ref(null);
 
-// Cart state
-const cart = ref([]);
+// Cart state (persisted via localStorage)
+const { cart, cartTotal, cartItemCount, clearCart } = useCart();
 
 // Booking data
 const booking = ref({
     master_id: null,
     date: null,
     slot: null,
-    pressure_level: 'medium',
+    pressure_level: null,
     notes: '',
 });
 
@@ -42,7 +46,252 @@ const manualAddress = ref({
     floor: '',
     apartment: '',
     landmark: '',
+    lat: null,
+    lng: null,
 });
+
+// Map & Geolocation
+const showMap = ref(false);
+const detectingLocation = ref(false);
+const mapCenter = ref([41.2995, 69.2401]); // Tashkent default
+const mapMarker = ref(null);
+const mapContainerRef = ref(null);
+let leafletMap = null;
+let leafletMarker = null;
+
+// Initialize Leaflet map when modal opens
+const initLeafletMap = async () => {
+    await nextTick();
+    if (!mapContainerRef.value || leafletMap) return;
+    
+    const L = await import('leaflet');
+    await import('leaflet/dist/leaflet.css');
+    
+    // Fix Leaflet marker icons
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    });
+    
+    const center = mapMarker.value || mapCenter.value;
+    leafletMap = L.map(mapContainerRef.value).setView(center, 15);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(leafletMap);
+    
+    // Add existing marker if any
+    if (mapMarker.value) {
+        leafletMarker = L.marker(mapMarker.value, { draggable: true }).addTo(leafletMap);
+        leafletMarker.on('dragend', async (e) => {
+            const latlng = e.target.getLatLng();
+            mapMarker.value = [latlng.lat, latlng.lng];
+            manualAddress.value.lat = latlng.lat;
+            manualAddress.value.lng = latlng.lng;
+            await reverseGeocode(latlng.lat, latlng.lng);
+        });
+    }
+    
+    // Click on map to add/move marker
+    leafletMap.on('click', async (e) => {
+        const { lat, lng } = e.latlng;
+        mapMarker.value = [lat, lng];
+        manualAddress.value.lat = lat;
+        manualAddress.value.lng = lng;
+        
+        if (leafletMarker) {
+            leafletMarker.setLatLng([lat, lng]);
+        } else {
+            leafletMarker = L.marker([lat, lng], { draggable: true }).addTo(leafletMap);
+            leafletMarker.on('dragend', async (e) => {
+                const latlng = e.target.getLatLng();
+                mapMarker.value = [latlng.lat, latlng.lng];
+                manualAddress.value.lat = latlng.lat;
+                manualAddress.value.lng = latlng.lng;
+                await reverseGeocode(latlng.lat, latlng.lng);
+            });
+        }
+        
+        await reverseGeocode(lat, lng);
+    });
+};
+
+// Cleanup map when modal closes
+const cleanupMap = () => {
+    if (leafletMap) {
+        leafletMap.remove();
+        leafletMap = null;
+        leafletMarker = null;
+    }
+};
+
+// Watch showMap to init/cleanup
+watch(showMap, async (visible) => {
+    if (visible) {
+        await nextTick();
+        initLeafletMap();
+    } else {
+        cleanupMap();
+    }
+});
+
+const detectLocation = async () => {
+    if (!navigator.geolocation) {
+        alert('Geolokatsiya qo\'llab-quvvatlanmaydi');
+        return;
+    }
+    
+    detectingLocation.value = true;
+    
+    try {
+        const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            });
+        });
+        
+        const { latitude, longitude } = position.coords;
+        mapCenter.value = [latitude, longitude];
+        mapMarker.value = [latitude, longitude];
+        manualAddress.value.lat = latitude;
+        manualAddress.value.lng = longitude;
+        
+        // Update map if already open
+        if (leafletMap) {
+            const L = await import('leaflet');
+            leafletMap.setView([latitude, longitude], 16);
+            
+            if (leafletMarker) {
+                leafletMarker.setLatLng([latitude, longitude]);
+            } else {
+                leafletMarker = L.marker([latitude, longitude], { draggable: true }).addTo(leafletMap);
+                leafletMarker.on('dragend', async (e) => {
+                    const latlng = e.target.getLatLng();
+                    mapMarker.value = [latlng.lat, latlng.lng];
+                    manualAddress.value.lat = latlng.lat;
+                    manualAddress.value.lng = latlng.lng;
+                    await reverseGeocode(latlng.lat, latlng.lng);
+                });
+            }
+        }
+        
+        // Reverse geocode
+        await reverseGeocode(latitude, longitude);
+        
+        // Open map if not already open
+        if (!showMap.value) {
+            showMap.value = true;
+        }
+    } catch (error) {
+        console.error('Location error:', error);
+        alert('Joylashuvni aniqlab bo\'lmadi. Ruxsat berilganligini tekshiring.');
+    } finally {
+        detectingLocation.value = false;
+    }
+};
+
+const reverseGeocode = async (lat, lng) => {
+    try {
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=uz`
+        );
+        const data = await response.json();
+        
+        if (data.display_name) {
+            // Extract meaningful address parts
+            const addr = data.address || {};
+            const parts = [];
+            if (addr.road) parts.push(addr.road);
+            if (addr.house_number) parts.push(addr.house_number);
+            if (addr.neighbourhood) parts.push(addr.neighbourhood);
+            if (addr.suburb) parts.push(addr.suburb);
+            
+            manualAddress.value.address = parts.length > 0 ? parts.join(', ') : data.display_name.split(',').slice(0, 3).join(',');
+        }
+    } catch (e) {
+        console.error('Geocode error:', e);
+    }
+};
+
+const onMapClick = async (lat, lng) => {
+    mapMarker.value = [lat, lng];
+    manualAddress.value.lat = lat;
+    manualAddress.value.lng = lng;
+    await reverseGeocode(lat, lng);
+};
+
+const confirmMapLocation = () => {
+    showMap.value = false;
+};
+
+// Save Address
+const savingAddress = ref(false);
+
+const saveAddress = async () => {
+    if (!manualAddress.value.address) {
+        console.log('No address to save');
+        return;
+    }
+    
+    savingAddress.value = true;
+    console.log('Saving address:', manualAddress.value);
+    
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        console.log('CSRF Token:', csrfToken ? 'Found' : 'Missing');
+        
+        // Generate unique name based on existing addresses count
+        const existingCount = savedAddresses.value.length;
+        const addressName = existingCount === 0 ? 'Manzil 1' : `Manzil ${existingCount + 1}`;
+        
+        const payload = {
+            name: addressName,
+            address: manualAddress.value.address,
+            entrance: manualAddress.value.entrance || '',
+            floor: manualAddress.value.floor || '',
+            apartment: manualAddress.value.apartment || '',
+            landmark: manualAddress.value.landmark || '',
+            lat: manualAddress.value.lat,
+            lng: manualAddress.value.lng,
+        };
+        console.log('Payload:', payload);
+        
+        const response = await fetch('/api/user/addresses', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+            body: JSON.stringify(payload),
+        });
+        
+        console.log('Response status:', response.status);
+        const data = await response.json();
+        console.log('Response data:', data);
+        
+        if (data.success || data.address) {
+            // Reload addresses and select the new one
+            await loadAddresses();
+            const newAddr = savedAddresses.value.find(a => a.address === manualAddress.value.address);
+            if (newAddr) {
+                selectedAddressId.value = newAddr.id;
+            }
+            showManualAddress.value = false;
+            // Reset form
+            manualAddress.value = { address: '', entrance: '', floor: '', apartment: '', landmark: '', lat: null, lng: null };
+        }
+    } catch (e) {
+        console.error('Failed to save address:', e);
+        alert('Manzilni saqlashda xatolik: ' + e.message);
+    } finally {
+        savingAddress.value = false;
+    }
+};
 
 const loadAddresses = async () => {
     try {
@@ -91,6 +340,12 @@ const hasValidAddress = computed(() => {
 
 onMounted(() => {
     loadAddresses();
+    
+    // Check if coming from cart button in Home
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('view') === 'cart' && cart.value.length > 0) {
+        step.value = 'cart';
+    }
 });
 
 // ==================== Service Selection ====================
@@ -99,11 +354,9 @@ const toggleService = (serviceId) => {
     if (selectedService.value?.service_id === serviceId) {
         selectedService.value = null;
     } else {
-        const service = props.services?.find(s => s.id === serviceId);
-        const defaultDuration = service?.durations?.find(d => d.is_default) || service?.durations?.[0];
         selectedService.value = {
             service_id: serviceId,
-            duration_id: defaultDuration?.id || null,
+            duration_id: null,
         };
     }
 };
@@ -146,8 +399,7 @@ const currentItemPrice = computed(() => {
     return Number(dur?.price) || 0;
 });
 
-const cartTotal = computed(() => cart.value.reduce((sum, item) => sum + item.price, 0));
-const cartItemCount = computed(() => cart.value.length);
+// cartTotal and cartItemCount come from useCart composable
 
 const selectedServiceIds = computed(() =>
     selectedService.value ? [selectedService.value.service_id] : []
@@ -251,10 +503,32 @@ const getSlotPeriod = (time) => {
 const periodLabels = { morning: 'Ertalab', day: 'Kunduzi', evening: 'Kechqurun' };
 const periodIcons = { morning: 'sun-rise', day: 'sun', evening: 'moon' };
 
+// Get slots that are already in cart for current master/date
+const cartBlockedSlots = computed(() => {
+    if (!booking.value.master_id || !booking.value.date) return new Set();
+    
+    const blocked = new Set();
+    for (const item of cart.value) {
+        if (item.master_id === booking.value.master_id && item.date === booking.value.date) {
+            blocked.add(item.slot);
+        }
+    }
+    return blocked;
+});
+
 const groupedSlots = computed(() => {
     const groups = { morning: [], day: [], evening: [] };
+    const blocked = cartBlockedSlots.value;
+    
     for (const slot of availableSlots.value) {
-        groups[getSlotPeriod(slot.start)].push(slot);
+        // Mark slot as disabled if it's already in cart
+        const isInCart = blocked.has(slot.start);
+        const processedSlot = {
+            ...slot,
+            disabled: slot.disabled || isInCart,
+            inCart: isInCart,
+        };
+        groups[getSlotPeriod(slot.start)].push(processedSlot);
     }
     return Object.entries(groups)
         .filter(([_, slots]) => slots.length > 0)
@@ -291,7 +565,7 @@ const getTranslated = (field) => {
 // ==================== Navigation ====================
 
 const canProceedStep1 = computed(() =>
-    selectedService.value?.service_id && selectedService.value?.duration_id
+    selectedService.value?.service_id && selectedService.value?.duration_id && booking.value.pressure_level
 );
 
 const canProceedStep2 = computed(() =>
@@ -350,7 +624,7 @@ const bookAnotherMaster = () => resetWizard();
 
 const resetWizard = () => {
     selectedService.value = null;
-    booking.value = { master_id: null, date: null, slot: null, pressure_level: 'medium', notes: '' };
+    booking.value = { master_id: null, date: null, slot: null, pressure_level: null, notes: '' };
     step.value = 1;
 };
 
@@ -404,9 +678,11 @@ const submitCart = async () => {
         const data = await response.json();
         if (data.success) {
             createdGroupId.value = data.group_id;
-            // If payment is enabled, go to payment step
+            // Clear cart after successful submission
+            clearCart();
+            // If payment is enabled, go directly to payment page
             if (props.payment?.enabled) {
-                step.value = 'payment';
+                window.location.href = `/booking/payment/${data.group_id}?source=miniapp`;
             } else {
                 // Redirect to success page
                 router.visit(`/app/booking-success?group_id=${data.group_id || ''}`);
@@ -612,7 +888,7 @@ const pressureLevels = [
 
             <!-- Slots -->
             <section class="bk-section">
-                <h2 class="bk-section-title">Vaqt oynasi</h2>
+                <h2 class="bk-section-title">{{ t('booking.master_arrival_time') }}</h2>
                 <div v-if="!booking.master_id" class="bk-empty">Avval masterni tanlang</div>
                 <div v-else-if="!booking.date" class="bk-empty">Avval sanani tanlang</div>
                 <div v-else-if="loadingSlots" class="bk-loading">
@@ -632,11 +908,13 @@ const pressureLevels = [
                                 v-for="slot in group.slots"
                                 :key="slot.start"
                                 class="bk-slot-btn"
-                                :class="{ selected: booking.slot === slot.start, disabled: slot.disabled }"
+                                :class="{ selected: booking.slot === slot.start, disabled: slot.disabled, 'in-cart': slot.inCart }"
                                 :disabled="slot.disabled"
                                 @click="booking.slot = slot.start"
+                                :title="slot.inCart ? 'Savatda mavjud' : ''"
                             >
                                 {{ formatSlotRange(slot.start) }}
+                                <span v-if="slot.inCart" class="slot-cart-icon">🛒</span>
                             </button>
                         </div>
                     </div>
@@ -781,6 +1059,36 @@ const pressureLevels = [
                             </button>
                         </div>
 
+                        <!-- Location Detection Button -->
+                        <div class="bk-location-btns">
+                            <button 
+                                class="bk-detect-location" 
+                                @click="detectLocation"
+                                :disabled="detectingLocation"
+                            >
+                                <svg v-if="!detectingLocation" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                    <line x1="12" y1="2" x2="12" y2="6"/>
+                                    <line x1="12" y1="18" x2="12" y2="22"/>
+                                    <line x1="2" y1="12" x2="6" y2="12"/>
+                                    <line x1="18" y1="12" x2="22" y2="12"/>
+                                </svg>
+                                <div v-else class="bk-spinner-small"></div>
+                                {{ detectingLocation ? 'Aniqlanmoqda...' : 'Joylashuvni aniqlash' }}
+                            </button>
+                            <button 
+                                class="bk-show-map"
+                                @click="showMap = true"
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                    <circle cx="12" cy="10" r="3"/>
+                                </svg>
+                                Xaritadan tanlash
+                            </button>
+                        </div>
+
                         <div class="bk-address-form">
                             <div class="bk-form-group">
                                 <input 
@@ -818,7 +1126,66 @@ const pressureLevels = [
                                     placeholder="Mo'ljal (ixtiyoriy)"
                                 />
                             </div>
+                            
+                            <!-- Save Address Button -->
+                            <button 
+                                type="button"
+                                class="bk-save-address-btn"
+                                :disabled="!manualAddress.address || savingAddress"
+                                @click="saveAddress"
+                            >
+                                <svg v-if="!savingAddress" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="20,6 9,17 4,12"/>
+                                </svg>
+                                <div v-else class="bk-spinner-small"></div>
+                                {{ savingAddress ? 'Saqlanmoqda...' : 'Manzilni saqlash' }}
+                            </button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Map Modal -->
+                <div v-if="showMap" class="bk-map-modal">
+                    <div class="bk-map-header">
+                        <button class="bk-map-close" @click="showMap = false">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                        <span class="bk-map-title">Xaritadan tanlang</span>
+                        <button class="bk-map-confirm" @click="confirmMapLocation" :disabled="!mapMarker">
+                            Tasdiqlash
+                        </button>
+                    </div>
+                    <div class="bk-map-container">
+                        <!-- Interactive Leaflet Map -->
+                        <div ref="mapContainerRef" class="bk-leaflet-map"></div>
+                        
+                        <!-- Detect Location Button -->
+                        <div class="bk-map-controls">
+                            <button class="bk-detect-btn" @click="detectLocation" :disabled="detectingLocation">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                    <line x1="12" y1="2" x2="12" y2="6"/>
+                                    <line x1="12" y1="18" x2="12" y2="22"/>
+                                    <line x1="2" y1="12" x2="6" y2="12"/>
+                                    <line x1="18" y1="12" x2="22" y2="12"/>
+                                </svg>
+                                {{ detectingLocation ? 'Aniqlanmoqda...' : 'Mening joylashuvim' }}
+                            </button>
+                        </div>
+                        
+                        <!-- Hint -->
+                        <p v-if="!mapMarker" class="bk-map-hint">Xaritaga bosib joylashuvni tanlang</p>
+                    </div>
+                    <div v-if="manualAddress.address" class="bk-map-address">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        {{ manualAddress.address }}
                     </div>
                 </div>
 
@@ -1245,24 +1612,40 @@ const pressureLevels = [
     color: var(--text-muted);
 }
 
-/* Master List */
+/* Master List - Horizontal Slider */
 .bk-master-list {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    flex-direction: row;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.bk-master-list::-webkit-scrollbar {
+    display: none;
 }
 
 .bk-master-card {
+    position: relative;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 12px;
+    gap: 8px;
+    padding: 14px 12px;
+    min-width: calc(50% - 6px);
+    max-width: calc(50% - 6px);
     background: rgba(255,255,255,0.4);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.6);
-    border-radius: 14px;
+    border: 2px solid rgba(255,255,255,0.6);
+    border-radius: 16px;
     cursor: pointer;
     transition: all 0.2s;
+    scroll-snap-align: start;
+    flex-shrink: 0;
 }
 
 .bk-master-card:hover {
@@ -1272,12 +1655,13 @@ const pressureLevels = [
 .bk-master-card.selected {
     background: rgba(200,169,81,0.15);
     border-color: var(--gold);
+    box-shadow: 0 4px 12px rgba(200,169,81,0.2);
 }
 
 .bk-master-photo {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
     overflow: hidden;
     background: var(--gold);
     display: flex;
@@ -1285,6 +1669,7 @@ const pressureLevels = [
     justify-content: center;
     color: white;
     font-weight: 600;
+    font-size: 18px;
 }
 
 .bk-master-photo img {
@@ -1294,32 +1679,46 @@ const pressureLevels = [
 }
 
 .bk-master-info {
-    flex: 1;
+    text-align: center;
+    width: 100%;
 }
 
 .bk-master-name {
     display: block;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--navy);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .bk-master-rating {
     display: flex;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
+    gap: 2px;
     margin-top: 4px;
 }
 
+.bk-master-rating svg {
+    width: 10px;
+    height: 10px;
+}
+
 .bk-master-rating span {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     color: var(--text-muted);
+    margin-left: 2px;
 }
 
 .bk-master-check {
-    width: 28px;
-    height: 28px;
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1455,6 +1854,17 @@ const pressureLevels = [
     opacity: 0.4;
     cursor: not-allowed;
     text-decoration: line-through;
+}
+
+.bk-slot-btn.in-cart {
+    background: rgba(200, 169, 81, 0.15);
+    border-color: var(--gold);
+    opacity: 0.6;
+}
+
+.slot-cart-icon {
+    font-size: 10px;
+    margin-left: 4px;
 }
 
 /* Confirm Card */
@@ -1794,6 +2204,207 @@ const pressureLevels = [
     font-size: 13px;
     color: var(--navy);
     cursor: pointer;
+}
+
+/* Location Buttons */
+.bk-location-btns {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.bk-detect-location,
+.bk-show-map {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    border: 2px dashed rgba(200,169,81,0.4);
+    border-radius: 12px;
+    background: rgba(200,169,81,0.05);
+    color: var(--gold);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.bk-detect-location:hover,
+.bk-show-map:hover {
+    background: rgba(200,169,81,0.1);
+    border-color: var(--gold);
+}
+
+.bk-detect-location:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.bk-spinner-small {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(200,169,81,0.3);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* Map Modal */
+.bk-map-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.bk-map-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--cream);
+    border-bottom: 1px solid rgba(200,169,81,0.2);
+}
+
+.bk-map-close {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: rgba(0,0,0,0.05);
+    border-radius: 50%;
+    color: var(--navy);
+    cursor: pointer;
+}
+
+.bk-map-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--navy);
+}
+
+.bk-map-confirm {
+    padding: 8px 16px;
+    background: var(--gold);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.bk-map-confirm:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.bk-map-container {
+    flex: 1;
+    position: relative;
+    background: #f0f0f0;
+    min-height: 300px;
+}
+
+.bk-leaflet-map {
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+}
+
+.bk-map-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+.bk-map-hint {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 8px 16px;
+    background: rgba(0,0,0,0.7);
+    border-radius: 20px;
+    color: white;
+    font-size: 12px;
+    text-align: center;
+    z-index: 1000;
+    white-space: nowrap;
+}
+
+.bk-detect-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: white;
+    border: none;
+    border-radius: 24px;
+    color: var(--navy);
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    cursor: pointer;
+}
+
+.bk-detect-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.bk-detect-btn svg {
+    color: var(--gold);
+}
+
+.bk-map-address {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    background: var(--cream);
+    border-top: 1px solid rgba(200,169,81,0.2);
+    font-size: 14px;
+    color: var(--navy);
+}
+
+/* Save Address Button */
+.bk-save-address-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px;
+    margin-top: 8px;
+    background: var(--gold);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.bk-save-address-btn:hover {
+    background: #b89841;
+}
+
+.bk-save-address-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .bk-address-form {
