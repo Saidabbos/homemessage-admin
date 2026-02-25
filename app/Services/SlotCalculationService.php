@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Master;
 use App\Models\Order;
 use App\Models\ServiceType;
+use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -38,7 +39,7 @@ class SlotCalculationService
      * 
      * @param Master|null $master Konkret master (null = barcha masterlar)
      * @param Carbon $date Sana
-     * @param array $serviceParams ['duration' => 60, 'people_count' => 1, 'massage_type' => 'relax', 'pressure_level' => 'medium']
+     * @param array $serviceParams ['duration' => 60, 'people_count' => 1, 'massage_type' => 'relax', 'pressure_level' => 'medium', 'user_gender' => 'male']
      * @return array
      */
     public function getAvailableSlots(?Master $master, Carbon $date, array $serviceParams): array
@@ -47,14 +48,51 @@ class SlotCalculationService
         $peopleCount = $serviceParams['people_count'] ?? 1;
         $massageType = $serviceParams['massage_type'] ?? null;
         $pressureLevel = $serviceParams['pressure_level'] ?? 'any';
+        $userGender = $serviceParams['user_gender'] ?? null;
         
         // Agar konkret master tanlangan
         if ($master) {
-            return $this->getSlotsForMaster($master, $date, $duration, $peopleCount);
+            $slots = $this->getSlotsForMaster($master, $date, $duration, $peopleCount);
+        } else {
+            // "Hammasi" rejimi - barcha masterlardan slotlarni yig'amiz
+            $slots = $this->getSlotsForAllMasters($date, $duration, $peopleCount, $massageType, $pressureLevel);
         }
         
-        // "Hammasi" rejimi - barcha masterlardan slotlarni yig'amiz
-        return $this->getSlotsForAllMasters($date, $duration, $peopleCount, $massageType, $pressureLevel);
+        // Apply gender-based time restrictions
+        return $this->applyGenderTimeRestriction($slots, $userGender);
+    }
+    
+    /**
+     * Jins bo'yicha vaqt cheklovini qo'llash
+     */
+    protected function applyGenderTimeRestriction(array $slots, ?string $userGender): array
+    {
+        // Check if feature is enabled
+        if (!Setting::get('gender_time_restriction_enabled', false)) {
+            return $slots;
+        }
+        
+        // If no gender provided, return all slots
+        if (!$userGender) {
+            return $slots;
+        }
+        
+        // Get cutoff hour based on gender
+        $cutoffHour = $userGender === 'male' 
+            ? Setting::get('male_booking_cutoff_hour', 22)
+            : Setting::get('female_booking_cutoff_hour', 23);
+        
+        // Filter slots
+        return array_map(function ($slot) use ($cutoffHour) {
+            $slotHour = (int) explode(':', $slot['start'])[0];
+            
+            if ($slotHour >= $cutoffHour) {
+                $slot['disabled'] = true;
+                $slot['reason'] = 'gender_time_restriction';
+            }
+            
+            return $slot;
+        }, $slots);
     }
 
     /**

@@ -237,6 +237,50 @@
     border-color: #C8A951;
 }
 
+/* Gender Selection */
+.gender-selection {
+    display: flex;
+    gap: 12px;
+}
+
+.gender-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 12px;
+    background: rgba(245, 242, 237, 0.8);
+    border: 2px solid rgba(200, 169, 81, 0.2);
+    border-radius: 16px;
+    color: #1B2B5A;
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.gender-btn svg {
+    color: #C8A951;
+}
+
+.gender-btn:hover:not(:disabled) {
+    border-color: #C8A951;
+    background: rgba(200, 169, 81, 0.1);
+}
+
+.gender-btn.selected {
+    background: rgba(200, 169, 81, 0.15);
+    border-color: #C8A951;
+    box-shadow: 0 4px 12px rgba(200, 169, 81, 0.2);
+}
+
+.gender-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 /* Submit Button */
 .otp-submit-btn {
     display: flex;

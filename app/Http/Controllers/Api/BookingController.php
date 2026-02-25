@@ -10,6 +10,7 @@ use App\Services\SlotCalculationService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BookingController extends Controller
 {
@@ -143,12 +144,16 @@ class BookingController extends Controller
 
         $date = Carbon::parse($request->date);
         $master = $request->master_id ? Master::find($request->master_id) : null;
+        
+        // Get user gender for time restrictions
+        $userGender = Auth::user()?->gender;
 
         $serviceParams = [
             'duration' => (int) $request->duration,
             'people_count' => (int) $request->input('people_count', 1),
             'massage_type' => $request->massage_type,
             'pressure_level' => $request->input('pressure_level', 'any'),
+            'user_gender' => $userGender,
         ];
 
         $slots = $this->slotService->getAvailableSlots($master, $date, $serviceParams);

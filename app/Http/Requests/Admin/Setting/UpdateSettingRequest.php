@@ -27,6 +27,11 @@ class UpdateSettingRequest extends FormRequest
             'max_booking_days' => 'nullable|integer|min:1|max:90',
             'cancellation_hours' => 'nullable|integer|min:0|max:48',
             'auto_confirm_booking' => 'nullable|boolean',
+            
+            // Gender-based booking restrictions
+            'gender_time_restriction_enabled' => 'nullable',
+            'male_booking_cutoff_hour' => 'nullable|integer|min:0|max:23',
+            'female_booking_cutoff_hour' => 'nullable|integer|min:0|max:23',
 
             // Social
             'telegram_link' => 'nullable|url|max:255',

@@ -60,13 +60,14 @@ class HomeController extends Controller
         $user = Auth::user();
         $services = $this->serviceTypeRepository->getActiveWithDurations();
 
-        // Check if user needs to enter name (from flash or detect)
+        // Check if user needs to enter name/gender (from flash or detect)
         $needsName = session('needs_name', false);
         if (!$needsName) {
-            // Auto-detect: name is empty, equals phone, or starts with +998
+            // Auto-detect: name is empty, equals phone, starts with +998, or no gender
             $needsName = empty($user->name) 
                 || $user->name === $user->phone 
-                || str_starts_with($user->name, '+998');
+                || str_starts_with($user->name, '+998')
+                || empty($user->gender);
         }
 
         return Inertia::render('MiniApp/Home', [
@@ -492,14 +493,19 @@ class HomeController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255|min:2',
+            'gender' => 'required|in:male,female',
         ]);
 
         $user = Auth::user();
-        $user->update(['name' => $request->input('name')]);
+        $user->update([
+            'name' => $request->input('name'),
+            'gender' => $request->input('gender'),
+        ]);
 
-        Log::info('MiniApp: Name saved', [
+        Log::info('MiniApp: Name and gender saved', [
             'user_id' => $user->id,
             'name' => $request->input('name'),
+            'gender' => $request->input('gender'),
         ]);
 
         return response()->json(['success' => true]);

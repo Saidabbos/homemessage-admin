@@ -8,6 +8,7 @@ use App\Services\SlotCalculationService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MasterController extends Controller
 {
@@ -86,13 +87,19 @@ class MasterController extends Controller
         $date = Carbon::parse($validated['date']);
         $duration = (int) $validated['duration'];
         $peopleCount = (int) ($validated['people_count'] ?? 1);
+        
+        // Get user gender for time restrictions
+        $userGender = Auth::user()?->gender;
 
-        // Get slots from SlotCalculationService
-        $slots = $this->slotService->getSlotsForMaster(
+        // Get slots from SlotCalculationService with gender restriction
+        $slots = $this->slotService->getAvailableSlots(
             $master,
             $date,
-            $duration,
-            $peopleCount
+            [
+                'duration' => $duration,
+                'people_count' => $peopleCount,
+                'user_gender' => $userGender,
+            ]
         );
 
         return response()->json([
