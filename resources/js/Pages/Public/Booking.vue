@@ -50,7 +50,7 @@ const booking = ref({
     master_id: null,
     date: null,
     slot: null,
-    pressure_level: 'medium',
+    pressure_level: null,
     notes: '',
 });
 
@@ -60,11 +60,9 @@ const toggleService = (serviceId) => {
     if (selectedService.value?.service_id === serviceId) {
         selectedService.value = null;
     } else {
-        const service = props.services?.find(s => s.id === serviceId);
-        const defaultDuration = service?.durations?.find(d => d.is_default) || service?.durations?.[0];
         selectedService.value = {
             service_id: serviceId,
-            duration_id: defaultDuration?.id || null,
+            duration_id: null,
         };
     }
 };
@@ -275,7 +273,9 @@ const slotDisplay = computed(() => {
 // ==================== Navigation ====================
 
 const canProceedStep1 = computed(() => {
-    return selectedService.value?.service_id && selectedService.value?.duration_id;
+    return selectedService.value?.service_id && 
+           selectedService.value?.duration_id && 
+           booking.value.pressure_level;
 });
 
 const canProceedStep2 = computed(() =>
@@ -346,7 +346,7 @@ const resetWizard = () => {
         master_id: null,
         date: null,
         slot: null,
-        pressure_level: 'medium',
+        pressure_level: null,
         notes: '',
     };
     step.value = 1;
