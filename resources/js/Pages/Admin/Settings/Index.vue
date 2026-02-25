@@ -32,6 +32,9 @@ const props = defineProps<{
       max_booking_days?: number;
       cancellation_hours?: number;
       auto_confirm_booking?: boolean;
+      gender_time_restriction_enabled?: boolean;
+      male_booking_cutoff_hour?: number;
+      female_booking_cutoff_hour?: number;
     };
     social?: {
       telegram_link?: string;
@@ -68,6 +71,9 @@ const form = useForm({
   max_booking_days: props.settings?.booking?.max_booking_days || 30,
   cancellation_hours: props.settings?.booking?.cancellation_hours || 1,
   auto_confirm_booking: props.settings?.booking?.auto_confirm_booking || false,
+  gender_time_restriction_enabled: props.settings?.booking?.gender_time_restriction_enabled || false,
+  male_booking_cutoff_hour: props.settings?.booking?.male_booking_cutoff_hour || 22,
+  female_booking_cutoff_hour: props.settings?.booking?.female_booking_cutoff_hour || 23,
   telegram_link: props.settings?.social?.telegram_link || '',
   instagram_link: props.settings?.social?.instagram_link || '',
   facebook_link: props.settings?.social?.facebook_link || '',
@@ -106,6 +112,7 @@ const handleImageChange = (e: Event) => {
 const submit = () => {
   form.put(route('admin.settings.update'), {
     forceFormData: true,
+    preserveScroll: true,
   });
 };
 </script>
@@ -204,6 +211,61 @@ const submit = () => {
                   <Switch v-model:checked="form.auto_confirm_booking" />
                 </div>
               </div>
+              
+              <!-- Gender-based Time Restrictions -->
+              <Card class="mt-6">
+                <CardHeader>
+                  <CardTitle class="text-base">Jins bo'yicha vaqt cheklovi</CardTitle>
+                  <CardDescription>Erkak va ayollar uchun alohida booking vaqti</CardDescription>
+                </CardHeader>
+                <CardContent class="space-y-4">
+                  <div class="flex items-center justify-between rounded-lg border p-4">
+                    <div class="space-y-0.5">
+                      <Label>Jins bo'yicha cheklov faol</Label>
+                      <p class="text-xs text-muted-foreground">Bu funksiya yoqilganda, belgilangan soatdan keyin slotlar jinsga qarab bloklanadi</p>
+                    </div>
+                    <Switch v-model:checked="form.gender_time_restriction_enabled" />
+                  </div>
+                  
+                  <div v-if="form.gender_time_restriction_enabled" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                      <Label for="male_booking_cutoff_hour" class="flex items-center gap-2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-blue-500">
+                          <circle cx="10" cy="14" r="5"/>
+                          <path d="M19 5l-5.4 5.4M19 5h-5M19 5v5"/>
+                        </svg>
+                        Erkaklar uchun (soatgacha)
+                      </Label>
+                      <Input 
+                        id="male_booking_cutoff_hour" 
+                        type="number" 
+                        v-model="form.male_booking_cutoff_hour" 
+                        min="0" 
+                        max="23" 
+                      />
+                      <p class="text-xs text-muted-foreground">Masalan: 22 = soat 22:00 gacha</p>
+                    </div>
+                    
+                    <div class="space-y-2">
+                      <Label for="female_booking_cutoff_hour" class="flex items-center gap-2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-pink-500">
+                          <circle cx="12" cy="8" r="5"/>
+                          <path d="M12 13v8M9 18h6"/>
+                        </svg>
+                        Ayollar uchun (soatgacha)
+                      </Label>
+                      <Input 
+                        id="female_booking_cutoff_hour" 
+                        type="number" 
+                        v-model="form.female_booking_cutoff_hour" 
+                        min="0" 
+                        max="23" 
+                      />
+                      <p class="text-xs text-muted-foreground">Masalan: 23 = soat 23:00 gacha</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <!-- Social Settings -->

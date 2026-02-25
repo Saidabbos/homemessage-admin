@@ -25,6 +25,7 @@ const telegramUser = ref(null);
 // Name modal state
 const showNameModal = ref(false);
 const nameInput = ref('');
+const genderInput = ref(null); // 'male' or 'female'
 const nameSaving = ref(false);
 const nameError = ref('');
 
@@ -76,9 +77,15 @@ const goToCart = () => {
 
 const saveName = async () => {
     const name = nameInput.value.trim();
+    const gender = genderInput.value;
     
     if (name.length < 2) {
         nameError.value = "Ism kamida 2 ta harfdan iborat bo'lishi kerak";
+        return;
+    }
+    
+    if (!gender) {
+        nameError.value = "Jinsingizni tanlang";
         return;
     }
     
@@ -94,7 +101,7 @@ const saveName = async () => {
                 'X-CSRF-TOKEN': csrfToken,
                 'Accept': 'application/json',
             },
-            body: JSON.stringify({ name }),
+            body: JSON.stringify({ name, gender }),
         });
         
         const result = await response.json();
@@ -141,14 +148,45 @@ const saveName = async () => {
                             :class="{ error: nameError }"
                             placeholder="Ismingiz"
                             maxlength="50"
-                            @keyup.enter="saveName"
                         />
                     </div>
+                    
+                    <!-- Gender Selection -->
+                    <div class="gender-selection">
+                        <p class="gender-label">Jinsingiz</p>
+                        <div class="gender-buttons">
+                            <button 
+                                type="button"
+                                class="gender-btn"
+                                :class="{ selected: genderInput === 'male' }"
+                                @click="genderInput = 'male'"
+                            >
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="10" cy="14" r="5"/>
+                                    <path d="M19 5l-5.4 5.4M19 5h-5M19 5v5"/>
+                                </svg>
+                                Erkak
+                            </button>
+                            <button 
+                                type="button"
+                                class="gender-btn"
+                                :class="{ selected: genderInput === 'female' }"
+                                @click="genderInput = 'female'"
+                            >
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="8" r="5"/>
+                                    <path d="M12 13v8M9 18h6"/>
+                                </svg>
+                                Ayol
+                            </button>
+                        </div>
+                    </div>
+                    
                     <p v-if="nameError" class="name-error">{{ nameError }}</p>
                 </div>
                 <button 
                     class="name-submit-btn" 
-                    :disabled="nameSaving || nameInput.trim().length < 2"
+                    :disabled="nameSaving || nameInput.trim().length < 2 || !genderInput"
                     @click="saveName"
                 >
                     {{ nameSaving ? 'Saqlanmoqda...' : 'Davom etish' }}
@@ -840,10 +878,60 @@ const saveName = async () => {
     color: var(--text-muted);
 }
 
+.gender-selection {
+    margin-top: 20px;
+}
+
+.gender-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--navy);
+    margin: 0 0 12px;
+    text-align: center;
+}
+
+.gender-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.gender-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 12px;
+    background: rgba(255,255,255,0.5);
+    border: 2px solid rgba(200,169,81,0.2);
+    border-radius: 16px;
+    color: var(--navy);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.gender-btn svg {
+    color: var(--gold);
+}
+
+.gender-btn:hover {
+    border-color: var(--gold);
+    background: rgba(200,169,81,0.1);
+}
+
+.gender-btn.selected {
+    background: rgba(200,169,81,0.2);
+    border-color: var(--gold);
+    box-shadow: 0 4px 12px rgba(200,169,81,0.2);
+}
+
 .name-error {
     font-size: 13px;
     color: #EF4444;
     margin: 8px 0 0;
+    text-align: center;
 }
 
 .name-submit-btn {

@@ -22,6 +22,7 @@ const hasPin = ref(false)
 
 // Name input state (for new users)
 const nameInput = ref('')
+const genderInput = ref(null) // 'male' or 'female'
 const nameError = ref('')
 const redirectUrl = ref('/customer/dashboard')
 
@@ -208,8 +209,15 @@ async function handleVerifyOtp() {
 // Handle Save Name
 async function handleSaveName() {
     const name = nameInput.value.trim()
+    const gender = genderInput.value
+    
     if (name.length < 2) {
         nameError.value = "Ism kamida 2 ta harfdan iborat bo'lishi kerak"
+        return
+    }
+    
+    if (!gender) {
+        nameError.value = "Jinsingizni tanlang"
         return
     }
 
@@ -217,7 +225,7 @@ async function handleSaveName() {
     loading.value = true
 
     try {
-        await axios.post('/app/save-name', { name })
+        await axios.post('/app/save-name', { name, gender })
         window.location.href = redirectUrl.value
     } catch (err) {
         nameError.value = err.response?.data?.message || 'Xatolik yuz berdi'
@@ -524,16 +532,48 @@ onBeforeUnmount(() => {
                         class="otp-name-input"
                         :placeholder="t('auth.namePlaceholder') || 'Ismingizni kiriting'"
                         maxlength="50"
-                        @keyup.enter="handleSaveName"
                         :disabled="loading"
                     />
+                </div>
+                
+                <!-- Gender Selection -->
+                <div class="otp-input-block">
+                    <label class="otp-input-label">Jinsingiz</label>
+                    <div class="gender-selection">
+                        <button 
+                            type="button"
+                            class="gender-btn"
+                            :class="{ selected: genderInput === 'male' }"
+                            @click="genderInput = 'male'"
+                            :disabled="loading"
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="10" cy="14" r="5"/>
+                                <path d="M19 5l-5.4 5.4M19 5h-5M19 5v5"/>
+                            </svg>
+                            Erkak
+                        </button>
+                        <button 
+                            type="button"
+                            class="gender-btn"
+                            :class="{ selected: genderInput === 'female' }"
+                            @click="genderInput = 'female'"
+                            :disabled="loading"
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="8" r="5"/>
+                                <path d="M12 13v8M9 18h6"/>
+                            </svg>
+                            Ayol
+                        </button>
+                    </div>
                     <p v-if="nameError" class="otp-error">{{ nameError }}</p>
                 </div>
 
                 <button
                     class="otp-submit-btn"
-                    :class="{ disabled: loading || nameInput.trim().length < 2 }"
-                    :disabled="loading || nameInput.trim().length < 2"
+                    :class="{ disabled: loading || nameInput.trim().length < 2 || !genderInput }"
+                    :disabled="loading || nameInput.trim().length < 2 || !genderInput"
                     @click="handleSaveName"
                 >
                     <span v-if="!loading">{{ t('common.continue') || 'Davom etish' }}</span>
