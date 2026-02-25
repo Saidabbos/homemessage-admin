@@ -17,6 +17,13 @@ class User extends Authenticatable
     use HasFactory, Notifiable, HasRoles;
 
     /**
+     * Default guard for Spatie roles/permissions.
+     * This ensures roles are always assigned with 'web' guard,
+     * even when admin (using 'admin' guard) assigns roles.
+     */
+    protected string $guard_name = 'web';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
