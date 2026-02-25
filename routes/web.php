@@ -254,7 +254,7 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin'])->group(function () {
 
     // Settings
     Route::get('settings', [SettingController::class, 'index'])->name('admin.settings.index');
-    Route::put('settings', [SettingController::class, 'update'])->name('admin.settings.update');
+    Route::post('settings', [SettingController::class, 'update'])->name('admin.settings.update');
 
     // Profile
     Route::get('profile', [ProfileController::class, 'index'])->name('admin.profile.index');

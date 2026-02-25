@@ -198,10 +198,10 @@ class SlotCalculationService
         $arrivalLatest = $windowEnd->copy();
         $visitCore = $this->calculateVisitCore($duration, $peopleCount);
         
-        // 6 soatlik qoida - minimal oldindan buyurtma
-        // Kelish vaqtigacha kamida 6 soat qolishi kerak
+        // Minimal oldindan buyurtma (Settings dan yoki fallback)
+        $minLeadHours = (int) Setting::get('min_booking_hours', self::MIN_LEAD_TIME_HOURS);
         $hoursUntilArrival = now()->diffInHours($arrivalLatest, false);
-        if ($hoursUntilArrival < self::MIN_LEAD_TIME_HOURS) {
+        if ($hoursUntilArrival < $minLeadHours) {
             return ['available' => false, 'reason' => 'too_soon'];
         }
         
@@ -461,13 +461,14 @@ class SlotCalculationService
     }
 
     /**
-     * Sanalar uchun slot mavjudligini tekshirish (14 kun)
+     * Sanalar uchun slot mavjudligini tekshirish
      */
     public function getDateAvailability(
-        ?Master $master, 
-        array $serviceParams, 
-        int $daysAhead = 14
+        ?Master $master,
+        array $serviceParams,
+        ?int $daysAhead = null
     ): array {
+        $daysAhead = $daysAhead ?? (int) Setting::get('max_booking_days', 14);
         $dates = [];
         $today = Carbon::today();
         

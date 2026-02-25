@@ -110,8 +110,7 @@ const handleImageChange = (e: Event) => {
 };
 
 const submit = () => {
-  form.put(route('admin.settings.update'), {
-    forceFormData: true,
+  form.post(route('admin.settings.update'), {
     preserveScroll: true,
   });
 };
@@ -208,7 +207,7 @@ const submit = () => {
                     <Label>{{ t('settings.autoConfirmBooking', 'Avtomatik tasdiqlash') }}</Label>
                     <p class="text-xs text-muted-foreground">{{ t('settings.autoConfirmHint', 'Bronlarni avtomatik tasdiqlash') }}</p>
                   </div>
-                  <Switch v-model:checked="form.auto_confirm_booking" />
+                  <Switch v-model="form.auto_confirm_booking" />
                 </div>
               </div>
               
@@ -224,7 +223,7 @@ const submit = () => {
                       <Label>Jins bo'yicha cheklov faol</Label>
                       <p class="text-xs text-muted-foreground">Bu funksiya yoqilganda, belgilangan soatdan keyin slotlar jinsga qarab bloklanadi</p>
                     </div>
-                    <Switch v-model:checked="form.gender_time_restriction_enabled" />
+                    <Switch v-model="form.gender_time_restriction_enabled" />
                   </div>
                   
                   <div v-if="form.gender_time_restriction_enabled" class="grid grid-cols-1 md:grid-cols-2 gap-4">

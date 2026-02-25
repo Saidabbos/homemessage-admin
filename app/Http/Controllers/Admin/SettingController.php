@@ -40,11 +40,9 @@ class SettingController extends Controller
         Setting::set('auto_confirm_booking', $validated['auto_confirm_booking'] ?? false, 'booking', 'boolean');
         
         // Gender-based booking time restrictions
+        Setting::set('gender_time_restriction_enabled', $validated['gender_time_restriction_enabled'] ?? false, 'booking', 'boolean');
         Setting::set('male_booking_cutoff_hour', $validated['male_booking_cutoff_hour'] ?? 22, 'booking', 'number');
         Setting::set('female_booking_cutoff_hour', $validated['female_booking_cutoff_hour'] ?? 23, 'booking', 'number');
-        // Handle boolean from form (can be string "true"/"false", "1"/"0", or actual boolean)
-        $genderRestrictionEnabled = filter_var($validated['gender_time_restriction_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
-        Setting::set('gender_time_restriction_enabled', $genderRestrictionEnabled, 'booking', 'boolean');
 
         // Social settings
         Setting::set('telegram_link', $validated['telegram_link'] ?? '', 'social', 'text');

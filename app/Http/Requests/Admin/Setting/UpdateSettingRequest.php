@@ -29,7 +29,7 @@ class UpdateSettingRequest extends FormRequest
             'auto_confirm_booking' => 'nullable|boolean',
             
             // Gender-based booking restrictions
-            'gender_time_restriction_enabled' => 'nullable',
+            'gender_time_restriction_enabled' => 'nullable|boolean',
             'male_booking_cutoff_hour' => 'nullable|integer|min:0|max:23',
             'female_booking_cutoff_hour' => 'nullable|integer|min:0|max:23',
 
