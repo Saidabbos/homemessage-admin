@@ -15,10 +15,10 @@
 
 | Sprint | Focus | Status |
 |--------|-------|--------|
-| Sprint 1 | Foundation + Admin CRUD | ✅ In Progress |
-| Sprint 2 | Public Booking + Telegram | ⏳ Pending |
-| Sprint 3 | Admin Orders + Payments | ⏳ Pending |
-| Sprint 4 | Customer Portal + QA | ⏳ Pending |
+| Sprint 1 | Foundation + Admin CRUD | ✅ Done |
+| Sprint 2 | Public Booking + Telegram | ✅ Done |
+| Sprint 3 | Admin Orders + Payments | ✅ Done |
+| Sprint 4 | Customer Portal + QA | ✅ Done |
 
 **Completed (Sprint 1):**
 - ✅ ServiceTypes, Oils, StandardItems CRUD

@@ -1,0 +1,217 @@
+<script setup>
+import { ref, computed } from 'vue'
+import { Head, Link, router } from '@inertiajs/vue3'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
+const props = defineProps({
+    masters: { type: Array, default: () => [] },
+    serviceTypes: { type: Array, default: () => [] },
+    filters: { type: Object, default: () => ({}) },
+    customer: { type: Object, required: true },
+})
+
+const searchQuery = ref(props.filters.search || '')
+const activeFilter = ref(props.filters.service_type ? Number(props.filters.service_type) : null)
+
+const filteredMasters = computed(() => {
+    let result = props.masters
+    if (activeFilter.value) {
+        result = result.filter(master =>
+            master.service_type_ids && master.service_type_ids.includes(activeFilter.value)
+        )
+    }
+    if (searchQuery.value.trim()) {
+        const q = searchQuery.value.trim().toLowerCase()
+        result = result.filter(master =>
+            master.full_name.toLowerCase().includes(q)
+        )
+    }
+    return result
+})
+
+const selectFilter = (id) => {
+    activeFilter.value = id
+}
+
+const toggleFavorite = (masterId, event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    router.post(`/customer/favorites/${masterId}/toggle`, {}, {
+        preserveScroll: true,
+    })
+}
+
+const logout = () => {
+    router.post('/customer/logout')
+}
+</script>
+
+<template>
+    <Head :title="t('customer.navMasters')" />
+
+    <div class="cm-page">
+        <!-- Sidebar -->
+        <aside class="cm-sidebar">
+            <div class="cm-sidebar-top">
+                <Link href="/" class="cm-sidebar-logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V9m-4.5 3a4.5 4.5 0 1 0 4.5 4.5M7.5 12H9m3 4.5a4.5 4.5 0 1 1-4.5-4.5M12 16.5V15m4.5-3a4.5 4.5 0 1 0-4.5-4.5M16.5 12H15"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <span>HOMEMASSAGE</span>
+                </Link>
+
+                <nav class="cm-nav">
+                    <Link href="/customer/dashboard" class="cm-nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                        <span>{{ t('customer.navDashboard') }}</span>
+                    </Link>
+                    <Link href="/customer/orders" class="cm-nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <span>{{ t('customer.navBookings') }}</span>
+                    </Link>
+                    <Link href="/customer/masters" class="cm-nav-item active">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <span>{{ t('customer.navMasters') }}</span>
+                    </Link>
+                    <Link href="/customer/ratings" class="cm-nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <span>{{ t('customer.navRatings') }}</span>
+                    </Link>
+                    <Link href="/customer/favorites" class="cm-nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                        <span>{{ t('customer.navFavorites') }}</span>
+                    </Link>
+                    <Link href="/customer/addresses" class="cm-nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span>{{ t('customer.navAddresses') }}</span>
+                    </Link>
+                    <Link href="/customer/profile" class="cm-nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <span>{{ t('customer.navProfile') }}</span>
+                    </Link>
+                </nav>
+            </div>
+
+            <div class="cm-sidebar-bottom">
+                <div class="cm-sidebar-divider"></div>
+                <div class="cm-user-profile">
+                    <Link href="/customer/profile" class="cm-user-link">
+                        <div class="cm-user-avatar">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </div>
+                        <div class="cm-user-info">
+                            <span class="cm-user-name">{{ customer.name }}</span>
+                            <span class="cm-user-phone">{{ customer.phone }}</span>
+                        </div>
+                    </Link>
+                    <button class="cm-logout-btn" @click="logout" :title="t('customer.logout')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Area -->
+        <main class="cm-main">
+            <!-- Top Bar -->
+            <div class="cm-topbar">
+                <div class="cm-topbar-left">
+                    <h1 class="cm-page-title">{{ t('customer.navMasters') }}</h1>
+                    <p class="cm-page-subtitle">{{ t('customer.masters.subtitle') }}</p>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="cm-content">
+                <!-- Search & Filter -->
+                <div class="cm-top-section">
+                    <div class="cm-search-wrap">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.3-4.3"/>
+                        </svg>
+                        <input
+                            v-model="searchQuery"
+                            type="text"
+                            class="cm-search-input"
+                            :placeholder="t('customer.masters.searchPlaceholder')"
+                        />
+                    </div>
+                    <div class="cm-filters">
+                        <button
+                            class="cm-filter-btn"
+                            :class="{ active: !activeFilter }"
+                            @click="selectFilter(null)"
+                        >
+                            {{ t('customer.orders.tabAll') }}
+                        </button>
+                        <button
+                            v-for="st in serviceTypes"
+                            :key="st.id"
+                            class="cm-filter-btn"
+                            :class="{ active: activeFilter === st.id }"
+                            @click="selectFilter(st.id)"
+                        >
+                            {{ st.name }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Masters count -->
+                <div class="cm-count">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span>{{ filteredMasters.length }} {{ t('customer.masters.count') }}</span>
+                </div>
+
+                <!-- Masters Grid -->
+                <div v-if="filteredMasters.length" class="cm-grid">
+                    <Link
+                        v-for="master in filteredMasters"
+                        :key="master.id"
+                        :href="`/customer/masters/${master.id}`"
+                        class="cm-card"
+                    >
+                        <div class="cm-card-img">
+                            <img
+                                :src="master.photo_url || '/images/master-placeholder.svg'"
+                                :alt="master.full_name"
+                            />
+                            <button class="cm-fav-btn" :class="{ active: master.is_favorite }" @click="toggleFavorite(master.id, $event)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" :fill="master.is_favorite ? '#C8A951' : 'none'" :stroke="master.is_favorite ? '#C8A951' : 'currentColor'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                            </button>
+                        </div>
+                        <div class="cm-card-body">
+                            <h3 class="cm-card-name">{{ master.full_name }}</h3>
+                            <p class="cm-card-spec">
+                                {{ master.service_types.map(st => st.name).join(', ') }}
+                            </p>
+                            <div class="cm-card-stats">
+                                <span v-if="master.experience_years" class="cm-stat">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                                    {{ master.experience_years }} {{ t('public.masters.years') }}
+                                </span>
+                                <span class="cm-stat">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#C8A951" stroke="#C8A951" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    5.0 ({{ master.completed_orders || 0 }})
+                                </span>
+                            </div>
+                            <div class="cm-card-arrow">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                            </div>
+                        </div>
+                    </Link>
+                </div>
+
+                <!-- Empty State -->
+                <div v-else class="cm-empty">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <p>{{ t('customer.masters.empty') }}</p>
+                </div>
+            </div>
+        </main>
+    </div>
+</template>
+

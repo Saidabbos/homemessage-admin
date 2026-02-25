@@ -6,234 +6,194 @@
 - **Dates:** 24 Fevral - 2 Mart 2025
 - **Delivery:** 2-Mart (Yakshanba)
 - **Hours:** ~22h work + ~3h buffer
+- **Status:** ✅ BAJARILGAN
 
 ---
 
-## GT-043: Eskiz OTP Service
-
-**📝 Description:**
-Eskiz SMS orqali OTP yuborish.
+## GT-043: Eskiz OTP Service ✅
 
 **✅ Acceptance Criteria:**
-- [ ] EskizService class
-- [ ] Auth token olish va cache qilish
-- [ ] Send SMS method
-- [ ] OTP generate (6 digit)
-- [ ] OTP store with expiry (2 min)
-- [ ] Rate limiting (5 attempts per 15 min)
+- [x] SmsService class (EskizService)
+- [x] Auth token olish va cache qilish
+- [x] Send SMS method
+- [x] OTP generate (6 digit)
+- [x] OTP store with expiry (2 min)
+- [x] Rate limiting (5 attempts per 15 min)
 
 **⏱ Estimate:** 3h | **🏷 Labels:** `backend`, `sms`, `P0`
 
 ---
 
-## GT-044: Customer OTP Login - Backend
-
-**📝 Description:**
-Mijoz OTP login API endpoints.
+## GT-044: Customer OTP Login - Backend ✅
 
 **✅ Acceptance Criteria:**
-- [ ] POST /api/v1/auth/otp/send - send OTP
-- [ ] POST /api/v1/auth/otp/verify - verify & login
-- [ ] Create customer if not exists
-- [ ] Return Sanctum token
-- [ ] Rate limiting response
+- [x] POST /api/v1/auth/otp/send - send OTP
+- [x] POST /api/v1/auth/otp/verify - verify & login
+- [x] Create customer if not exists
+- [x] Return session/token
+- [x] Rate limiting response
 
 **⏱ Estimate:** 2h | **🏷 Labels:** `backend`, `auth`, `P0`
 
 ---
 
-## GT-045: Customer OTP Login - Frontend
-
-**📝 Description:**
-Mijoz login UI.
+## GT-045: Customer OTP Login - Frontend ✅
 
 **✅ Acceptance Criteria:**
-- [ ] Phone input page
-- [ ] OTP input page (6 digits)
-- [ ] Countdown timer (resend after 60s)
-- [ ] Resend button
-- [ ] Error handling
-- [ ] Store token, redirect
+- [x] Phone input page
+- [x] OTP input page (6 digits)
+- [x] Countdown timer (resend after 60s)
+- [x] Resend button
+- [x] Error handling
+- [x] Store token, redirect
 
 **⏱ Estimate:** 3h | **🏷 Labels:** `frontend`, `auth`, `P0`
 
 ---
 
-## GT-046: Customer Orders List
-
-**📝 Description:**
-Mijoz buyurtmalari ro'yxati.
+## GT-046: Customer Orders List ✅
 
 **✅ Acceptance Criteria:**
-- [ ] GET /api/v1/customer/orders
-- [ ] List view (order cards)
-- [ ] Status badge
-- [ ] Empty state
+- [x] GET /customer/orders
+- [x] List view (order cards)
+- [x] Status badge
+- [x] Empty state
+- [x] Filter by status, search
 
 **⏱ Estimate:** 3h | **🏷 Labels:** `frontend`, `customer`, `P0`
 
 ---
 
-## GT-047: Customer Order Detail
-
-**📝 Description:**
-Mijoz buyurtma tafsilotlari.
+## GT-047: Customer Order Detail ✅
 
 **✅ Acceptance Criteria:**
-- [ ] Full order info
-- [ ] Status timeline
-- [ ] Pay button (if WAITING_PAYMENT)
-- [ ] Cancel request button
+- [x] Full order info
+- [x] Status timeline
+- [x] Pay button (if WAITING_PAYMENT) — Payme + Click
+- [x] Cancel request button
 
 **⏱ Estimate:** 2.5h | **🏷 Labels:** `frontend`, `customer`, `P0`
 
 ---
 
-## GT-048: Customer Profile
-
-**📝 Description:**
-Mijoz profili sahifasi.
+## GT-048: Customer Profile ✅
 
 **✅ Acceptance Criteria:**
-- [ ] View/Edit name
-- [ ] Phone (read-only)
-- [ ] Orders count
-- [ ] Logout button
+- [x] View/Edit name
+- [x] Phone (read-only)
+- [x] PIN management (set/remove)
+- [x] Logout button
 
 **⏱ Estimate:** 1.5h | **🏷 Labels:** `frontend`, `customer`, `P1`
 
 ---
 
-## GT-049: Customer Addresses CRUD
-
-**📝 Description:**
-Mijoz manzillari boshqaruvi.
+## GT-049: Customer Addresses CRUD ✅
 
 **✅ Acceptance Criteria:**
-- [ ] Addresses list
-- [ ] Add/Edit/Delete address
-- [ ] Set default address
+- [x] Addresses list
+- [x] Add/Edit/Delete address
+- [x] Set default address
+- [x] Coordinates support
 
 **⏱ Estimate:** 3h | **🏷 Labels:** `frontend`, `customer`, `P1`
 
 ---
 
-## GT-050: Cancel Request
-
-**📝 Description:**
-Mijoz buyurtmani bekor qilish so'rovi.
+## GT-050: Cancel Request ✅ (CANCEL_REQUESTED status qolgan)
 
 **✅ Acceptance Criteria:**
-- [ ] Cancel button (if status allows)
-- [ ] Confirmation modal
-- [ ] Update status to CANCEL_REQUESTED
-- [ ] Notify admin
+- [x] Cancel button (if status allows)
+- [x] Confirmation modal
+- [x] Cancel → CANCELLED + slot FREE
+- [ ] CANCEL_REQUESTED intermediate status (qolgan)
+- [ ] Admin notification for cancel request (qolgan)
 
 **⏱ Estimate:** 1.5h | **🏷 Labels:** `backend`, `customer`, `P1`
 
 ---
 
-## GT-051: Master Day View Page
-
-**📝 Description:**
-Usta kunlik buyurtmalar sahifasi.
+## GT-051: Master Day View Page ✅
 
 **✅ Acceptance Criteria:**
-- [ ] Public URL: /m/{token}/day/{date}
-- [ ] No auth required (token-based)
-- [ ] List of RESERVED orders
-- [ ] Date navigation
+- [x] Public URL: /m/{token}/day/{date}
+- [x] No auth required (token-based)
+- [x] List of RESERVED orders
+- [x] Date navigation
 
 **⏱ Estimate:** 3h | **🏷 Labels:** `frontend`, `master`, `P0`
 
 ---
 
-## GT-052: Master Order Detail Page
-
-**📝 Description:**
-Usta uchun buyurtma tafsilotlari.
+## GT-052: Master Order Detail Page ✅
 
 **✅ Acceptance Criteria:**
-- [ ] Public URL: /o/{token}
-- [ ] Full order info
-- [ ] Customer phone (clickable)
-- [ ] Full address with map link
+- [x] Public URL: /o/{token}
+- [x] Full order info
+- [x] Customer phone (clickable)
+- [x] Full address with map link
 
 **⏱ Estimate:** 2h | **🏷 Labels:** `frontend`, `master`, `P0`
 
 ---
 
-## GT-053: Master Pages API
-
-**📝 Description:**
-Master public pages uchun API.
+## GT-053: Master Pages API ✅
 
 **✅ Acceptance Criteria:**
-- [ ] GET /api/v1/m/{token}/day/{date}
-- [ ] GET /api/v1/o/{token}
-- [ ] Token validation
-- [ ] Security filters
+- [x] GET /api/v1/m/{token}/day/{date}
+- [x] GET /api/v1/o/{token}
+- [x] Token validation
+- [x] Security filters
 
 **⏱ Estimate:** 2h | **🏷 Labels:** `backend`, `api`, `P0`
 
 ---
 
-## GT-054: QA Form Component
-
-**📝 Description:**
-Sifat nazorati formasi.
+## GT-054: QA Form Component ✅
 
 **✅ Acceptance Criteria:**
-- [ ] Overall rating (1-5 stars)
-- [ ] Punctuality, Professionalism ratings
-- [ ] Yes/No checkboxes
-- [ ] Hygiene issue (with required comment)
-- [ ] Client feedback textarea
+- [x] Overall rating (1-5 stars)
+- [x] Punctuality, Professionalism ratings
+- [x] Yes/No checkboxes
+- [x] Hygiene issue (with required comment)
+- [x] Client feedback textarea
 
 **⏱ Estimate:** 2.5h | **🏷 Labels:** `frontend`, `admin`, `P1`
 
 ---
 
-## GT-055: Complete Order Flow
-
-**📝 Description:**
-Buyurtmani yakunlash logic.
+## GT-055: Complete Order Flow ✅
 
 **✅ Acceptance Criteria:**
-- [ ] QA form required before complete
-- [ ] POST /api/v1/admin/orders/{id}/complete
-- [ ] Update status to COMPLETED
-- [ ] Store QA data
+- [x] QA form required before complete
+- [x] POST /admin/orders/{id}/complete
+- [x] Update status to COMPLETED
+- [x] Store QA data
 
 **⏱ Estimate:** 2h | **🏷 Labels:** `backend`, `admin`, `P1`
 
 ---
 
-## GT-056: CSV Export
-
-**📝 Description:**
-Buyurtmalar CSV export.
+## GT-056: CSV Export ✅
 
 **✅ Acceptance Criteria:**
-- [ ] GET /api/v1/admin/export/orders
-- [ ] Date range filter
-- [ ] UTF-8 BOM encoding
-- [ ] Download button
+- [x] GET /admin/reports/export
+- [x] Date range filter
+- [x] UTF-8 BOM encoding
+- [x] Download button
 
 **⏱ Estimate:** 2h | **🏷 Labels:** `backend`, `export`, `P1`
 
 ---
 
-## GT-057: Audit Logs
-
-**📝 Description:**
-Audit logging implementatsiyasi.
+## GT-057: Audit Logs ✅
 
 **✅ Acceptance Criteria:**
-- [ ] Log order status changes
-- [ ] Log payment events
-- [ ] Log admin actions
-- [ ] Store user, IP, timestamp
+- [x] Log order status changes
+- [x] Log payment events
+- [x] Log admin actions
+- [x] Store user, IP, timestamp
+- [x] Admin UI with filters
 
 **⏱ Estimate:** 2h | **🏷 Labels:** `backend`, `audit`, `P2`
 
@@ -241,22 +201,22 @@ Audit logging implementatsiyasi.
 
 ## 📊 Summary
 
-| ID | Task | Hours |
-|----|------|-------|
-| GT-043 | Eskiz OTP Service | 3h |
-| GT-044 | OTP Login Backend | 2h |
-| GT-045 | OTP Login Frontend | 3h |
-| GT-046 | Customer Orders List | 3h |
-| GT-047 | Customer Order Detail | 2.5h |
-| GT-048 | Customer Profile | 1.5h |
-| GT-049 | Customer Addresses | 3h |
-| GT-050 | Cancel Request | 1.5h |
-| GT-051 | Master Day View | 3h |
-| GT-052 | Master Order Detail | 2h |
-| GT-053 | Master Pages API | 2h |
-| GT-054 | QA Form Component | 2.5h |
-| GT-055 | Complete Order Flow | 2h |
-| GT-056 | CSV Export | 2h |
-| GT-057 | Audit Logs | 2h |
+| ID | Task | Hours | Status |
+|----|------|-------|--------|
+| GT-043 | Eskiz OTP Service | 3h | ✅ |
+| GT-044 | OTP Login Backend | 2h | ✅ |
+| GT-045 | OTP Login Frontend | 3h | ✅ |
+| GT-046 | Customer Orders List | 3h | ✅ |
+| GT-047 | Customer Order Detail | 2.5h | ✅ |
+| GT-048 | Customer Profile | 1.5h | ✅ |
+| GT-049 | Customer Addresses | 3h | ✅ |
+| GT-050 | Cancel Request | 1.5h | ✅ (CANCEL_REQUESTED qolgan) |
+| GT-051 | Master Day View | 3h | ✅ |
+| GT-052 | Master Order Detail | 2h | ✅ |
+| GT-053 | Master Pages API | 2h | ✅ |
+| GT-054 | QA Form Component | 2.5h | ✅ |
+| GT-055 | Complete Order Flow | 2h | ✅ |
+| GT-056 | CSV Export | 2h | ✅ |
+| GT-057 | Audit Logs | 2h | ✅ |
 
-**Total: ~22h + 3h buffer = ~25h**
+**Total: ~22h — ALL DONE ✅** (GT-050 CANCEL_REQUESTED qolgan)

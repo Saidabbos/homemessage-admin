@@ -25,6 +25,7 @@ use App\Http\Controllers\Customer\DashboardController as CustomerDashboardContro
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
 use App\Http\Controllers\Customer\FavoriteController as CustomerFavoriteController;
 use App\Http\Controllers\Customer\RatingController as CustomerRatingController;
+use App\Http\Controllers\Customer\MasterController as CustomerMasterController;
 use App\Http\Controllers\Master\DashboardController as MasterDashboardController;
 use App\Http\Controllers\Master\OrderController as MasterOrderController;
 use App\Http\Controllers\Master\RatingController as MasterRatingController;
@@ -102,6 +103,8 @@ Route::prefix('customer')->middleware(['auth', 'role:customer'])->group(function
     Route::get('/ratings', [CustomerRatingController::class, 'index'])->name('customer.ratings');
     Route::post('/orders/{order}/rate', [CustomerRatingController::class, 'createAndRedirect'])->name('customer.orders.rate');
     Route::get('/favorites', [CustomerFavoriteController::class, 'index'])->name('customer.favorites');
+    Route::get('/masters', [CustomerMasterController::class, 'index'])->name('customer.masters');
+    Route::get('/masters/{master}', [CustomerMasterController::class, 'show'])->name('customer.masters.show');
     Route::post('/favorites/{master}/toggle', [CustomerFavoriteController::class, 'toggle'])->name('customer.favorites.toggle');
     Route::get('/profile', [\App\Http\Controllers\Customer\ProfileController::class, 'edit'])->name('customer.profile');
     Route::put('/profile', [\App\Http\Controllers\Customer\ProfileController::class, 'update'])->name('customer.profile.update');
