@@ -16,7 +16,7 @@ class StoreMasterRequest extends FormRequest
         return [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'phone' => 'required|string|unique:masters',
+            'phone' => 'required|string|unique:masters|unique:users,phone',
             'email' => 'required|email|unique:masters|unique:users,email',
             'password' => 'required|string|min:6',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
