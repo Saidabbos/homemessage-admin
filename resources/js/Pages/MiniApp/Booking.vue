@@ -888,7 +888,7 @@ const pressureLevels = [
                             :disabled="slot.disabled"
                             @click="booking.slot = slot.start"
                         >
-                            {{ slot.start.slice(0, 5) }}
+                            {{ formatSlotRange(slot.start) }}
                         </button>
                     </div>
                 </div>
