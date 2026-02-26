@@ -1795,51 +1795,6 @@ const pressureLevels = [
     color: var(--gold);
 }
 
-.bk-slot-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-}
-
-.bk-slot-btn {
-    padding: 10px 4px;
-    background: rgba(255,255,255,0.5);
-    border: 1px solid rgba(255,255,255,0.6);
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--navy);
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.bk-slot-btn:hover:not(:disabled) {
-    border-color: var(--gold);
-}
-
-.bk-slot-btn.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: white;
-}
-
-.bk-slot-btn.disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    text-decoration: line-through;
-}
-
-.bk-slot-btn.in-cart {
-    background: rgba(200, 169, 81, 0.15);
-    border-color: var(--gold);
-    opacity: 0.6;
-}
-
-.slot-cart-icon {
-    font-size: 10px;
-    margin-left: 4px;
-}
-
 /* Confirm Card */
 .bk-confirm-card {
     background: rgba(255,255,255,0.5);
