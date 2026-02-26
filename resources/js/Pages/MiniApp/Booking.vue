@@ -491,22 +491,12 @@ watch(
     }
 );
 
-// ==================== Grouped Slots ====================
-
-const getSlotPeriod = (time) => {
-    const hour = parseInt(time.split(':')[0], 10);
-    if (hour < 12) return 'morning';
-    if (hour < 17) return 'day';
-    return 'evening';
-};
-
-const periodLabels = { morning: 'Ertalab', day: 'Kunduzi', evening: 'Kechqurun' };
-const periodIcons = { morning: 'sun-rise', day: 'sun', evening: 'moon' };
+// ==================== Flat Slots ====================
 
 // Get slots that are already in cart for current master/date
 const cartBlockedSlots = computed(() => {
     if (!booking.value.master_id || !booking.value.date) return new Set();
-    
+
     const blocked = new Set();
     for (const item of cart.value) {
         if (item.master_id === booking.value.master_id && item.date === booking.value.date) {
@@ -516,23 +506,16 @@ const cartBlockedSlots = computed(() => {
     return blocked;
 });
 
-const groupedSlots = computed(() => {
-    const groups = { morning: [], day: [], evening: [] };
+const flatSlots = computed(() => {
     const blocked = cartBlockedSlots.value;
-    
-    for (const slot of availableSlots.value) {
-        // Mark slot as disabled if it's already in cart
+    return availableSlots.value.map(slot => {
         const isInCart = blocked.has(slot.start);
-        const processedSlot = {
+        return {
             ...slot,
             disabled: slot.disabled || isInCart,
             inCart: isInCart,
         };
-        groups[getSlotPeriod(slot.start)].push(processedSlot);
-    }
-    return Object.entries(groups)
-        .filter(([_, slots]) => slots.length > 0)
-        .map(([period, slots]) => ({ period, label: periodLabels[period], icon: periodIcons[period], slots }));
+    });
 });
 
 // ==================== Formatting ====================
@@ -895,28 +878,18 @@ const pressureLevels = [
                     <div class="bk-spinner"></div>
                 </div>
                 <div v-else-if="availableSlots.length === 0" class="bk-empty">Bu kunga bo'sh vaqt yo'q</div>
-                <div v-else class="bk-slots-grouped">
-                    <div v-for="group in groupedSlots" :key="group.period" class="bk-slot-group">
-                        <div class="bk-slot-group-header">
-                            <svg v-if="group.icon === 'sun-rise'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/></svg>
-                            <svg v-else-if="group.icon === 'sun'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
-                            <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                            <span>{{ group.label }}</span>
-                        </div>
-                        <div class="bk-slot-grid">
-                            <button
-                                v-for="slot in group.slots"
-                                :key="slot.start"
-                                class="bk-slot-btn"
-                                :class="{ selected: booking.slot === slot.start, disabled: slot.disabled, 'in-cart': slot.inCart }"
-                                :disabled="slot.disabled"
-                                @click="booking.slot = slot.start"
-                                :title="slot.inCart ? 'Savatda mavjud' : ''"
-                            >
-                                {{ formatSlotRange(slot.start) }}
-                                <span v-if="slot.inCart" class="slot-cart-icon">🛒</span>
-                            </button>
-                        </div>
+                <div v-else class="bk-slots-slider-wrap">
+                    <div class="bk-slots-slider">
+                        <button
+                            v-for="slot in flatSlots"
+                            :key="slot.start"
+                            class="bk-slot-chip"
+                            :class="{ selected: booking.slot === slot.start, disabled: slot.disabled, 'in-cart': slot.inCart }"
+                            :disabled="slot.disabled"
+                            @click="booking.slot = slot.start"
+                        >
+                            {{ slot.start.slice(0, 5) }}
+                        </button>
                     </div>
                 </div>
             </section>

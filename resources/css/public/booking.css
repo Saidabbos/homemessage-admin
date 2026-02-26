@@ -977,35 +977,51 @@
     color: rgba(27, 43, 90, 0.5);
 }
 
-/* ========== Step 2: Slots ========== */
-.bk-slots-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+/* ========== Step 2: Slots (inline slider) ========== */
+.bk-slots-slider-wrap {
+    overflow: hidden;
+    margin: 0 -20px;
+    padding: 0 20px;
 }
 
-.bk-slot-btn {
-    padding: 10px 0;
+.bk-slots-slider {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px 0 8px;
+    scrollbar-width: none;
+}
+
+.bk-slots-slider::-webkit-scrollbar {
+    display: none;
+}
+
+.bk-slot-chip {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    padding: 10px 18px;
     background: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 12px;
+    border-radius: 20px;
     font-family: 'Manrope', sans-serif;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: rgba(27, 43, 90, 0.5);
     cursor: pointer;
     transition: all 0.25s ease;
-    text-align: center;
+    white-space: nowrap;
 }
 
-.bk-slot-btn:hover:not(:disabled) {
+.bk-slot-chip:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.5);
     color: #1B2B5A;
 }
 
-.bk-slot-btn.selected {
+.bk-slot-chip.selected {
     background: #C8A951;
     border-color: #C8A951;
     color: #1B2B5A;
@@ -1013,11 +1029,16 @@
     box-shadow: 0 2px 8px rgba(200, 169, 81, 0.19);
 }
 
-.bk-slot-btn.disabled {
+.bk-slot-chip.disabled {
     opacity: 0.35;
     cursor: not-allowed;
     text-decoration: line-through;
     color: rgba(27, 43, 90, 0.31);
+}
+
+.bk-slot-chip.in-cart {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 /* ========== Step 3: Confirm ========== */
@@ -1604,10 +1625,6 @@
         font-size: 16px;
     }
 
-    .bk-slots-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
     .bk-summary-card {
         padding: 20px;
         border-radius: 20px;
@@ -1821,15 +1838,3 @@
     color: var(--navy);
 }
 
-/* Slot in cart state */
-.bk-slot-btn.in-cart {
-    background: rgba(200, 169, 81, 0.15);
-    border-color: var(--gold);
-    opacity: 0.6;
-    position: relative;
-}
-
-.slot-cart-badge {
-    font-size: 10px;
-    margin-left: 4px;
-}
