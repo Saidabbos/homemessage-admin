@@ -9,6 +9,7 @@ class TestimonialService
 {
     public function create(array $data, Request $request): Testimonial
     {
+        $data = $this->prepareTranslations($data);
         $data['status'] = $request->has('status');
 
         return Testimonial::create($data);
@@ -16,6 +17,7 @@ class TestimonialService
 
     public function update(Testimonial $testimonial, array $data, Request $request): Testimonial
     {
+        $data = $this->prepareTranslations($data);
         $data['status'] = $request->has('status');
 
         $testimonial->update($data);
@@ -26,6 +28,20 @@ class TestimonialService
     public function delete(Testimonial $testimonial): void
     {
         $testimonial->delete();
+    }
+
+    private function prepareTranslations(array $data): array
+    {
+        foreach (['en', 'uz', 'ru'] as $locale) {
+            if (isset($data[$locale])) {
+                foreach ($data[$locale] as $field => $value) {
+                    $data[$field][$locale] = $value;
+                }
+                unset($data[$locale]);
+            }
+        }
+
+        return $data;
     }
 
     public function getEditData(Testimonial $testimonial): array

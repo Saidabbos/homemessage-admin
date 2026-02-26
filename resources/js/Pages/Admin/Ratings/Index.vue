@@ -24,27 +24,27 @@ const props = defineProps({
 });
 
 const search = ref(props.filters?.search || '');
-const type = ref(props.filters?.type || '');
-const status = ref(props.filters?.status || '');
+const type = ref(props.filters?.type || 'all');
+const status = ref(props.filters?.status || 'all');
 const masterId = ref(props.filters?.master_id || '');
-const rating = ref(props.filters?.rating || '');
+const rating = ref(props.filters?.rating || 'all');
 
 const applyFilters = () => {
     router.get(route('admin.ratings.index'), {
         search: search.value || undefined,
-        type: type.value || undefined,
-        status: status.value || undefined,
+        type: type.value === 'all' ? undefined : type.value,
+        status: status.value === 'all' ? undefined : status.value,
         master_id: masterId.value || undefined,
-        rating: rating.value || undefined,
+        rating: rating.value === 'all' ? undefined : rating.value,
     }, { preserveState: true, replace: true });
 };
 
 const resetFilters = () => {
     search.value = '';
-    type.value = '';
-    status.value = '';
+    type.value = 'all';
+    status.value = 'all';
     masterId.value = '';
-    rating.value = '';
+    rating.value = 'all';
     router.get(route('admin.ratings.index'));
 };
 
@@ -63,7 +63,7 @@ const deleteRating = (id) => {
     }
 };
 
-const hasActiveFilters = () => search.value || type.value || status.value || masterId.value || rating.value;
+const hasActiveFilters = () => search.value || (type.value && type.value !== 'all') || (status.value && status.value !== 'all') || masterId.value || (rating.value && rating.value !== 'all');
 </script>
 
 <template>
@@ -119,7 +119,7 @@ const hasActiveFilters = () => search.value || type.value || status.value || mas
                             <SelectValue placeholder="Turi" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="">Barchasi</SelectItem>
+                            <SelectItem value="all">Barchasi</SelectItem>
                             <SelectItem value="client_to_master">Mijoz → Master</SelectItem>
                             <SelectItem value="master_to_client">Master → Mijoz</SelectItem>
                         </SelectContent>
@@ -129,7 +129,7 @@ const hasActiveFilters = () => search.value || type.value || status.value || mas
                             <SelectValue placeholder="Holat" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="">Barchasi</SelectItem>
+                            <SelectItem value="all">Barchasi</SelectItem>
                             <SelectItem value="rated">Baholangan</SelectItem>
                             <SelectItem value="pending">Kutilmoqda</SelectItem>
                         </SelectContent>
@@ -139,7 +139,7 @@ const hasActiveFilters = () => search.value || type.value || status.value || mas
                             <SelectValue placeholder="Baho" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="">Barchasi</SelectItem>
+                            <SelectItem value="all">Barchasi</SelectItem>
                             <SelectItem value="5">⭐ 5</SelectItem>
                             <SelectItem value="4">⭐ 4</SelectItem>
                             <SelectItem value="3">⭐ 3</SelectItem>

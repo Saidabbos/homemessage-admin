@@ -19,6 +19,8 @@ class OilService
     {
         Log::info('OilService: Creating new oil', ['slug' => $data['slug'] ?? 'unknown']);
 
+        $data = $this->prepareTranslations($data);
+
         if ($request->hasFile('image')) {
             $data['image'] = $this->imageService->upload($request->file('image'), 'oils');
             Log::info('OilService: Image uploaded');
@@ -39,6 +41,8 @@ class OilService
     {
         Log::info('OilService: Updating oil', ['id' => $oil->id]);
 
+        $data = $this->prepareTranslations($data);
+
         if ($request->hasFile('image')) {
             $data['image'] = $this->imageService->replace(
                 $oil->image,
@@ -54,6 +58,23 @@ class OilService
         Log::info('OilService: Oil updated successfully', ['id' => $oil->id]);
 
         return $oil;
+    }
+
+    /**
+     * Transform locale-keyed translations to field-keyed format for Spatie
+     */
+    private function prepareTranslations(array $data): array
+    {
+        foreach (['en', 'uz', 'ru'] as $locale) {
+            if (isset($data[$locale])) {
+                foreach ($data[$locale] as $field => $value) {
+                    $data[$field][$locale] = $value;
+                }
+                unset($data[$locale]);
+            }
+        }
+
+        return $data;
     }
 
     /**

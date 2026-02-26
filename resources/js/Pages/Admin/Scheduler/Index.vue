@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 // shadcn-vue components
@@ -18,6 +18,31 @@ const props = defineProps({
 });
 
 const runningCommand = ref(null);
+
+const paginationPages = computed(() => {
+    const current = props.runs.current_page;
+    const last = props.runs.last_page;
+    const pages = [];
+
+    if (last <= 7) {
+        for (let i = 1; i <= last; i++) pages.push(i);
+        return pages;
+    }
+
+    pages.push(1);
+
+    if (current > 3) pages.push('...');
+
+    const start = Math.max(2, current - 1);
+    const end = Math.min(last - 1, current + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+
+    if (current < last - 2) pages.push('...');
+
+    pages.push(last);
+
+    return pages;
+});
 
 const runCommand = (command) => {
     runningCommand.value = command;
@@ -199,16 +224,40 @@ const getStatusText = (status) => {
                 </div>
 
                 <!-- Pagination -->
-                <div v-if="runs.last_page > 1" class="flex justify-center gap-2 mt-4">
-                    <Button
-                        v-for="page in runs.last_page"
-                        :key="page"
-                        :variant="page === runs.current_page ? 'default' : 'outline'"
-                        size="sm"
-                        @click="router.get(route('admin.scheduler.index', { page }))"
-                    >
-                        {{ page }}
-                    </Button>
+                <div v-if="runs.last_page > 1" class="flex items-center justify-between mt-4 pt-4 border-t">
+                    <span class="text-sm text-muted-foreground">
+                        {{ runs.from }}-{{ runs.to }} / {{ runs.total }}
+                    </span>
+                    <div class="flex items-center gap-1">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            :disabled="runs.current_page === 1"
+                            @click="router.get(route('admin.scheduler.index', { page: runs.current_page - 1 }))"
+                        >
+                            ←
+                        </Button>
+                        <template v-for="page in paginationPages" :key="page">
+                            <span v-if="page === '...'" class="px-2 text-muted-foreground">...</span>
+                            <Button
+                                v-else
+                                :variant="page === runs.current_page ? 'default' : 'outline'"
+                                size="sm"
+                                class="w-9"
+                                @click="router.get(route('admin.scheduler.index', { page }))"
+                            >
+                                {{ page }}
+                            </Button>
+                        </template>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            :disabled="runs.current_page === runs.last_page"
+                            @click="router.get(route('admin.scheduler.index', { page: runs.current_page + 1 }))"
+                        >
+                            →
+                        </Button>
+                    </div>
                 </div>
             </CardContent>
         </Card>

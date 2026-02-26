@@ -27,6 +27,7 @@ class ServiceTypeService
                 Log::info('ServiceTypeService: Image uploaded');
             }
 
+            $data = $this->prepareTranslations($data);
             $data['status'] = $request->has('status');
 
             // Remove durations from main data
@@ -53,6 +54,8 @@ class ServiceTypeService
         Log::info('ServiceTypeService: Updating service type', ['id' => $serviceType->id]);
 
         return DB::transaction(function () use ($serviceType, $data, $request) {
+            $data = $this->prepareTranslations($data);
+
             if ($request->hasFile('image')) {
                 $data['image'] = $this->imageService->replace(
                     $serviceType->image,
@@ -126,6 +129,23 @@ class ServiceTypeService
         if (!$serviceType->durations()->where('is_default', true)->exists()) {
             $serviceType->durations()->orderBy('sort_order')->first()?->update(['is_default' => true]);
         }
+    }
+
+    /**
+     * Transform locale-keyed translations to field-keyed format for Spatie
+     */
+    private function prepareTranslations(array $data): array
+    {
+        foreach (['en', 'uz', 'ru'] as $locale) {
+            if (isset($data[$locale])) {
+                foreach ($data[$locale] as $field => $value) {
+                    $data[$field][$locale] = $value;
+                }
+                unset($data[$locale]);
+            }
+        }
+
+        return $data;
     }
 
     /**

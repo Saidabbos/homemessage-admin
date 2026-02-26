@@ -12,6 +12,7 @@ class StandardItemService
      */
     public function create(array $data, Request $request): StandardItem
     {
+        $data = $this->prepareTranslations($data);
         $data['status'] = $request->boolean('status');
         $data['sort_order'] = $request->input('sort_order', 0);
 
@@ -23,11 +24,29 @@ class StandardItemService
      */
     public function update(StandardItem $item, array $data, Request $request): StandardItem
     {
+        $data = $this->prepareTranslations($data);
         $data['status'] = $request->boolean('status');
 
         $item->update($data);
 
         return $item;
+    }
+
+    /**
+     * Transform locale-keyed translations to field-keyed format for Spatie
+     */
+    private function prepareTranslations(array $data): array
+    {
+        foreach (['en', 'uz', 'ru'] as $locale) {
+            if (isset($data[$locale])) {
+                foreach ($data[$locale] as $field => $value) {
+                    $data[$field][$locale] = $value;
+                }
+                unset($data[$locale]);
+            }
+        }
+
+        return $data;
     }
 
     /**

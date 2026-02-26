@@ -82,7 +82,7 @@ const formatDate = (date: string) => new Date(date).toLocaleDateString('uz-UZ');
               </div>
 
               <div class="space-y-2">
-                <Label>{{ t('customers.email', 'Email') }} <span class="text-destructive">*</span></Label>
+                <Label>{{ t('customers.email', 'Email') }}</Label>
                 <Input type="email" v-model="form.email" placeholder="email@example.com" />
                 <p v-if="form.errors.email" class="text-destructive text-xs">{{ form.errors.email }}</p>
               </div>

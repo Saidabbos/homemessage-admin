@@ -72,24 +72,31 @@ const props = defineProps<{
 const localFilters = ref({
     date_from: props.filters?.date_from || '',
     date_to: props.filters?.date_to || '',
-    master_id: props.filters?.master_id || '',
-    service_type_id: props.filters?.service_type_id || '',
-    status: props.filters?.status || '',
-    payment_status: props.filters?.payment_status || '',
+    master_id: props.filters?.master_id || 'all',
+    service_type_id: props.filters?.service_type_id || 'all',
+    status: props.filters?.status || 'all',
+    payment_status: props.filters?.payment_status || 'all',
 });
 
 const applyFilters = () => {
-    router.get('/admin/reports', localFilters.value, { preserveState: true });
+    const params = { ...localFilters.value };
+    if (params.master_id === 'all') params.master_id = undefined;
+    if (params.service_type_id === 'all') params.service_type_id = undefined;
+    if (params.status === 'all') params.status = undefined;
+    if (params.payment_status === 'all') params.payment_status = undefined;
+    if (!params.date_from) params.date_from = undefined;
+    if (!params.date_to) params.date_to = undefined;
+    router.get('/admin/reports', params, { preserveState: true });
 };
 
 const resetFilters = () => {
     localFilters.value = {
         date_from: '',
         date_to: '',
-        master_id: '',
-        service_type_id: '',
-        status: '',
-        payment_status: '',
+        master_id: 'all',
+        service_type_id: 'all',
+        status: 'all',
+        payment_status: 'all',
     };
     router.get('/admin/reports');
 };
@@ -259,7 +266,7 @@ const verticalBarOptions = {
                                 <SelectValue :placeholder="t('common.all', 'Barchasi')" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="">{{ t('common.all', 'Barchasi') }}</SelectItem>
+                                <SelectItem value="all">{{ t('common.all', 'Barchasi') }}</SelectItem>
                                 <SelectItem v-for="m in masters" :key="m.id" :value="String(m.id)">{{ m.name }}</SelectItem>
                             </SelectContent>
                         </Select>
@@ -271,7 +278,7 @@ const verticalBarOptions = {
                                 <SelectValue :placeholder="t('common.all', 'Barchasi')" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="">{{ t('common.all', 'Barchasi') }}</SelectItem>
+                                <SelectItem value="all">{{ t('common.all', 'Barchasi') }}</SelectItem>
                                 <SelectItem v-for="s in serviceTypes" :key="s.id" :value="String(s.id)">{{ s.name }}</SelectItem>
                             </SelectContent>
                         </Select>
@@ -283,7 +290,7 @@ const verticalBarOptions = {
                                 <SelectValue :placeholder="t('common.all', 'Barchasi')" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="">{{ t('common.all', 'Barchasi') }}</SelectItem>
+                                <SelectItem value="all">{{ t('common.all', 'Barchasi') }}</SelectItem>
                                 <SelectItem v-for="s in statuses" :key="s.value" :value="s.value">{{ s.label }}</SelectItem>
                             </SelectContent>
                         </Select>
@@ -295,7 +302,7 @@ const verticalBarOptions = {
                                 <SelectValue :placeholder="t('common.all', 'Barchasi')" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="">{{ t('common.all', 'Barchasi') }}</SelectItem>
+                                <SelectItem value="all">{{ t('common.all', 'Barchasi') }}</SelectItem>
                                 <SelectItem v-for="s in paymentStatuses" :key="s.value" :value="s.value">{{ s.label }}</SelectItem>
                             </SelectContent>
                         </Select>

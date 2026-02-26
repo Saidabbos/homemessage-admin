@@ -28,18 +28,18 @@ const props = defineProps({
 });
 
 const search = ref(props.filters?.search || '');
-const status = ref(props.filters?.status || '');
+const status = ref(props.filters?.status || 'all');
 
 const applyFilters = () => {
   router.get(route('admin.customers.index'), {
     search: search.value || undefined,
-    status: status.value || undefined,
+    status: status.value === 'all' ? undefined : status.value,
   }, { preserveState: true, replace: true });
 };
 
 const resetFilters = () => {
   search.value = '';
-  status.value = '';
+  status.value = 'all';
   router.get(route('admin.customers.index'));
 };
 
@@ -56,7 +56,7 @@ const deleteCustomer = (id) => {
   }
 };
 
-const hasActiveFilters = () => search.value || status.value;
+const hasActiveFilters = () => search.value || (status.value && status.value !== 'all');
 
 const formatDate = (date) => {
   if (!date) return '-';
@@ -84,7 +84,7 @@ const formatDate = (date) => {
               <SelectValue :placeholder="t('common.allStatuses')" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">{{ t('common.allStatuses') }}</SelectItem>
+              <SelectItem value="all">{{ t('common.allStatuses') }}</SelectItem>
               <SelectItem value="active">{{ t('common.active') }}</SelectItem>
               <SelectItem value="inactive">{{ t('common.inactive') }}</SelectItem>
             </SelectContent>

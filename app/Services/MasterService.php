@@ -25,6 +25,8 @@ class MasterService
         ]);
 
         return DB::transaction(function () use ($data, $request) {
+            $data = $this->prepareTranslations($data);
+
             // Handle photo upload
             if ($request->hasFile('photo')) {
                 $data['photo'] = $this->imageService->upload($request->file('photo'), 'masters');
@@ -75,6 +77,8 @@ class MasterService
         Log::info('MasterService: Updating master', ['master_id' => $master->id]);
 
         return DB::transaction(function () use ($master, $data, $request) {
+            $data = $this->prepareTranslations($data);
+
             // Handle photo upload
             if ($request->hasFile('photo')) {
                 $data['photo'] = $this->imageService->replace(
@@ -114,6 +118,20 @@ class MasterService
             Log::info('MasterService: Master updated successfully', ['master_id' => $master->id]);
             return $master;
         });
+    }
+
+    private function prepareTranslations(array $data): array
+    {
+        foreach (['en', 'uz', 'ru'] as $locale) {
+            if (isset($data[$locale])) {
+                foreach ($data[$locale] as $field => $value) {
+                    $data[$field][$locale] = $value;
+                }
+                unset($data[$locale]);
+            }
+        }
+
+        return $data;
     }
 
     /**

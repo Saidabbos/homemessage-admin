@@ -52,18 +52,18 @@ const props = defineProps({
 });
 
 const search = ref(props.filters?.search || '');
-const statusFilter = ref(props.filters?.status || '');
-const paymentStatusFilter = ref(props.filters?.payment_status || '');
-const masterFilter = ref(props.filters?.master_id || '');
+const statusFilter = ref(props.filters?.status || 'all');
+const paymentStatusFilter = ref(props.filters?.payment_status || 'all');
+const masterFilter = ref(props.filters?.master_id || 'all');
 
 const applyFilters = debounce(() => {
   router.get(
     props.isNewOrdersPage ? route('admin.orders.new') : route('admin.orders.index'),
     {
       search: search.value || undefined,
-      status: statusFilter.value || undefined,
-      payment_status: paymentStatusFilter.value || undefined,
-      master_id: masterFilter.value || undefined,
+      status: statusFilter.value === 'all' ? undefined : statusFilter.value,
+      payment_status: paymentStatusFilter.value === 'all' ? undefined : paymentStatusFilter.value,
+      master_id: masterFilter.value === 'all' ? undefined : masterFilter.value,
     },
     { preserveState: true, replace: true }
   );
@@ -73,9 +73,9 @@ watch([search, statusFilter, paymentStatusFilter, masterFilter], applyFilters);
 
 const resetFilters = () => {
   search.value = '';
-  statusFilter.value = '';
-  paymentStatusFilter.value = '';
-  masterFilter.value = '';
+  statusFilter.value = 'all';
+  paymentStatusFilter.value = 'all';
+  masterFilter.value = 'all';
 };
 
 const getStatusVariant = (status) => {
@@ -208,7 +208,7 @@ const isRowVisible = (row) => {
         :key="status.value"
         class="cursor-pointer transition-all hover:shadow-md"
         :class="{ 'ring-2 ring-primary': statusFilter === status.value }"
-        @click="statusFilter = statusFilter === status.value ? '' : status.value"
+        @click="statusFilter = statusFilter === status.value ? 'all' : status.value"
       >
         <CardContent class="p-4">
           <div class="text-2xl font-bold">{{ statusCounts[status.value] || 0 }}</div>
@@ -231,7 +231,7 @@ const isRowVisible = (row) => {
               <SelectValue :placeholder="t('orders.allStatuses')" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">{{ t('orders.allStatuses') }}</SelectItem>
+              <SelectItem value="all">{{ t('orders.allStatuses') }}</SelectItem>
               <SelectItem v-for="status in statuses" :key="status.value" :value="status.value">
                 {{ t(`orderStatuses.${status.value}`) }}
               </SelectItem>
@@ -242,7 +242,7 @@ const isRowVisible = (row) => {
               <SelectValue :placeholder="t('orders.allPaymentStatuses')" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">{{ t('orders.allPaymentStatuses') }}</SelectItem>
+              <SelectItem value="all">{{ t('orders.allPaymentStatuses') }}</SelectItem>
               <SelectItem v-for="status in paymentStatuses" :key="status.value" :value="status.value">
                 {{ t(`paymentStatuses.${status.value}`) }}
               </SelectItem>
@@ -253,7 +253,7 @@ const isRowVisible = (row) => {
               <SelectValue :placeholder="t('orders.allMasters')" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">{{ t('orders.allMasters') }}</SelectItem>
+              <SelectItem value="all">{{ t('orders.allMasters') }}</SelectItem>
               <SelectItem v-for="master in masters" :key="master.id" :value="String(master.id)">
                 {{ master.first_name }} {{ master.last_name }}
               </SelectItem>

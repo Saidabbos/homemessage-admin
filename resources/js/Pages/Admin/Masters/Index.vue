@@ -38,16 +38,16 @@ const props = defineProps({
 });
 
 const search = ref(props.filters?.search || '');
-const status = ref(props.filters?.status || '');
-const gender = ref(props.filters?.gender || '');
-const serviceType = ref(props.filters?.service_type || '');
+const status = ref(props.filters?.status || 'all');
+const gender = ref(props.filters?.gender || 'all');
+const serviceType = ref(props.filters?.service_type || 'all');
 
 const applyFilters = () => {
   router.get(route('admin.masters.index'), {
     search: search.value || undefined,
-    status: status.value || undefined,
-    gender: gender.value || undefined,
-    service_type: serviceType.value || undefined,
+    status: status.value === 'all' ? undefined : status.value,
+    gender: gender.value === 'all' ? undefined : gender.value,
+    service_type: serviceType.value === 'all' ? undefined : serviceType.value,
   }, {
     preserveState: true,
     replace: true,
@@ -56,9 +56,9 @@ const applyFilters = () => {
 
 const resetFilters = () => {
   search.value = '';
-  status.value = '';
-  gender.value = '';
-  serviceType.value = '';
+  status.value = 'all';
+  gender.value = 'all';
+  serviceType.value = 'all';
   router.get(route('admin.masters.index'));
 };
 
@@ -82,7 +82,7 @@ const deleteMaster = (id) => {
   }
 };
 
-const hasActiveFilters = () => search.value || status.value || gender.value || serviceType.value;
+const hasActiveFilters = () => search.value || (status.value && status.value !== 'all') || (gender.value && gender.value !== 'all') || (serviceType.value && serviceType.value !== 'all');
 </script>
 
 <template>
@@ -117,7 +117,7 @@ const hasActiveFilters = () => search.value || status.value || gender.value || s
               <SelectValue :placeholder="t('common.allStatuses')" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">{{ t('common.allStatuses') }}</SelectItem>
+              <SelectItem value="all">{{ t('common.allStatuses') }}</SelectItem>
               <SelectItem value="active">{{ t('common.active') }}</SelectItem>
               <SelectItem value="inactive">{{ t('common.inactive') }}</SelectItem>
             </SelectContent>
@@ -127,7 +127,7 @@ const hasActiveFilters = () => search.value || status.value || gender.value || s
               <SelectValue :placeholder="t('masters.gender')" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">{{ t('masters.gender') }}</SelectItem>
+              <SelectItem value="all">{{ t('masters.gender') }}</SelectItem>
               <SelectItem value="male">{{ t('masters.male') }}</SelectItem>
               <SelectItem value="female">{{ t('masters.female') }}</SelectItem>
             </SelectContent>
@@ -137,7 +137,7 @@ const hasActiveFilters = () => search.value || status.value || gender.value || s
               <SelectValue :placeholder="t('masters.services')" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">{{ t('masters.services') }}</SelectItem>
+              <SelectItem value="all">{{ t('masters.services') }}</SelectItem>
               <SelectItem v-for="st in serviceTypes" :key="st.id" :value="String(st.id)">
                 {{ getTranslation(st, 'name') }}
               </SelectItem>

@@ -17,7 +17,7 @@ class UpdateOilRequest extends FormRequest
 
         return [
             'slug' => 'required|alpha_dash|unique:oils,slug,' . $oilId,
-            'price' => 'required|numeric|min:0',
+            'price' => 'nullable|numeric|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'boolean',
             'en.name' => 'required|string|max:255',

@@ -26,19 +26,26 @@ const props = defineProps({
 
 const localFilters = ref({
     search: props.filters?.search || '',
-    action: props.filters?.action || '',
-    user_id: props.filters?.user_id || '',
-    auditable_type: props.filters?.auditable_type || '',
+    action: props.filters?.action || 'all',
+    user_id: props.filters?.user_id || 'all',
+    auditable_type: props.filters?.auditable_type || 'all',
     date_from: props.filters?.date_from || '',
     date_to: props.filters?.date_to || '',
 });
 
 const applyFilters = () => {
-    router.get('/admin/audit-logs', localFilters.value, { preserveState: true });
+    const params = { ...localFilters.value };
+    if (params.action === 'all') params.action = undefined;
+    if (params.user_id === 'all') params.user_id = undefined;
+    if (params.auditable_type === 'all') params.auditable_type = undefined;
+    if (!params.search) params.search = undefined;
+    if (!params.date_from) params.date_from = undefined;
+    if (!params.date_to) params.date_to = undefined;
+    router.get('/admin/audit-logs', params, { preserveState: true });
 };
 
 const resetFilters = () => {
-    localFilters.value = { search: '', action: '', user_id: '', auditable_type: '', date_from: '', date_to: '' };
+    localFilters.value = { search: '', action: 'all', user_id: 'all', auditable_type: 'all', date_from: '', date_to: '' };
     router.get('/admin/audit-logs');
 };
 
@@ -94,7 +101,10 @@ const formatJson = (data) => {
     catch { return String(data); }
 };
 
-const hasActiveFilters = () => Object.values(localFilters.value).some(v => v);
+const hasActiveFilters = () => Object.entries(localFilters.value).some(([k, v]) => {
+    if (['action', 'user_id', 'auditable_type'].includes(k)) return v && v !== 'all';
+    return !!v;
+});
 </script>
 
 <template>
@@ -113,21 +123,21 @@ const hasActiveFilters = () => Object.values(localFilters.value).some(v => v);
                     <Select v-model="localFilters.action">
                         <SelectTrigger class="lg:w-40"><SelectValue placeholder="Harakat" /></SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="">Barchasi</SelectItem>
+                            <SelectItem value="all">Barchasi</SelectItem>
                             <SelectItem v-for="action in actions" :key="action" :value="action">{{ getActionLabel(action) }}</SelectItem>
                         </SelectContent>
                     </Select>
                     <Select v-model="localFilters.auditable_type">
                         <SelectTrigger class="lg:w-40"><SelectValue placeholder="Model" /></SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="">Barchasi</SelectItem>
+                            <SelectItem value="all">Barchasi</SelectItem>
                             <SelectItem v-for="type in types" :key="type" :value="type">{{ getModelName(type) }}</SelectItem>
                         </SelectContent>
                     </Select>
                     <Select v-model="localFilters.user_id">
                         <SelectTrigger class="lg:w-40"><SelectValue placeholder="Foydalanuvchi" /></SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="">Barchasi</SelectItem>
+                            <SelectItem value="all">Barchasi</SelectItem>
                             <SelectItem v-for="user in users" :key="user.id" :value="String(user.id)">{{ user.name }}</SelectItem>
                         </SelectContent>
                     </Select>
