@@ -117,13 +117,16 @@ class OrderMapper
     {
         $locale = $locale ?? app()->getLocale();
 
+        $durationMinutes = $order->duration?->duration ?? 60;
+
         return [
             'id' => $order->id,
             'order_number' => $order->order_number,
             'time_start' => self::formatTime($order->arrival_window_start),
             'time_end' => self::formatTime($order->arrival_window_end),
+            'session_end' => self::calculateSessionEnd($order->arrival_window_start, $durationMinutes),
             'arrival_window' => self::formatArrivalWindow($order),
-            'duration_minutes' => $order->duration?->duration ?? 60,
+            'duration_minutes' => $durationMinutes,
             'service_name' => $order->serviceType?->getTranslation('name', $locale) ?? '-',
             'customer_name' => $order->customer?->name ?? '-',
             'customer_phone' => $order->customer?->phone,
@@ -290,6 +293,26 @@ class OrderMapper
         $end = self::formatTime($order->arrival_window_end);
 
         return $end ? "{$start} - {$end}" : $start;
+    }
+
+    /**
+     * Calculate session end time (start + duration)
+     */
+    protected static function calculateSessionEnd(?string $startTime, int $durationMinutes): ?string
+    {
+        if (!$startTime) return null;
+
+        try {
+            $start = \Carbon\Carbon::createFromFormat('H:i:s', $startTime);
+            return $start->addMinutes($durationMinutes)->format('H:i');
+        } catch (\Exception $e) {
+            try {
+                $start = \Carbon\Carbon::createFromFormat('H:i', $startTime);
+                return $start->addMinutes($durationMinutes)->format('H:i');
+            } catch (\Exception $e) {
+                return null;
+            }
+        }
     }
 
     /**

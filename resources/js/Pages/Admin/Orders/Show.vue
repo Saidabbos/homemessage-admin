@@ -332,14 +332,14 @@ const sendWorkOrderToMaster = async () => {
           <CardContent class="space-y-2">
             <div class="flex items-center gap-3 p-2 bg-purple-50 dark:bg-purple-950 rounded border border-purple-200 dark:border-purple-800">
               <span class="text-xs text-muted-foreground">Hozirgi:</span>
-              <span class="font-medium">{{ order.master?.first_name }} {{ order.master?.last_name }}</span>
+              <Link v-if="order.master" :href="route('admin.masters.show', order.master.id)" class="font-medium text-primary hover:underline" @click.stop>{{ order.master.first_name }} {{ order.master.last_name }}</Link>
               <span class="text-muted-foreground">→</span>
               <span class="text-sm">{{ order.service_type?.name?.uz || order.service_type?.name }}</span>
             </div>
             <Link v-for="lo in order.group_orders" :key="lo.id" :href="route('admin.orders.show', lo.id)"
               class="flex items-center gap-3 p-2 rounded border hover:bg-muted/50 transition">
               <span class="text-xs font-mono text-primary">{{ lo.order_number }}</span>
-              <span class="font-medium">{{ lo.master?.first_name }} {{ lo.master?.last_name }}</span>
+              <Link v-if="lo.master" :href="route('admin.masters.show', lo.master.id)" class="font-medium text-primary hover:underline" @click.stop>{{ lo.master.first_name }} {{ lo.master.last_name }}</Link>
               <span class="text-muted-foreground">→</span>
               <span class="text-sm">{{ lo.service_type?.name?.uz || lo.service_type?.name }}</span>
               <Badge :variant="getStatusVariant(lo.status)" class="ml-auto">{{ getStatusLabel(lo.status) }}</Badge>
@@ -387,7 +387,7 @@ const sendWorkOrderToMaster = async () => {
               <div><p class="text-sm text-muted-foreground">Davomiylik</p><p class="font-medium">{{ order.duration?.duration || '-' }} daqiqa</p></div>
               <div><p class="text-sm text-muted-foreground">{{ t('orders.oil', 'Yog\'') }}</p><p class="font-medium">{{ order.oil?.name?.uz || order.oil?.name || '-' }}</p></div>
               <div><p class="text-sm text-muted-foreground">Odamlar soni</p><p class="font-medium">{{ order.people_count || 1 }} kishi</p></div>
-              <div><p class="text-sm text-muted-foreground">{{ t('orders.master', 'Master') }}</p><p class="font-medium">{{ order.master?.first_name }} {{ order.master?.last_name }}</p></div>
+              <div><p class="text-sm text-muted-foreground">{{ t('orders.master', 'Master') }}</p><p><Link v-if="order.master" :href="route('admin.masters.show', order.master.id)" class="font-medium text-primary hover:underline">{{ order.master.first_name }} {{ order.master.last_name }}</Link></p></div>
               <div><p class="text-sm text-muted-foreground">{{ t('orders.amount', 'Summa') }}</p><p class="font-medium">{{ Number(order.total_amount).toLocaleString() }} so'm</p>
                 <p v-if="order.group_orders?.length > 0" class="text-xs text-muted-foreground">Guruh jami: {{ calculateGroupTotal() }} so'm</p></div>
             </div>
@@ -609,7 +609,7 @@ const sendWorkOrderToMaster = async () => {
       <DialogContent class="max-w-lg">
         <DialogHeader>
           <DialogTitle>{{ t('orders.changeTime', 'Vaqtni o\'zgartirish') }}</DialogTitle>
-          <p class="text-sm text-muted-foreground">Master: {{ order.master?.full_name }}</p>
+          <p class="text-sm text-muted-foreground">Master: <Link v-if="order.master" :href="route('admin.masters.show', order.master.id)" class="text-primary hover:underline">{{ order.master.full_name }}</Link></p>
         </DialogHeader>
         <div class="space-y-4">
           <div class="space-y-2">

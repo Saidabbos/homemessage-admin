@@ -227,7 +227,7 @@ const getStatusLabel = (status) => {
                                             getStatusColor(order.status)
                                         ]"
                                     >
-                                        {{ order.time_start }}
+                                        {{ order.time_start }}-{{ order.session_end }}
                                     </div>
                                     <div v-if="cell.orders.length > 3" class="text-xs text-gray-500 text-center">
                                         +{{ cell.orders.length - 3 }}
@@ -288,7 +288,7 @@ const getStatusLabel = (status) => {
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        <span>{{ order.time_start }} - {{ order.time_end }}</span>
+                                        <span>{{ order.time_start }} - {{ order.session_end }}</span>
                                         <span class="text-gray-400">({{ order.duration_minutes }} min)</span>
                                     </div>
                                     <div class="flex items-center gap-2 text-gray-600 mt-1">
