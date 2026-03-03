@@ -63,6 +63,8 @@ onMounted(async () => {
                 
                 const result = await response.json();
                 if (result.success) {
+                    // Update cart user key so cart loads for correct account
+                    localStorage.setItem('hm_cart_user', `tg_${tgUser.value.id}`);
                     window.location.href = '/app';
                     return;
                 }

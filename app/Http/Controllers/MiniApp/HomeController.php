@@ -46,6 +46,8 @@ class HomeController extends Controller
                 $user = User::where('telegram_id', $telegramUser['id'])->first();
                 
                 if ($user) {
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
                     Auth::login($user, true);
                     Log::info('MiniApp: Auto-login via Telegram', ['user_id' => $user->id, 'telegram_id' => $telegramUser['id']]);
                 }
@@ -188,6 +190,8 @@ class HomeController extends Controller
                 $user = User::where('telegram_id', $telegramUser['id'])->first();
                 
                 if ($user) {
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
                     Auth::login($user, true);
                     Log::info('MiniApp: Auto-login via Telegram from login page', ['user_id' => $user->id]);
                     return redirect()->route('miniapp.home');
@@ -351,9 +355,13 @@ class HomeController extends Controller
             return response()->json(['success' => false, 'error' => 'User not found'], 404);
         }
 
+        // Regenerate session to prevent conflicts with previous account
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
         // Login the user
         Auth::login($user, true);
-        
+
         Log::info('MiniApp: Auto-login successful', [
             'user_id' => $user->id,
             'telegram_id' => $telegramId,
