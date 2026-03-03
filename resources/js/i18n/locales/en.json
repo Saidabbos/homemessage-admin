@@ -50,7 +50,12 @@
         "sortOrder": "Sort Order",
         "basicInfo": "Basic Information",
         "new": "New",
-        "details": "Details"
+        "details": "Details",
+        "yes": "Yes",
+        "no": "No",
+        "error": "An error occurred",
+        "system": "System",
+        "unknown": "Unknown"
     },
     "translations": {
         "title": "Translations",
@@ -189,7 +194,7 @@
         "customer": "Customer",
         "amount": "Amount",
         "active_masters": "Active Masters",
-        "avg_per_master": "Avg Orders\/Master",
+        "avg_per_master": "Avg Orders/Master",
         "by_orders_count": "By Orders Count",
         "by_revenue": "By Revenue",
         "thousands": "thousands",
@@ -234,7 +239,9 @@
         "enterEmail": "Enter email",
         "statusHint": "Inactive customers cannot use the app",
         "registeredViaApp": "Customers register via the app",
-        "confirmDelete": "Are you sure you want to delete this customer?"
+        "confirmDelete": "Are you sure you want to delete this customer?",
+        "statusActive": "Customer active",
+        "statusBlocked": "Blocked"
     },
     "dispatchers": {
         "title": "Dispatchers",
@@ -371,7 +378,24 @@
         "enterNewPassword": "Enter new password",
         "enterConfirmPassword": "Re-enter password",
         "passwordHint": "Minimum 6 characters",
-        "changePassword": "Change Password"
+        "changePassword": "Change Password",
+        "pin": {
+            "title": "PIN code",
+            "fastLogin": "Quick login without OTP",
+            "setupHint": "Set a PIN for quick login",
+            "setup": "Set up",
+            "change": "Change",
+            "remove": "Remove",
+            "setTitle": "Set PIN",
+            "changeTitle": "Change PIN",
+            "removeTitle": "Remove PIN",
+            "currentPin": "Current PIN code",
+            "newPin": "New PIN code",
+            "confirmPin": "Confirm PIN code",
+            "invalidLength": "PIN code must be 4 digits",
+            "mismatch": "PIN codes do not match",
+            "enterCurrent": "Enter current PIN code"
+        }
     },
     "slots": {
         "title": "Time Slots",
@@ -447,7 +471,7 @@
         "orderNumber": "Order Number",
         "customer": "Customer",
         "master": "Master",
-        "dateTime": "Date\/Time",
+        "dateTime": "Date/Time",
         "service": "Service",
         "payment": "Payment",
         "status": "Status",
@@ -489,7 +513,94 @@
         "allStatuses": "All Statuses",
         "allPaymentStatuses": "All Payment Statuses",
         "allMasters": "All Masters",
-        "emptyMessage": "No orders found"
+        "emptyMessage": "No orders found",
+        "groupOrder": "Group order",
+        "people": "people",
+        "current": "Current",
+        "arrivalWindow": "Arrival window",
+        "groupTotal": "Group total",
+        "fillForm": "Fill in",
+        "confirmationForm": "Confirmation form",
+        "confirmationNotFilled": "Confirmation form not filled for this order",
+        "callOutcome": "Call outcome",
+        "addressDetails": "Address details",
+        "importantInfo": "Important information",
+        "reservationStatus": "Reservation status",
+        "progress": "Progress",
+        "workOrderTitle": "Work Order",
+        "workOrderCopied": "Work order copied\\!",
+        "workOrderSent": "Work order sent to master\\!",
+        "noTelegramId": "Master has no Telegram chat ID",
+        "copy": "Copy",
+        "sending": "Sending...",
+        "sendToMaster": "Send to master",
+        "sentToMaster": "Sent to master",
+        "readyToSend": "Ready to send to master",
+        "linkCopied": "Link copied\\!",
+        "linkReady": "link ready",
+        "generatePaymentLink": "Generate payment link",
+        "paymentNotConfigured": "Payme/Click not configured",
+        "availableSlots": "Available slots",
+        "noSlotsAvailable": "No available slots on this date",
+        "arrivalStart": "Arrival start",
+        "arrivalEnd": "Arrival end",
+        "reasonPlaceholder": "Reason...",
+        "paymentStatuses": {
+            "notPaid": "Not paid",
+            "paid": "Paid",
+            "refunded": "Refunded",
+            "pending": "Pending"
+        },
+        "steps": {
+            "orderCreated": "Order created",
+            "confirmationCall": "Confirmation call",
+            "payment": "Payment",
+            "notifyMasters": "Notify masters",
+            "workOrderSent": "Work order sent",
+            "sessionStarted": "Session started"
+        },
+        "logs": {
+            "statusChanged": "Status changed",
+            "rescheduled": "Rescheduled",
+            "noteAdded": "Note added",
+            "created": "Order created"
+        },
+        "confirmation": {
+            "entrance": "Entrance",
+            "entrancePod": "Entrance (Pod)",
+            "floor": "Floor",
+            "apartment": "Apartment",
+            "elevator": "Elevator",
+            "hasElevator": "Has elevator",
+            "onsitePhone": "On-site phone",
+            "parking": "Parking",
+            "parkingPlaceholder": "Yard / Street",
+            "landmark": "Landmark",
+            "landmarkPlaceholder": "Near Makro, building 5",
+            "constraints": "Constraints",
+            "constraintsLabel": "Constraints (allergy, health, ...)",
+            "spaceAvailable": "2x2 space available?",
+            "hasSpace": "2x2 meter space available",
+            "noSpace": "No 2x2 space - check\\!",
+            "pets": "Pets",
+            "hasPets": "Has pets",
+            "noteToMaster": "Note to master"
+        },
+        "workOrder": {
+            "title": "WORK ORDER",
+            "customer": "Customer",
+            "phone": "Phone",
+            "address": "Address"
+        },
+        "qa": {
+            "title": "Quality control",
+            "rate": "Rate",
+            "overall": "Overall rating",
+            "punctuality": "Punctuality",
+            "professionalism": "Professionalism",
+            "feedback": "Feedback",
+            "notRated": "Order not yet rated"
+        }
     },
     "landing": {
         "title": "Home Massage - Premium Massage Service",
@@ -839,7 +950,7 @@
             "subtitle": "Your favorite masters",
             "count": "favorite masters",
             "reviews": "reviews",
-            "perHour": "UZS\/hour",
+            "perHour": "UZS/hour",
             "book": "Book now",
             "empty": "No favorite masters yet"
         },
@@ -959,7 +1070,7 @@
             "statusInProgress": "In progress",
             "statusCompleted": "Completed",
             "statusCancelled": "Cancelled",
-            "dateTime": "Date\/Time",
+            "dateTime": "Date/Time",
             "date": "Date",
             "time": "Time",
             "customerInfo": "Customer info",
@@ -1048,7 +1159,34 @@
         "singular": "Rating",
         "details": "Rating Details",
         "info": "Rating Information",
-        "confirmDelete": "Are you sure you want to delete this rating?"
+        "confirmDelete": "Are you sure you want to delete this rating?",
+        "rated": "Rated",
+        "pending": "Pending",
+        "masterAvg": "Master average",
+        "clientAvg": "Client average",
+        "type": "Type",
+        "clientToMaster": "Client → Master",
+        "masterToClient": "Master → Client",
+        "rating": "Rating",
+        "order": "Order",
+        "ratedBy": "Rated by",
+        "ratedUser": "Rated",
+        "feedback": "Feedback",
+        "date": "Date",
+        "notFound": "No ratings found",
+        "noOrder": "No order",
+        "confirmDeleteRating": "Are you sure you want to delete this rating?",
+        "punctuality": "Punctuality",
+        "professionalism": "Professionalism",
+        "cleanliness": "Cleanliness",
+        "ratedAt": "Rated at",
+        "ratingsCount": "ratings",
+        "viewMaster": "View master",
+        "viewCustomer": "View customer",
+        "viewOrder": "View order",
+        "orderNumber": "Number",
+        "customer": "Customer",
+        "subtitle": "View and manage all ratings"
     },
     "orderActions": {
         "created": "Order created",
@@ -1112,13 +1250,16 @@
             "updated": "Updated",
             "deleted": "Deleted",
             "statusChanged": "Status changed",
-            "slotChanged": "Slot changed",
+            "slotChanged": "Time changed",
             "paymentReceived": "Payment received",
             "noteAdded": "Note added",
             "assigned": "Assigned",
-            "login": "Login",
-            "logout": "Logout"
-        }
+            "login": "Logged in",
+            "logout": "Logged out"
+        },
+        "close": "Close",
+        "description": "Description",
+        "notFound": "No logs found"
     },
     "admin": {
         "dashboard": {
@@ -1171,5 +1312,25 @@
             "clientToMaster": "Client → Master",
             "masterToClient": "Master → Client"
         }
+    },
+    "scheduler": {
+        "title": "Scheduler Monitor",
+        "subtitle": "Automated tasks monitoring",
+        "totalRuns": "Total runs",
+        "success": "Successful",
+        "failed": "Failed",
+        "errors": "Errors",
+        "running": "Running",
+        "modifiedToday": "Modified today",
+        "manualRun": "Manual run",
+        "updateOrderStatuses": "Update order statuses",
+        "otpCleanup": "OTP cleanup",
+        "history": "Run history",
+        "command": "Command",
+        "processed": "Processed",
+        "time": "Time",
+        "startedAt": "Started at",
+        "details": "Details",
+        "noRuns": "No runs yet"
     }
 }

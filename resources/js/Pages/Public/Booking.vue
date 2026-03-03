@@ -231,11 +231,13 @@ const cartBlockedSlots = computed(() => {
 // Process slots with cart blocking
 const processedSlots = computed(() => {
     const blocked = cartBlockedSlots.value;
-    return availableSlots.value.map(slot => ({
-        ...slot,
-        disabled: slot.disabled || blocked.has(slot.start),
-        inCart: blocked.has(slot.start),
-    }));
+    return availableSlots.value
+        .filter(slot => slot.available || blocked.has(slot.start))
+        .map(slot => ({
+            ...slot,
+            disabled: slot.disabled || blocked.has(slot.start),
+            inCart: blocked.has(slot.start),
+        }));
 });
 
 // ==================== Formatting ====================

@@ -38,7 +38,7 @@ const deleteRating = () => {
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-bold tracking-tight">{{ t('ratings.details', 'Baho tafsilotlari') }}</h1>
-        <p class="text-muted-foreground">{{ rating.order?.order_number || 'Buyurtma yo\'q' }}</p>
+        <p class="text-muted-foreground">{{ rating.order?.order_number || t('ratings.noOrder') }}</p>
       </div>
       <div class="flex gap-2">
         <Button variant="outline" as-child>
@@ -57,7 +57,7 @@ const deleteRating = () => {
             <AlertDialogHeader>
               <AlertDialogTitle>{{ t('common.confirmDelete', 'O\'chirishni tasdiqlang') }}</AlertDialogTitle>
               <AlertDialogDescription>
-                Haqiqatan ham bu bahoni o'chirmoqchimisiz?
+                {{ t('ratings.confirmDeleteRating') }}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -81,7 +81,7 @@ const deleteRating = () => {
           <!-- Type Badge -->
           <div>
             <Badge :variant="rating.type === 'client_to_master' ? 'default' : 'secondary'">
-              {{ rating.type === 'client_to_master' ? 'Mijoz → Master' : 'Master → Mijoz' }}
+              {{ rating.type === 'client_to_master' ? t('ratings.clientToMaster') : t('ratings.masterToClient') }}
             </Badge>
           </div>
 
@@ -90,7 +90,7 @@ const deleteRating = () => {
             <div v-if="rating.overall_rating" class="text-5xl font-bold text-yellow-500 mb-2">
               {{ rating.overall_rating }}
             </div>
-            <div v-else class="text-2xl text-muted-foreground mb-2">Kutilmoqda</div>
+            <div v-else class="text-2xl text-muted-foreground mb-2">{{ t('ratings.pending') }}</div>
             <div class="flex justify-center">
               <svg v-for="i in 5" :key="i" class="w-8 h-8" :class="i <= rating.overall_rating ? 'text-yellow-400' : 'text-muted'" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -101,7 +101,7 @@ const deleteRating = () => {
           <!-- Detailed Ratings -->
           <div v-if="rating.overall_rating" class="space-y-3">
             <div v-if="rating.punctuality_rating" class="flex items-center justify-between">
-              <span class="text-muted-foreground">Vaqtida kelish</span>
+              <span class="text-muted-foreground">{{ t('ratings.punctuality') }}</span>
               <div class="flex">
                 <svg v-for="i in 5" :key="i" class="w-4 h-4" :class="i <= rating.punctuality_rating ? 'text-yellow-400' : 'text-muted'" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -109,7 +109,7 @@ const deleteRating = () => {
               </div>
             </div>
             <div v-if="rating.professionalism_rating" class="flex items-center justify-between">
-              <span class="text-muted-foreground">Professionallik</span>
+              <span class="text-muted-foreground">{{ t('ratings.professionalism') }}</span>
               <div class="flex">
                 <svg v-for="i in 5" :key="i" class="w-4 h-4" :class="i <= rating.professionalism_rating ? 'text-yellow-400' : 'text-muted'" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -117,7 +117,7 @@ const deleteRating = () => {
               </div>
             </div>
             <div v-if="rating.cleanliness_rating" class="flex items-center justify-between">
-              <span class="text-muted-foreground">Tozalik</span>
+              <span class="text-muted-foreground">{{ t('ratings.cleanliness') }}</span>
               <div class="flex">
                 <svg v-for="i in 5" :key="i" class="w-4 h-4" :class="i <= rating.cleanliness_rating ? 'text-yellow-400' : 'text-muted'" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -128,15 +128,15 @@ const deleteRating = () => {
 
           <!-- Feedback -->
           <div v-if="rating.feedback" class="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
-            <h3 class="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-2">Izoh</h3>
+            <h3 class="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-2">{{ t('ratings.feedback') }}</h3>
             <p class="text-blue-700 dark:text-blue-300">"{{ rating.feedback }}"</p>
           </div>
 
           <!-- Timestamps -->
           <Separator />
           <div class="text-sm text-muted-foreground space-y-1">
-            <div>Yaratilgan: {{ rating.created_at }}</div>
-            <div v-if="rating.rated_at">Baholangan: {{ rating.rated_at }}</div>
+            <div>{{ t('common.createdAt') }}: {{ rating.created_at }}</div>
+            <div v-if="rating.rated_at">{{ t('ratings.ratedAt') }}: {{ rating.rated_at }}</div>
           </div>
         </CardContent>
       </Card>
@@ -146,7 +146,7 @@ const deleteRating = () => {
         <!-- Master Card -->
         <Card v-if="rating.master">
           <CardHeader>
-            <CardTitle>Master</CardTitle>
+            <CardTitle>{{ t('orders.master') }}</CardTitle>
           </CardHeader>
           <CardContent>
             <div class="flex items-center">
@@ -160,12 +160,12 @@ const deleteRating = () => {
                   <svg class="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                   </svg>
-                  {{ parseFloat(rating.master.rating).toFixed(1) }} ({{ rating.master.rating_count }} ta baho)
+                  {{ parseFloat(rating.master.rating).toFixed(1) }} ({{ rating.master.rating_count }} {{ t('ratings.ratingsCount') }})
                 </div>
               </div>
             </div>
             <Button variant="secondary" class="w-full mt-4" size="sm" as-child>
-              <Link :href="`/admin/masters/${rating.master.id}`">Masterni ko'rish</Link>
+              <Link :href="`/admin/masters/${rating.master.id}`">{{ t('ratings.viewMaster') }}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -173,7 +173,7 @@ const deleteRating = () => {
         <!-- Customer Card -->
         <Card v-if="rating.customer">
           <CardHeader>
-            <CardTitle>Mijoz</CardTitle>
+            <CardTitle>{{ t('ratings.customer') }}</CardTitle>
           </CardHeader>
           <CardContent>
             <div class="flex items-center">
@@ -186,7 +186,7 @@ const deleteRating = () => {
               </div>
             </div>
             <Button variant="secondary" class="w-full mt-4" size="sm" as-child>
-              <Link :href="`/admin/customers/${rating.customer.id}`">Mijozni ko'rish</Link>
+              <Link :href="`/admin/customers/${rating.customer.id}`">{{ t('ratings.viewCustomer') }}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -194,25 +194,25 @@ const deleteRating = () => {
         <!-- Order Card -->
         <Card v-if="rating.order">
           <CardHeader>
-            <CardTitle>Buyurtma</CardTitle>
+            <CardTitle>{{ t('ratings.order') }}</CardTitle>
           </CardHeader>
           <CardContent>
             <div class="space-y-2 text-sm">
               <div class="flex justify-between">
-                <span class="text-muted-foreground">Raqam:</span>
+                <span class="text-muted-foreground">{{ t('ratings.orderNumber') }}:</span>
                 <span class="font-mono">{{ rating.order.order_number }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-muted-foreground">Xizmat:</span>
+                <span class="text-muted-foreground">{{ t('orders.service') }}:</span>
                 <span>{{ rating.order.service }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-muted-foreground">Sana:</span>
+                <span class="text-muted-foreground">{{ t('orders.date') }}:</span>
                 <span>{{ rating.order.booking_date }}</span>
               </div>
             </div>
             <Button class="w-full mt-4" size="sm" as-child>
-              <Link :href="`/admin/orders/${rating.order.id}`">Buyurtmani ko'rish</Link>
+              <Link :href="`/admin/orders/${rating.order.id}`">{{ t('ratings.viewOrder') }}</Link>
             </Button>
           </CardContent>
         </Card>

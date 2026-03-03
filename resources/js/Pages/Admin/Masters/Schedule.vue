@@ -289,7 +289,7 @@ const getStatusLabel = (status) => {
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         <span>{{ order.time_start }} - {{ order.session_end }}</span>
-                                        <span class="text-gray-400">({{ order.duration_minutes }} min)</span>
+                                        <span class="text-gray-400">({{ order.duration_minutes }} {{ t('common.min') }})</span>
                                     </div>
                                     <div class="flex items-center gap-2 text-gray-600 mt-1">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

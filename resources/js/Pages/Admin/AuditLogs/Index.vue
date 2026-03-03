@@ -119,31 +119,31 @@ const hasActiveFilters = () => Object.entries(localFilters.value).some(([k, v]) 
         <Card>
             <CardHeader class="pb-4">
                 <div class="flex flex-col lg:flex-row lg:items-center gap-4 flex-wrap">
-                    <Input v-model="localFilters.search" placeholder="Qidirish..." class="lg:w-48" @keyup.enter="applyFilters" />
+                    <Input v-model="localFilters.search" :placeholder="t('common.search') + '...'" class="lg:w-48" @keyup.enter="applyFilters" />
                     <Select v-model="localFilters.action">
-                        <SelectTrigger class="lg:w-40"><SelectValue placeholder="Harakat" /></SelectTrigger>
+                        <SelectTrigger class="lg:w-40"><SelectValue :placeholder="t('auditLogs.action')" /></SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Barchasi</SelectItem>
+                            <SelectItem value="all">{{ t('common.all') }}</SelectItem>
                             <SelectItem v-for="action in actions" :key="action" :value="action">{{ getActionLabel(action) }}</SelectItem>
                         </SelectContent>
                     </Select>
                     <Select v-model="localFilters.auditable_type">
-                        <SelectTrigger class="lg:w-40"><SelectValue placeholder="Model" /></SelectTrigger>
+                        <SelectTrigger class="lg:w-40"><SelectValue :placeholder="t('auditLogs.model')" /></SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Barchasi</SelectItem>
+                            <SelectItem value="all">{{ t('common.all') }}</SelectItem>
                             <SelectItem v-for="type in types" :key="type" :value="type">{{ getModelName(type) }}</SelectItem>
                         </SelectContent>
                     </Select>
                     <Select v-model="localFilters.user_id">
-                        <SelectTrigger class="lg:w-40"><SelectValue placeholder="Foydalanuvchi" /></SelectTrigger>
+                        <SelectTrigger class="lg:w-40"><SelectValue :placeholder="t('auditLogs.user')" /></SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Barchasi</SelectItem>
+                            <SelectItem value="all">{{ t('common.all') }}</SelectItem>
                             <SelectItem v-for="user in users" :key="user.id" :value="String(user.id)">{{ user.name }}</SelectItem>
                         </SelectContent>
                     </Select>
                     <Input v-model="localFilters.date_from" type="date" class="lg:w-40" />
                     <Input v-model="localFilters.date_to" type="date" class="lg:w-40" />
-                    <Button @click="applyFilters">Qidirish</Button>
+                    <Button @click="applyFilters">{{ t('common.search') }}</Button>
                     <Button v-if="hasActiveFilters()" variant="ghost" @click="resetFilters">{{ t('common.reset') }}</Button>
                 </div>
             </CardHeader>
@@ -152,11 +152,11 @@ const hasActiveFilters = () => Object.entries(localFilters.value).some(([k, v]) 
                 <Table v-if="logs.data.length > 0">
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Sana</TableHead>
-                            <TableHead>Foydalanuvchi</TableHead>
-                            <TableHead>Harakat</TableHead>
-                            <TableHead>Model</TableHead>
-                            <TableHead>Tavsif</TableHead>
+                            <TableHead>{{ t('auditLogs.date') }}</TableHead>
+                            <TableHead>{{ t('auditLogs.user') }}</TableHead>
+                            <TableHead>{{ t('auditLogs.action') }}</TableHead>
+                            <TableHead>{{ t('auditLogs.model') }}</TableHead>
+                            <TableHead>{{ t('auditLogs.description') }}</TableHead>
                             <TableHead class="text-center">{{ t('common.actions') }}</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -165,7 +165,7 @@ const hasActiveFilters = () => Object.entries(localFilters.value).some(([k, v]) 
                             <TableRow>
                                 <TableCell class="text-sm text-muted-foreground whitespace-nowrap">{{ formatDate(log.created_at) }}</TableCell>
                                 <TableCell>
-                                    <div class="font-medium">{{ log.user?.name || 'Tizim' }}</div>
+                                    <div class="font-medium">{{ log.user?.name || t('common.system') }}</div>
                                     <div v-if="log.ip_address" class="text-xs text-muted-foreground">{{ log.ip_address }}</div>
                                 </TableCell>
                                 <TableCell><Badge :class="getActionColor(log.action)">{{ getActionLabel(log.action) }}</Badge></TableCell>
@@ -176,7 +176,7 @@ const hasActiveFilters = () => Object.entries(localFilters.value).some(([k, v]) 
                                 <TableCell class="max-w-xs truncate text-muted-foreground">{{ log.description || '-' }}</TableCell>
                                 <TableCell class="text-center">
                                     <Button v-if="log.old_values || log.new_values" variant="ghost" size="sm" @click="toggleChanges(log.id)">
-                                        {{ showChanges === log.id ? 'Yopish' : "O'zgarishlar" }}
+                                        {{ showChanges === log.id ? t('auditLogs.close') : t('auditLogs.changes') }}
                                     </Button>
                                 </TableCell>
                             </TableRow>
@@ -184,11 +184,11 @@ const hasActiveFilters = () => Object.entries(localFilters.value).some(([k, v]) 
                                 <TableCell colspan="6" class="p-4">
                                     <div class="grid grid-cols-2 gap-4 text-sm">
                                         <div v-if="log.old_values">
-                                            <h4 class="font-semibold mb-2 text-red-600">Eski qiymatlar</h4>
+                                            <h4 class="font-semibold mb-2 text-red-600">{{ t('auditLogs.oldValues') }}</h4>
                                             <pre class="bg-red-50 dark:bg-red-950 p-3 rounded text-xs overflow-auto max-h-48">{{ formatJson(log.old_values) }}</pre>
                                         </div>
                                         <div v-if="log.new_values">
-                                            <h4 class="font-semibold mb-2 text-green-600">Yangi qiymatlar</h4>
+                                            <h4 class="font-semibold mb-2 text-green-600">{{ t('auditLogs.newValues') }}</h4>
                                             <pre class="bg-green-50 dark:bg-green-950 p-3 rounded text-xs overflow-auto max-h-48">{{ formatJson(log.new_values) }}</pre>
                                         </div>
                                     </div>
@@ -204,7 +204,7 @@ const hasActiveFilters = () => Object.entries(localFilters.value).some(([k, v]) 
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold mb-2">{{ t('common.noData') }}</h3>
-                    <p class="text-muted-foreground">Loglar topilmadi</p>
+                    <p class="text-muted-foreground">{{ t('auditLogs.notFound') }}</p>
                 </div>
             </CardContent>
 

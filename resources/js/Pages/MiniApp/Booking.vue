@@ -508,14 +508,16 @@ const cartBlockedSlots = computed(() => {
 
 const flatSlots = computed(() => {
     const blocked = cartBlockedSlots.value;
-    return availableSlots.value.map(slot => {
-        const isInCart = blocked.has(slot.start);
-        return {
-            ...slot,
-            disabled: slot.disabled || isInCart,
-            inCart: isInCart,
-        };
-    });
+    return availableSlots.value
+        .filter(slot => slot.available || blocked.has(slot.start))
+        .map(slot => {
+            const isInCart = blocked.has(slot.start);
+            return {
+                ...slot,
+                disabled: slot.disabled || isInCart,
+                inCart: isInCart,
+            };
+        });
 });
 
 // ==================== Formatting ====================

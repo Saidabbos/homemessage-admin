@@ -126,14 +126,14 @@ const getStatusVariant = (status: string): 'default' | 'secondary' | 'destructiv
 
 const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
-        'NEW': 'Yangi',
-        'CONFIRMING': 'Tasdiqlanmoqda',
-        'CONFIRMED': 'Tasdiqlangan',
-        'WAITING_PAYMENT': 'To\'lov kutilmoqda',
-        'PAID': 'To\'langan',
-        'IN_PROGRESS': 'Jarayonda',
-        'COMPLETED': 'Tugallangan',
-        'CANCELLED': 'Bekor qilingan',
+        'NEW': t('orders.statuses.NEW'),
+        'CONFIRMING': t('orders.statuses.CONFIRMING'),
+        'CONFIRMED': t('orders.statuses.CONFIRMED'),
+        'WAITING_PAYMENT': t('orders.statuses.WAITING_PAYMENT'),
+        'PAID': t('orders.statuses.PAID'),
+        'IN_PROGRESS': t('orders.statuses.IN_PROGRESS'),
+        'COMPLETED': t('orders.statuses.COMPLETED'),
+        'CANCELLED': t('orders.statuses.CANCELLED'),
     };
     return labels[status] || status;
 };

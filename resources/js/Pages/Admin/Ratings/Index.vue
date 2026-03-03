@@ -80,31 +80,31 @@ const hasActiveFilters = () => search.value || (type.value && type.value !== 'al
             <Card class="border-l-4 border-l-blue-500">
                 <CardContent class="p-4">
                     <div class="text-2xl font-bold text-blue-600">{{ stats?.total || 0 }}</div>
-                    <p class="text-sm text-muted-foreground">Jami</p>
+                    <p class="text-sm text-muted-foreground">{{ t('common.total') }}</p>
                 </CardContent>
             </Card>
             <Card class="border-l-4 border-l-green-500">
                 <CardContent class="p-4">
                     <div class="text-2xl font-bold text-green-600">{{ stats?.rated || 0 }}</div>
-                    <p class="text-sm text-muted-foreground">Baholangan</p>
+                    <p class="text-sm text-muted-foreground">{{ t('ratings.rated') }}</p>
                 </CardContent>
             </Card>
             <Card class="border-l-4 border-l-yellow-500">
                 <CardContent class="p-4">
                     <div class="text-2xl font-bold text-yellow-600">{{ stats?.pending || 0 }}</div>
-                    <p class="text-sm text-muted-foreground">Kutilmoqda</p>
+                    <p class="text-sm text-muted-foreground">{{ t('ratings.pending') }}</p>
                 </CardContent>
             </Card>
             <Card class="border-l-4 border-l-purple-500">
                 <CardContent class="p-4">
                     <div class="text-2xl font-bold text-purple-600">{{ formatRating(stats?.avg_master) }}</div>
-                    <p class="text-sm text-muted-foreground">Master o'rtacha</p>
+                    <p class="text-sm text-muted-foreground">{{ t('ratings.masterAvg') }}</p>
                 </CardContent>
             </Card>
             <Card class="border-l-4 border-l-cyan-500">
                 <CardContent class="p-4">
                     <div class="text-2xl font-bold text-cyan-600">{{ formatRating(stats?.avg_client) }}</div>
-                    <p class="text-sm text-muted-foreground">Mijoz o'rtacha</p>
+                    <p class="text-sm text-muted-foreground">{{ t('ratings.clientAvg') }}</p>
                 </CardContent>
             </Card>
         </div>
@@ -113,33 +113,33 @@ const hasActiveFilters = () => search.value || (type.value && type.value !== 'al
         <Card>
             <CardHeader class="pb-4">
                 <div class="flex flex-col lg:flex-row lg:items-center gap-4 flex-wrap">
-                    <Input v-model="search" placeholder="Qidirish..." class="lg:w-48" />
+                    <Input v-model="search" :placeholder="t('common.search') + '...'" class="lg:w-48" />
                     <Select v-model="type">
                         <SelectTrigger class="lg:w-40">
-                            <SelectValue placeholder="Turi" />
+                            <SelectValue :placeholder="t('ratings.type')" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Barchasi</SelectItem>
-                            <SelectItem value="client_to_master">Mijoz → Master</SelectItem>
-                            <SelectItem value="master_to_client">Master → Mijoz</SelectItem>
+                            <SelectItem value="all">{{ t('common.all') }}</SelectItem>
+                            <SelectItem value="client_to_master">{{ t('ratings.clientToMaster') }}</SelectItem>
+                            <SelectItem value="master_to_client">{{ t('ratings.masterToClient') }}</SelectItem>
                         </SelectContent>
                     </Select>
                     <Select v-model="status">
                         <SelectTrigger class="lg:w-40">
-                            <SelectValue placeholder="Holat" />
+                            <SelectValue :placeholder="t('common.status')" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Barchasi</SelectItem>
-                            <SelectItem value="rated">Baholangan</SelectItem>
-                            <SelectItem value="pending">Kutilmoqda</SelectItem>
+                            <SelectItem value="all">{{ t('common.all') }}</SelectItem>
+                            <SelectItem value="rated">{{ t('ratings.rated') }}</SelectItem>
+                            <SelectItem value="pending">{{ t('ratings.pending') }}</SelectItem>
                         </SelectContent>
                     </Select>
                     <Select v-model="rating">
                         <SelectTrigger class="lg:w-32">
-                            <SelectValue placeholder="Baho" />
+                            <SelectValue :placeholder="t('ratings.rating')" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Barchasi</SelectItem>
+                            <SelectItem value="all">{{ t('common.all') }}</SelectItem>
                             <SelectItem value="5">⭐ 5</SelectItem>
                             <SelectItem value="4">⭐ 4</SelectItem>
                             <SelectItem value="3">⭐ 3</SelectItem>
@@ -155,13 +155,13 @@ const hasActiveFilters = () => search.value || (type.value && type.value !== 'al
                 <Table v-if="ratings.data.length > 0">
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Buyurtma</TableHead>
-                            <TableHead>Turi</TableHead>
-                            <TableHead>Baholagan</TableHead>
-                            <TableHead>Baholangan</TableHead>
-                            <TableHead class="text-center">Baho</TableHead>
-                            <TableHead>Izoh</TableHead>
-                            <TableHead>Sana</TableHead>
+                            <TableHead>{{ t('ratings.order') }}</TableHead>
+                            <TableHead>{{ t('ratings.type') }}</TableHead>
+                            <TableHead>{{ t('ratings.ratedBy') }}</TableHead>
+                            <TableHead>{{ t('ratings.ratedUser') }}</TableHead>
+                            <TableHead class="text-center">{{ t('ratings.rating') }}</TableHead>
+                            <TableHead>{{ t('ratings.feedback') }}</TableHead>
+                            <TableHead>{{ t('ratings.date') }}</TableHead>
                             <TableHead class="text-center">{{ t('common.actions') }}</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -174,10 +174,10 @@ const hasActiveFilters = () => search.value || (type.value && type.value !== 'al
                             </TableCell>
                             <TableCell>
                                 <Badge v-if="item.type === 'client_to_master'" class="bg-purple-500/10 text-purple-700">
-                                    Mijoz → Master
+                                    {{ t('ratings.clientToMaster') }}
                                 </Badge>
                                 <Badge v-else class="bg-cyan-500/10 text-cyan-700">
-                                    Master → Mijoz
+                                    {{ t('ratings.masterToClient') }}
                                 </Badge>
                             </TableCell>
                             <TableCell class="font-medium">
@@ -191,7 +191,7 @@ const hasActiveFilters = () => search.value || (type.value && type.value !== 'al
                                     <span class="text-yellow-500">⭐</span>
                                     <span class="font-bold">{{ item.overall_rating }}</span>
                                 </div>
-                                <Badge v-else variant="outline" class="text-yellow-600">Kutilmoqda</Badge>
+                                <Badge v-else variant="outline" class="text-yellow-600">{{ t('ratings.pending') }}</Badge>
                             </TableCell>
                             <TableCell class="max-w-xs truncate text-muted-foreground">
                                 {{ item.feedback || '-' }}
@@ -224,7 +224,7 @@ const hasActiveFilters = () => search.value || (type.value && type.value !== 'al
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold mb-2">{{ t('common.noData') }}</h3>
-                    <p class="text-muted-foreground">Baholar topilmadi</p>
+                    <p class="text-muted-foreground">{{ t('ratings.notFound') }}</p>
                 </div>
             </CardContent>
 

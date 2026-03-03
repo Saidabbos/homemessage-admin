@@ -54,17 +54,17 @@ const savePin = async () => {
     // Validation
     if (pinMode.value !== 'remove') {
         if (newPin.value.length !== 4 || !/^\d{4}$/.test(newPin.value)) {
-            pinError.value = 'PIN kod 4 ta raqamdan iborat bo\'lishi kerak'
+            pinError.value = t('profile.pin.invalidLength')
             return
         }
         if (newPin.value !== confirmPin.value) {
-            pinError.value = 'PIN kodlar mos kelmadi'
+            pinError.value = t('profile.pin.mismatch')
             return
         }
     }
     
     if ((pinMode.value === 'change' || pinMode.value === 'remove') && currentPin.value.length !== 4) {
-        pinError.value = 'Joriy PIN kodni kiriting'
+        pinError.value = t('profile.pin.enterCurrent')
         return
     }
     
@@ -90,7 +90,7 @@ const savePin = async () => {
                 hasPin.value = false
                 closePinModal()
             } else {
-                pinError.value = result.message || 'Xatolik yuz berdi'
+                pinError.value = result.message || t('common.error')
             }
         } else {
             const body = { pin: newPin.value }
@@ -114,11 +114,11 @@ const savePin = async () => {
                 hasPin.value = true
                 closePinModal()
             } else {
-                pinError.value = result.message || 'Xatolik yuz berdi'
+                pinError.value = result.message || t('common.error')
             }
         }
     } catch (e) {
-        pinError.value = 'Xatolik yuz berdi'
+        pinError.value = t('common.error')
     } finally {
         pinSaving.value = false
     }
@@ -289,9 +289,9 @@ const savePin = async () => {
                                 </svg>
                             </div>
                             <div class="cd-pin-info">
-                                <h3 class="cd-pin-title">PIN kod</h3>
+                                <h3 class="cd-pin-title">{{ t('profile.pin.title') }}</h3>
                                 <p class="cd-pin-desc">
-                                    {{ hasPin ? 'OTP siz tez kirish' : 'Tez kirish uchun PIN o\'rnating' }}
+                                    {{ hasPin ? t('profile.pin.fastLogin') : t('profile.pin.setupHint') }}
                                 </p>
                             </div>
                         </div>
@@ -301,14 +301,14 @@ const savePin = async () => {
                                 class="cd-pin-btn cd-pin-btn-primary"
                                 @click="openPinModal('set')"
                             >
-                                O'rnatish
+                                {{ t('profile.pin.setup') }}
                             </button>
                             <template v-else>
                                 <button class="cd-pin-btn" @click="openPinModal('change')">
-                                    O'zgartirish
+                                    {{ t('profile.pin.change') }}
                                 </button>
                                 <button class="cd-pin-btn cd-pin-btn-danger" @click="openPinModal('remove')">
-                                    O'chirish
+                                    {{ t('profile.pin.remove') }}
                                 </button>
                             </template>
                         </div>
@@ -330,7 +330,7 @@ const savePin = async () => {
             <div class="cd-modal">
                 <div class="cd-modal-header">
                     <h2 class="cd-modal-title">
-                        {{ pinMode === 'set' ? 'PIN o\'rnatish' : pinMode === 'change' ? 'PIN o\'zgartirish' : 'PIN o\'chirish' }}
+                        {{ pinMode === 'set' ? t('profile.pin.setTitle') : pinMode === 'change' ? t('profile.pin.changeTitle') : t('profile.pin.removeTitle') }}
                     </h2>
                     <button class="cd-modal-close" @click="closePinModal">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -343,7 +343,7 @@ const savePin = async () => {
                 <div class="cd-modal-body">
                     <!-- Current PIN (for change/remove) -->
                     <div v-if="pinMode === 'change' || pinMode === 'remove'" class="cd-form-group">
-                        <label class="cd-form-label">Joriy PIN kod</label>
+                        <label class="cd-form-label">{{ t('profile.pin.currentPin') }}</label>
                         <input
                             v-model="currentPin"
                             type="password"
@@ -357,7 +357,7 @@ const savePin = async () => {
                     <!-- New PIN (for set/change) -->
                     <template v-if="pinMode !== 'remove'">
                         <div class="cd-form-group">
-                            <label class="cd-form-label">{{ pinMode === 'change' ? 'Yangi PIN kod' : 'PIN kod' }}</label>
+                            <label class="cd-form-label">{{ pinMode === 'change' ? t('profile.pin.newPin') : t('profile.pin.title') }}</label>
                             <input
                                 v-model="newPin"
                                 type="password"
@@ -369,7 +369,7 @@ const savePin = async () => {
                         </div>
                         
                         <div class="cd-form-group">
-                            <label class="cd-form-label">PIN kodni tasdiqlang</label>
+                            <label class="cd-form-label">{{ t('profile.pin.confirmPin') }}</label>
                             <input
                                 v-model="confirmPin"
                                 type="password"
@@ -385,14 +385,14 @@ const savePin = async () => {
                 </div>
                 
                 <div class="cd-modal-footer">
-                    <button class="cd-modal-cancel" @click="closePinModal">Bekor qilish</button>
-                    <button 
+                    <button class="cd-modal-cancel" @click="closePinModal">{{ t('common.cancel') }}</button>
+                    <button
                         class="cd-modal-submit"
                         :class="{ danger: pinMode === 'remove' }"
                         :disabled="pinSaving"
                         @click="savePin"
                     >
-                        {{ pinSaving ? '...' : pinMode === 'remove' ? 'O\'chirish' : 'Saqlash' }}
+                        {{ pinSaving ? '...' : pinMode === 'remove' ? t('common.delete') : t('common.save') }}
                     </button>
                 </div>
             </div>

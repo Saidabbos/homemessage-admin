@@ -219,15 +219,15 @@ const generatePaymentLink = async (provider: string) => {
     });
     const data = await response.json();
     if (data.success) { generatedPaymentLink.value = data.link; paymentLinkProvider.value = provider; }
-    else { alert(data.message || 'Xatolik yuz berdi'); }
-  } catch (e) { alert('Xatolik yuz berdi'); }
+    else { alert(data.message || t('common.error')); }
+  } catch (e) { alert(t('common.error')); }
   finally { generatingPaymentLink.value = false; }
 };
 
 const copyPaymentLink = async () => {
   if (!generatedPaymentLink.value) return;
-  try { await navigator.clipboard.writeText(generatedPaymentLink.value); alert('Havola nusxalandi!'); }
-  catch (e) { const ta = document.createElement('textarea'); ta.value = generatedPaymentLink.value; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); alert('Havola nusxalandi!'); }
+  try { await navigator.clipboard.writeText(generatedPaymentLink.value); alert(t('orders.linkCopied')); }
+  catch (e) { const ta = document.createElement('textarea'); ta.value = generatedPaymentLink.value; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); alert(t('orders.linkCopied')); }
 };
 
 const canGeneratePaymentLink = () => props.order.payment_status !== 'PAID' && props.order.status !== 'CANCELLED';
@@ -242,7 +242,7 @@ const formatArrivalWindow = (order: any) => {
 };
 const getStatusLabel = (status: string) => props.statusOptions?.find(s => s.value === status)?.label || status;
 const getLogActionLabel = (action: string) => {
-  const labels: Record<string, string> = { 'status_changed': 'Status o\'zgartirildi', 'rescheduled': 'Vaqt o\'zgartirildi', 'note_added': 'Izoh qo\'shildi', 'created': 'Buyurtma yaratildi' };
+  const labels: Record<string, string> = { 'status_changed': t('orders.logs.statusChanged'), 'rescheduled': t('orders.logs.rescheduled'), 'note_added': t('orders.logs.noteAdded'), 'created': t('orders.logs.created') };
   return labels[action] || action;
 };
 
@@ -259,35 +259,35 @@ const getReservationProgress = () => {
 const workOrderText = computed(() => {
   const o = props.order;
   const lines = [
-    `📋 НАРЯД #${o.order_number}`, `━━━━━━━━━━━━━━━━━━━━`, ``,
-    `👤 Mijoz: ${o.customer?.name || 'Noma\'lum'}`,
-    `📞 Tel: ${o.conf_onsite_phone || o.contact_phone || o.customer?.phone || '-'}`, ``,
-    `📍 Manzil: ${o.address || '-'}`,
+    `📋 ${t('orders.workOrder.title')} #${o.order_number}`, `━━━━━━━━━━━━━━━━━━━━`, ``,
+    `👤 ${t('orders.workOrder.customer')}: ${o.customer?.name || t('common.unknown')}`,
+    `📞 ${t('orders.workOrder.phone')}: ${o.conf_onsite_phone || o.contact_phone || o.customer?.phone || '-'}`, ``,
+    `📍 ${t('orders.workOrder.address')}: ${o.address || '-'}`,
   ];
-  if (o.conf_entrance || o.conf_floor) lines.push(`   Kirish: ${o.conf_entrance || '-'}, Qavat: ${o.conf_floor || '-'}`);
-  if (o.conf_elevator) lines.push(`   ✓ Lift bor`);
-  if (o.conf_landmark) lines.push(`🗺 Mo'ljal: ${o.conf_landmark}`);
-  if (o.conf_parking) lines.push(`🅿️ Parking: ${o.conf_parking}`);
-  lines.push(``, `📅 Sana: ${formatDate(o.booking_date)}`, `⏰ Kelish oynasi: ${formatArrivalWindow(o)}`, ``);
-  lines.push(`💆 Xizmat: ${o.service_type?.name?.uz || o.service_type?.name || '-'}`, `⏱ Davomiylik: ${o.duration?.duration || '-'} daqiqa`);
-  if (o.oil) lines.push(`🧴 Yog': ${o.oil?.name?.uz || o.oil?.name}`);
-  if (o.people_count > 1) lines.push(`👥 Odamlar soni: ${o.people_count}`);
-  if (o.conf_constraints) lines.push(``, `⚠️ Cheklovlar: ${o.conf_constraints}`);
-  if (o.conf_pets) lines.push(`🐾 Hayvonlar bor!`);
-  if (!o.conf_space_ok) lines.push(`📐 2×2 joy yo'q - tekshiring!`);
-  if (o.conf_note_to_master) lines.push(``, `📝 Izoh: ${o.conf_note_to_master}`);
-  lines.push(``, `━━━━━━━━━━━━━━━━━━━━`, `💰 Summa: ${Number(o.total_amount).toLocaleString()} so'm`);
-  lines.push(`💳 To'lov: ${o.payment_status === 'PAID' ? '✅ To\'langan' : '⏳ Kutilmoqda'}`);
+  if (o.conf_entrance || o.conf_floor) lines.push(`   ${t('orders.confirmation.entrance')}: ${o.conf_entrance || '-'}, ${t('orders.confirmation.floor')}: ${o.conf_floor || '-'}`);
+  if (o.conf_elevator) lines.push(`   ✓ ${t('orders.confirmation.hasElevator')}`);
+  if (o.conf_landmark) lines.push(`🗺 ${t('orders.confirmation.landmark')}: ${o.conf_landmark}`);
+  if (o.conf_parking) lines.push(`🅿️ ${t('orders.confirmation.parking')}: ${o.conf_parking}`);
+  lines.push(``, `📅 ${t('orders.date')}: ${formatDate(o.booking_date)}`, `⏰ ${t('orders.arrivalWindow')}: ${formatArrivalWindow(o)}`, ``);
+  lines.push(`💆 ${t('orders.service')}: ${o.service_type?.name?.uz || o.service_type?.name || '-'}`, `⏱ ${t('orders.duration')}: ${o.duration?.duration || '-'} ${t('common.min')}`);
+  if (o.oil) lines.push(`🧴 ${t('orders.oil')}: ${o.oil?.name?.uz || o.oil?.name}`);
+  if (o.people_count > 1) lines.push(`👥 ${t('orders.peopleCount')}: ${o.people_count}`);
+  if (o.conf_constraints) lines.push(``, `⚠️ ${t('orders.confirmation.constraints')}: ${o.conf_constraints}`);
+  if (o.conf_pets) lines.push(`🐾 ${t('orders.confirmation.hasPets')}`);
+  if (!o.conf_space_ok) lines.push(`📐 ${t('orders.confirmation.noSpace')}`);
+  if (o.conf_note_to_master) lines.push(``, `📝 ${t('orders.confirmation.noteToMaster')}: ${o.conf_note_to_master}`);
+  lines.push(``, `━━━━━━━━━━━━━━━━━━━━`, `💰 ${t('orders.amount')}: ${Number(o.total_amount).toLocaleString()} ${t('common.sum')}`);
+  lines.push(`💳 ${t('orders.payment')}: ${o.payment_status === 'PAID' ? '✅ ' + t('orders.paymentStatuses.paid') : '⏳ ' + t('orders.paymentStatuses.pending')}`);
   return lines.join('\n');
 });
 
 const copyWorkOrder = async () => {
-  try { await navigator.clipboard.writeText(workOrderText.value); alert('Наряд nusxalandi!'); }
-  catch (e) { const ta = document.createElement('textarea'); ta.value = workOrderText.value; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); alert('Наряд nusxalandi!'); }
+  try { await navigator.clipboard.writeText(workOrderText.value); alert(t('orders.workOrderCopied')); }
+  catch (e) { const ta = document.createElement('textarea'); ta.value = workOrderText.value; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); alert(t('orders.workOrderCopied')); }
 };
 
 const sendWorkOrderToMaster = async () => {
-  if (!props.order.master?.telegram_chat_id) { alert('Master Telegram chat ID mavjud emas'); return; }
+  if (!props.order.master?.telegram_chat_id) { alert(t('orders.noTelegramId')); return; }
   sendingWorkOrder.value = true;
   try {
     const response = await fetch(route('admin.orders.send-work-order', props.order.id), {
@@ -295,9 +295,9 @@ const sendWorkOrderToMaster = async () => {
       headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' },
     });
     const data = await response.json();
-    if (data.success) { alert('Наряд masterga yuborildi!'); router.reload(); }
-    else { alert(data.message || 'Xatolik yuz berdi'); }
-  } catch (e) { alert('Xatolik yuz berdi'); }
+    if (data.success) { alert(t('orders.workOrderSent')); router.reload(); }
+    else { alert(data.message || t('common.error')); }
+  } catch (e) { alert(t('common.error')); }
   finally { sendingWorkOrder.value = false; }
 };
 </script>
@@ -325,13 +325,13 @@ const sendWorkOrderToMaster = async () => {
               <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              Guruh buyurtmasi
-              <Badge variant="secondary">{{ order.group_orders.length + 1 }} kishi</Badge>
+              {{ t('orders.groupOrder') }}
+              <Badge variant="secondary">{{ order.group_orders.length + 1 }} {{ t('orders.people') }}</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent class="space-y-2">
             <div class="flex items-center gap-3 p-2 bg-purple-50 dark:bg-purple-950 rounded border border-purple-200 dark:border-purple-800">
-              <span class="text-xs text-muted-foreground">Hozirgi:</span>
+              <span class="text-xs text-muted-foreground">{{ t('orders.current') }}:</span>
               <Link v-if="order.master" :href="route('admin.masters.show', order.master.id)" class="font-medium text-primary hover:underline" @click.stop>{{ order.master.first_name }} {{ order.master.last_name }}</Link>
               <span class="text-muted-foreground">→</span>
               <span class="text-sm">{{ order.service_type?.name?.uz || order.service_type?.name }}</span>
@@ -382,14 +382,14 @@ const sendWorkOrderToMaster = async () => {
           <CardContent>
             <div class="grid grid-cols-2 gap-4">
               <div><p class="text-sm text-muted-foreground">{{ t('orders.date', 'Sana') }}</p><p class="font-medium">{{ formatDate(order.booking_date) }}</p></div>
-              <div><p class="text-sm text-muted-foreground">Kelish oynasi</p><p class="font-medium">{{ formatArrivalWindow(order) }}</p></div>
-              <div><p class="text-sm text-muted-foreground">{{ t('orders.service', 'Xizmat') }}</p><p class="font-medium">{{ order.service_type?.name?.uz || order.service_type?.name }}</p></div>
-              <div><p class="text-sm text-muted-foreground">Davomiylik</p><p class="font-medium">{{ order.duration?.duration || '-' }} daqiqa</p></div>
-              <div><p class="text-sm text-muted-foreground">{{ t('orders.oil', 'Yog\'') }}</p><p class="font-medium">{{ order.oil?.name?.uz || order.oil?.name || '-' }}</p></div>
-              <div><p class="text-sm text-muted-foreground">Odamlar soni</p><p class="font-medium">{{ order.people_count || 1 }} kishi</p></div>
+              <div><p class="text-sm text-muted-foreground">{{ t('orders.arrivalWindow') }}</p><p class="font-medium">{{ formatArrivalWindow(order) }}</p></div>
+              <div><p class="text-sm text-muted-foreground">{{ t('orders.service') }}</p><p class="font-medium">{{ order.service_type?.name?.uz || order.service_type?.name }}</p></div>
+              <div><p class="text-sm text-muted-foreground">{{ t('orders.duration') }}</p><p class="font-medium">{{ order.duration?.duration || '-' }} {{ t('common.min') }}</p></div>
+              <div><p class="text-sm text-muted-foreground">{{ t('orders.oil') }}</p><p class="font-medium">{{ order.oil?.name?.uz || order.oil?.name || '-' }}</p></div>
+              <div><p class="text-sm text-muted-foreground">{{ t('orders.peopleCount') }}</p><p class="font-medium">{{ order.people_count || 1 }} {{ t('orders.people') }}</p></div>
               <div><p class="text-sm text-muted-foreground">{{ t('orders.master', 'Master') }}</p><p><Link v-if="order.master" :href="route('admin.masters.show', order.master.id)" class="font-medium text-primary hover:underline">{{ order.master.first_name }} {{ order.master.last_name }}</Link></p></div>
-              <div><p class="text-sm text-muted-foreground">{{ t('orders.amount', 'Summa') }}</p><p class="font-medium">{{ Number(order.total_amount).toLocaleString() }} so'm</p>
-                <p v-if="order.group_orders?.length > 0" class="text-xs text-muted-foreground">Guruh jami: {{ calculateGroupTotal() }} so'm</p></div>
+              <div><p class="text-sm text-muted-foreground">{{ t('orders.amount') }}</p><p class="font-medium">{{ Number(order.total_amount).toLocaleString() }} {{ t('common.sum') }}</p>
+                <p v-if="order.group_orders?.length > 0" class="text-xs text-muted-foreground">{{ t('orders.groupTotal') }}: {{ calculateGroupTotal() }} {{ t('common.sum') }}</p></div>
             </div>
           </CardContent>
         </Card>
@@ -403,7 +403,7 @@ const sendWorkOrderToMaster = async () => {
               <div><p class="text-sm text-muted-foreground">{{ t('customers.phone', 'Telefon') }}</p><p class="font-medium">{{ order.customer?.phone || order.contact_phone || '-' }}</p></div>
               <div class="col-span-2"><p class="text-sm text-muted-foreground">{{ t('orders.address', 'Manzil') }}</p><p class="font-medium">{{ order.address || '-' }}</p>
                 <p v-if="order.entrance || order.floor || order.apartment" class="text-sm text-muted-foreground">
-                  <span v-if="order.entrance">Pod: {{ order.entrance }}</span><span v-if="order.floor">, Qavat: {{ order.floor }}</span><span v-if="order.apartment">, Xonadon: {{ order.apartment }}</span>
+                  <span v-if="order.entrance">{{ t('orders.confirmation.entrance') }}: {{ order.entrance }}</span><span v-if="order.floor">, {{ t('orders.confirmation.floor') }}: {{ order.floor }}</span><span v-if="order.apartment">, {{ t('orders.confirmation.apartment') }}: {{ order.apartment }}</span>
                 </p></div>
               <div v-if="order.landmark" class="col-span-2"><p class="text-sm text-muted-foreground">{{ t('orders.landmark', 'Mo\'ljal') }}</p><p class="font-medium">{{ order.landmark }}</p></div>
             </div>
@@ -414,45 +414,45 @@ const sendWorkOrderToMaster = async () => {
         <Card>
           <CardHeader class="flex flex-row items-center justify-between">
             <div class="flex items-center gap-3">
-              <CardTitle>Анкета подтверждения</CardTitle>
+              <CardTitle>{{ t('orders.confirmationForm') }}</CardTitle>
               <span v-if="order.call_outcome" :class="['px-2 py-1 text-xs font-medium rounded', getCallOutcomeVariant(order.call_outcome)]">{{ order.call_outcome_label }}</span>
             </div>
-            <Button variant="link" size="sm" @click="showConfirmationModal = true">{{ order.call_outcome ? 'Tahrirlash' : 'To\'ldirish' }}</Button>
+            <Button variant="link" size="sm" @click="showConfirmationModal = true">{{ order.call_outcome ? t('common.edit') : t('orders.fillForm') }}</Button>
           </CardHeader>
           <CardContent>
             <div v-if="order.call_outcome && order.call_outcome !== 'pending'" class="grid grid-cols-2 gap-4">
-              <div><p class="text-sm text-muted-foreground">Kirish</p><p class="font-medium">{{ order.conf_entrance || '-' }}</p></div>
-              <div><p class="text-sm text-muted-foreground">Qavat</p><p class="font-medium">{{ order.conf_floor || '-' }}</p></div>
-              <div><p class="text-sm text-muted-foreground">Lift</p><p class="font-medium">{{ order.conf_elevator ? 'Ha' : 'Yo\'q' }}</p></div>
-              <div><p class="text-sm text-muted-foreground">Joydagi telefon</p><p class="font-medium">{{ order.conf_onsite_phone || '-' }}</p></div>
-              <div class="col-span-2"><p class="text-sm text-muted-foreground">Parking</p><p class="font-medium">{{ order.conf_parking || '-' }}</p></div>
-              <div class="col-span-2"><p class="text-sm text-muted-foreground">Mo'ljal</p><p class="font-medium">{{ order.conf_landmark || '-' }}</p></div>
+              <div><p class="text-sm text-muted-foreground">{{ t('orders.confirmation.entrance') }}</p><p class="font-medium">{{ order.conf_entrance || '-' }}</p></div>
+              <div><p class="text-sm text-muted-foreground">{{ t('orders.confirmation.floor') }}</p><p class="font-medium">{{ order.conf_floor || '-' }}</p></div>
+              <div><p class="text-sm text-muted-foreground">{{ t('orders.confirmation.elevator') }}</p><p class="font-medium">{{ order.conf_elevator ? t('common.yes') : t('common.no') }}</p></div>
+              <div><p class="text-sm text-muted-foreground">{{ t('orders.confirmation.onsitePhone') }}</p><p class="font-medium">{{ order.conf_onsite_phone || '-' }}</p></div>
+              <div class="col-span-2"><p class="text-sm text-muted-foreground">{{ t('orders.confirmation.parking') }}</p><p class="font-medium">{{ order.conf_parking || '-' }}</p></div>
+              <div class="col-span-2"><p class="text-sm text-muted-foreground">{{ t('orders.confirmation.landmark') }}</p><p class="font-medium">{{ order.conf_landmark || '-' }}</p></div>
               <Separator class="col-span-2" />
-              <div class="col-span-2"><p class="text-sm text-muted-foreground">Cheklovlar</p><p class="font-medium">{{ order.conf_constraints || '-' }}</p></div>
-              <div><p class="text-sm text-muted-foreground">2×2 joy bormi?</p><p :class="order.conf_space_ok ? 'text-green-600' : 'text-orange-600'" class="font-medium">{{ order.conf_space_ok ? 'Ha' : 'Yo\'q' }}</p></div>
-              <div><p class="text-sm text-muted-foreground">Hayvonlar</p><p :class="order.conf_pets ? 'text-orange-600' : 'text-green-600'" class="font-medium">{{ order.conf_pets ? 'Ha' : 'Yo\'q' }}</p></div>
-              <div v-if="order.conf_note_to_master" class="col-span-2"><p class="text-sm text-muted-foreground">Ustaga izoh</p><p class="font-medium">{{ order.conf_note_to_master }}</p></div>
-              <div v-if="order.ready_sent_at" class="col-span-2 pt-3 border-t"><p class="text-sm text-green-600 flex items-center gap-2">✓ Ustaga yuborildi: {{ formatDateTime(order.ready_sent_at) }}</p></div>
-              <div v-else-if="isReadyForTherapist()" class="col-span-2 pt-3 border-t"><p class="text-sm text-blue-600 flex items-center gap-2">📤 Tayyor ustaga yuborishga</p></div>
+              <div class="col-span-2"><p class="text-sm text-muted-foreground">{{ t('orders.confirmation.constraints') }}</p><p class="font-medium">{{ order.conf_constraints || '-' }}</p></div>
+              <div><p class="text-sm text-muted-foreground">{{ t('orders.confirmation.spaceAvailable') }}</p><p :class="order.conf_space_ok ? 'text-green-600' : 'text-orange-600'" class="font-medium">{{ order.conf_space_ok ? t('common.yes') : t('common.no') }}</p></div>
+              <div><p class="text-sm text-muted-foreground">{{ t('orders.confirmation.pets') }}</p><p :class="order.conf_pets ? 'text-orange-600' : 'text-green-600'" class="font-medium">{{ order.conf_pets ? t('common.yes') : t('common.no') }}</p></div>
+              <div v-if="order.conf_note_to_master" class="col-span-2"><p class="text-sm text-muted-foreground">{{ t('orders.confirmation.noteToMaster') }}</p><p class="font-medium">{{ order.conf_note_to_master }}</p></div>
+              <div v-if="order.ready_sent_at" class="col-span-2 pt-3 border-t"><p class="text-sm text-green-600 flex items-center gap-2">✓ {{ t('orders.sentToMaster') }}: {{ formatDateTime(order.ready_sent_at) }}</p></div>
+              <div v-else-if="isReadyForTherapist()" class="col-span-2 pt-3 border-t"><p class="text-sm text-blue-600 flex items-center gap-2">📤 {{ t('orders.readyToSend') }}</p></div>
             </div>
             <div v-else class="text-center py-6">
-              <p class="text-muted-foreground mb-3">Buyurtmani tasdiqlash uchun anketa to'ldirilmagan</p>
-              <Button @click="showConfirmationModal = true">Anketa to'ldirish</Button>
+              <p class="text-muted-foreground mb-3">{{ t('orders.confirmationNotFilled') }}</p>
+              <Button @click="showConfirmationModal = true">{{ t('orders.fillForm') }}</Button>
             </div>
           </CardContent>
         </Card>
 
         <!-- Reservation Status -->
         <Card class="border-l-4 border-l-green-500">
-          <CardHeader><CardTitle class="flex items-center gap-2">📋 Bron holati</CardTitle></CardHeader>
+          <CardHeader><CardTitle class="flex items-center gap-2">📋 {{ t('orders.reservationStatus') }}</CardTitle></CardHeader>
           <CardContent class="space-y-3">
             <div v-for="(step, i) in [
-              { done: true, label: 'Buyurtma yaratildi', date: order.created_at },
-              { done: order.call_outcome === 'confirmed', label: 'Tasdiq qo\'ng\'iroqi', date: order.confirmed_at },
-              { done: order.payment_status === 'PAID', label: 'To\'lov', date: order.paid_at },
-              { done: !!order.ready_sent_at, label: 'Ustalarga xabar', date: order.ready_sent_at },
-              { done: !!order.work_order_sent_at, label: 'Наряд yuborildi', date: order.work_order_sent_at },
-              { done: order.status === 'IN_PROGRESS' || order.status === 'COMPLETED', label: 'Seans boshlandi', date: null }
+              { done: true, label: t('orders.steps.orderCreated'), date: order.created_at },
+              { done: order.call_outcome === 'confirmed', label: t('orders.steps.confirmationCall'), date: order.confirmed_at },
+              { done: order.payment_status === 'PAID', label: t('orders.steps.payment'), date: order.paid_at },
+              { done: !!order.ready_sent_at, label: t('orders.steps.notifyMasters'), date: order.ready_sent_at },
+              { done: !!order.work_order_sent_at, label: t('orders.steps.workOrderSent'), date: order.work_order_sent_at },
+              { done: order.status === 'IN_PROGRESS' || order.status === 'COMPLETED', label: t('orders.steps.sessionStarted'), date: null }
             ]" :key="i" class="flex items-center gap-3">
               <span :class="['flex items-center justify-center w-6 h-6 rounded-full text-white text-xs font-bold', step.done ? 'bg-green-500' : 'bg-muted-foreground/30']">
                 {{ step.done ? '✓' : i + 1 }}
@@ -460,11 +460,11 @@ const sendWorkOrderToMaster = async () => {
               <div class="flex-1">
                 <p class="text-sm font-medium">{{ step.label }}</p>
                 <p v-if="step.date" class="text-xs text-muted-foreground">{{ formatDateTime(step.date) }}</p>
-                <p v-else-if="!step.done" class="text-xs text-orange-600">Kutilmoqda</p>
+                <p v-else-if="!step.done" class="text-xs text-orange-600">{{ t('orders.paymentStatuses.pending') }}</p>
               </div>
             </div>
             <Separator />
-            <div class="flex justify-between text-xs text-muted-foreground mb-2"><span>Jarayon</span><span>{{ getReservationProgress() }}%</span></div>
+            <div class="flex justify-between text-xs text-muted-foreground mb-2"><span>{{ t('orders.progress') }}</span><span>{{ getReservationProgress() }}%</span></div>
             <Progress :model-value="getReservationProgress()" class="h-2" />
           </CardContent>
         </Card>
@@ -472,39 +472,39 @@ const sendWorkOrderToMaster = async () => {
         <!-- Work Order -->
         <Card class="border-l-4 border-l-blue-500">
           <CardHeader class="flex flex-row items-center justify-between">
-            <CardTitle class="flex items-center gap-2">📋 Наряд (Work Order)</CardTitle>
+            <CardTitle class="flex items-center gap-2">📋 {{ t('orders.workOrderTitle') }}</CardTitle>
             <div class="flex items-center gap-2">
-              <Button variant="outline" size="sm" @click="copyWorkOrder">📋 Nusxa</Button>
+              <Button variant="outline" size="sm" @click="copyWorkOrder">📋 {{ t('orders.copy') }}</Button>
               <Button v-if="order.master?.telegram_chat_id" size="sm" @click="sendWorkOrderToMaster" :disabled="sendingWorkOrder">
-                📤 {{ sendingWorkOrder ? 'Yuborilmoqda...' : 'Masterga yuborish' }}
+                📤 {{ sendingWorkOrder ? t('orders.sending') : t('orders.sendToMaster') }}
               </Button>
             </div>
           </CardHeader>
           <CardContent>
             <pre class="bg-muted rounded-lg p-4 font-mono text-sm whitespace-pre-wrap border">{{ workOrderText }}</pre>
-            <p v-if="order.work_order_sent_at" class="mt-3 text-sm text-green-600 flex items-center gap-2">✓ Masterga yuborildi: {{ formatDateTime(order.work_order_sent_at) }}</p>
+            <p v-if="order.work_order_sent_at" class="mt-3 text-sm text-green-600 flex items-center gap-2">✓ {{ t('orders.sentToMaster') }}: {{ formatDateTime(order.work_order_sent_at) }}</p>
           </CardContent>
         </Card>
 
         <!-- QA Section (only for COMPLETED) -->
         <Card v-if="order.status === 'COMPLETED'" class="border-l-4 border-l-yellow-500">
           <CardHeader class="flex flex-row items-center justify-between">
-            <CardTitle class="flex items-center gap-2">⭐ Sifat nazorati</CardTitle>
-            <Button v-if="!order.qa_completed" variant="link" size="sm" @click="showQaModal = true">Baholash</Button>
+            <CardTitle class="flex items-center gap-2">⭐ {{ t('orders.qa.title') }}</CardTitle>
+            <Button v-if="!order.qa_completed" variant="link" size="sm" @click="showQaModal = true">{{ t('orders.qa.rate') }}</Button>
           </CardHeader>
           <CardContent>
             <div v-if="order.qa_completed" class="space-y-3">
-              <div class="flex items-center justify-between"><span class="text-sm text-muted-foreground">Umumiy baho:</span>
+              <div class="flex items-center justify-between"><span class="text-sm text-muted-foreground">{{ t('orders.qa.overall') }}:</span>
                 <div class="flex"><span v-for="i in 5" :key="i" :class="i <= order.qa_overall_rating ? 'text-yellow-400' : 'text-muted'">★</span></div></div>
-              <div class="flex items-center justify-between"><span class="text-sm text-muted-foreground">Vaqtga rioya:</span>
+              <div class="flex items-center justify-between"><span class="text-sm text-muted-foreground">{{ t('orders.qa.punctuality') }}:</span>
                 <div class="flex"><span v-for="i in 5" :key="i" :class="i <= order.qa_punctuality_rating ? 'text-yellow-400' : 'text-muted'">★</span></div></div>
-              <div class="flex items-center justify-between"><span class="text-sm text-muted-foreground">Professionallik:</span>
+              <div class="flex items-center justify-between"><span class="text-sm text-muted-foreground">{{ t('orders.qa.professionalism') }}:</span>
                 <div class="flex"><span v-for="i in 5" :key="i" :class="i <= order.qa_professionalism_rating ? 'text-yellow-400' : 'text-muted'">★</span></div></div>
-              <div v-if="order.qa_feedback" class="pt-3 border-t"><p class="text-sm text-muted-foreground">Izoh:</p><p class="text-sm">{{ order.qa_feedback }}</p></div>
+              <div v-if="order.qa_feedback" class="pt-3 border-t"><p class="text-sm text-muted-foreground">{{ t('orders.qa.feedback') }}:</p><p class="text-sm">{{ order.qa_feedback }}</p></div>
             </div>
             <div v-else class="text-center py-4">
-              <p class="text-sm text-muted-foreground mb-3">Buyurtma hali baholanmagan</p>
-              <Button variant="secondary" @click="showQaModal = true">⭐ Baholash</Button>
+              <p class="text-sm text-muted-foreground mb-3">{{ t('orders.qa.notRated') }}</p>
+              <Button variant="secondary" @click="showQaModal = true">⭐ {{ t('orders.qa.rate') }}</Button>
             </div>
           </CardContent>
         </Card>
@@ -531,7 +531,7 @@ const sendWorkOrderToMaster = async () => {
             <div class="flex items-center justify-between">
               <span class="text-sm text-muted-foreground">{{ t('orders.status', 'Status') }}:</span>
               <Badge :variant="order.payment_status === 'PAID' ? 'default' : 'destructive'">
-                {{ order.payment_status === 'NOT_PAID' ? "To'lanmagan" : order.payment_status === 'PAID' ? "To'langan" : 'Qaytarilgan' }}
+                {{ order.payment_status === 'NOT_PAID' ? t('orders.paymentStatuses.notPaid') : order.payment_status === 'PAID' ? t('orders.paymentStatuses.paid') : t('orders.paymentStatuses.refunded') }}
               </Badge>
             </div>
             <div class="flex items-center justify-between pb-3 border-b">
@@ -540,18 +540,18 @@ const sendWorkOrderToMaster = async () => {
             </div>
             <!-- Payment Link Generator -->
             <div v-if="canGeneratePaymentLink()" class="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
-              <p class="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">To'lov havolasini yaratish</p>
+              <p class="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">{{ t('orders.generatePaymentLink') }}</p>
               <div v-if="hasConfiguredProvider()" class="flex gap-2 mb-2">
                 <Button v-if="paymentProviders?.payme?.configured" size="sm" class="flex-1 bg-[#00CDCD] hover:bg-[#00B5B5]"
                   @click="generatePaymentLink('payme')" :disabled="generatingPaymentLink">{{ generatingPaymentLink ? '...' : 'Payme' }}</Button>
                 <Button v-if="paymentProviders?.click?.configured" size="sm" class="flex-1 bg-[#0066FF] hover:bg-[#0052CC]"
                   @click="generatePaymentLink('click')" :disabled="generatingPaymentLink">{{ generatingPaymentLink ? '...' : 'Click' }}</Button>
               </div>
-              <p v-else class="text-xs text-orange-600">⚠️ Payme/Click sozlanmagan</p>
+              <p v-else class="text-xs text-orange-600">⚠️ {{ t('orders.paymentNotConfigured') }}</p>
               <div v-if="generatedPaymentLink" class="mt-2 space-y-2">
                 <div class="flex items-center gap-2"><Input :model-value="generatedPaymentLink" readonly class="text-xs font-mono" />
-                  <Button size="sm" variant="secondary" @click="copyPaymentLink">Nusxa</Button></div>
-                <p class="text-xs text-green-700">{{ paymentLinkProvider === 'payme' ? 'Payme' : 'Click' }} havolasi tayyor</p>
+                  <Button size="sm" variant="secondary" @click="copyPaymentLink">{{ t('orders.copy') }}</Button></div>
+                <p class="text-xs text-green-700">{{ paymentLinkProvider === 'payme' ? 'Payme' : 'Click' }} {{ t('orders.linkReady') }}</p>
               </div>
             </div>
             <!-- Payments History -->
@@ -581,7 +581,7 @@ const sendWorkOrderToMaster = async () => {
                   <p class="text-sm font-medium">{{ getLogActionLabel(log.action) }}</p>
                   <p v-if="log.old_value || log.new_value" class="text-xs text-muted-foreground">{{ log.old_value }} → {{ log.new_value }}</p>
                   <p v-if="log.comment" class="text-xs text-muted-foreground mt-1">{{ log.comment }}</p>
-                  <p class="text-xs text-muted-foreground mt-1">{{ log.user?.name || 'Tizim' }} - {{ formatDateTime(log.created_at) }}</p>
+                  <p class="text-xs text-muted-foreground mt-1">{{ log.user?.name || t('common.system') }} - {{ formatDateTime(log.created_at) }}</p>
                 </div>
               </div>
               <div class="flex gap-3">
@@ -619,12 +619,12 @@ const sendWorkOrderToMaster = async () => {
           
           <!-- Available Slots -->
           <div v-if="rescheduleForm.booking_date" class="space-y-2">
-            <Label>Bo'sh vaqtlar</Label>
+            <Label>{{ t('orders.availableSlots') }}</Label>
             <div v-if="loadingSlots" class="text-sm text-muted-foreground py-4 text-center">
-              Yuklanmoqda...
+              {{ t('common.loading') }}
             </div>
             <div v-else-if="availableSlots.length === 0" class="text-sm text-muted-foreground py-4 text-center border rounded-lg">
-              Bu sanada bo'sh vaqt yo'q
+              {{ t('orders.noSlotsAvailable') }}
             </div>
             <div v-else class="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto p-1">
               <button
@@ -650,18 +650,18 @@ const sendWorkOrderToMaster = async () => {
           <!-- Manual time override -->
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-2">
-              <Label>Kelish boshlanishi</Label>
+              <Label>{{ t('orders.arrivalStart') }}</Label>
               <Input type="time" v-model="rescheduleForm.arrival_window_start" />
             </div>
             <div class="space-y-2">
-              <Label>Kelish tugashi</Label>
+              <Label>{{ t('orders.arrivalEnd') }}</Label>
               <Input type="time" v-model="rescheduleForm.arrival_window_end" />
             </div>
           </div>
           
           <div class="space-y-2">
             <Label>{{ t('orders.comment', 'Izoh') }}</Label>
-            <Textarea v-model="rescheduleForm.comment" rows="2" placeholder="Sabab..." />
+            <Textarea v-model="rescheduleForm.comment" rows="2" :placeholder="t('orders.reasonPlaceholder')" />
           </div>
         </div>
         <DialogFooter>
@@ -695,54 +695,54 @@ const sendWorkOrderToMaster = async () => {
     <!-- Confirmation Modal -->
     <Dialog v-model:open="showConfirmationModal">
       <DialogContent class="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle>Анкета подтверждения</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{{ t('orders.confirmationForm') }}</DialogTitle></DialogHeader>
         <div class="space-y-6">
-          <div><Label class="mb-2 block">Qo'ng'iroq natijasi *</Label>
+          <div><Label class="mb-2 block">{{ t('orders.callOutcome') }} *</Label>
             <div class="grid grid-cols-3 gap-2">
               <Button v-for="opt in callOutcomeOptions" :key="opt.value" type="button"
                 :variant="confirmationForm.call_outcome === opt.value ? 'default' : 'outline'" size="sm"
                 @click="confirmationForm.call_outcome = opt.value">{{ opt.label }}</Button>
             </div></div>
           <Card><CardContent class="pt-4 space-y-4">
-            <h4 class="font-medium">Manzil tafsilotlari</h4>
+            <h4 class="font-medium">{{ t('orders.addressDetails') }}</h4>
             <div class="grid grid-cols-2 gap-4">
-              <div class="space-y-2"><Label>Kirish (Pod)</Label><Input v-model="confirmationForm.conf_entrance" placeholder="1" /></div>
-              <div class="space-y-2"><Label>Qavat</Label><Input v-model="confirmationForm.conf_floor" placeholder="3" /></div>
+              <div class="space-y-2"><Label>{{ t('orders.confirmation.entrancePod') }}</Label><Input v-model="confirmationForm.conf_entrance" placeholder="1" /></div>
+              <div class="space-y-2"><Label>{{ t('orders.confirmation.floor') }}</Label><Input v-model="confirmationForm.conf_floor" placeholder="3" /></div>
             </div>
-            <div class="flex items-center space-x-2"><Checkbox id="elevator" :checked="confirmationForm.conf_elevator" @update:checked="confirmationForm.conf_elevator = $event" /><Label for="elevator">Lift bor</Label></div>
-            <div class="space-y-2"><Label>Parking</Label><Input v-model="confirmationForm.conf_parking" placeholder="Hovlida / Ko'chada" /></div>
-            <div class="space-y-2"><Label>Mo'ljal</Label><Input v-model="confirmationForm.conf_landmark" placeholder="Makro yonida, 5-uy" /></div>
+            <div class="flex items-center space-x-2"><Checkbox id="elevator" :checked="confirmationForm.conf_elevator" @update:checked="confirmationForm.conf_elevator = $event" /><Label for="elevator">{{ t('orders.confirmation.hasElevator') }}</Label></div>
+            <div class="space-y-2"><Label>{{ t('orders.confirmation.parking') }}</Label><Input v-model="confirmationForm.conf_parking" :placeholder="t('orders.confirmation.parkingPlaceholder')" /></div>
+            <div class="space-y-2"><Label>{{ t('orders.confirmation.landmark') }}</Label><Input v-model="confirmationForm.conf_landmark" :placeholder="t('orders.confirmation.landmarkPlaceholder')" /></div>
           </CardContent></Card>
-          <div class="space-y-2"><Label>Joydagi telefon</Label><Input v-model="confirmationForm.conf_onsite_phone" placeholder="+998 90 123 45 67" /></div>
+          <div class="space-y-2"><Label>{{ t('orders.confirmation.onsitePhone') }}</Label><Input v-model="confirmationForm.conf_onsite_phone" placeholder="+998 90 123 45 67" /></div>
           <Card class="bg-orange-50 dark:bg-orange-950 border-orange-200 dark:border-orange-800"><CardContent class="pt-4 space-y-4">
-            <h4 class="font-medium text-orange-800 dark:text-orange-200">Muhim ma'lumotlar</h4>
-            <div class="space-y-2"><Label>Cheklovlar (allergia, sog'liq, ...)</Label><Textarea v-model="confirmationForm.conf_constraints" rows="2" /></div>
+            <h4 class="font-medium text-orange-800 dark:text-orange-200">{{ t('orders.importantInfo') }}</h4>
+            <div class="space-y-2"><Label>{{ t('orders.confirmation.constraintsLabel') }}</Label><Textarea v-model="confirmationForm.conf_constraints" rows="2" /></div>
             <div class="grid grid-cols-2 gap-4">
-              <div class="flex items-center space-x-2"><Checkbox id="space" :checked="confirmationForm.conf_space_ok" @update:checked="confirmationForm.conf_space_ok = $event" /><Label for="space">2×2 metr joy bor</Label></div>
-              <div class="flex items-center space-x-2"><Checkbox id="pets" :checked="confirmationForm.conf_pets" @update:checked="confirmationForm.conf_pets = $event" /><Label for="pets">Hayvonlar bor</Label></div>
+              <div class="flex items-center space-x-2"><Checkbox id="space" :checked="confirmationForm.conf_space_ok" @update:checked="confirmationForm.conf_space_ok = $event" /><Label for="space">{{ t('orders.confirmation.hasSpace') }}</Label></div>
+              <div class="flex items-center space-x-2"><Checkbox id="pets" :checked="confirmationForm.conf_pets" @update:checked="confirmationForm.conf_pets = $event" /><Label for="pets">{{ t('orders.confirmation.hasPets') }}</Label></div>
             </div>
           </CardContent></Card>
-          <div class="space-y-2"><Label>Ustaga izoh</Label><Textarea v-model="confirmationForm.conf_note_to_master" rows="3" /></div>
+          <div class="space-y-2"><Label>{{ t('orders.confirmation.noteToMaster') }}</Label><Textarea v-model="confirmationForm.conf_note_to_master" rows="3" /></div>
         </div>
-        <DialogFooter><Button variant="outline" @click="showConfirmationModal = false">Bekor qilish</Button>
-          <Button @click="submitConfirmation" :disabled="confirmationForm.processing">Saqlash</Button></DialogFooter>
+        <DialogFooter><Button variant="outline" @click="showConfirmationModal = false">{{ t('common.cancel') }}</Button>
+          <Button @click="submitConfirmation" :disabled="confirmationForm.processing">{{ t('common.save') }}</Button></DialogFooter>
       </DialogContent>
     </Dialog>
 
     <!-- QA Modal -->
     <Dialog v-model:open="showQaModal">
-      <DialogContent><DialogHeader><DialogTitle>⭐ Sifat nazorati</DialogTitle></DialogHeader>
+      <DialogContent><DialogHeader><DialogTitle>⭐ {{ t('orders.qa.title') }}</DialogTitle></DialogHeader>
         <div class="space-y-4">
-          <div><Label class="mb-2 block">Umumiy baho</Label><div class="flex gap-1">
+          <div><Label class="mb-2 block">{{ t('orders.qa.overall') }}</Label><div class="flex gap-1">
             <button v-for="i in 5" :key="i" type="button" @click="qaForm.qa_overall_rating = i" class="text-2xl hover:scale-110 transition" :class="i <= qaForm.qa_overall_rating ? 'text-yellow-400' : 'text-muted'">★</button></div></div>
-          <div><Label class="mb-2 block">Vaqtga rioya qilish</Label><div class="flex gap-1">
+          <div><Label class="mb-2 block">{{ t('orders.qa.punctuality') }}</Label><div class="flex gap-1">
             <button v-for="i in 5" :key="i" type="button" @click="qaForm.qa_punctuality_rating = i" class="text-2xl hover:scale-110 transition" :class="i <= qaForm.qa_punctuality_rating ? 'text-yellow-400' : 'text-muted'">★</button></div></div>
-          <div><Label class="mb-2 block">Professionallik</Label><div class="flex gap-1">
+          <div><Label class="mb-2 block">{{ t('orders.qa.professionalism') }}</Label><div class="flex gap-1">
             <button v-for="i in 5" :key="i" type="button" @click="qaForm.qa_professionalism_rating = i" class="text-2xl hover:scale-110 transition" :class="i <= qaForm.qa_professionalism_rating ? 'text-yellow-400' : 'text-muted'">★</button></div></div>
-          <div class="space-y-2"><Label>Izoh</Label><Textarea v-model="qaForm.qa_feedback" rows="3" /></div>
+          <div class="space-y-2"><Label>{{ t('orders.qa.feedback') }}</Label><Textarea v-model="qaForm.qa_feedback" rows="3" /></div>
         </div>
-        <DialogFooter><Button variant="outline" @click="showQaModal = false">Bekor qilish</Button>
-          <Button variant="secondary" @click="submitQa" :disabled="qaForm.processing">Saqlash</Button></DialogFooter>
+        <DialogFooter><Button variant="outline" @click="showQaModal = false">{{ t('common.cancel') }}</Button>
+          <Button variant="secondary" @click="submitQa" :disabled="qaForm.processing">{{ t('common.save') }}</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   </div>

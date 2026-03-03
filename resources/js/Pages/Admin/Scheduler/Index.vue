@@ -82,11 +82,11 @@ const getStatusBadge = (status) => {
 const getStatusText = (status) => {
     switch (status) {
         case 'success':
-            return 'Muvaffaqiyatli';
+            return t('scheduler.success');
         case 'failed':
-            return 'Xatolik';
+            return t('scheduler.failed');
         case 'running':
-            return 'Ishlayapti';
+            return t('scheduler.running');
         default:
             return status;
     }
@@ -98,8 +98,8 @@ const getStatusText = (status) => {
         <!-- Header -->
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Scheduler Monitor</h1>
-                <p class="text-sm text-gray-500 mt-1">Avtomatik vazifalar monitoringi</p>
+                <h1 class="text-2xl font-bold text-gray-900">{{ t('scheduler.title') }}</h1>
+                <p class="text-sm text-gray-500 mt-1">{{ t('scheduler.subtitle') }}</p>
             </div>
         </div>
 
@@ -107,7 +107,7 @@ const getStatusText = (status) => {
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
                 <CardHeader class="pb-2">
-                    <CardTitle class="text-sm font-medium text-gray-500">Jami ishga tushirishlar</CardTitle>
+                    <CardTitle class="text-sm font-medium text-gray-500">{{ t('scheduler.totalRuns') }}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div class="text-2xl font-bold">{{ stats.total_runs }}</div>
@@ -116,7 +116,7 @@ const getStatusText = (status) => {
 
             <Card>
                 <CardHeader class="pb-2">
-                    <CardTitle class="text-sm font-medium text-gray-500">Muvaffaqiyatli</CardTitle>
+                    <CardTitle class="text-sm font-medium text-gray-500">{{ t('scheduler.success') }}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div class="text-2xl font-bold text-green-600">{{ stats.successful }}</div>
@@ -125,7 +125,7 @@ const getStatusText = (status) => {
 
             <Card>
                 <CardHeader class="pb-2">
-                    <CardTitle class="text-sm font-medium text-gray-500">Xatoliklar</CardTitle>
+                    <CardTitle class="text-sm font-medium text-gray-500">{{ t('scheduler.errors') }}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div class="text-2xl font-bold text-red-600">{{ stats.failed }}</div>
@@ -134,7 +134,7 @@ const getStatusText = (status) => {
 
             <Card>
                 <CardHeader class="pb-2">
-                    <CardTitle class="text-sm font-medium text-gray-500">Bugun o'zgartirilgan</CardTitle>
+                    <CardTitle class="text-sm font-medium text-gray-500">{{ t('scheduler.modifiedToday') }}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div class="text-2xl font-bold text-blue-600">{{ stats.records_today }}</div>
@@ -145,7 +145,7 @@ const getStatusText = (status) => {
         <!-- Manual Run -->
         <Card>
             <CardHeader>
-                <CardTitle>Qo'lda ishga tushirish</CardTitle>
+                <CardTitle>{{ t('scheduler.manualRun') }}</CardTitle>
             </CardHeader>
             <CardContent>
                 <div class="flex flex-wrap gap-3">
@@ -157,7 +157,7 @@ const getStatusText = (status) => {
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Buyurtmalar statusini yangilash
+                        {{ t('scheduler.updateOrderStatuses') }}
                     </Button>
 
                     <Button
@@ -169,7 +169,7 @@ const getStatusText = (status) => {
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        OTP tozalash
+                        {{ t('scheduler.otpCleanup') }}
                     </Button>
                 </div>
             </CardContent>
@@ -178,19 +178,19 @@ const getStatusText = (status) => {
         <!-- Runs Table -->
         <Card>
             <CardHeader>
-                <CardTitle>Ishga tushirishlar tarixi</CardTitle>
+                <CardTitle>{{ t('scheduler.history') }}</CardTitle>
             </CardHeader>
             <CardContent>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="border-b">
-                                <th class="text-left py-3 px-4 font-medium">Buyruq</th>
-                                <th class="text-left py-3 px-4 font-medium">Status</th>
-                                <th class="text-left py-3 px-4 font-medium">O'zgartirilgan</th>
-                                <th class="text-left py-3 px-4 font-medium">Vaqt</th>
-                                <th class="text-left py-3 px-4 font-medium">Boshlangan</th>
-                                <th class="text-left py-3 px-4 font-medium">Tafsilotlar</th>
+                                <th class="text-left py-3 px-4 font-medium">{{ t('scheduler.command') }}</th>
+                                <th class="text-left py-3 px-4 font-medium">{{ t('common.status') }}</th>
+                                <th class="text-left py-3 px-4 font-medium">{{ t('scheduler.processed') }}</th>
+                                <th class="text-left py-3 px-4 font-medium">{{ t('scheduler.time') }}</th>
+                                <th class="text-left py-3 px-4 font-medium">{{ t('scheduler.startedAt') }}</th>
+                                <th class="text-left py-3 px-4 font-medium">{{ t('scheduler.details') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -216,7 +216,7 @@ const getStatusText = (status) => {
                             </tr>
                             <tr v-if="runs.data.length === 0">
                                 <td colspan="6" class="py-8 text-center text-gray-500">
-                                    Hali hech qanday ishga tushirish yo'q
+                                    {{ t('scheduler.noRuns') }}
                                 </td>
                             </tr>
                         </tbody>

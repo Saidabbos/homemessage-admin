@@ -50,7 +50,12 @@
         "sortOrder": "Порядок сортировки",
         "basicInfo": "Основная информация",
         "new": "Новый",
-        "details": "Детали"
+        "details": "Детали",
+        "yes": "Да",
+        "no": "Нет",
+        "error": "Произошла ошибка",
+        "system": "Система",
+        "unknown": "Неизвестно"
     },
     "translations": {
         "title": "Переводы",
@@ -189,7 +194,7 @@
         "customer": "Клиент",
         "amount": "Сумма",
         "active_masters": "Активные мастера",
-        "avg_per_master": "Средний заказ\/мастер",
+        "avg_per_master": "Средний заказ/мастер",
         "by_orders_count": "По количеству заказов",
         "by_revenue": "По доходу",
         "thousands": "тыс. сум",
@@ -234,7 +239,9 @@
         "enterEmail": "Введите email",
         "statusHint": "Неактивные клиенты не могут использовать приложение",
         "registeredViaApp": "Клиенты регистрируются через приложение",
-        "confirmDelete": "Вы уверены, что хотите удалить этого клиента?"
+        "confirmDelete": "Вы уверены, что хотите удалить этого клиента?",
+        "statusActive": "Клиент активен",
+        "statusBlocked": "Заблокирован"
     },
     "dispatchers": {
         "title": "Диспетчеры",
@@ -371,7 +378,24 @@
         "enterNewPassword": "Введите новый пароль",
         "enterConfirmPassword": "Введите пароль ещё раз",
         "passwordHint": "Минимум 6 символов",
-        "changePassword": "Изменить пароль"
+        "changePassword": "Изменить пароль",
+        "pin": {
+            "title": "PIN код",
+            "fastLogin": "Быстрый вход без OTP",
+            "setupHint": "Установите PIN для быстрого входа",
+            "setup": "Установить",
+            "change": "Изменить",
+            "remove": "Удалить",
+            "setTitle": "Установка PIN",
+            "changeTitle": "Изменение PIN",
+            "removeTitle": "Удаление PIN",
+            "currentPin": "Текущий PIN код",
+            "newPin": "Новый PIN код",
+            "confirmPin": "Подтвердите PIN код",
+            "invalidLength": "PIN код должен состоять из 4 цифр",
+            "mismatch": "PIN коды не совпадают",
+            "enterCurrent": "Введите текущий PIN код"
+        }
     },
     "slots": {
         "title": "Временные слоты",
@@ -447,7 +471,7 @@
         "orderNumber": "Номер заказа",
         "customer": "Клиент",
         "master": "Мастер",
-        "dateTime": "Дата\/Время",
+        "dateTime": "Дата/Время",
         "service": "Услуга",
         "payment": "Оплата",
         "status": "Статус",
@@ -492,7 +516,94 @@
         "allStatuses": "Все статусы",
         "allPaymentStatuses": "Все статусы оплаты",
         "allMasters": "Все мастера",
-        "emptyMessage": "Заказы не найдены"
+        "emptyMessage": "Заказы не найдены",
+        "groupOrder": "Групповой заказ",
+        "people": "чел.",
+        "current": "Текущий",
+        "arrivalWindow": "Окно прибытия",
+        "groupTotal": "Итого по группе",
+        "fillForm": "Заполнить",
+        "confirmationForm": "Анкета подтверждения",
+        "confirmationNotFilled": "Для подтверждения заказа анкета не заполнена",
+        "callOutcome": "Результат звонка",
+        "addressDetails": "Детали адреса",
+        "importantInfo": "Важная информация",
+        "reservationStatus": "Статус бронирования",
+        "progress": "Прогресс",
+        "workOrderTitle": "Наряд (Work Order)",
+        "workOrderCopied": "Наряд скопирован\\!",
+        "workOrderSent": "Наряд отправлен мастеру\\!",
+        "noTelegramId": "У мастера нет Telegram chat ID",
+        "copy": "Копия",
+        "sending": "Отправка...",
+        "sendToMaster": "Отправить мастеру",
+        "sentToMaster": "Отправлено мастеру",
+        "readyToSend": "Готово к отправке мастеру",
+        "linkCopied": "Ссылка скопирована\\!",
+        "linkReady": "ссылка готова",
+        "generatePaymentLink": "Создать ссылку на оплату",
+        "paymentNotConfigured": "Payme/Click не настроены",
+        "availableSlots": "Свободные слоты",
+        "noSlotsAvailable": "Нет свободных слотов на эту дату",
+        "arrivalStart": "Начало прибытия",
+        "arrivalEnd": "Конец прибытия",
+        "reasonPlaceholder": "Причина...",
+        "paymentStatuses": {
+            "notPaid": "Не оплачено",
+            "paid": "Оплачено",
+            "refunded": "Возвращено",
+            "pending": "Ожидается"
+        },
+        "steps": {
+            "orderCreated": "Заказ создан",
+            "confirmationCall": "Подтверждающий звонок",
+            "payment": "Оплата",
+            "notifyMasters": "Уведомление мастеров",
+            "workOrderSent": "Наряд отправлен",
+            "sessionStarted": "Сеанс начат"
+        },
+        "logs": {
+            "statusChanged": "Статус изменён",
+            "rescheduled": "Время изменено",
+            "noteAdded": "Заметка добавлена",
+            "created": "Заказ создан"
+        },
+        "confirmation": {
+            "entrance": "Подъезд",
+            "entrancePod": "Подъезд (Pod)",
+            "floor": "Этаж",
+            "apartment": "Квартира",
+            "elevator": "Лифт",
+            "hasElevator": "Есть лифт",
+            "onsitePhone": "Телефон на месте",
+            "parking": "Парковка",
+            "parkingPlaceholder": "Во дворе / На улице",
+            "landmark": "Ориентир",
+            "landmarkPlaceholder": "Рядом с Макро, дом 5",
+            "constraints": "Ограничения",
+            "constraintsLabel": "Ограничения (аллергия, здоровье, ...)",
+            "spaceAvailable": "Есть место 2×2?",
+            "hasSpace": "Место 2×2 метра есть",
+            "noSpace": "Места 2×2 нет - проверьте\\!",
+            "pets": "Животные",
+            "hasPets": "Есть животные",
+            "noteToMaster": "Заметка для мастера"
+        },
+        "workOrder": {
+            "title": "НАРЯД",
+            "customer": "Клиент",
+            "phone": "Тел",
+            "address": "Адрес"
+        },
+        "qa": {
+            "title": "Контроль качества",
+            "rate": "Оценить",
+            "overall": "Общая оценка",
+            "punctuality": "Пунктуальность",
+            "professionalism": "Профессионализм",
+            "feedback": "Комментарий",
+            "notRated": "Заказ ещё не оценен"
+        }
     },
     "landing": {
         "title": "Home Massage - Премиум Массаж",
@@ -845,7 +956,7 @@
             "subtitle": "Ваши избранные мастера",
             "count": "избранных мастеров",
             "reviews": "отзывов",
-            "perHour": "сум\/час",
+            "perHour": "сум/час",
             "book": "Забронировать",
             "empty": "Нет избранных мастеров"
         },
@@ -964,7 +1075,7 @@
             "statusInProgress": "В процессе",
             "statusCompleted": "Завершён",
             "statusCancelled": "Отменён",
-            "dateTime": "Дата\/Время",
+            "dateTime": "Дата/Время",
             "date": "Дата",
             "time": "Время",
             "customerInfo": "Информация о клиенте",
@@ -1062,7 +1173,34 @@
         "singular": "Оценка",
         "details": "Детали оценки",
         "info": "Информация об оценке",
-        "confirmDelete": "Вы уверены, что хотите удалить эту оценку?"
+        "confirmDelete": "Вы уверены, что хотите удалить эту оценку?",
+        "rated": "Оценено",
+        "pending": "Ожидается",
+        "masterAvg": "Среднее мастера",
+        "clientAvg": "Среднее клиента",
+        "type": "Тип",
+        "clientToMaster": "Клиент → Мастер",
+        "masterToClient": "Мастер → Клиент",
+        "rating": "Оценка",
+        "order": "Заказ",
+        "ratedBy": "Оценил",
+        "ratedUser": "Оценённый",
+        "feedback": "Комментарий",
+        "date": "Дата",
+        "notFound": "Оценки не найдены",
+        "noOrder": "Нет заказа",
+        "confirmDeleteRating": "Вы действительно хотите удалить эту оценку?",
+        "punctuality": "Пунктуальность",
+        "professionalism": "Профессионализм",
+        "cleanliness": "Чистота",
+        "ratedAt": "Оценено",
+        "ratingsCount": "оценок",
+        "viewMaster": "Посмотреть мастера",
+        "viewCustomer": "Посмотреть клиента",
+        "viewOrder": "Посмотреть заказ",
+        "orderNumber": "Номер",
+        "customer": "Клиент",
+        "subtitle": "Просмотр и управление оценками"
     },
     "orderActions": {
         "created": "Заказ создан",
@@ -1128,11 +1266,14 @@
             "statusChanged": "Статус изменён",
             "slotChanged": "Время изменено",
             "paymentReceived": "Оплата получена",
-            "noteAdded": "Комментарий добавлен",
+            "noteAdded": "Заметка добавлена",
             "assigned": "Назначено",
             "login": "Вход",
             "logout": "Выход"
-        }
+        },
+        "close": "Закрыть",
+        "description": "Описание",
+        "notFound": "Логи не найдены"
     },
     "admin": {
         "dashboard": {
@@ -1185,5 +1326,25 @@
             "clientToMaster": "Клиент → Мастер",
             "masterToClient": "Мастер → Клиент"
         }
+    },
+    "scheduler": {
+        "title": "Scheduler Monitor",
+        "subtitle": "Мониторинг автоматических задач",
+        "totalRuns": "Всего запусков",
+        "success": "Успешно",
+        "failed": "Ошибка",
+        "errors": "Ошибки",
+        "running": "Выполняется",
+        "modifiedToday": "Изменено сегодня",
+        "manualRun": "Запуск вручную",
+        "updateOrderStatuses": "Обновить статусы заказов",
+        "otpCleanup": "Очистка OTP",
+        "history": "История запусков",
+        "command": "Команда",
+        "processed": "Обработано",
+        "time": "Время",
+        "startedAt": "Начало",
+        "details": "Детали",
+        "noRuns": "Пока нет запусков"
     }
 }

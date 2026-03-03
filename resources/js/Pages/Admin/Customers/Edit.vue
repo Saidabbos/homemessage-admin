@@ -107,7 +107,7 @@ const formatDate = (date: string) => new Date(date).toLocaleDateString('uz-UZ');
               <div class="flex items-center justify-between">
                 <div>
                   <Label>{{ t('common.active', 'Faol') }}</Label>
-                  <p class="text-xs text-muted-foreground">{{ form.status ? 'Mijoz faol' : 'Bloklangan' }}</p>
+                  <p class="text-xs text-muted-foreground">{{ form.status ? t('customers.statusActive') : t('customers.statusBlocked') }}</p>
                 </div>
                 <Switch v-model:checked="form.status" />
               </div>
