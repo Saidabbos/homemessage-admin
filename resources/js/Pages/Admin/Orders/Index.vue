@@ -55,6 +55,8 @@ const search = ref(props.filters?.search || '');
 const statusFilter = ref(props.filters?.status || 'all');
 const paymentStatusFilter = ref(props.filters?.payment_status || 'all');
 const masterFilter = ref(props.filters?.master_id || 'all');
+const dateFrom = ref(props.filters?.date_from || '');
+const dateTo = ref(props.filters?.date_to || '');
 
 const applyFilters = debounce(() => {
   router.get(
@@ -64,18 +66,22 @@ const applyFilters = debounce(() => {
       status: statusFilter.value === 'all' ? undefined : statusFilter.value,
       payment_status: paymentStatusFilter.value === 'all' ? undefined : paymentStatusFilter.value,
       master_id: masterFilter.value === 'all' ? undefined : masterFilter.value,
+      date_from: dateFrom.value || undefined,
+      date_to: dateTo.value || undefined,
     },
     { preserveState: true, replace: true }
   );
 }, 300);
 
-watch([search, statusFilter, paymentStatusFilter, masterFilter], applyFilters);
+watch([search, statusFilter, paymentStatusFilter, masterFilter, dateFrom, dateTo], applyFilters);
 
 const resetFilters = () => {
   search.value = '';
   statusFilter.value = 'all';
   paymentStatusFilter.value = 'all';
   masterFilter.value = 'all';
+  dateFrom.value = '';
+  dateTo.value = '';
 };
 
 const getStatusVariant = (status) => {
@@ -259,6 +265,18 @@ const isRowVisible = (row) => {
               </SelectItem>
             </SelectContent>
           </Select>
+          <Input
+            v-model="dateFrom"
+            type="date"
+            :placeholder="t('orders.dateFrom')"
+            class="lg:w-44"
+          />
+          <Input
+            v-model="dateTo"
+            type="date"
+            :placeholder="t('orders.dateTo')"
+            class="lg:w-44"
+          />
           <Button variant="outline" @click="resetFilters">
             {{ t('common.reset') }}
           </Button>
