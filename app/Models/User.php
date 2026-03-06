@@ -35,6 +35,11 @@ class User extends Authenticatable
         'phone',
         'password',
         'status',
+        'restriction_reason',
+        'restricted_at',
+        'restricted_by',
+        'admin_notes',
+        'booking_cutoff_hour',
         'locale',
         'telegram_id',
         'telegram_username',
@@ -66,6 +71,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'status' => 'boolean',
+            'restricted_at' => 'datetime',
             'pin_set_at' => 'datetime',
         ];
     }
@@ -115,6 +121,48 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Master::class, 'favorite_masters')
             ->withTimestamps();
+    }
+
+    /**
+     * Get the user's orders (as customer)
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'customer_id');
+    }
+
+    /**
+     * Get ratings received by this customer (from masters)
+     */
+    public function ratingsReceived(): HasMany
+    {
+        return $this->hasMany(Rating::class, 'customer_id')
+            ->where('type', Rating::TYPE_MASTER_TO_CLIENT);
+    }
+
+    /**
+     * Get ratings given by this customer (to masters)
+     */
+    public function ratingsGiven(): HasMany
+    {
+        return $this->hasMany(Rating::class, 'customer_id')
+            ->where('type', Rating::TYPE_CLIENT_TO_MASTER);
+    }
+
+    /**
+     * Get the user who restricted this customer
+     */
+    public function restrictedByUser(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'restricted_by');
+    }
+
+    /**
+     * Check if customer is restricted
+     */
+    public function isRestricted(): bool
+    {
+        return $this->restricted_at !== null;
     }
 
     /**

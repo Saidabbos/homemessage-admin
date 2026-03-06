@@ -26,12 +26,18 @@ class SlotController extends Controller
     {
         $master = Master::findOrFail($request->master_id);
         $date = Carbon::parse($request->date);
-        $duration = $request->duration ?? 60;
 
-        $slots = $this->slotCalculationService->getSlotsForMaster(
+        $serviceParams = [
+            'duration' => $request->duration ?? 60,
+            'people_count' => $request->people_count ?? 1,
+            'user_gender' => $request->user()?->gender,
+            'user_id' => $request->user()?->id,
+        ];
+
+        $slots = $this->slotCalculationService->getAvailableSlots(
             $master,
             $date,
-            $duration
+            $serviceParams
         );
 
         return response()->json([
@@ -48,12 +54,18 @@ class SlotController extends Controller
         $master = Master::findOrFail($request->master_id);
         $startDate = Carbon::parse($request->start_date);
         $days = $request->days ?? 7;
-        $duration = $request->duration ?? 60;
+
+        $serviceParams = [
+            'duration' => $request->duration ?? 60,
+            'people_count' => $request->people_count ?? 1,
+            'user_gender' => $request->user()?->gender,
+            'user_id' => $request->user()?->id,
+        ];
 
         $result = [];
         for ($i = 0; $i < $days; $i++) {
             $date = $startDate->copy()->addDays($i);
-            $slots = $this->slotCalculationService->getSlotsForMaster($master, $date, $duration);
+            $slots = $this->slotCalculationService->getAvailableSlots($master, $date, $serviceParams);
             $result[$date->toDateString()] = $slots;
         }
 
@@ -80,14 +92,21 @@ class SlotController extends Controller
         }
 
         $dateCarbon = Carbon::parse($date);
-        
+
+        $serviceParams = [
+            'duration' => $duration,
+            'people_count' => $request->people_count ?? 1,
+            'user_gender' => $request->user()?->gender,
+            'user_id' => $request->user()?->id,
+        ];
+
         // Get all slots for each master (including disabled)
         $allMasterSlots = [];
         foreach ($masterIds as $masterId) {
             $master = Master::find($masterId);
             if (!$master) continue;
-            
-            $slots = $this->slotCalculationService->getSlotsForMaster($master, $dateCarbon, $duration);
+
+            $slots = $this->slotCalculationService->getAvailableSlots($master, $dateCarbon, $serviceParams);
             foreach ($slots as $slot) {
                 $start = $slot['start'];
                 if (!isset($allMasterSlots[$start])) {

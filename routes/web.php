@@ -249,6 +249,10 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin'])->group(function () {
             'destroy' => 'admin.customers.destroy',
         ]
     ]);
+    Route::post('customers/{customer}/toggle-restriction', [CustomerController::class, 'toggleRestriction'])
+        ->name('admin.customers.toggleRestriction');
+    Route::patch('customers/{customer}/notes', [CustomerController::class, 'updateNotes'])
+        ->name('admin.customers.updateNotes');
 
     // Ratings
     Route::get('ratings', [\App\Http\Controllers\Admin\RatingController::class, 'index'])->name('admin.ratings.index');

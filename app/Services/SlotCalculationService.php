@@ -6,6 +6,7 @@ use App\Models\Master;
 use App\Models\Order;
 use App\Models\ServiceType;
 use App\Models\Setting;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -59,7 +60,13 @@ class SlotCalculationService
         }
         
         // Apply gender-based time restrictions
-        return $this->applyGenderTimeRestriction($slots, $userGender);
+        $slots = $this->applyGenderTimeRestriction($slots, $userGender);
+
+        // Apply individual user time restriction
+        $userId = $serviceParams['user_id'] ?? null;
+        $slots = $this->applyUserTimeRestriction($slots, $userId);
+
+        return $slots;
     }
     
     /**
@@ -91,6 +98,34 @@ class SlotCalculationService
                 $slot['reason'] = 'gender_time_restriction';
             }
             
+            return $slot;
+        }, $slots);
+    }
+
+    /**
+     * Individual foydalanuvchi uchun vaqt cheklovini qo'llash
+     */
+    protected function applyUserTimeRestriction(array $slots, ?int $userId): array
+    {
+        if (!$userId) {
+            return $slots;
+        }
+
+        $user = User::find($userId);
+        if (!$user || $user->booking_cutoff_hour === null) {
+            return $slots;
+        }
+
+        $cutoffHour = (int) $user->booking_cutoff_hour;
+
+        return array_map(function ($slot) use ($cutoffHour) {
+            $slotHour = (int) explode(':', $slot['start'] ?? $slot['window_start'])[0];
+
+            if ($slotHour >= $cutoffHour) {
+                $slot['disabled'] = true;
+                $slot['reason'] = 'user_time_restriction';
+            }
+
             return $slot;
         }, $slots);
     }
