@@ -75,7 +75,10 @@ const deleteCustomer = () => {
 };
 
 const saveRestriction = () => {
-  restrictionForm.post(route('admin.customers.toggleRestriction', props.customer.id), {
+  router.post(route('admin.customers.toggleRestriction', props.customer.id), {
+    booking_cutoff_hour: restrictionForm.booking_cutoff_hour,
+    restriction_reason: restrictionForm.restriction_reason,
+  }, {
     onSuccess: () => {
       showRestrictionModal.value = false;
       restrictionForm.reset();
@@ -84,7 +87,7 @@ const saveRestriction = () => {
 };
 
 const removeRestriction = () => {
-  router.post(route('admin.customers.toggleRestriction', props.customer.id), {});
+  router.post(route('admin.customers.toggleRestriction', props.customer.id));
 };
 
 const saveNotes = () => {

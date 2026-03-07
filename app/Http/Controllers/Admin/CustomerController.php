@@ -90,11 +90,13 @@ class CustomerController extends Controller
             ? (int) $request->input('booking_cutoff_hour')
             : null;
 
+        $admin = \Illuminate\Support\Facades\Auth::guard('admin')->user();
+
         $this->customerService->updateCutoffHour(
             $customer,
             $cutoffHour,
             $request->input('restriction_reason'),
-            $request->user()->id
+            $admin->id
         );
 
         return redirect()->back()
