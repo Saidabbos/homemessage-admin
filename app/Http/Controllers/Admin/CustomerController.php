@@ -76,7 +76,7 @@ class CustomerController extends Controller
         $this->customerService->update($customer, $request->validated(), $request);
 
         return redirect()->route('admin.customers.index')
-            ->with('success', 'Mijoz muvaffaqiyatli yangilandi');
+            ->with('success', 'customerUpdated');
     }
 
     public function toggleRestriction(Request $request, User $customer)
@@ -100,7 +100,7 @@ class CustomerController extends Controller
         );
 
         return redirect()->back()
-            ->with('success', $cutoffHour !== null ? 'Vaqt cheklovi qo\'yildi' : 'Cheklov olib tashlandi');
+            ->with('success', $cutoffHour !== null ? 'cutoffSet' : 'cutoffRemoved');
     }
 
     public function updateNotes(Request $request, User $customer)
@@ -110,7 +110,7 @@ class CustomerController extends Controller
         $this->customerService->updateNotes($customer, $request->input('admin_notes'));
 
         return redirect()->back()
-            ->with('success', 'Izoh saqlandi');
+            ->with('success', 'notesSaved');
     }
 
     public function destroy(User $customer)
@@ -118,6 +118,6 @@ class CustomerController extends Controller
         $this->customerService->delete($customer);
 
         return redirect()->route('admin.customers.index')
-            ->with('success', 'Mijoz o\'chirildi');
+            ->with('success', 'customerDeleted');
     }
 }

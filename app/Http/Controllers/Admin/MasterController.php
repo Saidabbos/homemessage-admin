@@ -50,7 +50,7 @@ class MasterController extends Controller
         $this->masterService->create($request->validated(), $request);
 
         return redirect()->route('admin.masters.index')
-            ->with('success', 'Master muvaffaqiyatli qo\'shildi');
+            ->with('success', 'masterCreated');
     }
 
     public function show(Master $master)
@@ -75,7 +75,7 @@ class MasterController extends Controller
         $this->masterService->update($master, $request->validated(), $request);
 
         return redirect()->route('admin.masters.index')
-            ->with('success', 'Master muvaffaqiyatli yangilandi');
+            ->with('success', 'masterUpdated');
     }
 
     public function destroy(Master $master)
@@ -83,7 +83,7 @@ class MasterController extends Controller
         $this->masterService->delete($master);
 
         return redirect()->route('admin.masters.index')
-            ->with('success', 'Master o\'chirildi');
+            ->with('success', 'masterDeleted');
     }
 
     public function schedule(Request $request, Master $master)

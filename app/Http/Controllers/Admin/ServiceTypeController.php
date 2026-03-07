@@ -36,7 +36,7 @@ class ServiceTypeController extends Controller
         $this->serviceTypeService->create($request->validated(), $request);
 
         return redirect()->route('admin.service-types.index')
-            ->with('success', 'Xizmat turi muvaffaqiyatli yaratildi');
+            ->with('success', 'serviceTypeCreated');
     }
 
     public function show(ServiceType $serviceType)
@@ -58,7 +58,7 @@ class ServiceTypeController extends Controller
         $this->serviceTypeService->update($serviceType, $request->validated(), $request);
 
         return redirect()->route('admin.service-types.index')
-            ->with('success', 'Xizmat turi muvaffaqiyatli yangilandi');
+            ->with('success', 'serviceTypeUpdated');
     }
 
     public function destroy(ServiceType $serviceType)
@@ -66,6 +66,6 @@ class ServiceTypeController extends Controller
         $this->serviceTypeService->delete($serviceType);
 
         return redirect()->route('admin.service-types.index')
-            ->with('success', 'Xizmat turi o\'chirildi');
+            ->with('success', 'serviceTypeDeleted');
     }
 }

@@ -82,7 +82,7 @@ class OrderController extends Controller
     {
         try {
             $this->orderService->updateStatus($order, $request->status, $request->comment);
-            return back()->with('success', 'Status muvaffaqiyatli yangilandi');
+            return back()->with('success', 'statusUpdated');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -101,7 +101,7 @@ class OrderController extends Controller
                 $request->arrival_window_end,
                 $request->comment
             );
-            return back()->with('success', 'Vaqt muvaffaqiyatli o\'zgartirildi');
+            return back()->with('success', 'timeUpdated');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -114,7 +114,7 @@ class OrderController extends Controller
     {
         $this->orderService->addNote($order, $request->note);
 
-        return back()->with('success', 'Izoh qo\'shildi');
+        return back()->with('success', 'noteAdded');
     }
 
     /**
@@ -124,7 +124,7 @@ class OrderController extends Controller
     {
         try {
             $this->orderService->cancel($order, $request->reason);
-            return back()->with('success', 'Buyurtma bekor qilindi');
+            return back()->with('success', 'orderCancelled');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -137,7 +137,7 @@ class OrderController extends Controller
     {
         try {
             $this->orderService->saveConfirmation($order, $request->validated());
-            return back()->with('success', 'Anketa muvaffaqiyatli saqlandi');
+            return back()->with('success', 'confirmationSaved');
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -315,6 +315,6 @@ class OrderController extends Controller
             'qa_completed_by' => \Illuminate\Support\Facades\Auth::guard('admin')->id(),
         ]);
 
-        return redirect()->back()->with('success', 'Baho saqlandi');
+        return redirect()->back()->with('success', 'ratingSaved');
     }
 }

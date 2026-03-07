@@ -32,7 +32,7 @@ class ProfileController extends Controller
         $this->profileService->updateProfile($this->guard()->user(), $request->validated());
 
         return redirect()->route('admin.profile.index')
-            ->with('success', 'Profil muvaffaqiyatli yangilandi');
+            ->with('success', 'profileUpdated');
     }
 
     public function updatePassword(UpdatePasswordRequest $request)
@@ -46,6 +46,6 @@ class ProfileController extends Controller
         }
 
         return redirect()->route('admin.profile.index')
-            ->with('success', 'Parol muvaffaqiyatli o\'zgartirildi');
+            ->with('success', 'passwordChanged');
     }
 }

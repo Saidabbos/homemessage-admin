@@ -43,7 +43,7 @@ class AuthController extends Controller
             // Check if user has admin or dispatcher role
             if (!$user->hasAnyRole(['admin', 'dispatcher'])) {
                 $this->guard()->logout();
-                return back()->with('error', 'Siz admin yoki dispetcher hisobiga ega emassiz');
+                return back()->with('error', 'notAdminOrDispatcher');
             }
 
             $request->session()->regenerate();
@@ -52,10 +52,10 @@ class AuthController extends Controller
             AuditLog::log($user, AuditLog::ACTION_LOGIN, null, null, 'Admin panelga kirdi');
 
             return redirect()->route('admin.dashboard')
-                ->with('success', 'Admin paneliga xush kelibsiz!');
+                ->with('success', 'welcomeAdmin');
         }
 
-        return back()->with('error', 'Email yoki parol noto\'g\'ri');
+        return back()->with('error', 'invalidCredentials');
     }
 
     /**
@@ -76,6 +76,6 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('admin.login')
-            ->with('success', 'Chiqib ketdingiz');
+            ->with('success', 'loggedOut');
     }
 }

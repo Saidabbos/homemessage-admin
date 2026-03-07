@@ -36,7 +36,7 @@ class StandardItemController extends Controller
         $this->standardItemService->create($request->validated(), $request);
 
         return redirect()->route('admin.standard-items.index')
-            ->with('success', 'Standart narsa muvaffaqiyatli yaratildi');
+            ->with('success', 'standardItemCreated');
     }
 
     public function show(StandardItem $standardItem)
@@ -58,7 +58,7 @@ class StandardItemController extends Controller
         $this->standardItemService->update($standardItem, $request->validated(), $request);
 
         return redirect()->route('admin.standard-items.index')
-            ->with('success', 'Standart narsa muvaffaqiyatli yangilandi');
+            ->with('success', 'standardItemUpdated');
     }
 
     public function destroy(StandardItem $standardItem)
@@ -66,6 +66,6 @@ class StandardItemController extends Controller
         $this->standardItemService->delete($standardItem);
 
         return redirect()->route('admin.standard-items.index')
-            ->with('success', 'Standart narsa o\'chirildi');
+            ->with('success', 'standardItemDeleted');
     }
 }

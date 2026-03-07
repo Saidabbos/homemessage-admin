@@ -74,6 +74,6 @@ class SettingController extends Controller
         }
 
         return redirect()->route('admin.settings.index')
-            ->with('success', 'Sozlamalar muvaffaqiyatli saqlandi');
+            ->with('success', 'settingsSaved');
     }
 }

@@ -255,6 +255,24 @@
     color: #B5B0A8;
 }
 
+.rf-char-counter {
+    text-align: right;
+    font-size: 12px;
+    color: #B5B0A8;
+    margin-top: 6px;
+    font-family: 'Manrope', sans-serif;
+    transition: color 0.2s;
+}
+
+.rf-char-warning {
+    color: #E6A817;
+}
+
+.rf-char-limit {
+    color: #DC3545;
+    font-weight: 600;
+}
+
 /* Submit Button */
 .rf-submit {
     width: 100%;

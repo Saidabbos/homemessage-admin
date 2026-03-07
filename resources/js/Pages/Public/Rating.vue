@@ -166,8 +166,12 @@ const formatDate = (date) => {
                             v-model="form.feedback"
                             class="rf-textarea"
                             rows="4"
+                            maxlength="1000"
                             :placeholder="t('rating.feedbackPlaceholder')"
                         ></textarea>
+                        <div class="rf-char-counter" :class="{ 'rf-char-warning': form.feedback.length > 900, 'rf-char-limit': form.feedback.length >= 1000 }">
+                            {{ form.feedback.length }} / 1000
+                        </div>
                     </div>
 
                     <!-- Submit -->

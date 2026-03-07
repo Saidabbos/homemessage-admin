@@ -36,7 +36,7 @@ class OilController extends Controller
         $this->oilService->create($request->validated(), $request);
 
         return redirect()->route('admin.oils.index')
-            ->with('success', 'Moy muvaffaqiyatli yaratildi');
+            ->with('success', 'oilCreated');
     }
 
     public function show(Oil $oil)
@@ -58,7 +58,7 @@ class OilController extends Controller
         $this->oilService->update($oil, $request->validated(), $request);
 
         return redirect()->route('admin.oils.index')
-            ->with('success', 'Moy muvaffaqiyatli yangilandi');
+            ->with('success', 'oilUpdated');
     }
 
     public function destroy(Oil $oil)
@@ -66,6 +66,6 @@ class OilController extends Controller
         $this->oilService->delete($oil);
 
         return redirect()->route('admin.oils.index')
-            ->with('success', 'Moy o\'chirildi');
+            ->with('success', 'oilDeleted');
     }
 }

@@ -36,7 +36,7 @@ class TestimonialController extends Controller
         $this->testimonialService->create($request->validated(), $request);
 
         return redirect()->route('admin.testimonials.index')
-            ->with('success', 'Fikr muvaffaqiyatli yaratildi');
+            ->with('success', 'testimonialCreated');
     }
 
     public function show(Testimonial $testimonial)
@@ -58,7 +58,7 @@ class TestimonialController extends Controller
         $this->testimonialService->update($testimonial, $request->validated(), $request);
 
         return redirect()->route('admin.testimonials.index')
-            ->with('success', 'Fikr muvaffaqiyatli yangilandi');
+            ->with('success', 'testimonialUpdated');
     }
 
     public function destroy(Testimonial $testimonial)
@@ -66,6 +66,6 @@ class TestimonialController extends Controller
         $this->testimonialService->delete($testimonial);
 
         return redirect()->route('admin.testimonials.index')
-            ->with('success', 'Fikr o\'chirildi');
+            ->with('success', 'testimonialDeleted');
     }
 }

@@ -157,6 +157,6 @@ class RatingController extends Controller
         }
 
         return redirect()->route('admin.ratings.index')
-            ->with('success', 'Baho o\'chirildi');
+            ->with('success', 'ratingDeleted');
     }
 }

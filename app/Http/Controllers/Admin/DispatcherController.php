@@ -36,7 +36,7 @@ class DispatcherController extends Controller
         $this->dispatcherService->create($request->validated(), $request);
 
         return redirect()->route('admin.dispatchers.index')
-            ->with('success', 'Dispetcher muvaffaqiyatli qo\'shildi');
+            ->with('success', 'dispatcherCreated');
     }
 
     public function show(User $dispatcher)
@@ -58,7 +58,7 @@ class DispatcherController extends Controller
         $this->dispatcherService->update($dispatcher, $request->validated(), $request);
 
         return redirect()->route('admin.dispatchers.index')
-            ->with('success', 'Dispetcher muvaffaqiyatli yangilandi');
+            ->with('success', 'dispatcherUpdated');
     }
 
     public function destroy(User $dispatcher)
@@ -66,6 +66,6 @@ class DispatcherController extends Controller
         $this->dispatcherService->delete($dispatcher);
 
         return redirect()->route('admin.dispatchers.index')
-            ->with('success', 'Dispetcher o\'chirildi');
+            ->with('success', 'dispatcherDeleted');
     }
 }

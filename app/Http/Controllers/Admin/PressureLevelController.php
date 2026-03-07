@@ -62,7 +62,7 @@ class PressureLevelController extends Controller
         ]);
 
         return redirect()->route('admin.pressure-levels.index')
-            ->with('success', 'Bosim darajasi muvaffaqiyatli yaratildi');
+            ->with('success', 'pressureLevelCreated');
     }
 
     /**
@@ -109,7 +109,7 @@ class PressureLevelController extends Controller
         ]);
 
         return redirect()->route('admin.pressure-levels.index')
-            ->with('success', 'Bosim darajasi muvaffaqiyatli yangilandi');
+            ->with('success', 'pressureLevelUpdated');
     }
 
     /**
@@ -120,6 +120,6 @@ class PressureLevelController extends Controller
         $pressureLevel->delete();
 
         return redirect()->route('admin.pressure-levels.index')
-            ->with('success', 'Bosim darajasi o\'chirildi');
+            ->with('success', 'pressureLevelDeleted');
     }
 }
