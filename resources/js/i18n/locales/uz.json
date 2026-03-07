@@ -351,7 +351,20 @@
         "total_orders_month": "Ushbu oydagi buyurtmalar",
         "select_day": "Kunni tanlang",
         "click_day_to_view": "Buyurtmalarni ko'rish uchun kunni bosing",
-        "no_orders_day": "Bu kunda buyurtma yo'q"
+        "no_orders_day": "Bu kunda buyurtma yo'q",
+        "completedOrders": "Bajarilgan",
+        "cancelledOrders": "Bekor qilingan",
+        "totalEarned": "Jami daromad",
+        "avgRating": "O'rtacha baho",
+        "orderHistory": "Buyurtmalar tarixi",
+        "ratingsFromClients": "Mijozlardan baholar",
+        "ratingsToClients": "Mijozlarga baholar",
+        "noOrders": "Buyurtmalar topilmadi",
+        "noRatings": "Baholar topilmadi",
+        "fromClient": "Mijozdan",
+        "toClient": "Mijozga",
+        "pressureLevels": "Bosim darajalari",
+        "shift": "Smena"
     },
     "settings": {
         "title": "Sozlamalar",

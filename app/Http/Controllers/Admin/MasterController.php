@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\Master\UpdateMasterRequest;
 use App\Mappers\OrderMapper;
 use App\Models\Master;
 use App\Models\Order;
+use App\Models\Rating;
 use App\Repositories\MasterRepository;
 use App\Repositories\OilRepository;
 use App\Repositories\PressureLevelRepository;
@@ -55,8 +56,41 @@ class MasterController extends Controller
 
     public function show(Master $master)
     {
+        $master->load('serviceTypes', 'oils', 'pressureLevels');
+
+        $orders = $master->orders()
+            ->with(['customer', 'serviceType'])
+            ->latest('booking_date')
+            ->paginate(10);
+
+        $ratingsReceived = $master->receivedRatings()
+            ->with(['customer', 'order'])
+            ->whereNotNull('rated_at')
+            ->latest('rated_at')
+            ->get();
+
+        $ratingsGiven = Rating::where('master_id', $master->id)
+            ->where('type', Rating::TYPE_MASTER_TO_CLIENT)
+            ->with(['customer', 'order'])
+            ->whereNotNull('rated_at')
+            ->latest('rated_at')
+            ->get();
+
+        $stats = [
+            'total_orders' => $master->orders()->count(),
+            'completed_orders' => $master->orders()->where('status', 'COMPLETED')->count(),
+            'cancelled_orders' => $master->orders()->where('status', 'CANCELLED')->count(),
+            'total_earned' => $master->orders()->where('payment_status', 'PAID')->sum('total_amount'),
+            'avg_rating' => $ratingsReceived->avg('overall_rating'),
+            'ratings_count' => $ratingsReceived->count(),
+        ];
+
         return Inertia::render('Admin/Masters/Show', [
-            'master' => $master->load('serviceTypes', 'oils'),
+            'master' => $master,
+            'orders' => $orders,
+            'ratingsReceived' => $ratingsReceived,
+            'ratingsGiven' => $ratingsGiven,
+            'stats' => $stats,
         ]);
     }
 

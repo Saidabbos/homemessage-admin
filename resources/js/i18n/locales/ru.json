@@ -351,7 +351,20 @@
         "total_orders_month": "Заказов в этом месяце",
         "select_day": "Выберите день",
         "click_day_to_view": "Нажмите на день для просмотра заказов",
-        "no_orders_day": "Нет заказов в этот день"
+        "no_orders_day": "Нет заказов в этот день",
+        "completedOrders": "Выполнено",
+        "cancelledOrders": "Отменено",
+        "totalEarned": "Общий доход",
+        "avgRating": "Средняя оценка",
+        "orderHistory": "История заказов",
+        "ratingsFromClients": "Оценки от клиентов",
+        "ratingsToClients": "Оценки клиентам",
+        "noOrders": "Заказы не найдены",
+        "noRatings": "Оценки не найдены",
+        "fromClient": "От клиента",
+        "toClient": "Клиенту",
+        "pressureLevels": "Уровни давления",
+        "shift": "Смена"
     },
     "settings": {
         "title": "Настройки",

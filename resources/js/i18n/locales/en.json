@@ -351,7 +351,20 @@
         "total_orders_month": "Orders this month",
         "select_day": "Select a day",
         "click_day_to_view": "Click on a day to view orders",
-        "no_orders_day": "No orders on this day"
+        "no_orders_day": "No orders on this day",
+        "completedOrders": "Completed",
+        "cancelledOrders": "Cancelled",
+        "totalEarned": "Total earned",
+        "avgRating": "Average rating",
+        "orderHistory": "Order history",
+        "ratingsFromClients": "Ratings from clients",
+        "ratingsToClients": "Ratings to clients",
+        "noOrders": "No orders found",
+        "noRatings": "No ratings found",
+        "fromClient": "From client",
+        "toClient": "To client",
+        "pressureLevels": "Pressure levels",
+        "shift": "Shift"
     },
     "settings": {
         "title": "Settings",
