@@ -598,7 +598,8 @@ const sendWorkOrderToMaster = async () => {
     <Dialog v-model:open="showStatusModal">
       <DialogContent><DialogHeader><DialogTitle>{{ t('orders.changeStatus', 'Statusni o\'zgartirish') }}</DialogTitle>
         <DialogDescription>{{ t('orders.statusChangeConfirm', 'Yangi status') }}: <strong>{{ getStatusLabel(statusForm.status) }}</strong></DialogDescription></DialogHeader>
-        <div class="space-y-4"><Label>{{ t('orders.comment', 'Izoh') }}</Label><Textarea v-model="statusForm.comment" rows="3" /></div>
+        <div class="space-y-4"><Label>{{ t('orders.comment', 'Izoh') }}</Label><Textarea v-model="statusForm.comment" rows="3" maxlength="500" />
+          <div class="text-xs text-right" :class="(statusForm.comment?.length || 0) > 450 ? 'text-orange-500' : 'text-muted-foreground'">{{ statusForm.comment?.length || 0 }} / 500</div></div>
         <DialogFooter><Button variant="outline" @click="showStatusModal = false">{{ t('common.cancel', 'Bekor') }}</Button>
           <Button @click="submitStatus" :disabled="statusForm.processing">{{ t('common.save', 'Saqlash') }}</Button></DialogFooter>
       </DialogContent>
@@ -661,7 +662,8 @@ const sendWorkOrderToMaster = async () => {
           
           <div class="space-y-2">
             <Label>{{ t('orders.comment', 'Izoh') }}</Label>
-            <Textarea v-model="rescheduleForm.comment" rows="2" :placeholder="t('orders.reasonPlaceholder')" />
+            <Textarea v-model="rescheduleForm.comment" rows="2" maxlength="500" :placeholder="t('orders.reasonPlaceholder')" />
+            <div class="text-xs text-right" :class="(rescheduleForm.comment?.length || 0) > 450 ? 'text-orange-500' : 'text-muted-foreground'">{{ rescheduleForm.comment?.length || 0 }} / 500</div>
           </div>
         </div>
         <DialogFooter>
@@ -676,7 +678,8 @@ const sendWorkOrderToMaster = async () => {
     <!-- Note Modal -->
     <Dialog v-model:open="showNoteModal">
       <DialogContent><DialogHeader><DialogTitle>{{ t('orders.addNote', 'Izoh qo\'shish') }}</DialogTitle></DialogHeader>
-        <Textarea v-model="noteForm.note" rows="4" />
+        <Textarea v-model="noteForm.note" rows="4" maxlength="1000" />
+        <div class="text-xs text-right" :class="(noteForm.note?.length || 0) > 900 ? 'text-orange-500' : 'text-muted-foreground'">{{ noteForm.note?.length || 0 }} / 1000</div>
         <DialogFooter><Button variant="outline" @click="showNoteModal = false">{{ t('common.cancel', 'Bekor') }}</Button>
           <Button @click="submitNote" :disabled="noteForm.processing || !noteForm.note">{{ t('common.save', 'Saqlash') }}</Button></DialogFooter>
       </DialogContent>
@@ -686,7 +689,8 @@ const sendWorkOrderToMaster = async () => {
     <Dialog v-model:open="showCancelModal">
       <DialogContent><DialogHeader><DialogTitle class="text-destructive">{{ t('orders.cancelOrder', 'Buyurtmani bekor qilish') }}</DialogTitle>
         <DialogDescription>{{ t('orders.cancelConfirm', 'Bu amalni qaytarib bo\'lmaydi.') }}</DialogDescription></DialogHeader>
-        <div class="space-y-2"><Label>{{ t('orders.cancelReason', 'Sabab') }} *</Label><Textarea v-model="cancelForm.reason" rows="3" /></div>
+        <div class="space-y-2"><Label>{{ t('orders.cancelReason', 'Sabab') }} *</Label><Textarea v-model="cancelForm.reason" rows="3" maxlength="500" />
+          <div class="text-xs text-right" :class="(cancelForm.reason?.length || 0) > 450 ? 'text-orange-500' : 'text-muted-foreground'">{{ cancelForm.reason?.length || 0 }} / 500</div></div>
         <DialogFooter><Button variant="outline" @click="showCancelModal = false">{{ t('common.cancel', 'Bekor') }}</Button>
           <Button variant="destructive" @click="submitCancel" :disabled="cancelForm.processing || !cancelForm.reason">{{ t('orders.confirmCancel', 'Bekor qilish') }}</Button></DialogFooter>
       </DialogContent>
@@ -716,13 +720,15 @@ const sendWorkOrderToMaster = async () => {
           <div class="space-y-2"><Label>{{ t('orders.confirmation.onsitePhone') }}</Label><Input v-model="confirmationForm.conf_onsite_phone" placeholder="+998 90 123 45 67" /></div>
           <Card class="bg-orange-50 dark:bg-orange-950 border-orange-200 dark:border-orange-800"><CardContent class="pt-4 space-y-4">
             <h4 class="font-medium text-orange-800 dark:text-orange-200">{{ t('orders.importantInfo') }}</h4>
-            <div class="space-y-2"><Label>{{ t('orders.confirmation.constraintsLabel') }}</Label><Textarea v-model="confirmationForm.conf_constraints" rows="2" /></div>
+            <div class="space-y-2"><Label>{{ t('orders.confirmation.constraintsLabel') }}</Label><Textarea v-model="confirmationForm.conf_constraints" rows="2" maxlength="500" />
+              <div class="text-xs text-right" :class="(confirmationForm.conf_constraints?.length || 0) > 450 ? 'text-orange-500' : 'text-muted-foreground'">{{ confirmationForm.conf_constraints?.length || 0 }} / 500</div></div>
             <div class="grid grid-cols-2 gap-4">
               <div class="flex items-center space-x-2"><Checkbox id="space" :checked="confirmationForm.conf_space_ok" @update:checked="confirmationForm.conf_space_ok = $event" /><Label for="space">{{ t('orders.confirmation.hasSpace') }}</Label></div>
               <div class="flex items-center space-x-2"><Checkbox id="pets" :checked="confirmationForm.conf_pets" @update:checked="confirmationForm.conf_pets = $event" /><Label for="pets">{{ t('orders.confirmation.hasPets') }}</Label></div>
             </div>
           </CardContent></Card>
-          <div class="space-y-2"><Label>{{ t('orders.confirmation.noteToMaster') }}</Label><Textarea v-model="confirmationForm.conf_note_to_master" rows="3" /></div>
+          <div class="space-y-2"><Label>{{ t('orders.confirmation.noteToMaster') }}</Label><Textarea v-model="confirmationForm.conf_note_to_master" rows="3" maxlength="1000" />
+            <div class="text-xs text-right" :class="(confirmationForm.conf_note_to_master?.length || 0) > 900 ? 'text-orange-500' : 'text-muted-foreground'">{{ confirmationForm.conf_note_to_master?.length || 0 }} / 1000</div></div>
         </div>
         <DialogFooter><Button variant="outline" @click="showConfirmationModal = false">{{ t('common.cancel') }}</Button>
           <Button @click="submitConfirmation" :disabled="confirmationForm.processing">{{ t('common.save') }}</Button></DialogFooter>
@@ -739,7 +745,8 @@ const sendWorkOrderToMaster = async () => {
             <button v-for="i in 5" :key="i" type="button" @click="qaForm.qa_punctuality_rating = i" class="text-2xl hover:scale-110 transition" :class="i <= qaForm.qa_punctuality_rating ? 'text-yellow-400' : 'text-muted'">★</button></div></div>
           <div><Label class="mb-2 block">{{ t('orders.qa.professionalism') }}</Label><div class="flex gap-1">
             <button v-for="i in 5" :key="i" type="button" @click="qaForm.qa_professionalism_rating = i" class="text-2xl hover:scale-110 transition" :class="i <= qaForm.qa_professionalism_rating ? 'text-yellow-400' : 'text-muted'">★</button></div></div>
-          <div class="space-y-2"><Label>{{ t('orders.qa.feedback') }}</Label><Textarea v-model="qaForm.qa_feedback" rows="3" /></div>
+          <div class="space-y-2"><Label>{{ t('orders.qa.feedback') }}</Label><Textarea v-model="qaForm.qa_feedback" rows="3" maxlength="1000" />
+            <div class="text-xs text-right" :class="(qaForm.qa_feedback?.length || 0) > 900 ? 'text-orange-500' : 'text-muted-foreground'">{{ qaForm.qa_feedback?.length || 0 }} / 1000</div></div>
         </div>
         <DialogFooter><Button variant="outline" @click="showQaModal = false">{{ t('common.cancel') }}</Button>
           <Button variant="secondary" @click="submitQa" :disabled="qaForm.processing">{{ t('common.save') }}</Button></DialogFooter>
