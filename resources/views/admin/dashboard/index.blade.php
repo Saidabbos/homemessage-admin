@@ -5,7 +5,7 @@
 @section('content')
 <div class="dashboard-header">
     <h1>Dashboard</h1>
-    <p>HomeMessage Admin Panel'ga xush kelibsiz, {{ auth()->user()->name }}!</p>
+    <p>Sabai Admin Panel'ga xush kelibsiz, {{ auth()->user()->name }}!</p>
 </div>
 
 <div class="stats-grid">

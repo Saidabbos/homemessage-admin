@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HomeMessage - Admin Login</title>
+    <title>Sabai - Admin Login</title>
     <style>
         * {
             margin: 0;
@@ -200,7 +200,7 @@
     <div class="login-container">
         <div class="login-card">
             <div class="login-header">
-                <h1>🏠 HomeMessage</h1>
+                <h1>Sabai</h1>
                 <p>Admin Paneliga Xush Kelibsiz</p>
             </div>
 
@@ -270,7 +270,7 @@
             </div>
 
             <div class="login-footer">
-                © 2024 HomeMessage Admin Panel. Barcha huquqlar himoyalangan.
+                © 2024 Sabai. Barcha huquqlar himoyalangan.
             </div>
         </div>
     </div>

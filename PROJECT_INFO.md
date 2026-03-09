@@ -1,8 +1,8 @@
-# HomeMessage - Service Booking Platform
+# Sabai - Service Booking Platform
 
 ## 📱 Loyiha Tavsifi
 
-**HomeMessage** - Uyga massage/beauty services booking qilish platforma.
+**Sabai** - Uyga massage/beauty services booking qilish platforma.
 
 ### Asosiy Xususiyatlar:
 - Customers - Serviceler book qiladi

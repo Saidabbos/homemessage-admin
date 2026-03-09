@@ -1,8 +1,8 @@
-# Admin Panel Setup - HomeMessage
+# Admin Panel Setup - Sabai
 
 ## 🔐 Admin Authentication System
 
-Admin panel HomeMessage uchun alohida authentication sistema bilan sozlangan.
+Admin panel Sabai uchun alohida authentication sistema bilan sozlangan.
 
 ---
 

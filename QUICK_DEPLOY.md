@@ -60,8 +60,8 @@ tail -f /var/www/hm/storage/logs/laravel.log
 ## Database Credentials (Auto-Generated)
 
 After deployment, credentials are in `/var/www/hm/.env`:
-- **Database**: golden_touch
-- **User**: golden_user
+- **Database**: sabai
+- **User**: sabai_user
 - **Password**: Random (32 chars) - check .env file
 
 ---

@@ -1,4 +1,4 @@
-# HomeMessage - Manual Testing Guide
+# Sabai - Manual Testing Guide
 
 ## Muhitlar
 
@@ -305,7 +305,7 @@ NEW → CONFIRMED → IN_PROGRESS → COMPLETED
 
 | Role | Login | Password |
 |------|-------|----------|
-| Admin | admin@homemassage.uz | ******* |
+| Admin | admin@sabai.uz | ******* |
 | Test Customer | +998900000000 | OTP: 223445 |
 
 ---

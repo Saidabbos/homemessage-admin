@@ -1,4 +1,4 @@
-# 🔀 Git Flow - HomeMessage
+# 🔀 Git Flow - Sabai
 
 ## Branch Strategy
 

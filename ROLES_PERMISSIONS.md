@@ -1,8 +1,8 @@
-# HomeMessage - Roles & Permissions System
+# Sabai - Roles & Permissions System
 
 ## 🎯 Project Roles Overview
 
-HomeMessage uchun 5 ta asosiy rol o'rnatilgan:
+Sabai uchun 5 ta asosiy rol o'rnatilgan:
 
 | Role | O'zbek | Maqsad | Status |
 |------|--------|--------|--------|

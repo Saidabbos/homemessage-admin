@@ -129,7 +129,7 @@ class TherapistBotController extends Controller
         }
 
         $text = "👋 Salom, *{$firstName}*!\n\n"
-            . "🏠 *HomeMessage* massajchilar boti.\n\n"
+            . "*Sabai* massajchilar boti.\n\n"
             . "🔗 Hisobingizni ulash uchun quyidagi tugmani bosib *telefon raqamingizni* yuboring.\n\n"
             . "📱 Raqamingiz tizimda ro'yxatdan o'tgan bo'lishi kerak.";
 

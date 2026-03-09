@@ -1,12 +1,12 @@
-## Golden Touch - Business Logic & User Flows
+## Sabai - Business Logic & User Flows
 
-This document describes the core business flows and requirements for the Golden Touch massage booking MVP.
+This document describes the core business flows and requirements for the Sabai massage booking MVP.
 
 ---
 
 ### Product Overview
 
-**Golden Touch** is a massage booking platform with:
+**Sabai** is a massage booking platform with:
 - Public booking site (iPhone-style UI)
 - Customer portal (OTP login)
 - Dispatcher admin panel

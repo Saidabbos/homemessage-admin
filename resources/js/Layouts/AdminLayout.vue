@@ -179,7 +179,7 @@ const logout = () => {
                   </svg>
                 </div>
                 <div class="grid flex-1 text-left text-sm leading-tight">
-                  <span class="truncate font-semibold">HomeMessage</span>
+                  <span class="truncate font-semibold">Sabai</span>
                   <span class="truncate text-xs text-muted-foreground">Admin Panel</span>
                 </div>
               </Link>
@@ -366,7 +366,7 @@ const logout = () => {
 
       <!-- Footer -->
       <footer class="border-t px-4 py-4 text-center text-sm text-muted-foreground">
-        <strong>Copyright © 2024 <a href="/" class="text-primary hover:underline">HomeMessage</a>.</strong>
+        <strong>Copyright © 2024 <a href="/" class="text-primary hover:underline">Sabai</a>.</strong>
         Barcha huquqlar himoyalangan.
       </footer>
     </SidebarInset>

@@ -1,4 +1,4 @@
-# 🏠 HomeMessage - Roles & Permissions Summary
+# 🏠 Sabai - Roles & Permissions Summary
 
 ## ✅ Bajarilgan Ishlar
 
@@ -204,7 +204,7 @@ docker compose exec app php artisan tinker
 
 ## ✨ Summary
 
-HomeMessage uchun **6 ta rol** va **42 ta permission** o'rnatildi!
+Sabai uchun **6 ta rol** va **42 ta permission** o'rnatildi!
 
 ✅ **Admin** - Tizim boshqaruvi
 ✅ **Dispatcher** - Bron boshqaruvi

@@ -1,4 +1,4 @@
-# 🚀 Golden Touch - Deployment Guide
+# 🚀 Sabai - Deployment Guide
 
 ## Server Information
 - **IP**: 64.226.102.231
@@ -145,7 +145,7 @@ systemctl status mysql
 grep DB_ /var/www/hm/.env
 
 # Test MySQL connection
-mysql -u golden_user -p golden_touch -h 127.0.0.1
+mysql -u sabai_user -p sabai -h 127.0.0.1
 ```
 
 ### Issue: "Permission denied" errors
@@ -188,7 +188,7 @@ systemctl restart php8.3-fpm
 
 ### Backup Database
 ```bash
-mysqldump -u golden_user -p golden_touch > backup_$(date +%Y%m%d_%H%M%S).sql
+mysqldump -u sabai_user -p sabai > backup_$(date +%Y%m%d_%H%M%S).sql
 ```
 
 ### View Real-Time Logs

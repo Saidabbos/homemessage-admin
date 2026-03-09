@@ -13,9 +13,9 @@ class SettingSeeder extends Seeder
     public function run(): void
     {
         // General settings
-        Setting::set('app_name', 'HomeMessage', 'general', 'text');
+        Setting::set('app_name', 'Sabai', 'general', 'text');
         Setting::set('company_phone', '+998 90 123 45 67', 'general', 'text');
-        Setting::set('company_email', 'info@homemessage.uz', 'general', 'text');
+        Setting::set('company_email', 'info@sabai.uz', 'general', 'text');
         Setting::set('company_address', 'Toshkent shahri', 'general', 'text');
         Setting::set('working_hours_start', '09:00', 'general', 'text');
         Setting::set('working_hours_end', '21:00', 'general', 'text');

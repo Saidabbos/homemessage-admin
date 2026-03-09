@@ -1,4 +1,4 @@
-## Golden Touch - Permissions & Roles System
+## Sabai - Permissions & Roles System
 
 This project uses **spatie/laravel-permission** for access control in the admin panel.
 

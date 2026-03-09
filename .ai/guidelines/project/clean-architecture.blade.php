@@ -1,4 +1,4 @@
-## Clean Architecture Pattern - HomeMessage
+## Clean Architecture Pattern - Sabai
 
 This project follows a clean architecture pattern with clear separation of concerns.
 

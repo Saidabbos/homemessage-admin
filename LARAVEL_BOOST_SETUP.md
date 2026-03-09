@@ -1,8 +1,8 @@
-# Golden Touch - AI-Assisted Development Setup
+# Sabai - AI-Assisted Development Setup
 
 ## Project Overview
 
-**Golden Touch** is a massage booking MVP (Laravel 12.x + Inertia.js + Vue 3) for validating the business hypothesis.
+**Sabai** is a massage booking MVP (Laravel 12.x + Inertia.js + Vue 3) for validating the business hypothesis.
 
 ### Key Features
 - Public booking site (iPhone-style UI)
@@ -56,7 +56,7 @@
 
 **When AI uses this:** Understanding project structure, creating new features
 
-### 2. Golden Touch (`golden-touch.blade.php`)
+### 2. Sabai (`golden-touch.blade.php`)
 **Covers:**
 - Services offered (massage types, pricing)
 - Client booking flow (7 steps)

@@ -1,4 +1,4 @@
-# HomeMessage - Massage Booking MVP
+# Sabai - Massage Booking MVP
 
 ## Quick Overview
 

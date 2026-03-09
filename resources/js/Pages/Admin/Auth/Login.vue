@@ -20,7 +20,7 @@ const submit = () => {
     <div class="al-page">
         <div class="al-box">
             <div class="al-header">
-                <h1 class="al-title">Golden Touch</h1>
+                <h1 class="al-title">Sabai</h1>
                 <p class="al-subtitle">Admin Paneli</p>
             </div>
 

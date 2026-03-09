@@ -199,7 +199,7 @@ const formatPrice = (price) => {
         <!-- Footer -->
         <footer class="mp-footer">
             <div class="mp-footer-content">
-                <span>&copy; 2026 HomeMassage. {{ t('landing.footer.rights') }}</span>
+                <span>&copy; 2026 Sabai. {{ t('landing.footer.rights') }}</span>
             </div>
         </footer>
     </div>

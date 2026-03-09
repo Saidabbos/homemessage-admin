@@ -1,4 +1,4 @@
-## Golden Touch - Project Architecture & Structure
+## Sabai - Project Architecture & Structure
 
 This is a **massage booking MVP** (Laravel 12.x + Inertia.js + Vue 3) for validating the business hypothesis.
 
@@ -277,7 +277,7 @@ SMS_PROVIDER=eskiz
 SMS_API_KEY=xxx
 
 # App
-APP_URL=https://goldentouch.uz
+APP_URL=https://sabai.uz
 BOOKING_LEAD_TIME_HOURS=2
 SESSION_DURATION_MINUTES=60
 SESSION_GAP_MINUTES=30

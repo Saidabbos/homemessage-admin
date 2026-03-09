@@ -1,4 +1,4 @@
-# 📋 HomeMessage - Qolgan Ishlar (TZ v2.0 asosida)
+# 📋 Sabai - Qolgan Ishlar (TZ v2.0 asosida)
 
 **Sana:** 2026-02-25 (yangilangan)
 **TZ Versiya:** 2.0 (Customer Portal + OTP, Payme/Click API+Webhooks)

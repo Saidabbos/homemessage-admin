@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin Panel') - HomeMessage</title>
+    <title>@yield('title', 'Admin Panel') - Sabai</title>
     <style>
         * {
             margin: 0;
@@ -229,7 +229,7 @@
     <div class="admin-layout">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="sidebar-logo">🏠 HomeMessage</div>
+            <div class="sidebar-logo">Sabai</div>
             <ul class="sidebar-menu">
                 <li>
                     <a href="{{ route('admin.dashboard') }}"

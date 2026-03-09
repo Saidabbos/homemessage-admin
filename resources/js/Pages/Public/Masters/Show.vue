@@ -498,7 +498,7 @@ const selectedDurationLabel = computed(() => {
             </div>
             <div class="md-footer-divider"></div>
             <div class="md-footer-bottom">
-                <span>&copy; 2026 HomeMassage. {{ t('landing.footer.rights') }}</span>
+                <span>&copy; 2026 Sabai. {{ t('landing.footer.rights') }}</span>
             </div>
         </footer>
 

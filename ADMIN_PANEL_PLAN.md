@@ -1,4 +1,4 @@
-# 📋 HomeMessage (SABAI) - Development Plan
+# 📋 Sabai - Development Plan
 
 > **Yangilangan:** 2025-02-07 (TZ hujjatlari asosida)
 

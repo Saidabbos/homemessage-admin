@@ -1,11 +1,11 @@
 ---
 name: order-processing
-description: Complete guide for implementing order lifecycle management in Golden Touch
+description: Complete guide for implementing order lifecycle management in Sabai
 ---
 
 # Order Processing Skill
 
-This skill covers implementing order management features for the Golden Touch massage booking system.
+This skill covers implementing order management features for the Sabai massage booking system.
 
 ## When to Use This Skill
 

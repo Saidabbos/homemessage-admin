@@ -1,4 +1,4 @@
-## HomeMessage - Slot Management System
+## Sabai - Slot Management System
 
 This document covers the two-table slot architecture and booking rules.
 

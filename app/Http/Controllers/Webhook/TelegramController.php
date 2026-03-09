@@ -292,7 +292,7 @@ class TelegramController extends Controller
         }
 
         $text = "👋 Salom, {$firstName}!\n\n"
-            . "*HomeMessage* massajchilar uchun xabar boti.\n\n"
+            . "*Sabai* massajchilar uchun xabar boti.\n\n"
             . "🔗 *Hisobingizni ulash uchun* quyidagi tugmani bosib telefon raqamingizni yuboring.\n\n"
             . "📱 Raqamingiz tizimda ro'yxatdan o'tgan bo'lishi kerak.";
 

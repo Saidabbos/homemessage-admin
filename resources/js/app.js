@@ -5,7 +5,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from 'ziggy-js';
 import i18n from './i18n';
 
-const appName = 'HomeMessage Admin';
+const appName = 'Sabai Admin';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

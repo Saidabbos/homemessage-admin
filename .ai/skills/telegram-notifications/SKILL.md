@@ -1,11 +1,11 @@
 ---
 name: telegram-notifications
-description: Guide for implementing Telegram bot notifications for Golden Touch
+description: Guide for implementing Telegram bot notifications for Sabai
 ---
 
 # Telegram Notifications Skill
 
-This skill covers implementing Telegram notifications for the Golden Touch booking system.
+This skill covers implementing Telegram notifications for the Sabai booking system.
 
 ## When to Use This Skill
 
@@ -18,7 +18,7 @@ This skill covers implementing Telegram notifications for the Golden Touch booki
 
 ## Architecture Overview
 
-Golden Touch uses **2 bots** and **2 groups**:
+Sabai uses **2 bots** and **2 groups**:
 
 | Bot | Group | Events | Audience |
 |-----|-------|--------|----------|
@@ -46,7 +46,7 @@ THERAPIST_BOT_TOKEN=0987654321:ZYXwvuTSRqpONMlkjIHGfedCBA
 THERAPIST_GROUP_CHAT_ID=-1009876543210
 
 # Base URL for links
-APP_URL=https://goldentouch.uz
+APP_URL=https://sabai.uz
 ```
 
 ### Config File
@@ -366,7 +366,7 @@ Master: Anvar
 Time: 2024-01-15 14:00
 Phone: `+998901234567`
 
-[Open in Admin](https://goldentouch.uz/admin/orders/123)
+[Open in Admin](https://sabai.uz/admin/orders/123)
 ```
 
 ### PAID (OPS Group)
@@ -377,7 +377,7 @@ Phone: `+998901234567`
 500 000 UZS · payme
 Master: Anvar · 2024-01-15 14:00
 
-[Open in Admin](https://goldentouch.uz/admin/orders/123)
+[Open in Admin](https://sabai.uz/admin/orders/123)
 ```
 
 ### READY (Therapists Group)
@@ -409,8 +409,8 @@ Space 2×2: Yes · Pets: No
 ✅ PAID · 500 000 UZS · payme
 
 🔗 *Links:*
-[My Day](https://goldentouch.uz/m/abc123token/day/2024-01-15)
-[Order Details](https://goldentouch.uz/o/xyz789token)
+[My Day](https://sabai.uz/m/abc123token/day/2024-01-15)
+[Order Details](https://sabai.uz/o/xyz789token)
 ```
 
 ---

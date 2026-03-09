@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Golden Touch Deployment Script
+# Sabai Deployment Script
 # Deploymentni server'da ishlatish uchun: bash deploy.sh hm.make-it.uz
 
 set -e
@@ -9,12 +9,12 @@ DOMAIN="${1:-hm.make-it.uz}"
 APP_PATH="/var/www/hm"
 APP_USER="www-data"
 REPO_URL="git@github.com:yourusername/hm.git"  # GitHub repo URL ni o'zgarti
-DB_NAME="golden_touch"
-DB_USER="golden_user"
+DB_NAME="sabai"
+DB_USER="sabai_user"
 DB_PASSWORD=$(openssl rand -base64 32)
 
 echo "================================"
-echo "🚀 Golden Touch Deployment Script"
+echo "🚀 Sabai Deployment Script"
 echo "Domain: $DOMAIN"
 echo "App Path: $APP_PATH"
 echo "================================"

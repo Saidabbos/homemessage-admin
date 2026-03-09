@@ -1,4 +1,4 @@
-# 🧪 HomeMessage - Test Accounts
+# 🧪 Sabai - Test Accounts
 
 ## 📋 All Test Accounts
 

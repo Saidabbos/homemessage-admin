@@ -1,4 +1,4 @@
-## Sprint Progress & Roadmap - HomeMessage
+## Sprint Progress & Roadmap - Sabai
 
 This document tracks sprint progress and provides a roadmap for the MVP development.
 

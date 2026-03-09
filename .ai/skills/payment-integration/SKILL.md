@@ -5,7 +5,7 @@ description: Guide for integrating Payme and Click payment providers with webhoo
 
 # Payment Integration Skill
 
-This skill covers implementing Payme and Click payment integrations for Golden Touch.
+This skill covers implementing Payme and Click payment integrations for Sabai.
 
 ## When to Use This Skill
 

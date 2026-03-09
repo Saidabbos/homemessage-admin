@@ -1,4 +1,4 @@
-## Golden Touch - Order Processing Workflow
+## Sabai - Order Processing Workflow
 
 This document covers the complete order lifecycle from creation to completion.
 
