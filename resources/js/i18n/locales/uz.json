@@ -356,6 +356,8 @@
         "cancelledOrders": "Bekor qilingan",
         "totalEarned": "Jami daromad",
         "avgRating": "O'rtacha baho",
+        "ratingFilter": "Reyting",
+        "noRating": "Bahosiz",
         "orderHistory": "Buyurtmalar tarixi",
         "ratingsFromClients": "Mijozlardan baholar",
         "ratingsToClients": "Mijozlarga baholar",

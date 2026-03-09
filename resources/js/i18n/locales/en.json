@@ -356,6 +356,8 @@
         "cancelledOrders": "Cancelled",
         "totalEarned": "Total earned",
         "avgRating": "Average rating",
+        "ratingFilter": "Rating",
+        "noRating": "No rating",
         "orderHistory": "Order history",
         "ratingsFromClients": "Ratings from clients",
         "ratingsToClients": "Ratings to clients",

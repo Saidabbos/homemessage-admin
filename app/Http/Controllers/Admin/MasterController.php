@@ -33,7 +33,7 @@ class MasterController extends Controller
         return Inertia::render('Admin/Masters/Index', [
             'masters' => $this->masterRepository->getFilteredPaginated($request->all()),
             'serviceTypes' => $this->serviceTypeRepository->getActive(),
-            'filters' => $request->only(['search', 'status', 'gender', 'service_type']),
+            'filters' => $request->only(['search', 'status', 'gender', 'service_type', 'rating']),
         ]);
     }
 

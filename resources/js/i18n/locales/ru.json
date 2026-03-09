@@ -356,6 +356,8 @@
         "cancelledOrders": "Отменено",
         "totalEarned": "Общий доход",
         "avgRating": "Средняя оценка",
+        "ratingFilter": "Рейтинг",
+        "noRating": "Без оценки",
         "orderHistory": "История заказов",
         "ratingsFromClients": "Оценки от клиентов",
         "ratingsToClients": "Оценки клиентам",

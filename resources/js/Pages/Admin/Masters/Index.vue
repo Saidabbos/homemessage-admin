@@ -41,6 +41,7 @@ const search = ref(props.filters?.search || '');
 const status = ref(props.filters?.status || 'all');
 const gender = ref(props.filters?.gender || 'all');
 const serviceType = ref(props.filters?.service_type || 'all');
+const rating = ref(props.filters?.rating || 'all');
 
 const applyFilters = () => {
   router.get(route('admin.masters.index'), {
@@ -48,6 +49,7 @@ const applyFilters = () => {
     status: status.value === 'all' ? undefined : status.value,
     gender: gender.value === 'all' ? undefined : gender.value,
     service_type: serviceType.value === 'all' ? undefined : serviceType.value,
+    rating: rating.value === 'all' ? undefined : rating.value,
   }, {
     preserveState: true,
     replace: true,
@@ -59,6 +61,7 @@ const resetFilters = () => {
   status.value = 'all';
   gender.value = 'all';
   serviceType.value = 'all';
+  rating.value = 'all';
   router.get(route('admin.masters.index'));
 };
 
@@ -68,7 +71,7 @@ watch(search, () => {
   searchTimeout = setTimeout(applyFilters, 300);
 });
 
-watch([status, gender, serviceType], applyFilters);
+watch([status, gender, serviceType, rating], applyFilters);
 
 const getTranslation = (item, field) => {
   if (!item[field]) return '';
@@ -82,7 +85,12 @@ const deleteMaster = (id) => {
   }
 };
 
-const hasActiveFilters = () => search.value || (status.value && status.value !== 'all') || (gender.value && gender.value !== 'all') || (serviceType.value && serviceType.value !== 'all');
+const formatRating = (value) => {
+  if (!value) return '—';
+  return Number(value).toFixed(1);
+};
+
+const hasActiveFilters = () => search.value || (status.value && status.value !== 'all') || (gender.value && gender.value !== 'all') || (serviceType.value && serviceType.value !== 'all') || (rating.value && rating.value !== 'all');
 </script>
 
 <template>
@@ -143,6 +151,18 @@ const hasActiveFilters = () => search.value || (status.value && status.value !==
               </SelectItem>
             </SelectContent>
           </Select>
+          <Select v-model="rating">
+            <SelectTrigger class="lg:w-40">
+              <SelectValue :placeholder="t('masters.ratingFilter')" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{{ t('masters.ratingFilter') }}</SelectItem>
+              <SelectItem value="4.5">4.5+</SelectItem>
+              <SelectItem value="4">4.0+</SelectItem>
+              <SelectItem value="3">3.0+</SelectItem>
+              <SelectItem value="no_rating">{{ t('masters.noRating') }}</SelectItem>
+            </SelectContent>
+          </Select>
           <Button v-if="hasActiveFilters()" variant="ghost" @click="resetFilters">
             {{ t('common.reset') }}
           </Button>
@@ -158,6 +178,7 @@ const hasActiveFilters = () => search.value || (status.value && status.value !==
               <TableHead>{{ t('masters.fullName') }}</TableHead>
               <TableHead>{{ t('masters.phone') }}</TableHead>
               <TableHead>{{ t('masters.experience') }}</TableHead>
+              <TableHead class="text-center">{{ t('masters.avgRating') }}</TableHead>
               <TableHead class="text-center">📲</TableHead>
               <TableHead>{{ t('common.status') }}</TableHead>
               <TableHead class="text-center">{{ t('common.actions') }}</TableHead>
@@ -185,6 +206,14 @@ const hasActiveFilters = () => search.value || (status.value && status.value !==
               </TableCell>
               <TableCell>
                 {{ master.experience_years }} {{ t('masters.years') }}
+              </TableCell>
+              <TableCell class="text-center">
+                <div v-if="master.avg_rating" class="flex items-center justify-center gap-1">
+                  <span class="text-yellow-500">★</span>
+                  <span class="font-medium">{{ formatRating(master.avg_rating) }}</span>
+                  <span class="text-xs text-muted-foreground">({{ master.ratings_count }})</span>
+                </div>
+                <span v-else class="text-muted-foreground">—</span>
               </TableCell>
               <TableCell class="text-center">
                 <span v-if="master.telegram_id" class="text-green-600" :title="master.telegram_username ? '@' + master.telegram_username : 'Ulangan'">✅</span>

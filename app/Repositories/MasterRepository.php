@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Master;
+use App\Models\Rating;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class MasterRepository extends BaseRepository
@@ -14,7 +15,10 @@ class MasterRepository extends BaseRepository
 
     public function getFilteredPaginated(array $filters, int $perPage = 10): LengthAwarePaginator
     {
-        $query = $this->query()->with('serviceTypes');
+        $query = $this->query()
+            ->with('serviceTypes')
+            ->withAvg(['receivedRatings as avg_rating' => fn($q) => $q->whereNotNull('rated_at')], 'overall_rating')
+            ->withCount(['receivedRatings as ratings_count' => fn($q) => $q->whereNotNull('rated_at')]);
 
         $this->applySearch($query, $filters['search'] ?? null, [
             'first_name', 'last_name', 'phone', 'email'
@@ -28,6 +32,17 @@ class MasterRepository extends BaseRepository
 
         if (!empty($filters['service_type'])) {
             $query->whereHas('serviceTypes', fn($q) => $q->where('service_types.id', $filters['service_type']));
+        }
+
+        if (!empty($filters['rating'])) {
+            $rating = $filters['rating'];
+            if ($rating === 'no_rating') {
+                $query->whereDoesntHave('receivedRatings', fn($q) => $q->whereNotNull('rated_at'));
+            } else {
+                $minRating = (float) $rating;
+                $query->whereHas('receivedRatings', fn($q) => $q->whereNotNull('rated_at'))
+                    ->having('avg_rating', '>=', $minRating);
+            }
         }
 
         return $this->paginate($query->latest(), $perPage);
