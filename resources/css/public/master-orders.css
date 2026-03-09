@@ -5,7 +5,7 @@
 .mo-page {
     display: flex;
     min-height: 100vh;
-    background: #F5F2ED;
+    background: #f9fafb;
     font-family: 'Manrope', sans-serif;
 }
 
@@ -238,7 +238,7 @@
     display: flex;
     gap: 4px;
     padding: 4px;
-    background: rgba(255, 255, 255, 0.25);
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     border-radius: 14px;
     border: 1px solid rgba(45, 106, 79, 0.03);
 }
@@ -265,7 +265,7 @@
     background: rgba(255, 255, 255, 0.5);
     color: #2D6A4F;
     font-weight: 600;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .mo-filter-right {
@@ -279,7 +279,7 @@
     align-items: center;
     gap: 8px;
     padding: 10px 16px;
-    background: rgba(255, 255, 255, 0.25);
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(45, 106, 79, 0.03);
     border-radius: 12px;
 }
@@ -305,7 +305,7 @@
 
 /* ── Orders Table Card ── */
 .mo-table-card {
-    background: rgba(255, 255, 255, 0.25);
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.37);
     backdrop-filter: blur(16px);
@@ -351,7 +351,7 @@
 }
 
 .mo-table-row:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .mo-td {
@@ -446,7 +446,7 @@
 }
 
 .mo-pag-btn:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.4);
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .mo-pag-btn.active {
@@ -461,7 +461,7 @@
 }
 
 .mo-pag-nav {
-    background: rgba(255, 255, 255, 0.31);
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(45, 106, 79, 0.03);
 }
 

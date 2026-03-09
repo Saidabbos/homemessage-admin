@@ -90,6 +90,11 @@ class OrderService
         $order = $order->fresh();
         $this->sendStatusChangeNotifications($order, $oldStatus, $newStatus);
 
+        // Auto-send READY notification to master when status becomes CONFIRMED
+        if ($newStatus === Order::STATUS_CONFIRMED) {
+            $this->checkAndSendReadyNotification($order);
+        }
+
         return $order;
     }
 
@@ -225,7 +230,7 @@ class OrderService
         ]);
 
         DB::transaction(function () use ($order, $data) {
-            $order->update([
+            $updateData = [
                 'call_outcome' => $data['call_outcome'] ?? $order->call_outcome,
                 'conf_entrance' => $data['conf_entrance'] ?? $order->conf_entrance,
                 'conf_floor' => $data['conf_floor'] ?? $order->conf_floor,
@@ -239,7 +244,20 @@ class OrderService
                 'conf_note_to_master' => $data['conf_note_to_master'] ?? $order->conf_note_to_master,
                 'confirmed_by' => auth()->id(),
                 'confirmed_at' => now(),
-            ]);
+            ];
+
+            // Auto-transition NEW → CONFIRMING when filling the confirmation form
+            $oldStatus = $order->status;
+            if ($order->status === Order::STATUS_NEW) {
+                $updateData['status'] = Order::STATUS_CONFIRMING;
+            }
+
+            $order->update($updateData);
+
+            // Log status change if transitioned
+            if ($oldStatus === Order::STATUS_NEW && $order->status === Order::STATUS_CONFIRMING) {
+                OrderLog::log($order, 'status_changed', $oldStatus, Order::STATUS_CONFIRMING, 'orders.logConfirmationStarted');
+            }
 
             // Log the confirmation
             OrderLog::log(
@@ -247,7 +265,7 @@ class OrderService
                 'confirmed',
                 null,
                 $data['call_outcome'] ?? 'confirmed',
-                'Анкета заполнена'
+                'orders.logConfirmationFormFilled'
             );
         });
 

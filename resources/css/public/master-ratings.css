@@ -5,7 +5,7 @@
 .mrt-page {
     display: flex;
     min-height: 100vh;
-    background: #F5F2ED;
+    background: #f9fafb;
     font-family: 'Manrope', sans-serif;
 }
 
@@ -222,7 +222,7 @@
     background: #fff;
     border-radius: 14px;
     padding: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     display: flex;
     justify-content: center;
 }
@@ -262,7 +262,7 @@
     background: #fff;
     border-radius: 14px;
     padding: 20px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .mrt-card-top {

@@ -5,7 +5,7 @@
 .mos-page {
     display: flex;
     min-height: 100vh;
-    background: #F5F2ED;
+    background: #f9fafb;
     font-family: 'Manrope', sans-serif;
 }
 
@@ -43,7 +43,7 @@
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.25);
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(45, 106, 79, 0.03);
     color: #2D6A4F;
     text-decoration: none;
@@ -102,7 +102,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 20px;
-    background: rgba(255, 255, 255, 0.25);
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     border-radius: 14px;
     border: 1px solid rgba(255, 255, 255, 0.37);
 }
@@ -144,7 +144,7 @@
 
 /* Info Cards */
 .mos-card {
-    background: rgba(255, 255, 255, 0.25);
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     border-radius: 14px;
     border: 1px solid rgba(255, 255, 255, 0.37);
     padding: 20px;

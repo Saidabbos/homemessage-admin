@@ -136,6 +136,10 @@ const qaForm = useForm({
 
 // Actions
 const openStatusModal = (status: string) => {
+  if (status === 'CONFIRMING') {
+    showConfirmationModal.value = true;
+    return;
+  }
   statusForm.status = status;
   statusForm.comment = '';
   showStatusModal.value = true;
@@ -240,7 +244,7 @@ const formatArrivalWindow = (order: any) => {
   if (!order.arrival_window_start || !order.arrival_window_end) return '-';
   return `${order.arrival_window_start?.substring(0, 5)} – ${order.arrival_window_end?.substring(0, 5)}`;
 };
-const getStatusLabel = (status: string) => props.statusOptions?.find(s => s.value === status)?.label || status;
+const getStatusLabel = (status: string) => t(`orderStatuses.${status}`, status);
 const getLogActionLabel = (action: string) => {
   const labels: Record<string, string> = { 'status_changed': t('orders.logs.statusChanged'), 'rescheduled': t('orders.logs.rescheduled'), 'note_added': t('orders.logs.noteAdded'), 'created': t('orders.logs.created') };
   return labels[action] || action;
@@ -355,17 +359,22 @@ const sendWorkOrderToMaster = async () => {
           </CardHeader>
           <CardContent>
             <div class="flex flex-wrap gap-2">
-              <Button v-for="status in availableStatuses.filter(s => s !== 'CANCELLED')" :key="status" variant="outline" size="sm"
-                @click="openStatusModal(status)"
-                :class="{ 'border-green-500 text-green-700 hover:bg-green-50 dark:hover:bg-green-950': status === 'CONFIRMED' || status === 'COMPLETED',
-                          'border-yellow-500 text-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-950': status === 'CONFIRMING' || status === 'IN_PROGRESS' }">
-                {{ getStatusLabel(status) }}
-              </Button>
-              <Button v-if="order.status !== 'CANCELLED' && order.status !== 'COMPLETED'"
-                variant="outline" size="sm" class="border-destructive text-destructive"
-                @click="showCancelModal = true">
-                {{ t('orders.cancel', 'Bekor qilish') }}
-              </Button>
+              <div v-for="status in availableStatuses.filter(s => s !== 'CANCELLED')" :key="status" class="flex flex-col items-center gap-1">
+                <Button variant="outline" size="sm"
+                  @click="openStatusModal(status)"
+                  :class="{ 'border-green-500 text-green-700 hover:bg-green-50 dark:hover:bg-green-950': status === 'CONFIRMED' || status === 'COMPLETED',
+                            'border-yellow-500 text-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-950': status === 'CONFIRMING' || status === 'IN_PROGRESS' }">
+                  {{ getStatusLabel(status) }}
+                </Button>
+                <span class="text-[11px] text-muted-foreground text-center max-w-[140px] leading-tight">{{ t(`orders.statusHint.${status}`) }}</span>
+              </div>
+              <div v-if="order.status !== 'CANCELLED' && order.status !== 'COMPLETED'" class="flex flex-col items-center gap-1">
+                <Button variant="outline" size="sm" class="border-destructive text-destructive"
+                  @click="showCancelModal = true">
+                  {{ t('orders.cancel', 'Bekor qilish') }}
+                </Button>
+                <span class="text-[11px] text-muted-foreground text-center max-w-[140px] leading-tight">{{ t('orders.statusHint.CANCELLED') }}</span>
+              </div>
             </div>
           </CardContent>
         </Card>

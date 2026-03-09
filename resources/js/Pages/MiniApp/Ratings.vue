@@ -175,7 +175,7 @@ const rateOrder = (orderId) => {
     --gold: #C8A951;
     --gold-light: #D4B76A;
     --navy: #1B2B5A;
-    --cream: #F5F2ED;
+    --cream: #f9fafb;
     --cream-dark: #EDE8DF;
     --text-muted: #8B8680;
 

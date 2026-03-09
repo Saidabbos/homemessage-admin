@@ -5,7 +5,7 @@
 .cms-page {
     display: flex;
     min-height: 100vh;
-    background: #EDE8DF;
+    background: #f9fafb;
     font-family: 'Manrope', sans-serif;
 }
 
@@ -205,7 +205,7 @@
 }
 
 .cms-back-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     color: #1B2B5A;
 }
 
@@ -219,7 +219,7 @@
 .cms-hero {
     display: flex;
     gap: 28px;
-    background: rgba(255, 255, 255, 0.25);
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.37);
     backdrop-filter: blur(16px);
@@ -362,7 +362,7 @@
 }
 
 .cms-service-card {
-    background: rgba(255, 255, 255, 0.25);
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.37);
     backdrop-filter: blur(16px);

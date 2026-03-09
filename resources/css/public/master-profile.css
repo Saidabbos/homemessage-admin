@@ -5,7 +5,7 @@
 .mp-page {
     display: flex;
     min-height: 100vh;
-    background: #F5F2ED;
+    background: #f9fafb;
     font-family: 'Manrope', sans-serif;
 }
 
@@ -223,7 +223,7 @@
     background: #fff;
     border-radius: 14px;
     padding: 32px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     gap: 24px;
@@ -292,7 +292,7 @@
     background: #fff;
     border-radius: 14px;
     padding: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .mp-info-title {
@@ -326,7 +326,7 @@
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: #F5F2ED;
+    background: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;

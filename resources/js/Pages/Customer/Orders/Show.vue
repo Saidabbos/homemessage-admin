@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Head, Link, usePage, router } from '@inertiajs/vue3'
 import { useI18n } from 'vue-i18n'
 
@@ -14,6 +14,12 @@ const props = defineProps({
 
 const showCancelModal = ref(false)
 const cancelling = ref(false)
+const showRescheduleModal = ref(false)
+const rescheduling = ref(false)
+const rescheduleDate = ref('')
+const rescheduleSlots = ref([])
+const loadingSlots = ref(false)
+const selectedSlot = ref(null)
 
 const formatPrice = (amount) => {
     return new Intl.NumberFormat('uz-UZ').format(amount) + ' ' + t('common.sum')
@@ -39,12 +45,60 @@ const payWithClick = () => {
     window.location.href = `/booking/payment/${props.order.id}?provider=click`
 }
 
+const cancellationInfo = computed(() => props.order.cancellation_info)
+const isOver24h = computed(() => cancellationInfo.value?.is_over_24h ?? false)
+
 const confirmCancel = () => {
     cancelling.value = true
     router.post(`/customer/orders/${props.order.id}/cancel`, {}, {
         onFinish: () => {
             cancelling.value = false
             showCancelModal.value = false
+        }
+    })
+}
+
+const openReschedule = () => {
+    showCancelModal.value = false
+    showRescheduleModal.value = true
+    rescheduleDate.value = ''
+    rescheduleSlots.value = []
+    selectedSlot.value = null
+}
+
+const minRescheduleDate = computed(() => {
+    const d = new Date()
+    d.setDate(d.getDate() + 1)
+    return d.toISOString().split('T')[0]
+})
+
+const fetchSlots = async () => {
+    if (!rescheduleDate.value || !props.order.master?.id) return
+    loadingSlots.value = true
+    selectedSlot.value = null
+    try {
+        const duration = props.order.duration?.minutes || 60
+        const res = await fetch(`/api/masters/${props.order.master.id}/slots?date=${rescheduleDate.value}&duration=${duration}&people_count=${props.order.people_count || 1}`)
+        const data = await res.json()
+        rescheduleSlots.value = data.data?.slots || data.slots || []
+    } catch (e) {
+        rescheduleSlots.value = []
+    } finally {
+        loadingSlots.value = false
+    }
+}
+
+const confirmReschedule = () => {
+    if (!selectedSlot.value) return
+    rescheduling.value = true
+    router.post(`/customer/orders/${props.order.id}/reschedule`, {
+        booking_date: rescheduleDate.value,
+        arrival_window_start: selectedSlot.value.start,
+        arrival_window_end: selectedSlot.value.end,
+    }, {
+        onFinish: () => {
+            rescheduling.value = false
+            showRescheduleModal.value = false
         }
     })
 }
@@ -373,7 +427,40 @@ const logout = () => {
                         </svg>
                     </div>
                     <h3 class="cos-modal-title">{{ t('orders.cancelConfirmTitle') }}</h3>
-                    <p class="cos-modal-text">{{ t('orders.cancelConfirmText') }}</p>
+
+                    <!-- Over 24h: show refund info + reschedule option -->
+                    <template v-if="isOver24h && cancellationInfo">
+                        <div class="cos-refund-info">
+                            <div class="cos-refund-row">
+                                <span>{{ t('orders.totalPaid') }}</span>
+                                <span class="cos-refund-amount">{{ formatPrice(cancellationInfo.total_amount) }}</span>
+                            </div>
+                            <div class="cos-refund-row cos-refund-fee">
+                                <span>{{ t('orders.cancellationFee') }} ({{ cancellationInfo.fee_percent }}%)</span>
+                                <span>-{{ formatPrice(cancellationInfo.fee_amount) }}</span>
+                            </div>
+                            <div class="cos-refund-divider"></div>
+                            <div class="cos-refund-row cos-refund-total">
+                                <span>{{ t('orders.refundAmount') }}</span>
+                                <span class="cos-refund-amount">{{ formatPrice(cancellationInfo.refund_amount) }}</span>
+                            </div>
+                        </div>
+                        <p class="cos-modal-text">{{ t('orders.cancelRefundNote') }}</p>
+
+                        <!-- Reschedule suggestion -->
+                        <button v-if="cancellationInfo.can_reschedule" @click="openReschedule" class="cos-modal-btn cos-modal-btn-primary cos-reschedule-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            {{ t('orders.rescheduleInstead') }}
+                        </button>
+                    </template>
+
+                    <!-- Under 24h: simple warning -->
+                    <template v-else>
+                        <p class="cos-modal-text">{{ t('orders.cancelConfirmText') }}</p>
+                    </template>
+
                     <div class="cos-modal-actions">
                         <button @click="showCancelModal = false" class="cos-modal-btn cos-modal-btn-secondary">
                             {{ t('common.no') }}
@@ -381,6 +468,68 @@ const logout = () => {
                         <button @click="confirmCancel" :disabled="cancelling" class="cos-modal-btn cos-modal-btn-danger">
                             <span v-if="cancelling">{{ t('common.loading') }}...</span>
                             <span v-else>{{ t('orders.yesCancel') }}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Teleport>
+
+        <!-- Reschedule Modal -->
+        <Teleport to="body">
+            <div v-if="showRescheduleModal" class="cos-modal-overlay" @click.self="showRescheduleModal = false">
+                <div class="cos-modal cos-modal-wide">
+                    <div class="cos-modal-icon" style="color: #3B82F6;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                    </div>
+                    <h3 class="cos-modal-title">{{ t('orders.rescheduleTitle') }}</h3>
+                    <p class="cos-modal-text">{{ t('orders.rescheduleText') }}</p>
+
+                    <!-- Date picker -->
+                    <div class="cos-reschedule-form">
+                        <label class="cos-form-label">{{ t('orders.newDate') }}</label>
+                        <input
+                            type="date"
+                            v-model="rescheduleDate"
+                            :min="minRescheduleDate"
+                            @change="fetchSlots"
+                            class="cos-form-input"
+                        />
+
+                        <!-- Loading slots -->
+                        <div v-if="loadingSlots" class="cos-slots-loading">
+                            {{ t('common.loading') }}...
+                        </div>
+
+                        <!-- Available slots -->
+                        <div v-else-if="rescheduleDate && rescheduleSlots.length > 0" class="cos-slots-grid">
+                            <label class="cos-form-label">{{ t('orders.selectTime') }}</label>
+                            <div class="cos-slot-buttons">
+                                <button
+                                    v-for="slot in rescheduleSlots"
+                                    :key="slot.start"
+                                    @click="selectedSlot = slot"
+                                    :class="['cos-slot-btn', { 'cos-slot-selected': selectedSlot?.start === slot.start }]"
+                                >
+                                    {{ slot.start }} - {{ slot.end }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- No slots message -->
+                        <div v-else-if="rescheduleDate && !loadingSlots" class="cos-no-slots">
+                            {{ t('orders.noSlotsAvailable') }}
+                        </div>
+                    </div>
+
+                    <div class="cos-modal-actions">
+                        <button @click="showRescheduleModal = false" class="cos-modal-btn cos-modal-btn-secondary">
+                            {{ t('common.cancel') }}
+                        </button>
+                        <button @click="confirmReschedule" :disabled="!selectedSlot || rescheduling" class="cos-modal-btn cos-modal-btn-primary">
+                            <span v-if="rescheduling">{{ t('common.loading') }}...</span>
+                            <span v-else>{{ t('orders.confirmReschedule') }}</span>
                         </button>
                     </div>
                 </div>
@@ -546,6 +695,152 @@ const logout = () => {
 .cos-modal-btn-danger:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.cos-modal-btn-primary {
+    background: #3B82F6;
+    border: none;
+    color: white;
+}
+
+.cos-modal-btn-primary:hover {
+    background: #2563EB;
+}
+
+.cos-modal-btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Refund Info */
+.cos-refund-info {
+    background: #FFF7ED;
+    border: 1px solid #FED7AA;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    text-align: left;
+}
+
+.cos-refund-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: #64748B;
+    padding: 4px 0;
+}
+
+.cos-refund-amount {
+    font-weight: 600;
+    color: #1E293B;
+}
+
+.cos-refund-fee {
+    color: #EF4444;
+}
+
+.cos-refund-divider {
+    height: 1px;
+    background: #FED7AA;
+    margin: 8px 0;
+}
+
+.cos-refund-total {
+    font-weight: 600;
+    color: #16A34A;
+}
+
+.cos-refund-total .cos-refund-amount {
+    color: #16A34A;
+}
+
+.cos-reschedule-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+/* Reschedule Modal */
+.cos-modal-wide {
+    max-width: 480px;
+}
+
+.cos-reschedule-form {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.cos-form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
+    margin-top: 12px;
+}
+
+.cos-form-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #1E293B;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.cos-form-input:focus {
+    border-color: #3B82F6;
+}
+
+.cos-slots-loading {
+    text-align: center;
+    padding: 20px;
+    color: #64748B;
+    font-size: 14px;
+}
+
+.cos-slot-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.cos-slot-btn {
+    padding: 10px 8px;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    background: white;
+    font-size: 13px;
+    color: #1E293B;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.cos-slot-btn:hover {
+    border-color: #3B82F6;
+    background: #EFF6FF;
+}
+
+.cos-slot-selected {
+    border-color: #3B82F6;
+    background: #3B82F6;
+    color: white;
+}
+
+.cos-no-slots {
+    text-align: center;
+    padding: 20px;
+    color: #94A3B8;
+    font-size: 14px;
 }
 
 @media (max-width: 768px) {

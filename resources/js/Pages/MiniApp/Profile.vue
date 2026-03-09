@@ -414,7 +414,7 @@ const savePin = async () => {
 .profile-page {
     --navy: #1B2B5A;
     --gold: #C8A951;
-    --cream: #F5F2ED;
+    --cream: #f9fafb;
     --cream-dark: #EDE8DF;
     --text-muted: #8B8680;
 

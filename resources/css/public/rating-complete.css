@@ -3,7 +3,7 @@
 
 .rc-page {
     min-height: 100vh;
-    background: #F5F2ED;
+    background: #f9fafb;
     padding: 24px 16px;
     display: flex;
     align-items: center;
@@ -72,7 +72,7 @@
     background: #fff;
     border-radius: 14px;
     padding: 24px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     margin-bottom: 16px;
 }
 

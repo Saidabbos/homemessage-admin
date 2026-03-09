@@ -65,6 +65,7 @@ Route::prefix('app')->group(function () {
     Route::get('/orders', [MiniAppHomeController::class, 'orders'])->name('miniapp.orders')->middleware('auth');
     Route::get('/orders/{order}', [MiniAppHomeController::class, 'orderShow'])->name('miniapp.orders.show')->middleware('auth');
     Route::post('/orders/{order}/cancel', [MiniAppHomeController::class, 'orderCancel'])->name('miniapp.orders.cancel')->middleware('auth');
+    Route::post('/orders/{order}/reschedule', [MiniAppHomeController::class, 'orderReschedule'])->name('miniapp.orders.reschedule')->middleware('auth');
     Route::get('/profile', [MiniAppHomeController::class, 'profile'])->name('miniapp.profile')->middleware('auth');
     Route::put('/profile', [MiniAppHomeController::class, 'profileUpdate'])->name('miniapp.profile.update')->middleware('auth');
     
@@ -100,6 +101,7 @@ Route::prefix('customer')->middleware(['auth', 'role:customer'])->group(function
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('customer.orders');
     Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('customer.orders.show');
     Route::post('/orders/{order}/cancel', [CustomerOrderController::class, 'cancel'])->name('customer.orders.cancel');
+    Route::post('/orders/{order}/reschedule', [CustomerOrderController::class, 'reschedule'])->name('customer.orders.reschedule');
     Route::get('/ratings', [CustomerRatingController::class, 'index'])->name('customer.ratings');
     Route::post('/orders/{order}/rate', [CustomerRatingController::class, 'createAndRedirect'])->name('customer.orders.rate');
     Route::get('/favorites', [CustomerFavoriteController::class, 'index'])->name('customer.favorites');

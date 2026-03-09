@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import MiniAppLayout from '@/Layouts/MiniAppLayout.vue';
@@ -15,6 +15,15 @@ const props = defineProps({
 
 const showCancelModal = ref(false);
 const cancelling = ref(false);
+const showRescheduleModal = ref(false);
+const rescheduling = ref(false);
+const rescheduleDate = ref('');
+const rescheduleSlots = ref([]);
+const loadingSlots = ref(false);
+const selectedSlot = ref(null);
+
+const cancellationInfo = computed(() => props.order.cancellation_info);
+const isOver24h = computed(() => cancellationInfo.value?.is_over_24h ?? false);
 
 const statusColors = {
   NEW: 'bg-blue-500',
@@ -92,6 +101,51 @@ const handleCancel = () => {
     onFinish: () => {
       cancelling.value = false;
       showCancelModal.value = false;
+    }
+  });
+};
+
+const openReschedule = () => {
+  showCancelModal.value = false;
+  showRescheduleModal.value = true;
+  rescheduleDate.value = '';
+  rescheduleSlots.value = [];
+  selectedSlot.value = null;
+};
+
+const minRescheduleDate = computed(() => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().split('T')[0];
+});
+
+const fetchSlots = async () => {
+  if (!rescheduleDate.value || !props.order.master?.id) return;
+  loadingSlots.value = true;
+  selectedSlot.value = null;
+  try {
+    const duration = props.order.duration?.minutes || 60;
+    const res = await fetch(`/api/masters/${props.order.master.id}/slots?date=${rescheduleDate.value}&duration=${duration}&people_count=${props.order.people_count || 1}`);
+    const data = await res.json();
+    rescheduleSlots.value = data.data?.slots || data.slots || [];
+  } catch (e) {
+    rescheduleSlots.value = [];
+  } finally {
+    loadingSlots.value = false;
+  }
+};
+
+const confirmReschedule = () => {
+  if (!selectedSlot.value) return;
+  rescheduling.value = true;
+  router.post(`/app/orders/${props.order.id}/reschedule`, {
+    booking_date: rescheduleDate.value,
+    arrival_window_start: selectedSlot.value.start,
+    arrival_window_end: selectedSlot.value.end,
+  }, {
+    onFinish: () => {
+      rescheduling.value = false;
+      showRescheduleModal.value = false;
     }
   });
 };
@@ -297,8 +351,44 @@ const handleCancel = () => {
     <!-- Cancel Modal -->
     <div v-if="showCancelModal" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50">
       <div class="bg-white w-full rounded-t-3xl p-6 animate-slide-up">
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ t('orders.cancelOrder') }}?</h3>
-        <p class="text-gray-500 mb-6">Buyurtmani bekor qilmoqchimisiz?</p>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ t('orders.cancelConfirmTitle') }}</h3>
+
+        <!-- Over 24h: refund info + reschedule option -->
+        <template v-if="isOver24h && cancellationInfo">
+          <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-4 text-left">
+            <div class="flex justify-between text-sm text-gray-500 mb-1">
+              <span>{{ t('orders.totalPaid') }}</span>
+              <span class="font-semibold text-gray-900">{{ formatPrice(cancellationInfo.total_amount) }}</span>
+            </div>
+            <div class="flex justify-between text-sm text-red-500 mb-1">
+              <span>{{ t('orders.cancellationFee') }} ({{ cancellationInfo.fee_percent }}%)</span>
+              <span>-{{ formatPrice(cancellationInfo.fee_amount) }}</span>
+            </div>
+            <div class="border-t border-orange-200 my-2"></div>
+            <div class="flex justify-between text-sm font-semibold text-green-600">
+              <span>{{ t('orders.refundAmount') }}</span>
+              <span>{{ formatPrice(cancellationInfo.refund_amount) }}</span>
+            </div>
+          </div>
+          <p class="text-gray-500 text-sm mb-4">{{ t('orders.cancelRefundNote') }}</p>
+
+          <button
+            v-if="cancellationInfo.can_reschedule"
+            @click="openReschedule"
+            class="w-full py-3 bg-blue-500 text-white font-semibold rounded-xl mb-3 flex items-center justify-center gap-2 active:bg-blue-600"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            {{ t('orders.rescheduleInstead') }}
+          </button>
+        </template>
+
+        <!-- Under 24h -->
+        <template v-else>
+          <p class="text-gray-500 mb-6">{{ t('orders.cancelConfirmText') }}</p>
+        </template>
+
         <div class="flex gap-3">
           <button
             @click="showCancelModal = false"
@@ -311,7 +401,71 @@ const handleCancel = () => {
             :disabled="cancelling"
             class="flex-1 py-3 bg-red-600 text-white font-semibold rounded-xl disabled:opacity-50"
           >
-            {{ cancelling ? '...' : t('orders.cancelOrder') }}
+            {{ cancelling ? '...' : t('orders.yesCancel') }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reschedule Modal -->
+    <div v-if="showRescheduleModal" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50">
+      <div class="bg-white w-full rounded-t-3xl p-6 animate-slide-up max-h-[80vh] overflow-y-auto">
+        <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ t('orders.rescheduleTitle') }}</h3>
+        <p class="text-gray-500 text-sm mb-4">{{ t('orders.rescheduleText') }}</p>
+
+        <!-- Date picker -->
+        <label class="block text-sm font-semibold text-gray-600 mb-1">{{ t('orders.newDate') }}</label>
+        <input
+          type="date"
+          v-model="rescheduleDate"
+          :min="minRescheduleDate"
+          @change="fetchSlots"
+          class="w-full p-3 border border-gray-200 rounded-xl text-gray-900 mb-4"
+        />
+
+        <!-- Loading -->
+        <div v-if="loadingSlots" class="text-center py-4 text-gray-500 text-sm">
+          {{ t('common.loading') }}...
+        </div>
+
+        <!-- Slots -->
+        <div v-else-if="rescheduleDate && rescheduleSlots.length > 0">
+          <label class="block text-sm font-semibold text-gray-600 mb-2">{{ t('orders.selectTime') }}</label>
+          <div class="grid grid-cols-3 gap-2 mb-4">
+            <button
+              v-for="slot in rescheduleSlots"
+              :key="slot.start"
+              @click="selectedSlot = slot"
+              :class="[
+                'py-2.5 px-2 border rounded-lg text-sm text-center transition-all',
+                selectedSlot?.start === slot.start
+                  ? 'border-blue-500 bg-blue-500 text-white'
+                  : 'border-gray-200 bg-white text-gray-900 active:bg-blue-50'
+              ]"
+            >
+              {{ slot.start }} - {{ slot.end }}
+            </button>
+          </div>
+        </div>
+
+        <!-- No slots -->
+        <div v-else-if="rescheduleDate && !loadingSlots" class="text-center py-4 text-gray-400 text-sm">
+          {{ t('orders.noSlotsAvailable') }}
+        </div>
+
+        <div class="flex gap-3 mt-2">
+          <button
+            @click="showRescheduleModal = false"
+            class="flex-1 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl"
+          >
+            {{ t('common.cancel') }}
+          </button>
+          <button
+            @click="confirmReschedule"
+            :disabled="!selectedSlot || rescheduling"
+            class="flex-1 py-3 bg-blue-500 text-white font-semibold rounded-xl disabled:opacity-50"
+          >
+            {{ rescheduling ? '...' : t('orders.confirmReschedule') }}
           </button>
         </div>
       </div>

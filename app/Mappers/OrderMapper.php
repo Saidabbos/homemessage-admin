@@ -63,6 +63,7 @@ class OrderMapper
             'pressure_level' => $order->pressure_level,
             'can_be_paid' => $order->canBePaid(),
             'can_cancel' => self::canCancel($order),
+            'cancellation_info' => self::canCancel($order) ? self::getCancellationInfo($order) : null,
             'can_pay' => $order->canBePaid(),
             'address' => $order->full_address ?? $order->address,
             'entrance' => $order->entrance,
@@ -321,6 +322,45 @@ class OrderMapper
     protected static function canCancel(Order $order): bool
     {
         return in_array($order->status, ['NEW', 'CONFIRMING', 'CONFIRMED', 'WAITING_PAYMENT']);
+    }
+
+    /**
+     * Calculate hours until session starts
+     */
+    protected static function hoursUntilSession(Order $order): ?float
+    {
+        if (!$order->booking_date || !$order->arrival_window_start) {
+            return null;
+        }
+
+        $sessionStart = \Carbon\Carbon::parse(
+            $order->booking_date->format('Y-m-d') . ' ' . $order->arrival_window_start
+        );
+
+        return max(0, now()->diffInMinutes($sessionStart, false) / 60);
+    }
+
+    /**
+     * Get cancellation info for the order
+     */
+    protected static function getCancellationInfo(Order $order): array
+    {
+        $hoursUntil = self::hoursUntilSession($order);
+        $totalAmount = (float) $order->total_amount;
+        $isOver24h = $hoursUntil !== null && $hoursUntil > 24;
+        $feePercent = 15;
+        $feeAmount = round($totalAmount * $feePercent / 100);
+        $refundAmount = $totalAmount - $feeAmount;
+
+        return [
+            'hours_until_session' => $hoursUntil !== null ? round($hoursUntil, 1) : null,
+            'is_over_24h' => $isOver24h,
+            'fee_percent' => $feePercent,
+            'fee_amount' => $feeAmount,
+            'refund_amount' => $refundAmount,
+            'total_amount' => $totalAmount,
+            'can_reschedule' => $isOver24h && $order->canChangeSlot(),
+        ];
     }
 
     /**

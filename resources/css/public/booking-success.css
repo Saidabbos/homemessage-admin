@@ -86,7 +86,7 @@
 }
 
 .bs-order-card {
-    background: rgba(255, 255, 255, 0.45);
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.6);
@@ -168,7 +168,7 @@
 
 /* ========== Next Steps ========== */
 .bs-steps-card {
-    background: rgba(255, 255, 255, 0.4);
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.6);
@@ -258,7 +258,7 @@
     justify-content: center;
     width: 100%;
     padding: 14px 32px;
-    background: rgba(255, 255, 255, 0.35);
+    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.5);

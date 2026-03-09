@@ -5,13 +5,18 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Mappers\OrderMapper;
 use App\Models\Order;
+use App\Models\OrderLog;
 use App\Models\Rating;
+use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class OrderController extends Controller
 {
+    public function __construct(
+        protected OrderService $orderService,
+    ) {}
     /**
      * Display customer's orders with filters and pagination.
      */
@@ -125,23 +130,91 @@ class OrderController extends Controller
 
         $cancellableStatuses = ['NEW', 'CONFIRMING', 'CONFIRMED', 'WAITING_PAYMENT'];
         if (!in_array($order->status, $cancellableStatuses)) {
-            return back()->with('error', 'Bu buyurtmani bekor qilib bo\'lmaydi');
+            return back()->with('error', 'orders.cannotCancel');
         }
 
-        $order->update([
+        // Calculate refund info
+        $hoursUntil = null;
+        if ($order->booking_date && $order->arrival_window_start) {
+            $sessionStart = \Carbon\Carbon::parse(
+                $order->booking_date->format('Y-m-d') . ' ' . $order->arrival_window_start
+            );
+            $hoursUntil = max(0, now()->diffInMinutes($sessionStart, false) / 60);
+        }
+
+        $isOver24h = $hoursUntil !== null && $hoursUntil > 24;
+        $refundNote = $isOver24h
+            ? 'orders.logCancelledOver24h'
+            : 'orders.logCancelledUnder24h';
+
+        $updateData = [
             'status' => 'CANCELLED',
             'cancelled_at' => now(),
             'cancelled_by' => $user->id,
-        ]);
+        ];
+
+        // Track refund info if order was paid and >24h
+        if ($isOver24h && $order->isPaid()) {
+            $feeAmount = round((float) $order->total_amount * 15 / 100);
+            $refundAmount = (float) $order->total_amount - $feeAmount;
+            $updateData['payment_status'] = Order::PAY_REFUNDED;
+            $refundNote .= " | refund:{$refundAmount},fee:{$feeAmount}";
+        }
+
+        $order->update($updateData);
 
         // Log the action
         $order->logs()->create([
             'action' => 'cancelled_by_customer',
             'user_id' => $user->id,
             'user_type' => 'customer',
-            'notes' => 'Mijoz tomonidan bekor qilindi',
+            'notes' => $refundNote,
         ]);
 
-        return redirect()->route('customer.orders')->with('success', 'Buyurtma bekor qilindi');
+        return redirect()->route('customer.orders')->with('success', 'orders.cancelledSuccess');
+    }
+
+    /**
+     * Reschedule order by customer (only when >24h before session)
+     */
+    public function reschedule(Request $request, Order $order)
+    {
+        $user = Auth::user();
+
+        if ($order->customer_id !== $user->id) {
+            abort(403);
+        }
+
+        if (!$order->canChangeSlot()) {
+            return back()->with('error', 'orders.cannotReschedule');
+        }
+
+        // Verify >24h before session
+        if ($order->booking_date && $order->arrival_window_start) {
+            $sessionStart = \Carbon\Carbon::parse(
+                $order->booking_date->format('Y-m-d') . ' ' . $order->arrival_window_start
+            );
+            $hoursUntil = now()->diffInMinutes($sessionStart, false) / 60;
+            if ($hoursUntil <= 24) {
+                return back()->with('error', 'orders.rescheduleTooLate');
+            }
+        }
+
+        $request->validate([
+            'booking_date' => 'required|date|after:today',
+            'arrival_window_start' => 'required|date_format:H:i',
+            'arrival_window_end' => 'required|date_format:H:i|after:arrival_window_start',
+        ]);
+
+        $this->orderService->reschedule(
+            $order,
+            $request->booking_date,
+            $request->arrival_window_start,
+            $request->arrival_window_end,
+            'orders.logRescheduledByCustomer'
+        );
+
+        return redirect()->route('customer.orders.show', $order)
+            ->with('success', 'orders.rescheduledSuccess');
     }
 }
