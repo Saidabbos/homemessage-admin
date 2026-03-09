@@ -282,7 +282,7 @@ const goBack = () => {
                     <path d="M9 22V12h6v10"/>
                 </svg>
             </div>
-            <h1 class="title">Home Massage</h1>
+            <h1 class="title">Sabai</h1>
             <p class="subtitle">Uyda professional massaj xizmati</p>
         </div>
 

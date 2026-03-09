@@ -45,7 +45,7 @@ onUnmounted(() => {
         <nav class="public-nav">
             <div class="nav-container">
                 <Link href="/" class="nav-logo">
-                    <span class="logo-text">Home Massage</span>
+                    <span class="logo-text">Sabai</span>
                 </Link>
 
                 <!-- Desktop Menu -->
@@ -151,7 +151,7 @@ onUnmounted(() => {
         <footer class="public-footer">
             <div class="footer-container">
                 <div class="footer-brand">
-                    <span class="footer-logo">Home Massage</span>
+                    <span class="footer-logo">Sabai</span>
                     <p class="footer-tagline">{{ t('public.footer.tagline') }}</p>
                 </div>
                 
@@ -170,7 +170,7 @@ onUnmounted(() => {
                 </div>
 
                 <div class="footer-bottom">
-                    <p>&copy; 2026 Home Massage. {{ t('public.footer.rights') }}</p>
+                    <p>&copy; 2026 Sabai. {{ t('public.footer.rights') }}</p>
                 </div>
             </div>
         </footer>
