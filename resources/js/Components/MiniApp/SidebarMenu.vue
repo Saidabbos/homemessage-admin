@@ -37,7 +37,7 @@ const close = () => emit('close');
                             <path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V9m-4.5 3a4.5 4.5 0 1 0 4.5 4.5M7.5 12H9m3 4.5a4.5 4.5 0 1 1-4.5-4.5M12 16.5V15m4.5-3a4.5 4.5 0 1 0-4.5-4.5M16.5 12H15"/>
                             <circle cx="12" cy="12" r="3"/>
                         </svg>
-                        <span>HOMEMASSAGE</span>
+                        <span>SABAI</span>
                     </div>
                     <button class="sidebar-close" @click="close">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

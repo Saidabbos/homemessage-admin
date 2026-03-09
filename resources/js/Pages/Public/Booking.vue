@@ -658,7 +658,7 @@ const getServiceIcon = (service) => {
         <div class="bg-blob-2" style="bottom: 20%; left: -100px; opacity: 0.3;"></div>
         <!-- Top Bar -->
         <div class="bk-topbar">
-            <a href="/" class="bk-logo">HOMEMASSAGE</a>
+            <a href="/" class="bk-logo">SABAI</a>
 
             <!-- Stepper (steps 1-3) -->
             <div v-if="step !== 'cart'" class="bk-stepper">

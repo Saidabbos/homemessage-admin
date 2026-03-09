@@ -286,7 +286,7 @@ function submitContact() {
                         <path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V9m-4.5 3a4.5 4.5 0 1 0 4.5 4.5M7.5 12H9m3 4.5a4.5 4.5 0 1 1-4.5-4.5M12 16.5V15m4.5-3a4.5 4.5 0 1 0-4.5-4.5M16.5 12H15"/>
                         <circle cx="12" cy="12" r="3"/>
                     </svg>
-                    <span class="nav-logo-text">HOMEMASSAGE</span>
+                    <span class="nav-logo-text">SABAI</span>
                 </Link>
 
                 <!-- Desktop Nav Links -->
@@ -737,7 +737,7 @@ function submitContact() {
                                     <path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V9m-4.5 3a4.5 4.5 0 1 0 4.5 4.5M7.5 12H9m3 4.5a4.5 4.5 0 1 1-4.5-4.5M12 16.5V15m4.5-3a4.5 4.5 0 1 0-4.5-4.5M16.5 12H15"/>
                                     <circle cx="12" cy="12" r="3"/>
                                 </svg>
-                                <span class="footer-logo-text">HOMEMASSAGE</span>
+                                <span class="footer-logo-text">SABAI</span>
                             </div>
                             <p class="footer-brand-desc">{{ t('landing.footer.tagline') }}</p>
                             <div class="footer-socials">

@@ -150,7 +150,7 @@ const goToBooking = () => {
     <div class="bp-page">
         <!-- Top Bar -->
         <div class="bp-topbar">
-            <Link href="/" class="bp-logo">GOLDEN TOUCH</Link>
+            <Link href="/" class="bp-logo">SABAI</Link>
             <span class="bp-title">{{ t('bookingPayment.title') }}</span>
             <Link href="/booking" class="bp-close-btn">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">

@@ -32,7 +32,7 @@ const getPaymentLabel = (status) => {
     <div class="bs-page">
         <!-- Top Bar -->
         <div class="bs-topbar">
-            <Link href="/" class="bs-logo">GOLDEN TOUCH</Link>
+            <Link href="/" class="bs-logo">SABAI</Link>
         </div>
 
         <div class="bs-content">
