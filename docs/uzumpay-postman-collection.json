@@ -1,0 +1,348 @@
+{
+	"info": {
+		"_postman_id": "sabai-uzumpay-merchant-api",
+		"name": "Sabai - UzumPay Merchant API",
+		"description": "Sabai massage booking service - UzumPay payment webhook endpoints.\n\nAuthentication: HTTP Basic Auth\nAll amounts in tiyin (1 UZS = 100 tiyin)\n\nFlow: check → create → confirm\nAdditional: reverse, status",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "username",
+				"value": "{{login}}",
+				"type": "string"
+			},
+			{
+				"key": "password",
+				"value": "{{password}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://sabai.uz"
+		},
+		{
+			"key": "login",
+			"value": "sabai_merchant"
+		},
+		{
+			"key": "password",
+			"value": ""
+		},
+		{
+			"key": "serviceId",
+			"value": "100001"
+		},
+		{
+			"key": "transId",
+			"value": ""
+		},
+		{
+			"key": "accountId",
+			"value": "1"
+		},
+		{
+			"key": "amount",
+			"value": "15000000"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Check - Verify payment feasibility",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"",
+							"pm.test('Status is OK', function () {",
+							"    pm.expect(jsonData.status).to.eql('OK');",
+							"});",
+							"",
+							"pm.test('Account value returned', function () {",
+							"    pm.expect(jsonData.data.account.value).to.exist;",
+							"});",
+							"",
+							"if (jsonData.data && jsonData.data.amount) {",
+							"    pm.collectionVariables.set('amount', jsonData.data.amount.value);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"serviceId\": {{serviceId}},\n    \"timestamp\": {{$timestamp}}000,\n    \"params\": {\n        \"account\": {{accountId}}\n    }\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/webhook/uzum/check",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "webhook", "uzum", "check"]
+				},
+				"description": "Step 1: Verify that the order exists and can be paid.\n\nParams:\n- serviceId: Service identifier\n- timestamp: Unix timestamp in milliseconds\n- params.account: Order ID in our system\n\nSuccess response (200):\n- status: \"OK\"\n- data.account.value: Order ID\n- data.order_number.value: Order number (e.g. \"GT-20260310-001\")\n- data.amount.value: Amount in tiyin"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"status": "OK",
+					"code": 200,
+					"body": "{\n    \"serviceId\": 100001,\n    \"timestamp\": 1710100000000,\n    \"status\": \"OK\",\n    \"data\": {\n        \"account\": {\n            \"value\": \"1\"\n        },\n        \"order_number\": {\n            \"value\": \"GT-20260310-001\"\n        },\n        \"amount\": {\n            \"value\": \"15000000\"\n        }\n    }\n}"
+				},
+				{
+					"name": "Order not found",
+					"status": "Bad Request",
+					"code": 400,
+					"body": "{\n    \"serviceId\": 100001,\n    \"timestamp\": 1710100000000,\n    \"status\": \"FAILED\",\n    \"errorMessage\": \"Order not found\"\n}"
+				}
+			]
+		},
+		{
+			"name": "2. Create - Initialize transaction",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Generate UUID for transId if not set",
+							"if (!pm.collectionVariables.get('transId') || pm.collectionVariables.get('transId') === '') {",
+							"    pm.collectionVariables.set('transId', pm.variables.replaceIn('{{$guid}}'));",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"",
+							"pm.test('Status is CREATED', function () {",
+							"    pm.expect(jsonData.status).to.eql('CREATED');",
+							"});",
+							"",
+							"pm.test('TransId matches', function () {",
+							"    pm.expect(jsonData.transId).to.eql(pm.collectionVariables.get('transId'));",
+							"});",
+							"",
+							"pm.test('Amount matches', function () {",
+							"    pm.expect(jsonData.amount).to.eql(parseInt(pm.collectionVariables.get('amount')));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"serviceId\": {{serviceId}},\n    \"timestamp\": {{$timestamp}}000,\n    \"transId\": \"{{transId}}\",\n    \"params\": {\n        \"account\": {{accountId}}\n    },\n    \"amount\": {{amount}}\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/webhook/uzum/create",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "webhook", "uzum", "create"]
+				},
+				"description": "Step 2: Create transaction in merchant system.\n\nParams:\n- serviceId: Service identifier\n- timestamp: Unix timestamp in milliseconds\n- transId: UUID transaction identifier (from Uzum)\n- params.account: Order ID\n- amount: Payment amount in tiyin\n\nSuccess response (200):\n- status: \"CREATED\"\n- transId: Same UUID\n- transTime: Transaction creation time (ms)\n- amount: Amount in tiyin"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"status": "OK",
+					"code": 200,
+					"body": "{\n    \"serviceId\": 100001,\n    \"transId\": \"5c398d7e-76b6-11ee-96da-f3a095c6289d\",\n    \"status\": \"CREATED\",\n    \"transTime\": 1710100000000,\n    \"amount\": 15000000\n}"
+				}
+			]
+		},
+		{
+			"name": "3. Confirm - Complete payment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"",
+							"pm.test('Status is CONFIRMED', function () {",
+							"    pm.expect(jsonData.status).to.eql('CONFIRMED');",
+							"});",
+							"",
+							"pm.test('ConfirmTime exists', function () {",
+							"    pm.expect(jsonData.confirmTime).to.be.a('number');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"serviceId\": {{serviceId}},\n    \"timestamp\": {{$timestamp}}000,\n    \"transId\": \"{{transId}}\",\n    \"paymentSource\": \"UZCARD\",\n    \"phone\": \"998901234567\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/webhook/uzum/confirm",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "webhook", "uzum", "confirm"]
+				},
+				"description": "Step 3: Confirm payment after funds transfer.\n\nParams:\n- serviceId: Service identifier\n- timestamp: Unix timestamp in milliseconds\n- transId: UUID from create step\n- paymentSource: UZCARD, HUMO, VISA, MASTERCARD, etc.\n- phone: Customer phone number\n- tariff (optional): For installment payments\n- processingReferenceNumber (optional): Card reference\n- cardType (optional): 1=corporate, 2=individual\n\nSuccess response (200):\n- status: \"CONFIRMED\"\n- confirmTime: Confirmation time (ms)\n- amount: Amount in tiyin"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"status": "OK",
+					"code": 200,
+					"body": "{\n    \"serviceId\": 100001,\n    \"transId\": \"5c398d7e-76b6-11ee-96da-f3a095c6289d\",\n    \"status\": \"CONFIRMED\",\n    \"confirmTime\": 1710100000000,\n    \"amount\": 15000000\n}"
+				}
+			]
+		},
+		{
+			"name": "4. Reverse - Cancel transaction",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"",
+							"pm.test('Status is REVERSED', function () {",
+							"    pm.expect(jsonData.status).to.eql('REVERSED');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"serviceId\": {{serviceId}},\n    \"timestamp\": {{$timestamp}}000,\n    \"transId\": \"{{transId}}\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/webhook/uzum/reverse",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "webhook", "uzum", "reverse"]
+				},
+				"description": "Cancel/reverse a transaction.\n\nParams:\n- serviceId: Service identifier\n- timestamp: Unix timestamp in milliseconds\n- transId: UUID of transaction to reverse\n\nSuccess response (200):\n- status: \"REVERSED\"\n- reverseTime: Reversal time (ms)"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"status": "OK",
+					"code": 200,
+					"body": "{\n    \"serviceId\": 100001,\n    \"transId\": \"5c398d7e-76b6-11ee-96da-f3a095c6289d\",\n    \"status\": \"REVERSED\",\n    \"reverseTime\": 1710100000000,\n    \"amount\": 15000000\n}"
+				}
+			]
+		},
+		{
+			"name": "5. Status - Query transaction state",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"",
+							"pm.test('Status exists', function () {",
+							"    pm.expect(jsonData.status).to.be.oneOf(['CREATED', 'CONFIRMED', 'FAILED', 'REVERSED']);",
+							"});",
+							"",
+							"pm.test('TransId matches', function () {",
+							"    pm.expect(jsonData.transId).to.eql(pm.collectionVariables.get('transId'));",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"serviceId\": {{serviceId}},\n    \"timestamp\": {{$timestamp}}000,\n    \"transId\": \"{{transId}}\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/webhook/uzum/status",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "webhook", "uzum", "status"]
+				},
+				"description": "Query current transaction state.\n\nParams:\n- serviceId: Service identifier\n- timestamp: Unix timestamp in milliseconds\n- transId: UUID of transaction\n\nSuccess response (200):\n- status: CREATED | CONFIRMED | FAILED | REVERSED\n- transTime: Creation time (ms)\n- confirmTime: Confirmation time (ms) or null\n- reverseTime: Reversal time (ms) or null\n- amount: Amount in tiyin"
+			},
+			"response": [
+				{
+					"name": "Confirmed",
+					"status": "OK",
+					"code": 200,
+					"body": "{\n    \"serviceId\": 100001,\n    \"transId\": \"5c398d7e-76b6-11ee-96da-f3a095c6289d\",\n    \"status\": \"CONFIRMED\",\n    \"transTime\": 1710100000000,\n    \"confirmTime\": 1710100001000,\n    \"reverseTime\": null,\n    \"amount\": 15000000\n}"
+				},
+				{
+					"name": "Created (pending)",
+					"status": "OK",
+					"code": 200,
+					"body": "{\n    \"serviceId\": 100001,\n    \"transId\": \"5c398d7e-76b6-11ee-96da-f3a095c6289d\",\n    \"status\": \"CREATED\",\n    \"transTime\": 1710100000000,\n    \"confirmTime\": null,\n    \"reverseTime\": null,\n    \"amount\": 15000000\n}"
+				}
+			]
+		}
+	]
+}

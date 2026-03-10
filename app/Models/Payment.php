@@ -11,6 +11,7 @@ class Payment extends Model
     // Providers
     public const PROVIDER_PAYME = 'payme';
     public const PROVIDER_CLICK = 'click';
+    public const PROVIDER_UZUM = 'uzum';
 
     // Statuses
     public const STATUS_PENDING = 'PENDING';
@@ -203,6 +204,7 @@ class Payment extends Model
         return match($this->provider) {
             self::PROVIDER_PAYME => 'Payme',
             self::PROVIDER_CLICK => 'Click',
+            self::PROVIDER_UZUM => 'Uzum',
             default => $this->provider,
         };
     }

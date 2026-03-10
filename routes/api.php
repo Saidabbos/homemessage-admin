@@ -12,8 +12,10 @@ use App\Http\Controllers\Api\PublicOrderController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Webhook\PaymeController;
 use App\Http\Controllers\Webhook\ClickController;
+use App\Http\Controllers\Webhook\UzumPayController;
 use App\Http\Controllers\Api\MockPaymeController;
 use App\Http\Controllers\Api\MockClickController;
+use App\Http\Controllers\Api\MockUzumController;
 use App\Http\Controllers\Api\PublicPaymentController;
 
 /*
@@ -208,6 +210,13 @@ Route::prefix('webhook')->group(function () {
     Route::post('/click/prepare', [ClickController::class, 'prepare']);
     Route::post('/click/complete', [ClickController::class, 'complete']);
 
+    // UzumPay
+    Route::post('/uzum/check', [UzumPayController::class, 'check']);
+    Route::post('/uzum/create', [UzumPayController::class, 'create']);
+    Route::post('/uzum/confirm', [UzumPayController::class, 'confirm']);
+    Route::post('/uzum/reverse', [UzumPayController::class, 'reverse']);
+    Route::post('/uzum/status', [UzumPayController::class, 'status']);
+
     // Telegram (main bot - Mini App)
     Route::post('/telegram', [\App\Http\Controllers\Webhook\TelegramController::class, 'webhook']);
     
@@ -237,4 +246,10 @@ Route::prefix('mock/click')->middleware('web')->group(function () {
     Route::get('/status', [MockClickController::class, 'getStatus']);
     Route::post('/trigger', [MockClickController::class, 'triggerMethod']);
     Route::post('/reset', [MockClickController::class, 'resetOrder']);
+});
+
+Route::prefix('mock/uzum')->middleware('web')->group(function () {
+    Route::post('/simulate', [MockUzumController::class, 'simulatePayment']);
+    Route::get('/status', [MockUzumController::class, 'getStatus']);
+    Route::post('/reset', [MockUzumController::class, 'resetOrder']);
 });

@@ -63,6 +63,15 @@ return [
         'mock_enabled' => env('CLICK_MOCK_ENABLED', false),
     ],
 
+    'uzum' => [
+        'enabled' => env('UZUM_ENABLED', false),
+        'service_id' => env('UZUM_SERVICE_ID'),
+        'login' => env('UZUM_LOGIN'),
+        'password' => env('UZUM_PASSWORD'),
+        'test_mode' => env('UZUM_TEST_MODE', true),
+        'mock_enabled' => env('UZUM_MOCK_ENABLED', false),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Telegram Bot

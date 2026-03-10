@@ -25,7 +25,7 @@ class PublicPaymentController extends Controller
 
         $validated = $request->validate([
             'order_id' => 'required|integer',
-            'provider' => 'required|in:payme,click',
+            'provider' => 'required|in:payme,click,uzum',
         ]);
 
         $order = Order::where('id', $validated['order_id'])

@@ -15,7 +15,7 @@ class CreatePaymentRequest extends FormRequest
     {
         return [
             'order_number' => 'required|string',
-            'provider' => 'required|in:payme,click',
+            'provider' => 'required|in:payme,click,uzum',
         ];
     }
 }

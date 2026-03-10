@@ -39,6 +39,14 @@ class PaymentService
             ];
         }
 
+        if (config('services.uzum.enabled')) {
+            $providers[] = [
+                'id' => Payment::PROVIDER_UZUM,
+                'name' => 'Uzum',
+                'icon' => '/images/payment/uzum.svg',
+            ];
+        }
+
         return $providers;
     }
 
@@ -88,6 +96,7 @@ class PaymentService
         return match ($payment->provider) {
             Payment::PROVIDER_PAYME => $this->generatePaymeUrl($payment),
             Payment::PROVIDER_CLICK => $this->generateClickUrl($payment),
+            Payment::PROVIDER_UZUM => '', // UzumPay uses webhook-based flow, no redirect URL
             default => '',
         };
     }
@@ -172,13 +181,14 @@ class PaymentService
      */
     public function generateDirectPaymentLink(Order $order, string $provider): ?string
     {
-        if (!in_array($provider, [Payment::PROVIDER_PAYME, Payment::PROVIDER_CLICK])) {
+        if (!in_array($provider, [Payment::PROVIDER_PAYME, Payment::PROVIDER_CLICK, Payment::PROVIDER_UZUM])) {
             return null;
         }
 
         return match ($provider) {
             Payment::PROVIDER_PAYME => $this->generateDirectPaymeLink($order),
             Payment::PROVIDER_CLICK => $this->generateDirectClickLink($order),
+            Payment::PROVIDER_UZUM => null, // UzumPay uses webhook-based flow, no direct link
             default => null,
         };
     }
@@ -233,6 +243,11 @@ class PaymentService
                 'enabled' => config('services.click.enabled', false),
                 'configured' => !empty(config('services.click.merchant_id')),
                 'name' => 'Click',
+            ],
+            'uzum' => [
+                'enabled' => config('services.uzum.enabled', false),
+                'configured' => !empty(config('services.uzum.service_id')),
+                'name' => 'Uzum',
             ],
         ];
     }

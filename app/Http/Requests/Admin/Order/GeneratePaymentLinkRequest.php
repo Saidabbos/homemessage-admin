@@ -14,7 +14,7 @@ class GeneratePaymentLinkRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'provider' => 'required|in:payme,click',
+            'provider' => 'required|in:payme,click,uzum',
         ];
     }
 }
