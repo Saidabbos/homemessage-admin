@@ -40,7 +40,7 @@ const submit = () => {
                                 type="email"
                                 class="al-input"
                                 :class="{ 'al-input-error': form.errors.email }"
-                                placeholder="admin@example.com"
+                                placeholder="email@sabai.uz"
                                 autocomplete="email"
                                 autofocus
                             />

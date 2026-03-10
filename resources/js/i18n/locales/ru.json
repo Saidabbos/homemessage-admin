@@ -418,7 +418,7 @@
         "name": "Имя",
         "name_placeholder": "Введите ваше имя",
         "email": "Email",
-        "email_placeholder": "email{'@'}example.com",
+        "email_placeholder": "email{'@'}sabai.uz",
         "phone": "Телефон",
         "phone_hint": "Номер телефона нельзя изменить",
         "language": "Язык",

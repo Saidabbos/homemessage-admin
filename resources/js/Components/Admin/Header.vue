@@ -181,7 +181,7 @@ const logout = () => {
         >
           <div class="px-4 py-3 border-b border-gray-200">
             <p class="text-sm font-medium text-gray-900">{{ user?.name }}</p>
-            <p class="text-xs text-gray-500">{{ user?.email || 'admin@example.com' }}</p>
+            <p class="text-xs text-gray-500">{{ user?.email || '' }}</p>
           </div>
           <div class="py-1">
             <Link href="/admin/profile" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">

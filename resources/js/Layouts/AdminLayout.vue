@@ -226,7 +226,7 @@ const logout = () => {
                   </Avatar>
                   <div class="grid flex-1 text-left text-sm leading-tight">
                     <span class="truncate font-semibold">{{ auth?.user?.name || 'Admin' }}</span>
-                    <span class="truncate text-xs text-muted-foreground">{{ auth?.user?.email || 'admin@example.com' }}</span>
+                    <span class="truncate text-xs text-muted-foreground">{{ auth?.user?.email || '' }}</span>
                   </div>
                   <svg class="ml-auto size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M9 18l6-6-6-6"/>
