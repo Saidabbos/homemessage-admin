@@ -102,36 +102,36 @@ const submit = () => {
 
               <div v-show="activeTab === 'uz'" class="space-y-4">
                 <div class="space-y-2">
-                  <Label>Nomi (O'zbek) <span class="text-destructive">*</span></Label>
+                  <Label>{{ t('translations.name') }} ({{ t('translations.uzbek') }}) <span class="text-destructive">*</span></Label>
                   <Input v-model="form.uz.name" @blur="generateSlug" placeholder="Masalan: Klassik massaj" />
                   <p v-if="form.errors['uz.name']" class="text-destructive text-xs">{{ form.errors['uz.name'] }}</p>
                 </div>
                 <div class="space-y-2">
-                  <Label>Tavsifi (O'zbek)</Label>
+                  <Label>{{ t('translations.description') }} ({{ t('translations.uzbek') }})</Label>
                   <Textarea v-model="form.uz.description" rows="4" placeholder="Xizmat haqida batafsil..." />
                 </div>
               </div>
 
               <div v-show="activeTab === 'ru'" class="space-y-4">
                 <div class="space-y-2">
-                  <Label>Название (Русский) <span class="text-destructive">*</span></Label>
+                  <Label>{{ t('translations.name') }} ({{ t('translations.russian') }}) <span class="text-destructive">*</span></Label>
                   <Input v-model="form.ru.name" placeholder="Например: Классический массаж" />
                   <p v-if="form.errors['ru.name']" class="text-destructive text-xs">{{ form.errors['ru.name'] }}</p>
                 </div>
                 <div class="space-y-2">
-                  <Label>Описание (Русский)</Label>
+                  <Label>{{ t('translations.description') }} ({{ t('translations.russian') }})</Label>
                   <Textarea v-model="form.ru.description" rows="4" placeholder="Подробное описание..." />
                 </div>
               </div>
 
               <div v-show="activeTab === 'en'" class="space-y-4">
                 <div class="space-y-2">
-                  <Label>Name (English) <span class="text-destructive">*</span></Label>
+                  <Label>{{ t('translations.name') }} ({{ t('translations.english') }}) <span class="text-destructive">*</span></Label>
                   <Input v-model="form.en.name" placeholder="e.g., Classic Massage" />
                   <p v-if="form.errors['en.name']" class="text-destructive text-xs">{{ form.errors['en.name'] }}</p>
                 </div>
                 <div class="space-y-2">
-                  <Label>Description (English)</Label>
+                  <Label>{{ t('translations.description') }} ({{ t('translations.english') }})</Label>
                   <Textarea v-model="form.en.description" rows="4" placeholder="Detailed description..." />
                 </div>
               </div>
@@ -151,7 +151,7 @@ const submit = () => {
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Qo'shish
+                {{ t('serviceTypes.add') }}
               </Button>
             </CardHeader>
             <CardContent>
@@ -165,22 +165,22 @@ const submit = () => {
                   :class="duration.is_default ? 'border-primary bg-primary/5' : ''"
                 >
                   <div class="flex-1 space-y-1">
-                    <Label class="text-xs text-muted-foreground">Davomiylik (daq)</Label>
+                    <Label class="text-xs text-muted-foreground">{{ t('serviceTypes.durationMin') }}</Label>
                     <Input type="number" v-model.number="duration.duration" min="15" max="480" step="15" />
                   </div>
 
                   <div class="flex-1 space-y-1">
-                    <Label class="text-xs text-muted-foreground">Narx (so'm)</Label>
+                    <Label class="text-xs text-muted-foreground">{{ t('serviceTypes.priceSum') }}</Label>
                     <Input type="number" v-model.number="duration.price" min="0" step="1000" />
                   </div>
 
                   <div class="flex flex-col items-center gap-1">
-                    <Label class="text-xs text-muted-foreground">Asosiy</Label>
+                    <Label class="text-xs text-muted-foreground">{{ t('serviceTypes.default') }}</Label>
                     <input type="radio" :checked="duration.is_default" @change="setDefault(index)" class="w-4 h-4" />
                   </div>
 
                   <div class="flex flex-col items-center gap-1">
-                    <Label class="text-xs text-muted-foreground">Faol</Label>
+                    <Label class="text-xs text-muted-foreground">{{ t('common.active') }}</Label>
                     <Checkbox :checked="duration.status" @update:checked="duration.status = $event" />
                   </div>
 
@@ -200,7 +200,7 @@ const submit = () => {
               </div>
 
               <p class="mt-3 text-xs text-muted-foreground">
-                Bir necha davomiylik variantlari qo'shing (30, 60, 90, 120 daqiqa). Asosiy - default tanlov.
+                {{ t('serviceTypes.durationsHint') }}
               </p>
             </CardContent>
           </Card>
@@ -214,7 +214,7 @@ const submit = () => {
               <div class="space-y-2">
                 <Label>Slug (URL)</Label>
                 <Input v-model="form.slug" class="font-mono" placeholder="klassik-massaj" />
-                <p class="text-xs text-muted-foreground">Avtomatik yaratiladi</p>
+                <p class="text-xs text-muted-foreground">{{ t('serviceTypes.autoGenerated') }}</p>
                 <p v-if="form.errors.slug" class="text-destructive text-xs">{{ form.errors.slug }}</p>
               </div>
             </CardContent>
@@ -232,7 +232,7 @@ const submit = () => {
               <div class="flex items-center justify-between">
                 <div>
                   <Label>{{ t('common.active', 'Faol') }}</Label>
-                  <p class="text-xs text-muted-foreground">{{ form.status ? 'Faol' : 'Nofaol' }}</p>
+                  <p class="text-xs text-muted-foreground">{{ form.status ? t('common.active') : t('common.inactive') }}</p>
                 </div>
                 <Switch v-model:checked="form.status" />
               </div>
