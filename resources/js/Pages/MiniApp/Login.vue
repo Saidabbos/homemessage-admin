@@ -1,10 +1,13 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 import MiniAppLayout from '@/Layouts/MiniAppLayout.vue';
 
 defineOptions({ layout: MiniAppLayout });
+
+const { t } = useI18n();
 
 const props = defineProps({
     telegramUser: Object,
@@ -150,11 +153,11 @@ const loginWithPin = async () => {
         if (result.success) {
             window.location.href = result.redirect || '/app';
         } else {
-            pinError.value = result.message || 'Noto\'g\'ri PIN kod';
+            pinError.value = result.message || t('auth.wrongPinCode');
             pinCode.value = '';
         }
     } catch (e) {
-        pinError.value = 'Xatolik yuz berdi';
+        pinError.value = t('auth.errorOccurred');
     } finally {
         pinLoading.value = false;
     }
@@ -205,7 +208,7 @@ const verifyOtp = async () => {
             window.location.href = response.data.redirect || '/app';
         }
     } catch (e) {
-        form.errors.code = e.response?.data?.message || 'Noto\'g\'ri kod';
+        form.errors.code = e.response?.data?.message || t('auth.wrongCode');
     }
 };
 
@@ -223,10 +226,10 @@ const saveName = async () => {
         if (response.data.success) {
             window.location.href = '/app';
         } else {
-            nameError.value = response.data.message || 'Xatolik yuz berdi';
+            nameError.value = response.data.message || t('auth.errorOccurred');
         }
     } catch (e) {
-        nameError.value = e.response?.data?.message || 'Xatolik yuz berdi';
+        nameError.value = e.response?.data?.message || t('auth.errorOccurred');
     } finally {
         nameSaving.value = false;
     }
@@ -271,7 +274,7 @@ const goBack = () => {
         <!-- Auto-login loading -->
         <div v-if="isAutoLogging" class="auto-login">
             <div class="spinner"></div>
-            <p>Kirish...</p>
+            <p>{{ t('auth.loggingIn') }}</p>
         </div>
 
         <!-- Logo -->
@@ -283,7 +286,7 @@ const goBack = () => {
                 </svg>
             </div>
             <h1 class="title">Sabai</h1>
-            <p class="subtitle">Uyda professional massaj xizmati</p>
+            <p class="subtitle">{{ t('auth.subtitle') }}</p>
         </div>
 
         <!-- Form Card -->
@@ -291,7 +294,7 @@ const goBack = () => {
             <!-- Phone Step -->
             <div v-if="step === 'phone'" class="form-content">
                 <div class="input-group">
-                    <label class="input-label">Telefon raqamingiz</label>
+                    <label class="input-label">{{ t('auth.phoneNumber') }}</label>
                     <div class="input-wrapper glass">
                         <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
@@ -313,7 +316,7 @@ const goBack = () => {
                     :disabled="!canCheckPhone || form.processing"
                     @click="checkPhoneAndProceed"
                 >
-                    {{ form.processing ? 'Yuborilmoqda...' : 'Davom etish' }}
+                    {{ form.processing ? t('auth.sending') : t('auth.continue') }}
                 </button>
             </div>
 
@@ -321,7 +324,7 @@ const goBack = () => {
             <div v-if="step === 'method'" class="form-content">
                 <div class="method-header">
                     <p class="method-phone">{{ form.phone }}</p>
-                    <p class="method-hint">Kirish usulini tanlang</p>
+                    <p class="method-hint">{{ t('auth.chooseMethod') }}</p>
                 </div>
 
                 <div class="method-options">
@@ -333,8 +336,8 @@ const goBack = () => {
                             </svg>
                         </div>
                         <div class="method-text">
-                            <span class="method-title">PIN kod</span>
-                            <span class="method-desc">Tez kirish</span>
+                            <span class="method-title">{{ t('auth.pinCode') }}</span>
+                            <span class="method-desc">{{ t('auth.quickLogin') }}</span>
                         </div>
                         <svg class="method-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="m9 18 6-6-6-6"/>
@@ -348,8 +351,8 @@ const goBack = () => {
                             </svg>
                         </div>
                         <div class="method-text">
-                            <span class="method-title">SMS kod</span>
-                            <span class="method-desc">Bir martalik kod</span>
+                            <span class="method-title">{{ t('auth.smsCode') }}</span>
+                            <span class="method-desc">{{ t('auth.oneTimeCode') }}</span>
                         </div>
                         <svg class="method-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="m9 18 6-6-6-6"/>
@@ -358,15 +361,15 @@ const goBack = () => {
                 </div>
 
                 <button class="link-btn back-btn" @click="goBack">
-                    ← Raqamni o'zgartirish
+                    ← {{ t('auth.changeNumber') }}
                 </button>
             </div>
 
             <!-- PIN Step -->
             <div v-if="step === 'pin'" class="form-content">
                 <div class="input-group">
-                    <label class="input-label">PIN kod</label>
-                    <p class="input-hint">4 xonali PIN kodingizni kiriting</p>
+                    <label class="input-label">{{ t('auth.pinCode') }}</label>
+                    <p class="input-hint">{{ t('auth.pinCodeHint') }}</p>
                     <div class="otp-wrapper glass">
                         <input
                             type="password"
@@ -386,16 +389,16 @@ const goBack = () => {
                     :disabled="!canVerifyPin || pinLoading"
                     @click="loginWithPin"
                 >
-                    {{ pinLoading ? 'Tekshirilmoqda...' : 'Kirish' }}
+                    {{ pinLoading ? t('auth.verifying') : t('auth.loginBtn') }}
                 </button>
 
                 <div class="secondary-actions">
                     <button class="link-btn" @click="chooseOtp">
-                        SMS kod bilan kirish
+                        {{ t('auth.loginWithSms') }}
                     </button>
                     <span class="divider">•</span>
                     <button class="link-btn" @click="goBack">
-                        Raqamni o'zgartirish
+                        {{ t('auth.changeNumber') }}
                     </button>
                 </div>
             </div>
@@ -403,8 +406,8 @@ const goBack = () => {
             <!-- OTP Step -->
             <div v-if="step === 'otp'" class="form-content">
                 <div class="input-group">
-                    <label class="input-label">SMS kod</label>
-                    <p class="input-hint">{{ form.phone }} raqamiga yuborildi</p>
+                    <label class="input-label">{{ t('auth.smsCode') }}</label>
+                    <p class="input-hint">{{ form.phone }} {{ t('auth.sentToNumber') }}</p>
                     <div class="otp-wrapper glass">
                         <input
                             type="text"
@@ -424,7 +427,7 @@ const goBack = () => {
                     :disabled="!canVerify || form.processing"
                     @click="verifyOtp"
                 >
-                    {{ form.processing ? 'Tekshirilmoqda...' : 'Kirish' }}
+                    {{ form.processing ? t('auth.verifying') : t('auth.loginBtn') }}
                 </button>
 
                 <div class="secondary-actions">
@@ -433,11 +436,11 @@ const goBack = () => {
                         :disabled="countdown > 0"
                         @click="sendOtp"
                     >
-                        {{ countdown > 0 ? `Qayta yuborish (${countdown}s)` : 'Qayta yuborish' }}
+                        {{ countdown > 0 ? `${t('auth.resendOtp')} (${countdown}s)` : t('auth.resendOtp') }}
                     </button>
                     <span class="divider">•</span>
                     <button class="link-btn" @click="goBack">
-                        Raqamni o'zgartirish
+                        {{ t('auth.changeNumber') }}
                     </button>
                 </div>
             </div>
@@ -451,12 +454,12 @@ const goBack = () => {
                             <circle cx="12" cy="7" r="4"/>
                         </svg>
                     </div>
-                    <h2 class="welcome-title">Xush kelibsiz!</h2>
+                    <h2 class="welcome-title">{{ t('auth.welcome') }}</h2>
                 </div>
 
                 <div class="input-group">
-                    <label class="input-label">Ismingiz</label>
-                    <p class="input-hint">Masterlar sizni qanday atashini kiriting</p>
+                    <label class="input-label">{{ t('auth.yourName') }}</label>
+                    <p class="input-hint">{{ t('auth.nameHint') }}</p>
                     <div class="input-wrapper glass">
                         <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
@@ -466,7 +469,7 @@ const goBack = () => {
                             type="text"
                             class="input-field"
                             v-model="nameInput"
-                            placeholder="Ismingizni kiriting"
+                            :placeholder="t('auth.namePlaceholder')"
                             maxlength="50"
                             @keyup.enter="saveName"
                         />
@@ -479,13 +482,13 @@ const goBack = () => {
                     :disabled="!canSaveName || nameSaving"
                     @click="saveName"
                 >
-                    {{ nameSaving ? 'Saqlanmoqda...' : 'Davom etish' }}
+                    {{ nameSaving ? t('auth.saving') : t('auth.continue') }}
                 </button>
             </div>
         </div>
 
         <!-- Footer -->
-        <p class="footer">Xizmatdan foydalanish orqali Foydalanish shartlariga rozilik bildirasiz</p>
+        <p class="footer">{{ t('auth.termsFooter') }}</p>
     </div>
 </template>
 

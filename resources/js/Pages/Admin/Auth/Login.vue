@@ -1,5 +1,8 @@
 <script setup>
 import { useForm, Head } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const form = useForm({
     email: '',
@@ -15,21 +18,21 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Admin | Kirish" />
+    <Head :title="`Admin | ${t('auth.loginBtn')}`" />
 
     <div class="al-page">
         <div class="al-box">
             <div class="al-header">
                 <h1 class="al-title">Sabai</h1>
-                <p class="al-subtitle">Admin Paneli</p>
+                <p class="al-subtitle">{{ t('auth.adminPanel') }}</p>
             </div>
 
             <div class="al-body">
-                <p class="al-hint">Tizimga kirish uchun ma'lumotlarni kiriting</p>
+                <p class="al-hint">{{ t('auth.adminLoginHint') }}</p>
 
                 <form @submit.prevent="submit">
                     <div class="al-field">
-                        <label class="al-label" for="email">Email</label>
+                        <label class="al-label" for="email">{{ t('auth.email') }}</label>
                         <div class="al-input-wrap">
                             <input
                                 id="email"
@@ -52,7 +55,7 @@ const submit = () => {
                     </div>
 
                     <div class="al-field">
-                        <label class="al-label" for="password">Parol</label>
+                        <label class="al-label" for="password">{{ t('auth.password') }}</label>
                         <div class="al-input-wrap">
                             <input
                                 id="password"
@@ -60,7 +63,7 @@ const submit = () => {
                                 type="password"
                                 class="al-input"
                                 :class="{ 'al-input-error': form.errors.password }"
-                                placeholder="Parol"
+                                :placeholder="t('auth.password')"
                                 autocomplete="current-password"
                             />
                             <span class="al-input-icon">
@@ -76,7 +79,7 @@ const submit = () => {
                     <div class="al-row">
                         <label class="al-check">
                             <input type="checkbox" v-model="form.remember" />
-                            <span>Eslab qolish</span>
+                            <span>{{ t('auth.rememberMe') }}</span>
                         </label>
                     </div>
 
@@ -89,7 +92,7 @@ const submit = () => {
                             <polyline points="10 17 15 12 10 7"/>
                             <line x1="15" y1="12" x2="3" y2="12"/>
                         </svg>
-                        {{ form.processing ? 'Kirish...' : 'Kirish' }}
+                        {{ form.processing ? t('auth.loggingIn') : t('auth.loginBtn') }}
                     </button>
                 </form>
             </div>

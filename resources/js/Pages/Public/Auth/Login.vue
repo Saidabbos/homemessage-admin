@@ -68,7 +68,7 @@ async function handleCheckPhone() {
             await sendOtp()
         } else {
             // Network/CSRF error - show error, don't auto-fallback
-            error.value = 'Tarmoq xatosi. Qayta urinib ko\'ring.'
+            error.value = t('auth.networkError')
             console.error('PIN check error:', err)
         }
     } finally {
@@ -133,7 +133,7 @@ async function handlePinLogin() {
         window.location.href = response.data.redirect
     } catch (err) {
         const data = err.response?.data
-        error.value = data?.message || 'Noto\'g\'ri PIN kod'
+        error.value = data?.message || t('auth.wrongPinCode')
         pinCode.value = ['', '', '', '']
         setTimeout(() => pinInputRefs.value[0]?.focus(), 100)
     } finally {
@@ -212,12 +212,12 @@ async function handleSaveName() {
     const gender = genderInput.value
     
     if (name.length < 2) {
-        nameError.value = "Ism kamida 2 ta harfdan iborat bo'lishi kerak"
+        nameError.value = t('auth.nameMinLength')
         return
     }
     
     if (!gender) {
-        nameError.value = "Jinsingizni tanlang"
+        nameError.value = t('auth.selectGender')
         return
     }
 
@@ -228,7 +228,7 @@ async function handleSaveName() {
         await axios.post('/app/save-name', { name, gender })
         window.location.href = redirectUrl.value
     } catch (err) {
-        nameError.value = err.response?.data?.message || 'Xatolik yuz berdi'
+        nameError.value = err.response?.data?.message || t('auth.errorOccurred')
     } finally {
         loading.value = false
     }
@@ -389,7 +389,7 @@ onBeforeUnmount(() => {
                     :disabled="loading || !phone || phone.length < 9"
                     @click="handleCheckPhone"
                 >
-                    <span v-if="!loading">{{ t('auth.continue') || 'Davom etish' }}</span>
+                    <span v-if="!loading">{{ t('auth.continue') }}</span>
                     <span v-else>{{ t('common.loading') }}</span>
                     <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 </button>
@@ -415,7 +415,7 @@ onBeforeUnmount(() => {
                 </div>
 
                 <div class="otp-form-title-block">
-                    <h1 class="otp-form-title">Kirish usulini tanlang</h1>
+                    <h1 class="otp-form-title">{{ t('auth.chooseMethod') }}</h1>
                     <p class="otp-form-desc">{{ phoneDisplay() }}</p>
                 </div>
 
@@ -428,8 +428,8 @@ onBeforeUnmount(() => {
                             </svg>
                         </div>
                         <div class="method-text">
-                            <span class="method-title">PIN kod</span>
-                            <span class="method-desc">Tez kirish</span>
+                            <span class="method-title">{{ t('auth.pinCode') }}</span>
+                            <span class="method-desc">{{ t('auth.quickLogin') }}</span>
                         </div>
                         <svg class="method-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                     </button>
@@ -441,8 +441,8 @@ onBeforeUnmount(() => {
                             </svg>
                         </div>
                         <div class="method-text">
-                            <span class="method-title">SMS kod</span>
-                            <span class="method-desc">Bir martalik kod</span>
+                            <span class="method-title">{{ t('auth.smsCode') }}</span>
+                            <span class="method-desc">{{ t('auth.oneTimeCode') }}</span>
                         </div>
                         <svg v-if="!loading" class="method-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                         <span v-else class="method-loading">...</span>
@@ -465,8 +465,8 @@ onBeforeUnmount(() => {
                 </div>
 
                 <div class="otp-form-title-block">
-                    <h1 class="otp-form-title">PIN kod kiriting</h1>
-                    <p class="otp-form-desc">4 xonali PIN kodingizni kiriting</p>
+                    <h1 class="otp-form-title">{{ t('auth.enterPin') }}</h1>
+                    <p class="otp-form-desc">{{ t('auth.pinCodeHint') }}</p>
                 </div>
 
                 <div class="otp-digits-row pin-digits-row">
@@ -494,7 +494,7 @@ onBeforeUnmount(() => {
                     :disabled="loading || pinCode.join('').length < 4"
                     @click="handlePinLogin"
                 >
-                    <span v-if="!loading">Kirish</span>
+                    <span v-if="!loading">{{ t('auth.loginBtn') }}</span>
                     <span v-else>{{ t('common.loading') }}</span>
                     <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                 </button>
@@ -506,7 +506,7 @@ onBeforeUnmount(() => {
                 </div>
 
                 <button class="otp-link-btn" @click="chooseOtp" :disabled="loading">
-                    SMS kod bilan kirish
+                    {{ t('auth.loginWithSms') }}
                 </button>
             </div>
 
@@ -520,17 +520,17 @@ onBeforeUnmount(() => {
                 </div>
 
                 <div class="otp-form-title-block">
-                    <h1 class="otp-form-title">{{ t('auth.welcome') || 'Xush kelibsiz!' }}</h1>
-                    <p class="otp-form-desc">{{ t('auth.enterName') || 'Ismingizni kiriting' }}</p>
+                    <h1 class="otp-form-title">{{ t('auth.welcome') }}</h1>
+                    <p class="otp-form-desc">{{ t('auth.enterName') }}</p>
                 </div>
 
                 <div class="otp-input-block">
-                    <label class="otp-input-label">{{ t('auth.yourName') || 'Ismingiz' }}</label>
+                    <label class="otp-input-label">{{ t('auth.yourName') }}</label>
                     <input
                         v-model="nameInput"
                         type="text"
                         class="otp-name-input"
-                        :placeholder="t('auth.namePlaceholder') || 'Ismingizni kiriting'"
+                        :placeholder="t('auth.namePlaceholder')"
                         maxlength="50"
                         :disabled="loading"
                     />
@@ -538,7 +538,7 @@ onBeforeUnmount(() => {
                 
                 <!-- Gender Selection -->
                 <div class="otp-input-block">
-                    <label class="otp-input-label">Jinsingiz</label>
+                    <label class="otp-input-label">{{ t('auth.gender') }}</label>
                     <div class="gender-selection">
                         <button 
                             type="button"
@@ -551,7 +551,7 @@ onBeforeUnmount(() => {
                                 <circle cx="10" cy="14" r="5"/>
                                 <path d="M19 5l-5.4 5.4M19 5h-5M19 5v5"/>
                             </svg>
-                            Erkak
+                            {{ t('auth.male') }}
                         </button>
                         <button 
                             type="button"
@@ -564,7 +564,7 @@ onBeforeUnmount(() => {
                                 <circle cx="12" cy="8" r="5"/>
                                 <path d="M12 13v8M9 18h6"/>
                             </svg>
-                            Ayol
+                            {{ t('auth.female') }}
                         </button>
                     </div>
                     <p v-if="nameError" class="otp-error">{{ nameError }}</p>
@@ -576,7 +576,7 @@ onBeforeUnmount(() => {
                     :disabled="loading || nameInput.trim().length < 2 || !genderInput"
                     @click="handleSaveName"
                 >
-                    <span v-if="!loading">{{ t('common.continue') || 'Davom etish' }}</span>
+                    <span v-if="!loading">{{ t('common.continue') }}</span>
                     <span v-else>{{ t('common.loading') }}</span>
                     <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 </button>
