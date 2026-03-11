@@ -123,13 +123,7 @@ class SmsService
      */
     protected function buildMessage(string $code, string $locale = 'uz'): string
     {
-        $messages = [
-            'uz' => "Sabai: Tasdiqlash kodi: {$code}",
-            'ru' => "Sabai: Код подтверждения: {$code}",
-            'en' => "Sabai: Verification code: {$code}",
-        ];
-
-        return $messages[$locale] ?? $messages['uz'];
+        return "Sizning raqamingizdan Sabai.uz tizimiga kirish so'raldi. Tasdiqlash kodi: {$code}. Kodni hech kimga bermang.";
     }
 
     /**
