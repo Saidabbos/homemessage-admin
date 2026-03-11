@@ -38,13 +38,13 @@ class UzumPayController extends Controller
 
         $serviceId = $request->input('serviceId');
         $params = $request->input('params', []);
-        $account = $params['account'] ?? null;
+        $orderId = $params['order_id'] ?? null;
 
-        if (!$account) {
+        if (!$orderId) {
             return $this->errorResponse($serviceId, 'Order ID not provided');
         }
 
-        $order = Order::find($account);
+        $order = Order::find($orderId);
 
         if (!$order) {
             return $this->errorResponse($serviceId, 'Order not found');
@@ -90,10 +90,10 @@ class UzumPayController extends Controller
         $serviceId = $request->input('serviceId');
         $transId = $request->input('transId');
         $params = $request->input('params', []);
-        $account = $params['account'] ?? null;
+        $orderId = $params['order_id'] ?? null;
         $amount = ($request->input('amount', 0)) / 100; // tiyin to som
 
-        if (!$account || !$transId) {
+        if (!$orderId || !$transId) {
             return $this->errorResponse($serviceId, 'Missing required parameters');
         }
 
@@ -112,7 +112,7 @@ class UzumPayController extends Controller
             ]);
         }
 
-        $order = Order::find($account);
+        $order = Order::find($orderId);
 
         if (!$order) {
             return $this->errorResponse($serviceId, 'Order not found');
