@@ -175,7 +175,7 @@ const getName = (item: { name: { uz?: string } | string }) => {
 
               <div class="flex items-center justify-between rounded-lg border p-4">
                 <Label>{{ t('common.active', 'Faol') }}</Label>
-                <Switch v-model:checked="form.status" />
+                <Switch v-model="form.status" />
               </div>
 
               <!-- Telegram Connection Status -->
@@ -200,7 +200,7 @@ const getName = (item: { name: { uz?: string } | string }) => {
                     <Label>Telegram xabarlari</Label>
                     <p class="text-xs text-muted-foreground">Buyurtmalar haqida Telegram DM</p>
                   </div>
-                  <Switch v-model:checked="form.notify_telegram" :disabled="!master.telegram_id" />
+                  <Switch v-model="form.notify_telegram" :disabled="!master.telegram_id" />
                 </div>
 
                 <div class="flex items-center justify-between">
@@ -208,7 +208,7 @@ const getName = (item: { name: { uz?: string } | string }) => {
                     <Label>SMS xabarlari</Label>
                     <p class="text-xs text-muted-foreground">Buyurtmalar haqida SMS</p>
                   </div>
-                  <Switch v-model:checked="form.notify_sms" />
+                  <Switch v-model="form.notify_sms" />
                 </div>
               </div>
 

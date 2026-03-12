@@ -177,7 +177,7 @@ const deleteOil = () => {
             <CardContent>
               <div class="flex items-center justify-between">
                 <Label>{{ t('common.active', 'Faol') }}</Label>
-                <Switch v-model:checked="form.status" />
+                <Switch v-model="form.status" />
               </div>
             </CardContent>
           </Card>

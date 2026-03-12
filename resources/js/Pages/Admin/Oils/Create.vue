@@ -166,7 +166,7 @@ const generateSlug = () => {
                   <Label>{{ t('common.active', 'Faol') }}</Label>
                   <p class="text-xs text-muted-foreground">{{ t('oils.activeHint', 'Faol bo\'lsa ko\'rinadi') }}</p>
                 </div>
-                <Switch v-model:checked="form.status" />
+                <Switch v-model="form.status" />
               </div>
             </CardContent>
           </Card>

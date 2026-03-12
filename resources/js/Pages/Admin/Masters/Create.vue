@@ -159,7 +159,7 @@ const languageTabs = [
                   <Label>{{ t('common.active', 'Faol') }}</Label>
                   <p class="text-xs text-muted-foreground">Master faol holatda</p>
                 </div>
-                <Switch v-model:checked="form.status" />
+                <Switch v-model="form.status" />
               </div>
 
               <!-- Service Types -->

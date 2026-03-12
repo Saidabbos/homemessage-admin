@@ -89,7 +89,7 @@ const submit = () => {
                   <Label>{{ t('common.active', 'Faol') }}</Label>
                   <p class="text-xs text-muted-foreground">{{ form.status ? 'Faol' : 'Nofaol' }}</p>
                 </div>
-                <Switch v-model:checked="form.status" />
+                <Switch v-model="form.status" />
               </div>
             </CardContent>
           </Card>
