@@ -33,7 +33,7 @@ const form = useForm({
   name: props.customer.name,
   email: props.customer.email,
   phone: props.customer.phone || '',
-  status: props.customer.status,
+  status: Boolean(props.customer.status),
 });
 
 const submit = () => {
