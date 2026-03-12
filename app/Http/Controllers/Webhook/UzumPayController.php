@@ -21,6 +21,20 @@ use Illuminate\Support\Facades\Log;
  */
 class UzumPayController extends Controller
 {
+    // UzumPay error codes
+    const ERROR_REQUIRED_PARAMS_MISSING = 10005;
+    const ERROR_INCORRECT_SERVICE_ID = 10006;
+    const ERROR_PAYABLE_NOT_FOUND = 10007;
+    const ERROR_ALREADY_PAID = 10008;
+    const ERROR_CANCELLED = 10009;
+    const ERROR_TRANSACTION_ALREADY_CREATED = 10010;
+    const ERROR_INCORRECT_AMOUNT = 10011;
+    const ERROR_TRANSACTION_NOT_FOUND = 10014;
+    const ERROR_TRANSACTION_CANCELLED = 10015;
+    const ERROR_TRANSACTION_ALREADY_CONFIRMED = 10016;
+    const ERROR_TRANSACTION_CANNOT_BE_REVERSED = 10017;
+    const ERROR_TRANSACTION_ALREADY_REVERSED = 10018;
+
     public function __construct(
         protected TelegramNotificationService $telegramService
     ) {}
@@ -41,21 +55,21 @@ class UzumPayController extends Controller
         $orderId = $params['order_id'] ?? null;
 
         if (!$orderId) {
-            return $this->errorResponse($serviceId, 'Order ID not provided');
+            return $this->errorResponse($serviceId, self::ERROR_REQUIRED_PARAMS_MISSING, 'Order ID not provided');
         }
 
         $order = Order::find($orderId);
 
         if (!$order) {
-            return $this->errorResponse($serviceId, 'Order not found');
+            return $this->errorResponse($serviceId, self::ERROR_PAYABLE_NOT_FOUND, 'Order not found');
         }
 
         if ($order->status === Order::STATUS_CANCELLED) {
-            return $this->errorResponse($serviceId, 'Order is cancelled');
+            return $this->errorResponse($serviceId, self::ERROR_CANCELLED, 'Order is cancelled');
         }
 
         if ($order->payment_status === Order::PAY_PAID) {
-            return $this->errorResponse($serviceId, 'Order already paid');
+            return $this->errorResponse($serviceId, self::ERROR_ALREADY_PAID, 'Order already paid');
         }
 
         return response()->json([
@@ -70,7 +84,7 @@ class UzumPayController extends Controller
                     'value' => $order->order_number,
                 ],
                 'amount' => [
-                    'value' => (string) ((int) ($order->total_amount * 100)),
+                    'value' => (string) ((int) $order->total_amount),
                 ],
             ],
         ]);
@@ -94,7 +108,7 @@ class UzumPayController extends Controller
         $amount = ($request->input('amount', 0)) / 100; // tiyin to som
 
         if (!$orderId || !$transId) {
-            return $this->errorResponse($serviceId, 'Missing required parameters');
+            return $this->errorResponse($serviceId, self::ERROR_REQUIRED_PARAMS_MISSING, 'Missing required parameters');
         }
 
         // Check if transaction already exists
@@ -115,20 +129,20 @@ class UzumPayController extends Controller
         $order = Order::find($orderId);
 
         if (!$order) {
-            return $this->errorResponse($serviceId, 'Order not found');
+            return $this->errorResponse($serviceId, self::ERROR_PAYABLE_NOT_FOUND, 'Order not found');
         }
 
         if ($order->payment_status === Order::PAY_PAID) {
-            return $this->errorResponse($serviceId, 'Order already paid');
+            return $this->errorResponse($serviceId, self::ERROR_ALREADY_PAID, 'Order already paid');
         }
 
         if ($order->status === Order::STATUS_CANCELLED) {
-            return $this->errorResponse($serviceId, 'Order is cancelled');
+            return $this->errorResponse($serviceId, self::ERROR_CANCELLED, 'Order is cancelled');
         }
 
         // Validate amount
         if (abs($order->total_amount - $amount) > 1) {
-            return $this->errorResponse($serviceId, 'Invalid amount');
+            return $this->errorResponse($serviceId, self::ERROR_INCORRECT_AMOUNT, 'Invalid amount');
         }
 
         // Create payment record
@@ -178,7 +192,7 @@ class UzumPayController extends Controller
             ->first();
 
         if (!$payment) {
-            return $this->errorResponse($serviceId, 'Transaction not found');
+            return $this->errorResponse($serviceId, self::ERROR_TRANSACTION_NOT_FOUND, 'Transaction not found');
         }
 
         if ($payment->status === Payment::STATUS_PAID) {
@@ -192,7 +206,7 @@ class UzumPayController extends Controller
         }
 
         if ($payment->status === Payment::STATUS_CANCELLED || $payment->status === Payment::STATUS_FAILED) {
-            return $this->errorResponse($serviceId, 'Transaction cancelled or failed');
+            return $this->errorResponse($serviceId, self::ERROR_TRANSACTION_CANCELLED, 'Transaction cancelled or failed');
         }
 
         // Store additional provider data
@@ -252,7 +266,7 @@ class UzumPayController extends Controller
             ->first();
 
         if (!$payment) {
-            return $this->errorResponse($serviceId, 'Transaction not found');
+            return $this->errorResponse($serviceId, self::ERROR_TRANSACTION_NOT_FOUND, 'Transaction not found');
         }
 
         $wasCompleted = $payment->status === Payment::STATUS_PAID;
@@ -297,7 +311,7 @@ class UzumPayController extends Controller
             ->first();
 
         if (!$payment) {
-            return $this->errorResponse($serviceId, 'Transaction not found');
+            return $this->errorResponse($serviceId, self::ERROR_TRANSACTION_NOT_FOUND, 'Transaction not found');
         }
 
         $uzumStatus = $this->mapToUzumStatus($payment);
@@ -364,12 +378,13 @@ class UzumPayController extends Controller
     /**
      * Error response (HTTP 400)
      */
-    protected function errorResponse(int|string|null $serviceId, string $message): JsonResponse
+    protected function errorResponse(int|string|null $serviceId, int $errorCode, string $message): JsonResponse
     {
         return response()->json([
             'serviceId' => (int) ($serviceId ?? 0),
             'timestamp' => $this->timestamp(),
             'status' => 'FAILED',
+            'errorCode' => $errorCode,
             'errorMessage' => $message,
         ], 400);
     }
