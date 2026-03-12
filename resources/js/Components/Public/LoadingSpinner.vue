@@ -63,6 +63,6 @@ const colorClasses = {
 
 <style scoped>
 .text-gold {
-    color: #C9A55C;
+    color: var(--c-gold);
 }
 </style>

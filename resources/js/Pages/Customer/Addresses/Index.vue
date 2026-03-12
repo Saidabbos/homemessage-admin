@@ -529,8 +529,8 @@ const customer = page.props.auth?.user || {}
 
 .cd-form-input:focus {
     outline: none;
-    border-color: #C8A951;
-    box-shadow: 0 0 0 3px rgba(200, 169, 81, 0.1);
+    border-color: var(--c-gold);
+    box-shadow: 0 0 0 3px var(--c-gold-10);
 }
 
 .cd-form-input.cd-form-error {
@@ -565,13 +565,13 @@ const customer = page.props.auth?.user || {}
 }
 
 .cd-btn-primary {
-    background: linear-gradient(135deg, #C8A951 0%, #B8983F 100%);
+    background: linear-gradient(135deg, var(--c-gold) 0%, #B8983F 100%);
     color: #fff;
 }
 
 .cd-btn-primary:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(200, 169, 81, 0.3);
+    box-shadow: 0 4px 12px var(--c-gold-30);
 }
 
 /* Page title */
@@ -579,7 +579,7 @@ const customer = page.props.auth?.user || {}
     font-family: 'Playfair Display', serif;
     font-size: 24px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0;
 }
 
@@ -600,12 +600,12 @@ const customer = page.props.auth?.user || {}
 
 .cd-address-card:hover {
     border-color: #d1d5db;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px var(--c-black-8);
 }
 
 .cd-address-default {
-    border-color: #C8A951;
-    background: linear-gradient(135deg, rgba(200, 169, 81, 0.02) 0%, rgba(200, 169, 81, 0.08) 100%);
+    border-color: var(--c-gold);
+    background: linear-gradient(135deg, var(--c-gold-2) 0%, var(--c-gold-8) 100%);
 }
 
 .cd-address-header {
@@ -624,14 +624,14 @@ const customer = page.props.auth?.user || {}
 }
 
 .cd-address-name svg {
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 .cd-address-badge {
     font-size: 0.75rem;
     font-weight: 500;
-    color: #1B2B5A;
-    background: rgba(200, 169, 81, 0.15);
+    color: var(--c-forest);
+    background: var(--c-gold-15);
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
 }
@@ -673,7 +673,7 @@ const customer = page.props.auth?.user || {}
 .cd-btn-link {
     background: none;
     border: none;
-    color: #1B2B5A;
+    color: var(--c-forest);
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
@@ -724,7 +724,7 @@ const customer = page.props.auth?.user || {}
 .cd-modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--c-black-50);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -799,8 +799,8 @@ const customer = page.props.auth?.user || {}
 
 .cd-form-textarea:focus {
     outline: none;
-    border-color: #C8A951;
-    box-shadow: 0 0 0 3px rgba(200, 169, 81, 0.1);
+    border-color: var(--c-gold);
+    box-shadow: 0 0 0 3px var(--c-gold-10);
 }
 
 .cd-checkbox-label {
@@ -815,7 +815,7 @@ const customer = page.props.auth?.user || {}
 .cd-checkbox {
     width: 18px;
     height: 18px;
-    accent-color: #C8A951;
+    accent-color: var(--c-gold);
 }
 
 .cd-btn-secondary {
@@ -854,9 +854,9 @@ const customer = page.props.auth?.user || {}
     display: flex;
     align-items: center;
     gap: 6px;
-    background: rgba(200, 169, 81, 0.1);
-    border: 1px solid rgba(200, 169, 81, 0.3);
-    color: #1B2B5A;
+    background: var(--c-gold-10);
+    border: 1px solid var(--c-gold-30);
+    color: var(--c-forest);
     padding: 6px 12px;
     border-radius: 8px;
     font-size: 0.8rem;
@@ -866,11 +866,11 @@ const customer = page.props.auth?.user || {}
 }
 
 .cd-detect-btn svg {
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 .cd-detect-btn:hover:not(:disabled) {
-    background: rgba(200, 169, 81, 0.2);
+    background: var(--c-gold-20);
 }
 
 .cd-detect-btn:disabled {
@@ -881,8 +881,8 @@ const customer = page.props.auth?.user || {}
 .cd-loading-spinner {
     width: 14px;
     height: 14px;
-    border: 2px solid rgba(200, 169, 81, 0.3);
-    border-top-color: #C8A951;
+    border: 2px solid var(--c-gold-30);
+    border-top-color: var(--c-gold);
     border-radius: 50%;
     animation: cd-spin 0.8s linear infinite;
 }
@@ -911,13 +911,13 @@ const customer = page.props.auth?.user || {}
     justify-content: space-between;
     margin-top: 0.5rem;
     padding: 0.5rem 0.75rem;
-    background: rgba(200, 169, 81, 0.1);
+    background: var(--c-gold-10);
     border-radius: 6px;
 }
 
 .cd-location-coords {
     font-size: 0.85rem;
-    color: #1B2B5A;
+    color: var(--c-forest);
     font-family: monospace;
 }
 
@@ -933,7 +933,7 @@ const customer = page.props.auth?.user || {}
     align-items: center;
     gap: 0.375rem;
     font-size: 0.85rem;
-    color: #C8A951;
+    color: var(--c-gold);
     margin-top: 0.5rem;
 }
 

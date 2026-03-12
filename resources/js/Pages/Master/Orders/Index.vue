@@ -64,9 +64,9 @@ const formatPrice = (price) => {
 }
 
 const statusConfig = {
-    NEW: { color: '#2D6A4F', bg: '#2D6A4F10' },
-    CONFIRMING: { color: '#2D6A4F', bg: '#2D6A4F10' },
-    CONFIRMED: { color: '#C8A951', bg: '#C8A95120' },
+    NEW: { color: 'var(--c-forest)', bg: 'var(--c-forest-10)' },
+    CONFIRMING: { color: 'var(--c-forest)', bg: 'var(--c-forest-10)' },
+    CONFIRMED: { color: '#C8A65E', bg: '#C8A65E20' },
     IN_PROGRESS: { color: '#3B82F6', bg: '#3B82F615' },
     COMPLETED: { color: '#22C55E', bg: '#22C55E15' },
     CANCELLED: { color: '#EF4444', bg: '#EF444415' },
@@ -225,8 +225,8 @@ const logout = () => {
                             <span
                                 class="mo-status-badge"
                                 :style="{
-                                    color: statusConfig[order.status]?.color || '#2D6A4F',
-                                    backgroundColor: statusConfig[order.status]?.bg || '#2D6A4F10',
+                                    color: statusConfig[order.status]?.color || 'var(--c-forest)',
+                                    backgroundColor: statusConfig[order.status]?.bg || 'var(--c-forest-10)',
                                 }"
                             >
                                 {{ statusLabel(order.status) }}

@@ -13,7 +13,7 @@
 .cd-sidebar {
     width: 240px;
     min-height: 100vh;
-    background: linear-gradient(180deg, #1B2B5A, #152348);
+    background: linear-gradient(180deg, var(--c-forest), var(--c-forest-dark));
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -40,7 +40,7 @@
 }
 
 .cd-sidebar-logo svg {
-    color: #C8A951;
+    color: var(--c-gold);
     flex-shrink: 0;
 }
 
@@ -65,7 +65,7 @@
     gap: 12px;
     padding: 10px 14px;
     border-radius: 10px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--c-white-60);
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
@@ -74,12 +74,12 @@
 }
 
 .cd-nav-item:hover {
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(255, 255, 255, 0.06);
+    color: var(--c-white-90);
+    background: var(--c-white-6);
 }
 
 .cd-nav-item.active {
-    background: #C8A951;
+    background: var(--c-gold);
     color: #fff;
     font-weight: 600;
 }
@@ -99,7 +99,7 @@
 
 .cd-sidebar-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--c-white-10);
     margin-bottom: 16px;
 }
 
@@ -130,7 +130,7 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--c-white-15);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -138,7 +138,7 @@
 }
 
 .cd-user-avatar svg {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--c-white-80);
 }
 
 .cd-user-info {
@@ -159,13 +159,13 @@
 
 .cd-user-phone {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--c-white-50);
 }
 
 .cd-logout-btn {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--c-white-40);
     cursor: pointer;
     padding: 4px;
     border-radius: 6px;
@@ -175,7 +175,7 @@
 
 .cd-logout-btn:hover {
     color: #ff6b6b;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--c-white-6);
 }
 
 /* ── Main Area ── */
@@ -199,7 +199,7 @@
     font-family: 'Playfair Display', serif;
     font-size: 24px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0;
 }
 
@@ -246,7 +246,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px var(--c-black-10);
 }
 
 .cd-stat-top {
@@ -265,21 +265,21 @@
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: #ffffff;
+    background: var(--c-sage-10);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .cd-stat-icon svg {
-    color: #1B2B5A;
+    color: var(--c-sage-dark);
 }
 
 .cd-stat-val {
     font-family: 'Playfair Display', serif;
     font-size: 28px;
     font-weight: 700;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 /* Cards */
@@ -287,7 +287,7 @@
     background: #fff;
     border-radius: 14px;
     padding: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px var(--c-black-10);
 }
 
 .cd-card-grow {
@@ -305,7 +305,7 @@
     font-family: 'Playfair Display', serif;
     font-size: 18px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0;
 }
 
@@ -314,7 +314,7 @@
 }
 
 .cd-heart-icon {
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 /* Empty States */
@@ -347,7 +347,7 @@
     align-items: center;
     gap: 6px;
     padding: 8px 20px;
-    background: #1B2B5A;
+    background: var(--c-forest);
     color: #fff;
     border-radius: 8px;
     font-size: 13px;
@@ -362,7 +362,7 @@
 
 /* Quick Book Card */
 .cd-quick-book {
-    background: linear-gradient(135deg, #C8A951, #B8963E);
+    background: linear-gradient(135deg, var(--c-gold), var(--c-gold-dark));
     border-radius: 14px;
     padding: 28px 24px;
     display: flex;
@@ -376,7 +376,7 @@
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--c-white-20);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -395,7 +395,7 @@
 
 .cd-qb-desc {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--c-white-80);
     line-height: 1.5;
     margin: 0;
 }
@@ -406,7 +406,7 @@
     gap: 8px;
     padding: 10px 20px;
     background: #fff;
-    color: #1B2B5A;
+    color: var(--c-forest);
     border-radius: 8px;
     font-size: 14px;
     font-weight: 600;
@@ -421,7 +421,7 @@
 }
 
 .cd-qb-btn svg {
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 /* Stat sub-text */
@@ -436,12 +436,12 @@
 }
 
 .cd-stat-icon-gold svg {
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 /* Card link arrow */
 .cd-card-link {
-    color: #C8A951;
+    color: var(--c-gold);
     transition: transform 0.2s ease;
 }
 
@@ -476,7 +476,7 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(200, 169, 81, 0.1), transparent);
+    background: linear-gradient(90deg, transparent, var(--c-gold-10), transparent);
     transition: left 0.6s ease;
     z-index: 1;
     pointer-events: none;
@@ -523,7 +523,7 @@
 .cd-booking-service {
     font-size: 14px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 .cd-booking-meta {
@@ -576,7 +576,7 @@
     align-items: center;
     gap: 4px;
     padding: 6px 12px;
-    background: #C8A951;
+    background: var(--c-gold);
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -589,7 +589,7 @@
 }
 
 .cd-rate-btn:hover {
-    background: #B8993F;
+    background: var(--c-gold-dark);
 }
 
 .cd-rated-stars {
@@ -613,7 +613,7 @@
 
 .cd-view-btn:hover {
     background: #E8E5E0;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 /* Reviews List */
@@ -625,7 +625,7 @@
 
 .cd-review-item {
     padding-bottom: 16px;
-    border-bottom: 1px solid #F0EDE8;
+    border-bottom: 1px solid var(--c-sage-15);
 }
 
 .cd-review-item:last-child {
@@ -643,7 +643,7 @@
 .cd-review-name {
     font-size: 14px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 .cd-review-date {
@@ -674,7 +674,7 @@
     width: 40px;
     height: 40px;
     border-radius: 10px;
-    background: #1B2B5A;
+    background: var(--c-forest);
     color: #fff;
     border: none;
     cursor: pointer;
@@ -719,7 +719,7 @@
     .cd-sidebar-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.5);
+        background: var(--c-black-50);
         z-index: 40;
     }
 

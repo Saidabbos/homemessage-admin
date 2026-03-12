@@ -68,9 +68,9 @@ const formatPrice = (price) => {
 }
 
 const statusConfig = {
-    NEW: { color: '#1B2B5A', bg: '#1B2B5A10' },
-    CONFIRMING: { color: '#1B2B5A', bg: '#1B2B5A10' },
-    CONFIRMED: { color: '#C8A951', bg: '#C8A95120' },
+    NEW: { color: '#1F2D2A', bg: '#1F2D2A10' },
+    CONFIRMING: { color: '#1F2D2A', bg: '#1F2D2A10' },
+    CONFIRMED: { color: '#C8A65E', bg: '#C8A65E20' },
     IN_PROGRESS: { color: '#3B82F6', bg: '#3B82F615' },
     COMPLETED: { color: '#22C55E', bg: '#22C55E15' },
     CANCELLED: { color: '#EF4444', bg: '#EF444415' },
@@ -247,8 +247,8 @@ const paginationInfo = computed(() => {
                             <span
                                 class="co-status-badge"
                                 :style="{
-                                    color: statusConfig[order.status]?.color || '#1B2B5A',
-                                    backgroundColor: statusConfig[order.status]?.bg || '#1B2B5A10',
+                                    color: statusConfig[order.status]?.color || '#1F2D2A',
+                                    backgroundColor: statusConfig[order.status]?.bg || '#1F2D2A10',
                                 }"
                             >
                                 {{ statusLabel(order.status) }}

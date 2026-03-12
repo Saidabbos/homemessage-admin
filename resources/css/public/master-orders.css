@@ -13,7 +13,7 @@
 .mo-sidebar {
     width: 240px;
     min-height: 100vh;
-    background: linear-gradient(180deg, #2D6A4F, #1B4332);
+    background: linear-gradient(180deg, var(--c-forest), var(--c-forest-dark));
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -40,7 +40,7 @@
 }
 
 .mo-sidebar-logo svg {
-    color: #C8A951;
+    color: var(--c-gold);
     flex-shrink: 0;
 }
 
@@ -65,7 +65,7 @@
     gap: 12px;
     padding: 10px 14px;
     border-radius: 10px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--c-white-60);
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
@@ -74,12 +74,12 @@
 }
 
 .mo-nav-item:hover {
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(255, 255, 255, 0.06);
+    color: var(--c-white-90);
+    background: var(--c-white-6);
 }
 
 .mo-nav-item.active {
-    background: #C8A951;
+    background: var(--c-gold);
     color: #fff;
     font-weight: 600;
 }
@@ -99,7 +99,7 @@
 
 .mo-sidebar-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--c-white-10);
     margin-bottom: 16px;
 }
 
@@ -130,7 +130,7 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--c-white-15);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -145,7 +145,7 @@
 }
 
 .mo-user-avatar svg {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--c-white-80);
 }
 
 .mo-user-info {
@@ -166,13 +166,13 @@
 
 .mo-user-phone {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--c-white-50);
 }
 
 .mo-logout-btn {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--c-white-40);
     cursor: pointer;
     padding: 4px;
     border-radius: 6px;
@@ -182,7 +182,7 @@
 
 .mo-logout-btn:hover {
     color: #ff6b6b;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--c-white-6);
 }
 
 /* ── Main Area ── */
@@ -207,7 +207,7 @@
     font-family: 'Playfair Display', serif;
     font-size: 22px;
     font-weight: 600;
-    color: #2D6A4F;
+    color: var(--c-forest);
     margin: 0;
 }
 
@@ -238,7 +238,7 @@
     display: flex;
     gap: 4px;
     padding: 4px;
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
     border-radius: 14px;
     border: 1px solid rgba(45, 106, 79, 0.03);
 }
@@ -262,10 +262,10 @@
 }
 
 .mo-tab.active {
-    background: rgba(255, 255, 255, 0.5);
-    color: #2D6A4F;
+    background: var(--c-white-50);
+    color: var(--c-forest);
     font-weight: 600;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px var(--c-black-10);
 }
 
 .mo-filter-right {
@@ -279,7 +279,7 @@
     align-items: center;
     gap: 8px;
     padding: 10px 16px;
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
     border: 1px solid rgba(45, 106, 79, 0.03);
     border-radius: 12px;
 }
@@ -295,7 +295,7 @@
     outline: none;
     font-family: 'Manrope', sans-serif;
     font-size: 13px;
-    color: #2D6A4F;
+    color: var(--c-forest);
     width: 160px;
 }
 
@@ -305,9 +305,9 @@
 
 /* ── Orders Table Card ── */
 .mo-table-card {
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.37);
+    border: 1px solid var(--c-white-37);
     backdrop-filter: blur(16px);
     overflow: hidden;
     flex: 1;
@@ -351,7 +351,7 @@
 }
 
 .mo-table-row:hover {
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
 }
 
 .mo-td {
@@ -366,17 +366,17 @@
 
 .mo-customer-name {
     font-weight: 500;
-    color: #2D6A4F;
+    color: var(--c-forest);
 }
 
 .mo-service-name {
     font-weight: 500;
-    color: #2D6A4F;
+    color: var(--c-forest);
 }
 
 .mo-price {
     font-weight: 600;
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 /* Status Badge */
@@ -446,12 +446,12 @@
 }
 
 .mo-pag-btn:hover:not(:disabled) {
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
 }
 
 .mo-pag-btn.active {
-    background: #C8A951;
-    color: #2D6A4F;
+    background: var(--c-gold);
+    color: var(--c-forest);
     font-weight: 600;
 }
 
@@ -461,7 +461,7 @@
 }
 
 .mo-pag-nav {
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
     border: 1px solid rgba(45, 106, 79, 0.03);
 }
 

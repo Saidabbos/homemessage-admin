@@ -498,7 +498,7 @@ const goBack = () => {
     padding: 24px;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(180deg, #EDE8DF 0%, #F5F2ED 50%, #EDE8DF 100%);
+    background: linear-gradient(180deg, var(--c-ivory) 0%, #F5F2ED 50%, var(--c-ivory) 100%);
     position: relative;
     overflow: hidden;
     font-family: 'Manrope', sans-serif;
@@ -524,14 +524,14 @@ const goBack = () => {
     height: 200px; 
     top: -50px; 
     right: -50px; 
-    background: radial-gradient(circle, rgba(200, 169, 81, 0.25) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--c-gold-25) 0%, transparent 70%);
 }
 .c2 { 
     width: 150px; 
     height: 150px; 
     bottom: 100px; 
     left: -40px; 
-    background: radial-gradient(circle, rgba(27, 43, 90, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--c-forest-10) 0%, transparent 70%);
     animation-delay: -2s; 
 }
 .c3 { 
@@ -539,7 +539,7 @@ const goBack = () => {
     height: 100px; 
     top: 50%; 
     right: 20%; 
-    background: radial-gradient(circle, rgba(200, 169, 81, 0.2) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--c-gold-20) 0%, transparent 70%);
     animation-delay: -4s; 
 }
 
@@ -550,18 +550,18 @@ const goBack = () => {
 
 /* Glass effect - cream/gold theme */
 .glass {
-    background: rgba(255, 255, 255, 0.45);
+    background: var(--c-white-45);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 0 8px 32px rgba(27, 43, 90, 0.08);
+    border: 1px solid var(--c-white-60);
+    box-shadow: 0 8px 32px var(--c-forest-8);
 }
 
 /* Auto-login */
 .auto-login {
     position: fixed;
     inset: 0;
-    background: linear-gradient(180deg, #EDE8DF 0%, #F5F2ED 50%, #EDE8DF 100%);
+    background: linear-gradient(180deg, var(--c-ivory) 0%, #F5F2ED 50%, var(--c-ivory) 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -570,7 +570,7 @@ const goBack = () => {
 }
 
 .auto-login p {
-    color: #1B2B5A;
+    color: var(--c-forest);
     opacity: 0.6;
     margin-top: 16px;
     font-family: 'Manrope', sans-serif;
@@ -579,8 +579,8 @@ const goBack = () => {
 .spinner {
     width: 48px;
     height: 48px;
-    border: 3px solid rgba(200, 169, 81, 0.2);
-    border-top-color: #C8A951;
+    border: 3px solid var(--c-gold-20);
+    border-top-color: var(--c-gold);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -610,7 +610,7 @@ const goBack = () => {
     align-items: center;
     justify-content: center;
     border-radius: 24px;
-    color: #C8A951;
+    color: var(--c-gold);
     margin-bottom: 20px;
     transition: all 0.3s ease;
     position: relative;
@@ -624,7 +624,7 @@ const goBack = () => {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(200, 169, 81, 0.2), transparent);
+    background: linear-gradient(90deg, transparent, var(--c-gold-20), transparent);
     transition: left 0.6s ease;
 }
 
@@ -634,20 +634,20 @@ const goBack = () => {
 
 .logo:hover {
     transform: scale(1.05);
-    box-shadow: 0 8px 30px rgba(200, 169, 81, 0.3);
+    box-shadow: 0 8px 30px var(--c-gold-30);
 }
 
 .title {
     font-family: 'Playfair Display', serif;
     font-size: 28px;
     font-weight: 500;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0 0 8px;
 }
 
 .subtitle {
     font-size: 14px;
-    color: rgba(27, 43, 90, 0.5);
+    color: var(--c-forest-50);
     margin: 0;
 }
 
@@ -668,7 +668,7 @@ const goBack = () => {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(200, 169, 81, 0.1), transparent);
+    background: linear-gradient(90deg, transparent, var(--c-gold-10), transparent);
     transition: left 0.6s ease;
     z-index: -1;
 }
@@ -697,12 +697,12 @@ const goBack = () => {
 .input-label {
     font-size: 14px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 .input-hint {
     font-size: 13px;
-    color: rgba(27, 43, 90, 0.5);
+    color: var(--c-forest-50);
     margin: 0;
 }
 
@@ -715,14 +715,14 @@ const goBack = () => {
 }
 
 .input-wrapper:focus-within {
-    border-color: rgba(200, 169, 81, 0.5);
-    box-shadow: 0 0 20px rgba(200, 169, 81, 0.15);
+    border-color: var(--c-gold-50);
+    box-shadow: 0 0 20px var(--c-gold-15);
 }
 
 .input-icon {
     position: absolute;
     left: 16px;
-    color: rgba(27, 43, 90, 0.4);
+    color: var(--c-forest-40);
 }
 
 .input-field {
@@ -731,13 +731,13 @@ const goBack = () => {
     font-size: 17px;
     border: none;
     background: transparent;
-    color: #1B2B5A;
+    color: var(--c-forest);
     outline: none;
     font-family: 'Manrope', sans-serif;
 }
 
 .input-field::placeholder {
-    color: rgba(27, 43, 90, 0.3);
+    color: var(--c-forest-30);
 }
 
 .otp-wrapper {
@@ -746,8 +746,8 @@ const goBack = () => {
 }
 
 .otp-wrapper:focus-within {
-    border-color: rgba(200, 169, 81, 0.5);
-    box-shadow: 0 0 20px rgba(200, 169, 81, 0.15);
+    border-color: var(--c-gold-50);
+    box-shadow: 0 0 20px var(--c-gold-15);
 }
 
 .otp-input {
@@ -759,13 +759,13 @@ const goBack = () => {
     font-weight: 600;
     border: none;
     background: transparent;
-    color: #1B2B5A;
+    color: var(--c-forest);
     outline: none;
     font-family: 'Manrope', sans-serif;
 }
 
 .otp-input::placeholder {
-    color: rgba(27, 43, 90, 0.2);
+    color: var(--c-forest-20);
     letter-spacing: 10px;
 }
 
@@ -781,13 +781,13 @@ const goBack = () => {
     padding: 18px;
     font-size: 16px;
     font-weight: 600;
-    background: #C8A951;
-    color: #1B2B5A;
+    background: var(--c-gold);
+    color: var(--c-forest);
     border: none;
     border-radius: 16px;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 20px rgba(200, 169, 81, 0.35);
+    box-shadow: 0 4px 20px var(--c-gold-35);
     font-family: 'Manrope', sans-serif;
     overflow: hidden;
 }
@@ -799,7 +799,7 @@ const goBack = () => {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    background: linear-gradient(90deg, transparent, var(--c-white-30), transparent);
     transition: left 0.6s ease;
 }
 
@@ -809,7 +809,7 @@ const goBack = () => {
 
 .submit-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(200, 169, 81, 0.5);
+    box-shadow: 0 8px 30px var(--c-gold-50);
 }
 
 .submit-btn:disabled {
@@ -829,7 +829,7 @@ const goBack = () => {
     padding: 8px;
     font-size: 14px;
     background: transparent;
-    color: rgba(27, 43, 90, 0.6);
+    color: var(--c-forest-60);
     border: none;
     cursor: pointer;
     transition: color 0.3s ease;
@@ -837,16 +837,16 @@ const goBack = () => {
 }
 
 .link-btn:hover:not(:disabled) {
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 .link-btn:disabled {
-    color: rgba(27, 43, 90, 0.3);
+    color: var(--c-forest-30);
     cursor: not-allowed;
 }
 
 .divider {
-    color: rgba(27, 43, 90, 0.3);
+    color: var(--c-forest-30);
 }
 
 /* Method Selection */
@@ -858,13 +858,13 @@ const goBack = () => {
 .method-phone {
     font-size: 16px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0 0 4px;
 }
 
 .method-hint {
     font-size: 13px;
-    color: rgba(27, 43, 90, 0.5);
+    color: var(--c-forest-50);
     margin: 0;
 }
 
@@ -881,9 +881,9 @@ const goBack = () => {
     align-items: center;
     gap: 14px;
     padding: 16px;
-    background: rgba(255, 255, 255, 0.5);
+    background: var(--c-white-50);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--c-white-60);
     border-radius: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -898,7 +898,7 @@ const goBack = () => {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(200, 169, 81, 0.15), transparent);
+    background: linear-gradient(90deg, transparent, var(--c-gold-15), transparent);
     transition: left 0.6s ease;
     z-index: 0;
 }
@@ -908,9 +908,9 @@ const goBack = () => {
 }
 
 .method-btn:hover {
-    background: rgba(255, 255, 255, 0.65);
-    border-color: rgba(200, 169, 81, 0.4);
-    box-shadow: 0 8px 24px rgba(27, 43, 90, 0.08);
+    background: var(--c-white-65);
+    border-color: var(--c-gold-40);
+    box-shadow: 0 8px 24px var(--c-forest-8);
 }
 
 .method-icon {
@@ -921,9 +921,9 @@ const goBack = () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(200, 169, 81, 0.15);
+    background: var(--c-gold-15);
     border-radius: 12px;
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 .method-text {
@@ -938,24 +938,24 @@ const goBack = () => {
 .method-title {
     font-size: 15px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 .method-desc {
     font-size: 12px;
-    color: rgba(27, 43, 90, 0.5);
+    color: var(--c-forest-50);
 }
 
 .method-arrow {
     position: relative;
     z-index: 1;
-    color: rgba(27, 43, 90, 0.4);
+    color: var(--c-forest-40);
     transition: all 0.3s ease;
 }
 
 .method-btn:hover .method-arrow {
     transform: translateX(4px);
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 .back-btn {
@@ -982,16 +982,16 @@ const goBack = () => {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    color: #C8A951;
+    color: var(--c-gold);
     margin-bottom: 16px;
-    background: linear-gradient(135deg, rgba(200, 169, 81, 0.15) 0%, rgba(200, 169, 81, 0.05) 100%);
+    background: linear-gradient(135deg, var(--c-gold-15) 0%, var(--c-gold-5) 100%);
 }
 
 .welcome-title {
     font-family: 'Playfair Display', serif;
     font-size: 24px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0;
 }
 
@@ -1001,7 +1001,7 @@ const goBack = () => {
     padding-top: 24px;
     text-align: center;
     font-size: 12px;
-    color: rgba(27, 43, 90, 0.4);
+    color: var(--c-forest-40);
     position: relative;
     z-index: 1;
 }

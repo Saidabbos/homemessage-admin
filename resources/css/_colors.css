@@ -1,0 +1,223 @@
+/* ============================================
+   CENTRAL COLOR DEFINITIONS - Multi-Theme System
+   ============================================
+
+   Theme switching: add class to <html> element.
+   Default: Sage & Champagne (no class needed)
+
+   Available themes:
+     .theme-classic        — Custom Theme (Gold & Navy)
+     .theme-sand           — Sand Minimal
+     .theme-blush          — Blush Serenity
+     .theme-azure          — Azure Calm
+     .theme-mono           — Monochrome Luxury
+   ============================================ */
+
+/* ==========================================
+   DEFAULT THEME: Sage & Champagne
+   ========================================== */
+:root {
+    /* === 5 Primary Colors (override these to change theme) === */
+    --c-gold: #C8A65E;
+    --c-gold-dark: #b89940;
+    --c-sage: #9BAF9B;
+    --c-sage-dark: #7a9a7a;
+    --c-forest: #1F2D2A;
+    --c-forest-dark: #0f1f1d;
+    --c-ivory: #FCFBF8;
+    --c-champagne: #EADFCB;
+
+    /* === Derived Backgrounds (auto-computed) === */
+    --c-bg-warm-1: color-mix(in srgb, var(--c-champagne) 45%, var(--c-ivory));
+    --c-bg-warm-2: color-mix(in srgb, var(--c-champagne) 65%, var(--c-ivory));
+    --c-bg-warm-3: color-mix(in srgb, var(--c-champagne) 80%, var(--c-ivory));
+
+    /* === Gold Alpha Variants (auto-computed from --c-gold) === */
+    --c-gold-2: color-mix(in srgb, var(--c-gold) 2%, transparent);
+    --c-gold-5: color-mix(in srgb, var(--c-gold) 5%, transparent);
+    --c-gold-8: color-mix(in srgb, var(--c-gold) 8%, transparent);
+    --c-gold-10: color-mix(in srgb, var(--c-gold) 10%, transparent);
+    --c-gold-15: color-mix(in srgb, var(--c-gold) 15%, transparent);
+    --c-gold-19: color-mix(in srgb, var(--c-gold) 19%, transparent);
+    --c-gold-20: color-mix(in srgb, var(--c-gold) 20%, transparent);
+    --c-gold-25: color-mix(in srgb, var(--c-gold) 25%, transparent);
+    --c-gold-30: color-mix(in srgb, var(--c-gold) 30%, transparent);
+    --c-gold-31: color-mix(in srgb, var(--c-gold) 31%, transparent);
+    --c-gold-35: color-mix(in srgb, var(--c-gold) 35%, transparent);
+    --c-gold-38: color-mix(in srgb, var(--c-gold) 38%, transparent);
+    --c-gold-40: color-mix(in srgb, var(--c-gold) 40%, transparent);
+    --c-gold-45: color-mix(in srgb, var(--c-gold) 45%, transparent);
+    --c-gold-50: color-mix(in srgb, var(--c-gold) 50%, transparent);
+    --c-gold-60: color-mix(in srgb, var(--c-gold) 60%, transparent);
+    --c-gold-70: color-mix(in srgb, var(--c-gold) 70%, transparent);
+    --c-gold-80: color-mix(in srgb, var(--c-gold) 80%, transparent);
+    --c-gold-90: color-mix(in srgb, var(--c-gold) 90%, transparent);
+
+    /* === Gold Dark Alpha === */
+    --c-gold-dark-90: color-mix(in srgb, var(--c-gold-dark) 90%, transparent);
+
+    /* === Forest Alpha Variants (auto-computed from --c-forest) === */
+    --c-forest-5: color-mix(in srgb, var(--c-forest) 5%, transparent);
+    --c-forest-8: color-mix(in srgb, var(--c-forest) 8%, transparent);
+    --c-forest-10: color-mix(in srgb, var(--c-forest) 10%, transparent);
+    --c-forest-15: color-mix(in srgb, var(--c-forest) 15%, transparent);
+    --c-forest-20: color-mix(in srgb, var(--c-forest) 20%, transparent);
+    --c-forest-30: color-mix(in srgb, var(--c-forest) 30%, transparent);
+    --c-forest-38: color-mix(in srgb, var(--c-forest) 38%, transparent);
+    --c-forest-40: color-mix(in srgb, var(--c-forest) 40%, transparent);
+    --c-forest-44: color-mix(in srgb, var(--c-forest) 44%, transparent);
+    --c-forest-50: color-mix(in srgb, var(--c-forest) 50%, transparent);
+    --c-forest-56: color-mix(in srgb, var(--c-forest) 56%, transparent);
+    --c-forest-60: color-mix(in srgb, var(--c-forest) 60%, transparent);
+    --c-forest-65: color-mix(in srgb, var(--c-forest) 65%, transparent);
+    --c-forest-70: color-mix(in srgb, var(--c-forest) 70%, transparent);
+    --c-forest-80: color-mix(in srgb, var(--c-forest) 80%, transparent);
+    --c-forest-85: color-mix(in srgb, var(--c-forest) 85%, transparent);
+    --c-forest-90: color-mix(in srgb, var(--c-forest) 90%, transparent);
+
+    /* === Sage Alpha Variants (auto-computed from --c-sage) === */
+    --c-sage-10: color-mix(in srgb, var(--c-sage) 10%, transparent);
+    --c-sage-15: color-mix(in srgb, var(--c-sage) 15%, transparent);
+    --c-sage-20: color-mix(in srgb, var(--c-sage) 20%, transparent);
+    --c-sage-30: color-mix(in srgb, var(--c-sage) 30%, transparent);
+    --c-sage-50: color-mix(in srgb, var(--c-sage) 50%, transparent);
+
+    /* === Ivory Alpha Variants (auto-computed from --c-ivory) === */
+    --c-ivory-0: color-mix(in srgb, var(--c-ivory) 0%, transparent);
+    --c-ivory-70: color-mix(in srgb, var(--c-ivory) 70%, transparent);
+    --c-ivory-80: color-mix(in srgb, var(--c-ivory) 80%, transparent);
+    --c-ivory-85: color-mix(in srgb, var(--c-ivory) 85%, transparent);
+    --c-ivory-87: color-mix(in srgb, var(--c-ivory) 87%, transparent);
+    --c-ivory-90: color-mix(in srgb, var(--c-ivory) 90%, transparent);
+    --c-ivory-95: color-mix(in srgb, var(--c-ivory) 95%, transparent);
+
+    /* === Champagne Alpha Variants (auto-computed from --c-champagne) === */
+    --c-champagne-60: color-mix(in srgb, var(--c-champagne) 60%, transparent);
+    --c-champagne-70: color-mix(in srgb, var(--c-champagne) 70%, transparent);
+    --c-champagne-80: color-mix(in srgb, var(--c-champagne) 80%, transparent);
+    --c-champagne-85: color-mix(in srgb, var(--c-champagne) 85%, transparent);
+    --c-champagne-87: color-mix(in srgb, var(--c-champagne) 87%, transparent);
+    --c-champagne-90: color-mix(in srgb, var(--c-champagne) 90%, transparent);
+
+    /* === Neutral Alpha Variants (theme-independent) === */
+    --c-white: #ffffff;
+    --c-white-5: rgba(255, 255, 255, 0.05);
+    --c-white-6: rgba(255, 255, 255, 0.06);
+    --c-white-8: rgba(255, 255, 255, 0.08);
+    --c-white-9: rgba(255, 255, 255, 0.09);
+    --c-white-10: rgba(255, 255, 255, 0.10);
+    --c-white-12: rgba(255, 255, 255, 0.12);
+    --c-white-15: rgba(255, 255, 255, 0.15);
+    --c-white-19: rgba(255, 255, 255, 0.19);
+    --c-white-20: rgba(255, 255, 255, 0.20);
+    --c-white-25: rgba(255, 255, 255, 0.25);
+    --c-white-30: rgba(255, 255, 255, 0.30);
+    --c-white-31: rgba(255, 255, 255, 0.31);
+    --c-white-35: rgba(255, 255, 255, 0.35);
+    --c-white-37: rgba(255, 255, 255, 0.37);
+    --c-white-38: rgba(255, 255, 255, 0.38);
+    --c-white-40: rgba(255, 255, 255, 0.40);
+    --c-white-44: rgba(255, 255, 255, 0.44);
+    --c-white-45: rgba(255, 255, 255, 0.45);
+    --c-white-50: rgba(255, 255, 255, 0.50);
+    --c-white-55: rgba(255, 255, 255, 0.55);
+    --c-white-56: rgba(255, 255, 255, 0.56);
+    --c-white-60: rgba(255, 255, 255, 0.60);
+    --c-white-65: rgba(255, 255, 255, 0.65);
+    --c-white-70: rgba(255, 255, 255, 0.70);
+    --c-white-75: rgba(255, 255, 255, 0.75);
+    --c-white-80: rgba(255, 255, 255, 0.80);
+    --c-white-85: rgba(255, 255, 255, 0.85);
+    --c-white-90: rgba(255, 255, 255, 0.90);
+    --c-white-95: rgba(255, 255, 255, 0.95);
+
+    --c-black-2: rgba(0, 0, 0, 0.02);
+    --c-black-3: rgba(0, 0, 0, 0.03);
+    --c-black-4: rgba(0, 0, 0, 0.04);
+    --c-black-5: rgba(0, 0, 0, 0.05);
+    --c-black-6: rgba(0, 0, 0, 0.06);
+    --c-black-7: rgba(0, 0, 0, 0.07);
+    --c-black-8: rgba(0, 0, 0, 0.08);
+    --c-black-10: rgba(0, 0, 0, 0.10);
+    --c-black-12: rgba(0, 0, 0, 0.12);
+    --c-black-15: rgba(0, 0, 0, 0.15);
+    --c-black-19: rgba(0, 0, 0, 0.19);
+    --c-black-20: rgba(0, 0, 0, 0.20);
+    --c-black-25: rgba(0, 0, 0, 0.25);
+    --c-black-30: rgba(0, 0, 0, 0.30);
+    --c-black-40: rgba(0, 0, 0, 0.40);
+    --c-black-50: rgba(0, 0, 0, 0.50);
+    --c-black-60: rgba(0, 0, 0, 0.60);
+    --c-black-70: rgba(0, 0, 0, 0.70);
+    --c-black-80: rgba(0, 0, 0, 0.80);
+}
+
+/* ==========================================
+   THEME 1: Classic (Original Gold & Navy)
+   ========================================== */
+.theme-classic {
+    --c-gold: #C9A55C;
+    --c-gold-dark: #b5923e;
+    --c-sage: #D4B76A;
+    --c-sage-dark: #c4a750;
+    --c-forest: #1A1A2E;
+    --c-forest-dark: #0e0e1f;
+    --c-ivory: #FAF8F5;
+    --c-champagne: #F5F0E8;
+}
+
+/* ==========================================
+   THEME 3: Sand Minimal
+   ========================================== */
+.theme-sand {
+    --c-gold: #B58B4F;
+    --c-gold-dark: #9e7840;
+    --c-sage: #B9AA9A;
+    --c-sage-dark: #a09181;
+    --c-forest: #222428;
+    --c-forest-dark: #141518;
+    --c-ivory: #FFFFFF;
+    --c-champagne: #EFE6D8;
+}
+
+/* ==========================================
+   THEME 4: Blush Serenity
+   ========================================== */
+.theme-blush {
+    --c-gold: #D0B06B;
+    --c-gold-dark: #bf9e54;
+    --c-sage: #E8C9C3;
+    --c-sage-dark: #d4a9a1;
+    --c-forest: #1E1F24;
+    --c-forest-dark: #101115;
+    --c-ivory: #FBFAF9;
+    --c-champagne: #E6E7EA;
+}
+
+/* ==========================================
+   THEME 5: Azure Calm
+   ========================================== */
+.theme-azure {
+    --c-gold: #C7A15A;
+    --c-gold-dark: #b08e45;
+    --c-sage: #F1E8DB;
+    --c-sage-dark: #e0d0bb;
+    --c-forest: #121B2B;
+    --c-forest-dark: #080f1a;
+    --c-ivory: #FAFBFC;
+    --c-champagne: #DDEAF4;
+}
+
+/* ==========================================
+   THEME 6: Monochrome Luxury
+   ========================================== */
+.theme-mono {
+    --c-gold: #BFA06A;
+    --c-gold-dark: #a88c55;
+    --c-sage: #C8C3BA;
+    --c-sage-dark: #b0aaa0;
+    --c-forest: #2A2B2F;
+    --c-forest-dark: #1a1b1e;
+    --c-ivory: #FDFDFC;
+    --c-champagne: #F0F1F3;
+}

@@ -692,7 +692,7 @@ const selectedDurationLabel = computed(() => {
 .qb-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--c-black-60);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -735,7 +735,7 @@ const selectedDurationLabel = computed(() => {
 .qb-title {
     font-size: 18px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0;
 }
 
@@ -772,7 +772,7 @@ const selectedDurationLabel = computed(() => {
     display: block;
     font-size: 13px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin-bottom: 10px;
 }
 
@@ -788,7 +788,7 @@ const selectedDurationLabel = computed(() => {
     border: 2px solid transparent;
     border-radius: 10px;
     font-size: 14px;
-    color: #1B2B5A;
+    color: var(--c-forest);
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -798,8 +798,8 @@ const selectedDurationLabel = computed(() => {
 }
 
 .qb-service-btn.active {
-    background: #C8A95115;
-    border-color: #C8A951;
+    background: var(--c-gold)15;
+    border-color: var(--c-gold);
     color: #B8963E;
 }
 
@@ -826,19 +826,19 @@ const selectedDurationLabel = computed(() => {
 }
 
 .qb-duration-btn.active {
-    background: #C8A95115;
-    border-color: #C8A951;
+    background: var(--c-gold)15;
+    border-color: var(--c-gold);
 }
 
 .qb-dur-time {
     font-size: 14px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 .qb-dur-price {
     font-size: 12px;
-    color: #C8A951;
+    color: var(--c-gold);
     margin-top: 2px;
 }
 
@@ -867,12 +867,12 @@ const selectedDurationLabel = computed(() => {
 }
 
 .qb-date-btn.active {
-    background: #C8A95115;
-    border-color: #C8A951;
+    background: var(--c-gold)15;
+    border-color: var(--c-gold);
 }
 
 .qb-date-btn.today .qb-date-day {
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 .qb-date-day {
@@ -884,7 +884,7 @@ const selectedDurationLabel = computed(() => {
 .qb-date-num {
     font-size: 18px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin-top: 2px;
 }
 
@@ -908,7 +908,7 @@ const selectedDurationLabel = computed(() => {
     border: 2px solid transparent;
     border-radius: 8px;
     font-size: 14px;
-    color: #1B2B5A;
+    color: var(--c-forest);
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -918,8 +918,8 @@ const selectedDurationLabel = computed(() => {
 }
 
 .qb-slot-btn.active {
-    background: #C8A95115;
-    border-color: #C8A951;
+    background: var(--c-gold)15;
+    border-color: var(--c-gold);
     color: #B8963E;
 }
 
@@ -939,7 +939,7 @@ const selectedDurationLabel = computed(() => {
     border: none;
     border-radius: 10px;
     font-size: 20px;
-    color: #1B2B5A;
+    color: var(--c-forest);
     cursor: pointer;
 }
 
@@ -951,7 +951,7 @@ const selectedDurationLabel = computed(() => {
 .qb-guest-count {
     font-size: 20px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     min-width: 40px;
     text-align: center;
 }
@@ -968,7 +968,7 @@ const selectedDurationLabel = computed(() => {
 
 .qb-textarea:focus {
     outline: none;
-    border-color: #C8A951;
+    border-color: var(--c-gold);
 }
 
 /* Summary */
@@ -981,7 +981,7 @@ const selectedDurationLabel = computed(() => {
 .qb-summary-title {
     font-size: 16px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0 0 16px;
 }
 
@@ -997,7 +997,7 @@ const selectedDurationLabel = computed(() => {
 }
 
 .qb-summary-value {
-    color: #1B2B5A;
+    color: var(--c-forest);
     font-size: 14px;
     font-weight: 500;
 }
@@ -1012,7 +1012,7 @@ const selectedDurationLabel = computed(() => {
 .qb-summary-total .qb-summary-value {
     font-size: 16px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 .qb-error {
@@ -1045,7 +1045,7 @@ const selectedDurationLabel = computed(() => {
 .qb-price-value {
     font-size: 18px;
     font-weight: 700;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 .qb-actions {
@@ -1055,7 +1055,7 @@ const selectedDurationLabel = computed(() => {
 
 .qb-btn-primary {
     padding: 12px 24px;
-    background: linear-gradient(135deg, #C8A951, #B8963E);
+    background: linear-gradient(135deg, var(--c-gold), #B8963E);
     border: none;
     border-radius: 10px;
     font-size: 15px;
@@ -1076,7 +1076,7 @@ const selectedDurationLabel = computed(() => {
     border-radius: 10px;
     font-size: 15px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     cursor: pointer;
 }
 
@@ -1085,7 +1085,7 @@ const selectedDurationLabel = computed(() => {
     margin-top: 16px;
     width: 100%;
     padding: 10px;
-    background: linear-gradient(135deg, #C8A951, #B8963E);
+    background: linear-gradient(135deg, var(--c-gold), #B8963E);
     border: none;
     border-radius: 8px;
     font-size: 14px;
@@ -1097,7 +1097,7 @@ const selectedDurationLabel = computed(() => {
 
 .md-service-book-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(200, 169, 81, 0.3);
+    box-shadow: 0 4px 12px var(--c-gold-30);
 }
 
 @media (max-width: 640px) {

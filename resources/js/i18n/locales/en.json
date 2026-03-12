@@ -411,7 +411,9 @@
         "heroCtaText": "CTA Button Text",
         "heroCtaTextHint": "Text for the main call-to-action button",
         "heroViewServicesText": "View Services Button Text",
-        "heroViewServicesTextHint": "Text for the secondary button"
+        "heroViewServicesTextHint": "Text for the secondary button",
+        "theme": "Theme",
+        "themeHint": "Theme is saved only in this browser. Each user can choose their own theme."
     },
     "profile": {
         "title": "Profile",

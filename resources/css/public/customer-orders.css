@@ -13,7 +13,7 @@
 .co-sidebar {
     width: 260px;
     min-height: 100vh;
-    background: linear-gradient(180deg, #1B2B5A, #152348);
+    background: linear-gradient(180deg, var(--c-forest), var(--c-forest-dark));
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -40,7 +40,7 @@
 }
 
 .co-sidebar-logo svg {
-    color: #C8A951;
+    color: var(--c-gold);
     flex-shrink: 0;
 }
 
@@ -65,7 +65,7 @@
     gap: 12px;
     padding: 12px 16px;
     border-radius: 14px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--c-white-60);
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
@@ -74,17 +74,17 @@
 }
 
 .co-nav-item:hover {
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(255, 255, 255, 0.06);
+    color: var(--c-white-90);
+    background: var(--c-white-6);
 }
 
 .co-nav-item.active {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--c-white-8);
     color: #fff;
 }
 
 .co-nav-item.active svg {
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 .co-nav-item svg {
@@ -98,7 +98,7 @@
 
 .co-sidebar-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--c-white-8);
     margin-bottom: 16px;
 }
 
@@ -129,7 +129,7 @@
     width: 40px;
     height: 40px;
     border-radius: 20px;
-    background: rgba(200, 169, 81, 0.19);
+    background: var(--c-gold-20);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -137,7 +137,7 @@
 }
 
 .co-user-avatar svg {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--c-white-80);
 }
 
 .co-user-info {
@@ -159,13 +159,13 @@
 
 .co-user-phone {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--c-white-50);
 }
 
 .co-logout-btn {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--c-white-40);
     cursor: pointer;
     padding: 4px;
     border-radius: 6px;
@@ -175,7 +175,7 @@
 
 .co-logout-btn:hover {
     color: #ff6b6b;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--c-white-6);
 }
 
 /* ── Main Area ── */
@@ -193,20 +193,20 @@
     align-items: center;
     justify-content: space-between;
     padding: 20px 32px;
-    border-bottom: 1px solid rgba(27, 43, 90, 0.06);
+    border-bottom: 1px solid var(--c-forest-5);
 }
 
 .co-page-title {
     font-family: 'Playfair Display', serif;
     font-size: 22px;
     font-weight: 400;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0;
 }
 
 .co-page-subtitle {
     font-size: 13px;
-    color: rgba(27, 43, 90, 0.31);
+    color: var(--c-forest-30);
     margin-top: 2px;
 }
 
@@ -231,9 +231,9 @@
     display: flex;
     gap: 4px;
     padding: 4px;
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
     border-radius: 14px;
-    border: 1px solid rgba(27, 43, 90, 0.03);
+    border: 1px solid var(--c-forest-5);
 }
 
 .co-tab {
@@ -244,21 +244,21 @@
     font-family: 'Manrope', sans-serif;
     font-size: 13px;
     font-weight: 400;
-    color: rgba(27, 43, 90, 0.31);
+    color: var(--c-forest-30);
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
 }
 
 .co-tab:hover {
-    color: rgba(27, 43, 90, 0.6);
+    color: var(--c-forest-60);
 }
 
 .co-tab.active {
-    background: rgba(255, 255, 255, 0.5);
-    color: #1B2B5A;
+    background: var(--c-white-50);
+    color: var(--c-forest);
     font-weight: 600;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px var(--c-black-10);
 }
 
 .co-filter-right {
@@ -272,13 +272,13 @@
     align-items: center;
     gap: 8px;
     padding: 10px 16px;
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(27, 43, 90, 0.03);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
+    border: 1px solid var(--c-forest-5);
     border-radius: 12px;
 }
 
 .co-search-box svg {
-    color: rgba(27, 43, 90, 0.19);
+    color: var(--c-forest-20);
     flex-shrink: 0;
 }
 
@@ -288,12 +288,12 @@
     outline: none;
     font-family: 'Manrope', sans-serif;
     font-size: 13px;
-    color: #1B2B5A;
+    color: var(--c-forest);
     width: 160px;
 }
 
 .co-search-box input::placeholder {
-    color: rgba(27, 43, 90, 0.19);
+    color: var(--c-forest-20);
 }
 
 .co-new-btn {
@@ -301,14 +301,14 @@
     align-items: center;
     gap: 8px;
     padding: 10px 20px;
-    background: #C8A951;
-    color: #1B2B5A;
+    background: var(--c-gold);
+    color: var(--c-forest);
     border-radius: 12px;
     font-size: 13px;
     font-weight: 600;
     text-decoration: none;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(200, 169, 81, 0.19);
+    box-shadow: 0 2px 8px var(--c-gold-20);
     white-space: nowrap;
 }
 
@@ -319,9 +319,9 @@
 
 /* ── Orders Table Card ── */
 .co-table-card {
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.37);
+    border: 1px solid var(--c-white-37);
     backdrop-filter: blur(16px);
     overflow: hidden;
     flex: 1;
@@ -334,13 +334,13 @@
     display: flex;
     align-items: center;
     padding: 14px 24px;
-    background: rgba(27, 43, 90, 0.024);
+    background: var(--c-sage-10);
 }
 
 .co-th {
     font-size: 11px;
     font-weight: 700;
-    color: rgba(27, 43, 90, 0.25);
+    color: var(--c-forest-20);
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
@@ -359,7 +359,7 @@
     display: flex;
     align-items: center;
     padding: 14px 24px;
-    border-top: 1px solid rgba(27, 43, 90, 0.024);
+    border-top: 1px solid var(--c-forest-5);
     transition: background 0.15s ease;
     text-decoration: none;
     color: inherit;
@@ -367,27 +367,27 @@
 }
 
 .co-table-row:hover {
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
 }
 
 .co-td {
     font-size: 13px;
-    color: rgba(27, 43, 90, 0.44);
+    color: var(--c-forest-40);
 }
 
 .co-order-id {
     font-weight: 500;
-    color: rgba(27, 43, 90, 0.31);
+    color: var(--c-forest-30);
 }
 
 .co-service-name {
     font-weight: 500;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 .co-price {
     font-weight: 600;
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 /* Status Badge */
@@ -411,13 +411,13 @@
 }
 
 .co-empty-state svg {
-    color: rgba(27, 43, 90, 0.15);
+    color: var(--c-forest-15);
     margin-bottom: 16px;
 }
 
 .co-empty-state p {
     font-size: 14px;
-    color: rgba(27, 43, 90, 0.4);
+    color: var(--c-forest-40);
     margin: 0 0 20px;
 }
 
@@ -426,8 +426,8 @@
     align-items: center;
     gap: 6px;
     padding: 10px 24px;
-    background: #C8A951;
-    color: #1B2B5A;
+    background: var(--c-gold);
+    color: var(--c-forest);
     border-radius: 10px;
     font-size: 13px;
     font-weight: 600;
@@ -445,12 +445,12 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 24px;
-    border-top: 1px solid rgba(27, 43, 90, 0.024);
+    border-top: 1px solid var(--c-forest-5);
 }
 
 .co-pag-info {
     font-size: 12px;
-    color: rgba(27, 43, 90, 0.25);
+    color: var(--c-forest-20);
 }
 
 .co-pag-btns {
@@ -469,18 +469,18 @@
     background: none;
     font-family: 'Manrope', sans-serif;
     font-size: 12px;
-    color: rgba(27, 43, 90, 0.31);
+    color: var(--c-forest-30);
     cursor: pointer;
     transition: all 0.15s ease;
 }
 
 .co-pag-btn:hover:not(:disabled) {
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
 }
 
 .co-pag-btn.active {
-    background: #C8A951;
-    color: #1B2B5A;
+    background: var(--c-gold);
+    color: var(--c-forest);
     font-weight: 600;
 }
 
@@ -490,12 +490,12 @@
 }
 
 .co-pag-nav {
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(27, 43, 90, 0.03);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
+    border: 1px solid var(--c-forest-5);
 }
 
 .co-pag-nav svg {
-    color: rgba(27, 43, 90, 0.19);
+    color: var(--c-forest-20);
 }
 
 /* ── Mobile Responsive ── */

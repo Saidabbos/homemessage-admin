@@ -3,7 +3,7 @@
 /* ========== Page ========== */
 .bp-page {
     min-height: 100vh;
-    background: linear-gradient(160deg, #F0EBE2 0%, #E5E0D7 50%, #DDD8CF 100%);
+    background: linear-gradient(160deg, var(--c-bg-warm-1) 0%, var(--c-bg-warm-2) 50%, var(--c-bg-warm-3) 100%);
     font-family: 'Manrope', sans-serif;
     display: flex;
     flex-direction: column;
@@ -24,7 +24,7 @@
     font-family: 'Playfair Display', serif;
     font-size: 18px;
     font-weight: 700;
-    color: #1B2B5A;
+    color: var(--c-forest);
     text-decoration: none;
     letter-spacing: 2px;
 }
@@ -33,7 +33,7 @@
     font-family: 'Playfair Display', serif;
     font-size: 18px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 .bp-close-btn {
@@ -42,19 +42,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--c-white-50);
     border-radius: 50%;
-    color: #1B2B5A;
+    color: var(--c-forest);
     text-decoration: none;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .bp-close-btn:hover {
-    background: rgba(255, 255, 255, 0.6);
+    background: var(--c-white-60);
 }
 
 /* ========== Content ========== */
@@ -72,7 +72,7 @@
     font-family: 'Playfair Display', serif;
     font-size: 18px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0 0 12px;
 }
 
@@ -84,10 +84,10 @@
 }
 
 .bp-order-card {
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--c-white-60);
     border-radius: 20px;
     padding: 20px;
     transition: all 0.25s ease;
@@ -99,7 +99,7 @@
     gap: 14px;
     margin-bottom: 14px;
     padding-bottom: 14px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid var(--c-black-5);
 }
 
 .bp-order-avatar {
@@ -108,7 +108,7 @@
     border-radius: 14px;
     overflow: hidden;
     flex-shrink: 0;
-    background: linear-gradient(135deg, #E5E0D7, #DDD8CF);
+    background: linear-gradient(135deg, var(--c-bg-warm-2), var(--c-bg-warm-3));
 }
 
 .bp-order-avatar img {
@@ -123,8 +123,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(200, 169, 81, 0.12);
-    color: #C8A951;
+    background: var(--c-gold-10);
+    color: var(--c-gold);
 }
 
 .bp-order-header {
@@ -136,7 +136,7 @@
     font-family: 'Playfair Display', serif;
     font-size: 15px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0 0 3px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -146,7 +146,7 @@
 .bp-order-master {
     font-size: 12px;
     font-weight: 500;
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 .bp-order-details {
@@ -164,27 +164,27 @@
 .bp-order-label {
     font-size: 13px;
     font-weight: 500;
-    color: rgba(27, 43, 90, 0.5);
+    color: var(--c-forest-50);
 }
 
 .bp-order-value {
     font-size: 13px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 .bp-order-price {
     font-size: 15px;
     font-weight: 700;
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 /* ========== Total Row ========== */
 .bp-total-card {
-    background: rgba(255, 255, 255, 0.5);
+    background: var(--c-white-50);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--c-white-60);
     border-radius: 20px;
     padding: 20px 24px;
     display: flex;
@@ -195,14 +195,14 @@
 .bp-total-label {
     font-size: 16px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 .bp-total-value {
     font-family: 'Playfair Display', serif;
     font-size: 26px;
     font-weight: 700;
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 /* ========== Provider Selection ========== */
@@ -225,10 +225,10 @@
     justify-content: center;
     gap: 10px;
     padding: 24px 16px;
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 2px solid rgba(255, 255, 255, 0.5);
+    border: 2px solid var(--c-white-50);
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.25s ease;
@@ -236,14 +236,14 @@
 }
 
 .bp-provider-btn:hover {
-    background: rgba(255, 255, 255, 0.5);
-    border-color: rgba(255, 255, 255, 0.7);
+    background: var(--c-white-50);
+    border-color: var(--c-white-70);
 }
 
 .bp-provider-btn.selected {
-    background: rgba(255, 255, 255, 0.6);
-    border-color: #C8A951;
-    box-shadow: 0 4px 16px rgba(200, 169, 81, 0.15);
+    background: var(--c-white-60);
+    border-color: var(--c-gold);
+    box-shadow: 0 4px 16px var(--c-gold-15);
 }
 
 .bp-provider-logo {
@@ -280,7 +280,7 @@
 .bp-provider-name {
     font-size: 13px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 .bp-provider-check {
@@ -289,7 +289,7 @@
     right: 10px;
     width: 22px;
     height: 22px;
-    background: #C8A951;
+    background: var(--c-gold);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -305,21 +305,21 @@
     gap: 8px;
     width: 100%;
     padding: 18px 40px;
-    background: #C8A951;
+    background: var(--c-gold);
     border: none;
     border-radius: 28px;
     font-family: 'Manrope', sans-serif;
     font-size: 16px;
     font-weight: 700;
-    color: #1B2B5A;
+    color: var(--c-forest);
     cursor: pointer;
     transition: all 0.25s ease;
-    box-shadow: 0 8px 20px rgba(200, 169, 81, 0.25);
+    box-shadow: 0 8px 20px var(--c-gold-25);
 }
 
 .bp-pay-btn:hover:not(:disabled) {
-    background: #b89940;
-    box-shadow: 0 10px 24px rgba(200, 169, 81, 0.35);
+    background: var(--c-gold-dark);
+    box-shadow: 0 10px 24px var(--c-gold-30);
     transform: translateY(-1px);
 }
 
@@ -343,8 +343,8 @@
 .bp-spinner {
     width: 56px;
     height: 56px;
-    border: 3px solid rgba(200, 169, 81, 0.15);
-    border-top-color: #C8A951;
+    border: 3px solid var(--c-gold-15);
+    border-top-color: var(--c-gold);
     border-radius: 50%;
     animation: bp-spin 0.8s linear infinite;
 }
@@ -357,13 +357,13 @@
     font-family: 'Playfair Display', serif;
     font-size: 20px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 .bp-processing-sub {
     font-size: 14px;
     font-weight: 500;
-    color: rgba(27, 43, 90, 0.5);
+    color: var(--c-forest-50);
     margin-top: -16px;
 }
 
@@ -380,18 +380,18 @@
     align-items: center;
     gap: 10px;
     padding: 12px 16px;
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
+    border: 1px solid var(--c-white-50);
     border-radius: 14px;
     font-size: 13px;
-    color: rgba(27, 43, 90, 0.5);
+    color: var(--c-forest-50);
     transition: all 0.3s ease;
 }
 
 .bp-processing-item.active {
-    background: rgba(255, 255, 255, 0.5);
-    color: #1B2B5A;
-    border-color: #C8A951;
+    background: var(--c-white-50);
+    color: var(--c-forest);
+    border-color: var(--c-gold);
 }
 
 .bp-processing-item.done {
@@ -403,8 +403,8 @@
 .bp-processing-item-spinner {
     width: 18px;
     height: 18px;
-    border: 2px solid rgba(200, 169, 81, 0.2);
-    border-top-color: #C8A951;
+    border: 2px solid var(--c-gold-20);
+    border-top-color: var(--c-gold);
     border-radius: 50%;
     animation: bp-spin 0.8s linear infinite;
     flex-shrink: 0;
@@ -424,7 +424,7 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: rgba(27, 43, 90, 0.1);
+    background: var(--c-forest-10);
     flex-shrink: 0;
 }
 
@@ -461,14 +461,14 @@
     font-family: 'Playfair Display', serif;
     font-size: 24px;
     font-weight: 700;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0;
 }
 
 .bp-success-message {
     font-size: 14px;
     font-weight: 500;
-    color: rgba(27, 43, 90, 0.5);
+    color: var(--c-forest-50);
     margin: 0;
     line-height: 1.5;
 }
@@ -488,21 +488,21 @@
     gap: 8px;
     width: 100%;
     padding: 16px 32px;
-    background: #C8A951;
+    background: var(--c-gold);
     border: none;
     border-radius: 28px;
     font-family: 'Manrope', sans-serif;
     font-size: 15px;
     font-weight: 700;
-    color: #1B2B5A;
+    color: var(--c-forest);
     cursor: pointer;
     text-decoration: none;
     transition: all 0.25s ease;
-    box-shadow: 0 6px 16px rgba(200, 169, 81, 0.2);
+    box-shadow: 0 6px 16px var(--c-gold-20);
 }
 
 .bp-btn-primary:hover {
-    background: #b89940;
+    background: var(--c-gold-dark);
     transform: translateY(-1px);
 }
 
@@ -512,22 +512,22 @@
     justify-content: center;
     width: 100%;
     padding: 14px 32px;
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--c-white-50);
     border-radius: 28px;
     font-family: 'Manrope', sans-serif;
     font-size: 14px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     cursor: pointer;
     text-decoration: none;
     transition: all 0.2s ease;
 }
 
 .bp-btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.55);
+    background: var(--c-white-55);
 }
 
 /* ========== Error State ========== */
@@ -558,14 +558,14 @@
     font-family: 'Playfair Display', serif;
     font-size: 22px;
     font-weight: 700;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0;
 }
 
 .bp-error-message {
     font-size: 14px;
     font-weight: 500;
-    color: rgba(27, 43, 90, 0.5);
+    color: var(--c-forest-50);
     margin: 0;
     line-height: 1.5;
 }
@@ -585,20 +585,20 @@
     gap: 8px;
     width: 100%;
     padding: 16px 32px;
-    background: #C8A951;
+    background: var(--c-gold);
     border: none;
     border-radius: 28px;
     font-family: 'Manrope', sans-serif;
     font-size: 15px;
     font-weight: 700;
-    color: #1B2B5A;
+    color: var(--c-forest);
     cursor: pointer;
     transition: all 0.25s ease;
-    box-shadow: 0 6px 16px rgba(200, 169, 81, 0.2);
+    box-shadow: 0 6px 16px var(--c-gold-20);
 }
 
 .bp-btn-retry:hover {
-    background: #b89940;
+    background: var(--c-gold-dark);
     transform: translateY(-1px);
 }
 
@@ -621,8 +621,8 @@
 }
 
 .bp-badge.pending {
-    background: rgba(200, 169, 81, 0.12);
-    color: #C8A951;
+    background: var(--c-gold-10);
+    color: var(--c-gold);
 }
 
 .bp-badge.failed {
@@ -636,12 +636,12 @@
     align-items: center;
     gap: 8px;
     padding: 10px 16px;
-    background: rgba(200, 169, 81, 0.08);
-    border: 1px solid rgba(200, 169, 81, 0.2);
+    background: var(--c-gold-10);
+    border: 1px solid var(--c-gold-20);
     border-radius: 12px;
     font-size: 12px;
     font-weight: 500;
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 /* ========== Responsive ========== */

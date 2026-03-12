@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import ThemeSwitcher from '@/Components/ThemeSwitcher.vue';
 
 defineOptions({ layout: AdminLayout });
 
@@ -128,11 +129,12 @@ const submit = () => {
       <Card>
         <Tabs default-value="general" class="w-full">
           <CardHeader class="pb-0">
-            <TabsList class="grid w-full grid-cols-4">
+            <TabsList class="grid w-full grid-cols-5">
               <TabsTrigger value="general">{{ t('settings.general', 'Umumiy') }}</TabsTrigger>
               <TabsTrigger value="booking">{{ t('settings.booking', 'Bron') }}</TabsTrigger>
               <TabsTrigger value="social">{{ t('settings.social', 'Ijtimoiy') }}</TabsTrigger>
               <TabsTrigger value="hero">{{ t('settings.hero', 'Hero') }}</TabsTrigger>
+              <TabsTrigger value="theme">{{ t('settings.theme', 'Tema') }}</TabsTrigger>
             </TabsList>
           </CardHeader>
 
@@ -444,6 +446,14 @@ const submit = () => {
                   <p v-if="form.errors.hero_view_services_text" class="text-destructive text-xs">{{ form.errors.hero_view_services_text }}</p>
                 </div>
               </div>
+            </TabsContent>
+
+            <!-- Theme Settings -->
+            <TabsContent value="theme" class="space-y-4">
+              <ThemeSwitcher />
+              <p class="text-xs text-muted-foreground">
+                {{ t('settings.themeHint', 'Tema faqat shu brauzerda saqlanadi. Har bir foydalanuvchi o\'z temasini tanlashi mumkin.') }}
+              </p>
             </TabsContent>
 
             <!-- Submit Button -->

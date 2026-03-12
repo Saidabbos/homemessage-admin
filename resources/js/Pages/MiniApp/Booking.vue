@@ -842,7 +842,7 @@ const pressureLevels = [
                         <div class="bk-master-info">
                             <span class="bk-master-name">{{ master.name }}</span>
                             <div class="bk-master-rating">
-                                <svg v-for="s in 5" :key="s" width="12" height="12" viewBox="0 0 24 24" fill="#C8A951"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                                <svg v-for="s in 5" :key="s" width="12" height="12" viewBox="0 0 24 24" fill="#C8A65E"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
                                 <span>{{ master.rating || '5.0' }}</span>
                             </div>
                         </div>
@@ -1261,14 +1261,14 @@ const pressureLevels = [
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap');
 
 .bk-page {
-    --navy: #1B2B5A;
-    --gold: #C8A951;
+    --navy: var(--c-forest);
+    --gold: var(--c-gold);
     --cream: #f9fafb;
     --cream-dark: #E8E5DF;
     --text-muted: #8B8680;
 
     min-height: 100vh;
-    background: linear-gradient(160deg, #F0EBE2 0%, #E5E0D7 50%, #DDD8CF 100%);
+    background: linear-gradient(160deg, var(--c-bg-warm-1) 0%, var(--c-bg-warm-2) 50%, #DDD8CF 100%);
     font-family: 'Manrope', -apple-system, sans-serif;
     padding-bottom: 100px;
 }
@@ -1279,10 +1279,10 @@ const pressureLevels = [
     align-items: center;
     justify-content: space-between;
     padding: 12px 16px;
-    background: rgba(255,255,255,0.7);
+    background: var(--c-white-70);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255,255,255,0.5);
+    border-bottom: 1px solid var(--c-white-50);
     position: sticky;
     top: 0;
     z-index: 50;
@@ -1294,8 +1294,8 @@ const pressureLevels = [
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255,255,255,0.5);
-    border: 1px solid rgba(255,255,255,0.6);
+    background: var(--c-white-50);
+    border: 1px solid var(--c-white-60);
     border-radius: 12px;
     color: var(--navy);
     cursor: pointer;
@@ -1321,8 +1321,8 @@ const pressureLevels = [
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: rgba(255,255,255,0.5);
-    border: 1px solid rgba(255,255,255,0.6);
+    background: var(--c-white-50);
+    border: 1px solid var(--c-white-60);
     font-size: 12px;
     font-weight: 600;
     color: var(--text-muted);
@@ -1349,7 +1349,7 @@ const pressureLevels = [
 .bk-step-line {
     width: 20px;
     height: 2px;
-    background: rgba(255,255,255,0.5);
+    background: var(--c-white-50);
     margin: 0 4px;
     margin-bottom: 14px;
 }
@@ -1430,20 +1430,20 @@ const pressureLevels = [
     align-items: center;
     gap: 8px;
     padding: 20px 12px;
-    background: rgba(255,255,255,0.4);
+    background: var(--c-white-40);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.6);
+    border: 1px solid var(--c-white-60);
     border-radius: 16px;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .bk-service-card:hover {
-    background: rgba(255,255,255,0.6);
+    background: var(--c-white-60);
 }
 
 .bk-service-card.selected {
-    background: rgba(200,169,81,0.15);
+    background: var(--c-gold-15);
     border-color: var(--gold);
 }
 
@@ -1453,7 +1453,7 @@ const pressureLevels = [
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255,255,255,0.5);
+    background: var(--c-white-50);
     border-radius: 12px;
     color: var(--gold);
 }
@@ -1493,9 +1493,9 @@ const pressureLevels = [
 
 .bk-chip {
     padding: 10px 16px;
-    background: rgba(255,255,255,0.4);
+    background: var(--c-white-40);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.6);
+    border: 1px solid var(--c-white-60);
     border-radius: 20px;
     font-size: 13px;
     font-weight: 500;
@@ -1505,7 +1505,7 @@ const pressureLevels = [
 }
 
 .bk-chip:hover {
-    background: rgba(255,255,255,0.6);
+    background: var(--c-white-60);
 }
 
 .bk-chip.selected {
@@ -1527,16 +1527,16 @@ const pressureLevels = [
     align-items: center;
     gap: 6px;
     padding: 14px 8px;
-    background: rgba(255,255,255,0.4);
+    background: var(--c-white-40);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.6);
+    border: 1px solid var(--c-white-60);
     border-radius: 14px;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .bk-pressure-card:hover {
-    background: rgba(255,255,255,0.6);
+    background: var(--c-white-60);
 }
 
 .bk-pressure-card.selected {
@@ -1564,8 +1564,8 @@ const pressureLevels = [
     align-items: center;
     gap: 10px;
     padding: 12px 14px;
-    background: rgba(255,255,255,0.5);
-    border: 1px solid rgba(255,255,255,0.6);
+    background: var(--c-white-50);
+    border: 1px solid var(--c-white-60);
     border-radius: 12px;
     margin-bottom: 12px;
 }
@@ -1613,9 +1613,9 @@ const pressureLevels = [
     padding: 14px 12px;
     min-width: calc(50% - 6px);
     max-width: calc(50% - 6px);
-    background: rgba(255,255,255,0.4);
+    background: var(--c-white-40);
     backdrop-filter: blur(10px);
-    border: 2px solid rgba(255,255,255,0.6);
+    border: 2px solid var(--c-white-60);
     border-radius: 16px;
     cursor: pointer;
     transition: all 0.2s;
@@ -1624,13 +1624,13 @@ const pressureLevels = [
 }
 
 .bk-master-card:hover {
-    background: rgba(255,255,255,0.6);
+    background: var(--c-white-60);
 }
 
 .bk-master-card.selected {
-    background: rgba(200,169,81,0.15);
+    background: var(--c-gold-15);
     border-color: var(--gold);
-    box-shadow: 0 4px 12px rgba(200,169,81,0.2);
+    box-shadow: 0 4px 12px var(--c-gold-20);
 }
 
 .bk-master-photo {
@@ -1718,16 +1718,16 @@ const pressureLevels = [
     align-items: center;
     gap: 2px;
     padding: 10px 14px;
-    background: rgba(255,255,255,0.4);
+    background: var(--c-white-40);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.6);
+    border: 1px solid var(--c-white-60);
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .bk-date-card:hover {
-    background: rgba(255,255,255,0.6);
+    background: var(--c-white-60);
 }
 
 .bk-date-card.selected {
@@ -1743,7 +1743,7 @@ const pressureLevels = [
 }
 
 .bk-date-card.selected .bk-date-day {
-    color: rgba(255,255,255,0.8);
+    color: var(--c-white-80);
 }
 
 .bk-date-num {
@@ -1763,7 +1763,7 @@ const pressureLevels = [
 }
 
 .bk-date-card.selected .bk-date-month {
-    color: rgba(255,255,255,0.8);
+    color: var(--c-white-80);
 }
 
 /* Slots Grouped */
@@ -1774,9 +1774,9 @@ const pressureLevels = [
 }
 
 .bk-slot-group {
-    background: rgba(255,255,255,0.4);
+    background: var(--c-white-40);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.6);
+    border: 1px solid var(--c-white-60);
     border-radius: 14px;
     padding: 12px;
 }
@@ -1787,7 +1787,7 @@ const pressureLevels = [
     gap: 8px;
     margin-bottom: 10px;
     padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255,255,255,0.5);
+    border-bottom: 1px solid var(--c-white-50);
     color: var(--navy);
     font-size: 13px;
     font-weight: 600;
@@ -1799,9 +1799,9 @@ const pressureLevels = [
 
 /* Confirm Card */
 .bk-confirm-card {
-    background: rgba(255,255,255,0.5);
+    background: var(--c-white-50);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.6);
+    border: 1px solid var(--c-white-60);
     border-radius: 16px;
     padding: 16px;
 }
@@ -1825,7 +1825,7 @@ const pressureLevels = [
 
 .bk-confirm-divider {
     height: 1px;
-    background: rgba(255,255,255,0.6);
+    background: var(--c-white-60);
     margin: 8px 0;
 }
 
@@ -1838,8 +1838,8 @@ const pressureLevels = [
 .bk-textarea {
     width: 100%;
     padding: 12px;
-    background: rgba(255,255,255,0.5);
-    border: 1px solid rgba(255,255,255,0.6);
+    background: var(--c-white-50);
+    border: 1px solid var(--c-white-60);
     border-radius: 12px;
     font-size: 14px;
     font-family: inherit;
@@ -1869,7 +1869,7 @@ const pressureLevels = [
 .bk-spinner {
     width: 32px;
     height: 32px;
-    border: 3px solid rgba(200,169,81,0.2);
+    border: 3px solid var(--c-gold-20);
     border-top-color: var(--gold);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -1901,8 +1901,8 @@ const pressureLevels = [
     align-items: center;
     gap: 12px;
     padding: 12px;
-    background: rgba(255,255,255,0.5);
-    border: 1px solid rgba(255,255,255,0.6);
+    background: var(--c-white-50);
+    border: 1px solid var(--c-white-60);
     border-radius: 14px;
 }
 
@@ -1970,7 +1970,7 @@ const pressureLevels = [
     width: 100%;
     padding: 14px;
     margin-top: 12px;
-    background: rgba(255,255,255,0.4);
+    background: var(--c-white-40);
     border: 1px dashed var(--gold);
     border-radius: 12px;
     font-size: 14px;
@@ -1982,7 +1982,7 @@ const pressureLevels = [
 .bk-cart-summary {
     margin-top: 16px;
     padding: 16px;
-    background: rgba(255,255,255,0.5);
+    background: var(--c-white-50);
     border-radius: 14px;
 }
 
@@ -2008,8 +2008,8 @@ const pressureLevels = [
 .bk-address-section {
     margin-top: 20px;
     padding: 16px;
-    background: rgba(255,255,255,0.5);
-    border: 1px solid rgba(255,255,255,0.6);
+    background: var(--c-white-50);
+    border: 1px solid var(--c-white-60);
     border-radius: 16px;
 }
 
@@ -2038,8 +2038,8 @@ const pressureLevels = [
     align-items: center;
     gap: 12px;
     padding: 12px;
-    background: rgba(255,255,255,0.6);
-    border: 1px solid rgba(200,169,81,0.2);
+    background: var(--c-white-60);
+    border: 1px solid var(--c-gold-20);
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s;
@@ -2050,7 +2050,7 @@ const pressureLevels = [
 }
 
 .bk-address-card.selected {
-    background: rgba(200,169,81,0.1);
+    background: var(--c-gold-10);
     border-color: var(--gold);
 }
 
@@ -2128,7 +2128,7 @@ const pressureLevels = [
     align-items: center;
     gap: 6px;
     padding: 8px 12px;
-    background: rgba(255,255,255,0.5);
+    background: var(--c-white-50);
     border: none;
     border-radius: 8px;
     font-size: 13px;
@@ -2151,9 +2151,9 @@ const pressureLevels = [
     justify-content: center;
     gap: 8px;
     padding: 12px;
-    border: 2px dashed rgba(200,169,81,0.4);
+    border: 2px dashed var(--c-gold-40);
     border-radius: 12px;
-    background: rgba(200,169,81,0.05);
+    background: var(--c-gold-5);
     color: var(--gold);
     font-size: 13px;
     font-weight: 600;
@@ -2163,7 +2163,7 @@ const pressureLevels = [
 
 .bk-detect-location:hover,
 .bk-show-map:hover {
-    background: rgba(200,169,81,0.1);
+    background: var(--c-gold-10);
     border-color: var(--gold);
 }
 
@@ -2175,7 +2175,7 @@ const pressureLevels = [
 .bk-spinner-small {
     width: 18px;
     height: 18px;
-    border: 2px solid rgba(200,169,81,0.3);
+    border: 2px solid var(--c-gold-30);
     border-top-color: var(--gold);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -2200,7 +2200,7 @@ const pressureLevels = [
     justify-content: space-between;
     padding: 12px 16px;
     background: var(--cream);
-    border-bottom: 1px solid rgba(200,169,81,0.2);
+    border-bottom: 1px solid var(--c-gold-20);
 }
 
 .bk-map-close {
@@ -2210,7 +2210,7 @@ const pressureLevels = [
     align-items: center;
     justify-content: center;
     border: none;
-    background: rgba(0,0,0,0.05);
+    background: var(--c-black-5);
     border-radius: 50%;
     color: var(--navy);
     cursor: pointer;
@@ -2265,7 +2265,7 @@ const pressureLevels = [
     left: 50%;
     transform: translateX(-50%);
     padding: 8px 16px;
-    background: rgba(0,0,0,0.7);
+    background: var(--c-black-70);
     border-radius: 20px;
     color: white;
     font-size: 12px;
@@ -2285,7 +2285,7 @@ const pressureLevels = [
     color: var(--navy);
     font-size: 14px;
     font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px var(--c-black-15);
     cursor: pointer;
 }
 
@@ -2304,7 +2304,7 @@ const pressureLevels = [
     gap: 8px;
     padding: 16px;
     background: var(--cream);
-    border-top: 1px solid rgba(200,169,81,0.2);
+    border-top: 1px solid var(--c-gold-20);
     font-size: 14px;
     color: var(--navy);
 }
@@ -2356,8 +2356,8 @@ const pressureLevels = [
 .bk-input {
     width: 100%;
     padding: 12px 14px;
-    background: rgba(255,255,255,0.7);
-    border: 1px solid rgba(255,255,255,0.6);
+    background: var(--c-white-70);
+    border: 1px solid var(--c-white-60);
     border-radius: 10px;
     font-size: 14px;
     font-family: inherit;
@@ -2471,9 +2471,9 @@ const pressureLevels = [
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(255,255,255,0.95);
+    background: var(--c-white-95);
     backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255,255,255,0.6);
+    border-top: 1px solid var(--c-white-60);
     padding: 12px 16px;
     padding-bottom: calc(12px + env(safe-area-inset-bottom));
     z-index: 100;

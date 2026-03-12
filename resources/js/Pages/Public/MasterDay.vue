@@ -177,7 +177,7 @@ const isToday = computed(() => {
 
 .page-subtitle {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--c-white-50);
     margin: 4px 0 0;
 }
 
@@ -186,9 +186,9 @@ const isToday = computed(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--c-white-8);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--c-white-12);
     border-radius: 16px;
     padding: 12px 16px;
     margin-bottom: 24px;
@@ -200,14 +200,14 @@ const isToday = computed(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--c-white-10);
     border-radius: 12px;
     color: #fff;
     transition: all 0.3s ease;
 }
 
 .nav-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--c-white-20);
 }
 
 .date-display {
@@ -217,7 +217,7 @@ const isToday = computed(() => {
 .day-name {
     display: block;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--c-white-50);
     text-transform: uppercase;
 }
 
@@ -248,7 +248,7 @@ const isToday = computed(() => {
 .empty-state {
     text-align: center;
     padding: 60px 20px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--c-white-40);
 }
 
 .empty-state svg {
@@ -270,9 +270,9 @@ const isToday = computed(() => {
     display: flex;
     align-items: center;
     gap: 16px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--c-white-8);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--c-white-12);
     border-radius: 16px;
     padding: 16px;
     text-decoration: none;
@@ -280,7 +280,7 @@ const isToday = computed(() => {
 }
 
 .order-card:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--c-white-12);
     transform: translateX(4px);
 }
 
@@ -299,7 +299,7 @@ const isToday = computed(() => {
 .duration-text {
     display: block;
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--c-white-40);
     margin-top: 2px;
 }
 
@@ -316,7 +316,7 @@ const isToday = computed(() => {
 
 .order-address {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--c-white-50);
     margin-top: 4px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -355,11 +355,11 @@ const isToday = computed(() => {
 
 .quick-btn {
     padding: 12px 24px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--c-white-10);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--c-white-15);
     border-radius: 30px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--c-white-70);
     font-size: 14px;
     font-weight: 500;
     text-decoration: none;

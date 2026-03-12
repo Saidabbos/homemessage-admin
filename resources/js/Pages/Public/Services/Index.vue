@@ -129,17 +129,17 @@ const getServiceIcon = (id) => {
 <style scoped>
 .services-page {
     min-height: 100vh;
-    background: var(--cream, #faf8f5);
+    background: var(--cream, var(--c-ivory));
 }
 
 .page-header {
     position: sticky;
     top: 0;
     z-index: 50;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--c-white-90);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid var(--c-black-5);
 }
 
 .page-header .header-content {
@@ -158,20 +158,20 @@ const getServiceIcon = (id) => {
     width: 40px;
     height: 40px;
     border-radius: 12px;
-    background: rgba(0, 0, 0, 0.05);
-    color: #1a1a2e;
+    background: var(--c-black-5);
+    color: var(--c-forest);
     transition: all 0.2s ease;
 }
 
 .back-button:hover {
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--c-black-10);
 }
 
 .page-title {
     font-family: 'Playfair Display', serif;
     font-size: 1.25rem;
     font-weight: 500;
-    color: #1a1a2e;
+    color: var(--c-forest);
 }
 
 .header-spacer {
@@ -201,12 +201,12 @@ const getServiceIcon = (id) => {
     text-decoration: none;
     color: inherit;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 2px 8px var(--c-black-4);
 }
 
 .service-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px var(--c-black-8);
 }
 
 .service-icon {
@@ -217,7 +217,7 @@ const getServiceIcon = (id) => {
     align-items: center;
     justify-content: center;
     font-size: 2rem;
-    background: linear-gradient(135deg, rgba(201, 165, 92, 0.1) 0%, rgba(212, 183, 106, 0.1) 100%);
+    background: linear-gradient(135deg, rgba(201, 165, 92, 0.1) 0%, var(--c-sage-10) 100%);
     border-radius: 16px;
 }
 
@@ -230,7 +230,7 @@ const getServiceIcon = (id) => {
     font-family: 'Playfair Display', serif;
     font-size: 1.125rem;
     font-weight: 500;
-    color: #1a1a2e;
+    color: var(--c-forest);
     margin-bottom: 0.375rem;
 }
 
@@ -260,7 +260,7 @@ const getServiceIcon = (id) => {
 }
 
 .meta-item svg {
-    color: #C9A55C;
+    color: var(--c-gold);
 }
 
 .durations-list {
@@ -288,11 +288,11 @@ const getServiceIcon = (id) => {
 .duration-price {
     font-size: 0.8125rem;
     font-weight: 600;
-    color: #C9A55C;
+    color: var(--c-gold);
 }
 
 .duration-badge.more {
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--c-black-5);
     color: #6a6a7a;
     font-size: 0.8125rem;
     font-weight: 500;
@@ -301,7 +301,7 @@ const getServiceIcon = (id) => {
 
 .card-arrow {
     flex-shrink: 0;
-    color: #C9A55C;
+    color: var(--c-gold);
     margin-top: 1rem;
 }
 
@@ -322,7 +322,7 @@ const getServiceIcon = (id) => {
 .cta-section {
     margin-top: 2rem;
     padding: 2rem;
-    background: linear-gradient(135deg, #1a1a2e 0%, #2d2d4a 100%);
+    background: linear-gradient(135deg, var(--c-forest) 0%, #2d2d4a 100%);
     border-radius: 20px;
     text-align: center;
     color: white;
@@ -344,7 +344,7 @@ const getServiceIcon = (id) => {
 .cta-button {
     display: inline-block;
     padding: 0.875rem 2rem;
-    background: linear-gradient(135deg, #C9A55C 0%, #D4B76A 100%);
+    background: linear-gradient(135deg, var(--c-gold) 0%, var(--c-sage) 100%);
     color: white;
     font-weight: 600;
     border-radius: 50px;

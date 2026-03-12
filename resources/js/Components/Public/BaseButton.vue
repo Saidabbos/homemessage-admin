@@ -37,8 +37,8 @@ defineEmits(['click']);
 
 const variantClasses = {
     primary: 'bg-gold hover:bg-gold-dark text-white border-transparent',
-    secondary: 'bg-gray-100 hover:bg-gray-200 text-gray-800 border-transparent',
-    outline: 'bg-transparent hover:bg-gray-50 text-gray-700 border-gray-300',
+    secondary: 'btn-secondary-sage border-transparent',
+    outline: 'btn-outline-sage',
 };
 
 const sizeClasses = {
@@ -88,9 +88,24 @@ const sizeClasses = {
 
 <style scoped>
 .bg-gold {
-    background-color: #C9A55C;
+    background-color: var(--c-gold);
 }
 .bg-gold-dark:hover {
     background-color: #B8944B;
+}
+.btn-secondary-sage {
+    background-color: var(--c-sage-10);
+    color: var(--c-forest);
+}
+.btn-secondary-sage:hover {
+    background-color: var(--c-sage-20);
+}
+.btn-outline-sage {
+    background: transparent;
+    color: var(--c-sage-dark);
+    border: 1px solid var(--c-sage-30);
+}
+.btn-outline-sage:hover {
+    background-color: var(--c-sage-10);
 }
 </style>

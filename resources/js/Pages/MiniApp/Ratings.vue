@@ -129,7 +129,7 @@ const rateOrder = (orderId) => {
                     <div class="rating-stars">
                         <div class="stars">
                             <svg v-for="s in 5" :key="s" width="16" height="16" viewBox="0 0 24 24" 
-                                :fill="s <= rating.overall_rating ? '#C8A951' : '#EDE8DF'" stroke="none">
+                                :fill="s <= rating.overall_rating ? '#C8A65E' : '#FCFBF8'" stroke="none">
                                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                             </svg>
                         </div>
@@ -172,11 +172,11 @@ const rateOrder = (orderId) => {
 
 <style scoped>
 .ratings-page {
-    --gold: #C8A951;
-    --gold-light: #D4B76A;
-    --navy: #1B2B5A;
+    --gold: var(--c-gold);
+    --gold-light: var(--c-sage);
+    --navy: var(--c-forest);
     --cream: #f9fafb;
-    --cream-dark: #EDE8DF;
+    --cream-dark: var(--c-ivory);
     --text-muted: #8B8680;
 
     min-height: 100vh;
@@ -193,7 +193,7 @@ const rateOrder = (orderId) => {
     justify-content: space-between;
     padding: 12px 16px;
     background: white;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
+    border-bottom: 1px solid var(--c-black-6);
     position: sticky;
     top: 0;
     z-index: 50;
@@ -230,7 +230,7 @@ const rateOrder = (orderId) => {
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 4px 16px rgba(200, 169, 81, 0.3);
+    box-shadow: 0 4px 16px var(--c-gold-30);
 }
 
 .summary-rating {
@@ -251,7 +251,7 @@ const rateOrder = (orderId) => {
 }
 
 .summary-stars svg {
-    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+    filter: drop-shadow(0 1px 2px var(--c-black-10));
 }
 
 .summary-count {
@@ -287,7 +287,7 @@ const rateOrder = (orderId) => {
     padding: 12px;
     background: white;
     border-radius: 14px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 8px var(--c-black-4);
 }
 
 .pending-avatar {
@@ -347,7 +347,7 @@ const rateOrder = (orderId) => {
     color: white;
     cursor: pointer;
     white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(200, 169, 81, 0.3);
+    box-shadow: 0 2px 8px var(--c-gold-30);
 }
 
 /* Tabs */
@@ -362,7 +362,7 @@ const rateOrder = (orderId) => {
     flex: 1;
     padding: 12px;
     background: white;
-    border: 1px solid rgba(0,0,0,0.06);
+    border: 1px solid var(--c-black-6);
     border-radius: 12px;
     font-size: 14px;
     font-weight: 500;
@@ -375,7 +375,7 @@ const rateOrder = (orderId) => {
     background: var(--gold);
     border-color: var(--gold);
     color: white;
-    box-shadow: 0 2px 8px rgba(200, 169, 81, 0.3);
+    box-shadow: 0 2px 8px var(--c-gold-30);
 }
 
 /* Ratings Content */
@@ -393,7 +393,7 @@ const rateOrder = (orderId) => {
     padding: 16px;
     background: white;
     border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 8px var(--c-black-4);
 }
 
 .rating-top {
@@ -517,7 +517,7 @@ const rateOrder = (orderId) => {
     align-items: center;
     justify-content: center;
     background: white;
-    border: 1px solid rgba(0,0,0,0.06);
+    border: 1px solid var(--c-black-6);
     border-radius: 12px;
     color: var(--navy);
     cursor: pointer;

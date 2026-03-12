@@ -201,14 +201,14 @@ const props = defineProps({
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--c-white-10);
     border-radius: 14px;
     color: #fff;
     transition: all 0.3s ease;
 }
 
 .back-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--c-white-20);
 }
 
 .header-content {
@@ -267,9 +267,9 @@ const props = defineProps({
 
 /* Info Cards */
 .info-card {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--c-white-8);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--c-white-12);
     border-radius: 20px;
     padding: 20px;
     margin-bottom: 16px;
@@ -285,7 +285,7 @@ const props = defineProps({
     gap: 10px;
     font-size: 14px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--c-white-60);
     margin: 0 0 16px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -300,7 +300,7 @@ const props = defineProps({
     justify-content: space-between;
     align-items: center;
     padding: 10px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--c-white-6);
 }
 
 .info-row:last-child {
@@ -309,7 +309,7 @@ const props = defineProps({
 
 .info-label {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--c-white-50);
 }
 
 .info-value {
@@ -350,13 +350,13 @@ const props = defineProps({
     align-items: center;
     gap: 6px;
     padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--c-white-8);
     border-radius: 10px;
     font-size: 13px;
 }
 
 .chip-label {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--c-white-50);
 }
 
 .chip-value {
@@ -381,7 +381,7 @@ const props = defineProps({
 /* Notes */
 .note-item {
     padding: 12px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--c-white-5);
     border-radius: 12px;
     margin-bottom: 10px;
 }
@@ -394,7 +394,7 @@ const props = defineProps({
 .note-label {
     display: block;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--c-white-50);
     margin-bottom: 4px;
 }
 

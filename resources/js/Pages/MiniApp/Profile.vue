@@ -412,10 +412,10 @@ const savePin = async () => {
 
 <style scoped>
 .profile-page {
-    --navy: #1B2B5A;
-    --gold: #C8A951;
+    --navy: var(--c-forest);
+    --gold: var(--c-gold);
     --cream: #f9fafb;
-    --cream-dark: #EDE8DF;
+    --cream-dark: var(--c-ivory);
     --text-muted: #8B8680;
 
     min-height: 100vh;
@@ -431,7 +431,7 @@ const savePin = async () => {
     justify-content: space-between;
     padding: 12px 16px;
     background: white;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
+    border-bottom: 1px solid var(--c-black-6);
     position: sticky;
     top: 0;
     z-index: 50;
@@ -465,7 +465,7 @@ const savePin = async () => {
     align-items: center;
     padding: 24px 16px;
     background: white;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
+    border-bottom: 1px solid var(--c-black-6);
 }
 
 .avatar {
@@ -526,7 +526,7 @@ const savePin = async () => {
     background: white;
     border-radius: 16px;
     padding: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 8px var(--c-black-4);
 }
 
 .form-group {
@@ -658,7 +658,7 @@ const savePin = async () => {
 
 .quick-link-card:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px var(--c-black-8);
 }
 
 .quick-link-icon {
@@ -667,13 +667,13 @@ const savePin = async () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, rgba(200, 169, 81, 0.15) 0%, rgba(200, 169, 81, 0.05) 100%);
+    background: linear-gradient(135deg, var(--c-gold-15) 0%, var(--c-gold-5) 100%);
     border-radius: 12px;
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 .quick-link-icon-gold {
-    background: linear-gradient(135deg, #C8A951 0%, #B8993F 100%);
+    background: linear-gradient(135deg, var(--c-gold) 0%, #B8993F 100%);
     color: white;
 }
 
@@ -684,7 +684,7 @@ const savePin = async () => {
 .quick-link-title {
     font-size: 15px;
     font-weight: 600;
-    color: #1a1a2e;
+    color: var(--c-forest);
     margin: 0 0 2px;
 }
 
@@ -761,7 +761,7 @@ const savePin = async () => {
     background: white;
     border-radius: 16px;
     padding: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 8px var(--c-black-4);
 }
 
 .pin-header {
@@ -847,7 +847,7 @@ const savePin = async () => {
 .pin-modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.5);
+    background: var(--c-black-50);
     display: flex;
     align-items: flex-end;
     justify-content: center;

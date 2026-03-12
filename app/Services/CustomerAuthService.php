@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Master;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\DB;
@@ -31,13 +32,43 @@ class CustomerAuthService
         ]);
 
         return DB::transaction(function () use ($phone, $locale, $telegramData) {
-            $user = $this->userRepository->findByPhone($phone);
+            // Normalize phone: try with and without '+' prefix
+            $phoneVariants = [
+                $phone,
+                ltrim($phone, '+'),
+                '+' . ltrim($phone, '+'),
+            ];
+
+            $user = null;
+            foreach (array_unique($phoneVariants) as $variant) {
+                $user = $this->userRepository->findByPhone($variant);
+                if ($user) break;
+            }
+
+            // If no user found, check if a master exists with this phone
+            if (!$user) {
+                $master = Master::where(function ($q) use ($phoneVariants) {
+                    foreach (array_unique($phoneVariants) as $variant) {
+                        $q->orWhere('phone', $variant);
+                    }
+                })->first();
+
+                if ($master && $master->user) {
+                    $user = $master->user;
+                    Log::info('CustomerAuthService: Found master by phone in masters table', [
+                        'user_id' => $user->id,
+                        'master_id' => $master->id,
+                        'phone' => $phone,
+                    ]);
+                }
+            }
+
             $isNew = false;
 
             // Create new customer if not exists
             if (!$user) {
                 $isNew = true;
-                
+
                 // Use Telegram first_name as name, or phone as fallback
                 $name = $telegramData['first_name'] ?? $phone;
 
@@ -57,7 +88,7 @@ class CustomerAuthService
                 // Assign customer role
                 $user->assignRole('customer');
                 Log::info('CustomerAuthService: New customer registered', [
-                    'user_id' => $user->id, 
+                    'user_id' => $user->id,
                     'phone' => $phone,
                     'name' => $name,
                     'telegram_id' => $telegramData['id'] ?? null,
@@ -80,8 +111,8 @@ class CustomerAuthService
                     ]);
                 }
 
-                // Ensure customer has correct role
-                if (!$user->hasRole('customer')) {
+                // Ensure user has correct role (don't override master role)
+                if (!$user->hasRole('customer') && !$user->hasRole('master')) {
                     $user->assignRole('customer');
                     Log::info('CustomerAuthService: Customer role assigned', ['user_id' => $user->id]);
                 }

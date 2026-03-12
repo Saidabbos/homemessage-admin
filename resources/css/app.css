@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 @import 'tailwindcss';
+@import './_colors.css';
 @import './liquid-glass.css';
 @import './public/landing.css';
 @import './public/masters.css';
@@ -38,11 +39,16 @@
     --font-serif: 'Playfair Display', ui-serif, Georgia, serif;
     --font-playfair: 'Playfair Display', ui-serif, Georgia, serif;
     --font-manrope: 'Manrope', ui-sans-serif, system-ui, sans-serif;
-    --color-gold: #C9A55C;
-    --color-gold-light: #D4B76A;
-    --color-navy: #1a1a2e;
-    --color-cream: #faf8f5;
-    --color-cream-dark: #f5f0e8;
+    --color-gold: var(--c-gold);
+    --color-gold-light: var(--c-sage);
+    --color-navy: var(--c-forest);
+    --color-cream: var(--c-ivory);
+    --color-cream-dark: var(--c-champagne);
+    --color-ivory: var(--c-ivory);
+    --color-champagne: var(--c-champagne);
+    --color-sage: var(--c-sage);
+    --color-forest: var(--c-forest);
+    --color-soft-gold: var(--c-gold);
 }
 
 /* Global Styles */

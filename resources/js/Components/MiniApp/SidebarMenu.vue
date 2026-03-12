@@ -126,7 +126,7 @@ const close = () => emit('close');
 .sidebar-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--c-black-50);
     backdrop-filter: blur(4px);
     z-index: 100;
 }
@@ -142,7 +142,7 @@ const close = () => emit('close');
     z-index: 101;
     display: flex;
     flex-direction: column;
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+    box-shadow: 4px 0 24px var(--c-black-15);
 }
 
 /* Transitions */
@@ -177,7 +177,7 @@ const close = () => emit('close');
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 .sidebar-logo span {
@@ -185,7 +185,7 @@ const close = () => emit('close');
     font-size: 14px;
     font-weight: 600;
     letter-spacing: 1px;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 .sidebar-close {
@@ -207,7 +207,7 @@ const close = () => emit('close');
     align-items: center;
     gap: 12px;
     padding: 20px;
-    background: linear-gradient(135deg, #1B2B5A 0%, #253672 100%);
+    background: linear-gradient(135deg, var(--c-forest) 0%, #253672 100%);
 }
 
 .sidebar-avatar {
@@ -216,7 +216,7 @@ const close = () => emit('close');
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #C8A951 0%, #D4B76A 100%);
+    background: linear-gradient(135deg, var(--c-gold) 0%, var(--c-sage) 100%);
     border-radius: 50%;
     font-size: 18px;
     font-weight: 600;
@@ -236,7 +236,7 @@ const close = () => emit('close');
 
 .sidebar-user-phone {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--c-white-70);
 }
 
 /* Navigation */
@@ -261,7 +261,7 @@ const close = () => emit('close');
 
 .sidebar-link:hover {
     background: #f8f5f0;
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 .sidebar-link svg {
@@ -270,7 +270,7 @@ const close = () => emit('close');
 }
 
 .sidebar-link:hover svg {
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 /* Footer */

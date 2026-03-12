@@ -274,7 +274,7 @@ const logout = () => {
     background: #fff;
     border: 1px solid #E8E5E0;
     border-radius: 8px;
-    color: #1B2B5A;
+    color: var(--c-forest);
     font-size: 14px;
     font-weight: 500;
     text-decoration: none;
@@ -283,7 +283,7 @@ const logout = () => {
 
 .md-back-btn:hover {
     background: #F5F2ED;
-    border-color: #C8A951;
+    border-color: var(--c-gold);
 }
 
 /* Photo Upload */
@@ -310,7 +310,7 @@ const logout = () => {
 }
 
 .md-photo-preview:hover {
-    border-color: #C8A951;
+    border-color: var(--c-gold);
 }
 
 .md-photo-preview img {
@@ -326,7 +326,7 @@ const logout = () => {
 .md-photo-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(27, 43, 90, 0.6);
+    background: var(--c-forest-60);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -371,7 +371,7 @@ const logout = () => {
 .md-form-label {
     font-size: 14px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 .md-form-input,
@@ -383,7 +383,7 @@ const logout = () => {
     border: 1px solid #E8E5E0;
     border-radius: 10px;
     font-size: 15px;
-    color: #1B2B5A;
+    color: var(--c-forest);
     transition: all 0.2s ease;
 }
 
@@ -391,8 +391,8 @@ const logout = () => {
 .md-form-select:focus,
 .md-form-textarea:focus {
     outline: none;
-    border-color: #C8A951;
-    box-shadow: 0 0 0 3px rgba(200, 169, 81, 0.1);
+    border-color: var(--c-gold);
+    box-shadow: 0 0 0 3px var(--c-gold-10);
 }
 
 .md-form-input::placeholder,
@@ -459,7 +459,7 @@ const logout = () => {
 }
 
 .md-btn-primary {
-    background: linear-gradient(135deg, #C8A951, #B8963E);
+    background: linear-gradient(135deg, var(--c-gold), #B8963E);
     color: #fff;
     border: none;
 }
@@ -477,13 +477,13 @@ const logout = () => {
 
 .md-btn-secondary {
     background: #fff;
-    color: #1B2B5A;
+    color: var(--c-forest);
     border: 1px solid #E8E5E0;
 }
 
 .md-btn-secondary:hover {
     background: #F5F2ED;
-    border-color: #C8A951;
+    border-color: var(--c-gold);
 }
 
 /* Mobile */

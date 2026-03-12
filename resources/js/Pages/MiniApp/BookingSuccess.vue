@@ -234,10 +234,10 @@ const getStatusColor = (status) => {
 
 /* Glass effect */
 .glass {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--c-white-8);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--c-white-12);
 }
 
 /* Header */
@@ -303,7 +303,7 @@ const getStatusColor = (status) => {
 
 .success-hint {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--c-white-50);
     margin: 0 0 16px;
     text-align: center;
     animation: fadeInUp 0.5s ease 0.4s both;
@@ -358,7 +358,7 @@ const getStatusColor = (status) => {
     color: #fff;
     margin: 0 0 20px;
     padding-bottom: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--c-white-10);
 }
 
 .detail-row {
@@ -369,7 +369,7 @@ const getStatusColor = (status) => {
 
 .detail-label {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--c-white-50);
 }
 
 .detail-value {
@@ -384,7 +384,7 @@ const getStatusColor = (status) => {
     justify-content: space-between;
     padding-top: 16px;
     margin-top: 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--c-white-10);
 }
 
 .total-price {
@@ -436,8 +436,8 @@ const getStatusColor = (status) => {
     align-items: center;
     gap: 8px;
     padding: 16px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: var(--c-white-10);
+    border: 1px solid var(--c-white-15);
     border-radius: 16px;
     color: #fff;
     font-size: 14px;
@@ -447,7 +447,7 @@ const getStatusColor = (status) => {
 }
 
 .provider-btn:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--c-white-20);
     transform: translateY(-2px);
 }
 
@@ -464,7 +464,7 @@ const getStatusColor = (status) => {
 
 .payment-hint {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--c-white-40);
     text-align: center;
     margin: 0;
 }
@@ -478,7 +478,7 @@ const getStatusColor = (status) => {
     padding: 16px 20px;
     border-radius: 16px;
     margin-bottom: 24px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--c-white-60);
     font-size: 14px;
     animation: fadeInUp 0.5s ease 0.55s both;
     position: relative;
@@ -522,7 +522,7 @@ const getStatusColor = (status) => {
 
 .contact-label {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--c-white-40);
     margin: 0 0 4px;
 }
 

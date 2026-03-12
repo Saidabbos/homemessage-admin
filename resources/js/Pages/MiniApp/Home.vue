@@ -339,11 +339,11 @@ const saveName = async () => {
 <style scoped>
 /* Variables */
 .ma-page {
-    --gold: #C8A951;
-    --gold-light: #D4B76A;
-    --navy: #1B2B5A;
+    --gold: var(--c-gold);
+    --gold-light: var(--c-sage);
+    --navy: var(--c-forest);
     --cream: #f9fafb;
-    --cream-dark: #EDE8DF;
+    --cream-dark: var(--c-ivory);
     --text-muted: #8B8680;
 
     min-height: 100vh;
@@ -375,7 +375,7 @@ const saveName = async () => {
     justify-content: center;
     border-radius: 12px;
     background: white;
-    border: 1px solid rgba(0,0,0,0.06);
+    border: 1px solid var(--c-black-6);
     color: var(--navy);
     cursor: pointer;
     transition: all 0.2s;
@@ -413,7 +413,7 @@ const saveName = async () => {
     justify-content: center;
     border-radius: 12px;
     background: white;
-    border: 1px solid rgba(0,0,0,0.06);
+    border: 1px solid var(--c-black-6);
     color: var(--gold);
     cursor: pointer;
     transition: all 0.2s;
@@ -432,7 +432,7 @@ const saveName = async () => {
     justify-content: center;
     border-radius: 12px;
     background: white;
-    border: 1px solid rgba(0,0,0,0.06);
+    border: 1px solid var(--c-black-6);
     color: var(--gold);
     cursor: pointer;
     transition: all 0.2s;
@@ -477,7 +477,7 @@ const saveName = async () => {
     right: -30%;
     width: 200px;
     height: 200px;
-    background: radial-gradient(circle, rgba(200,169,81,0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--c-gold-15) 0%, transparent 70%);
     border-radius: 50%;
 }
 
@@ -491,8 +491,8 @@ const saveName = async () => {
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    background: rgba(200,169,81,0.15);
-    border: 1px solid rgba(200,169,81,0.3);
+    background: var(--c-gold-15);
+    border: 1px solid var(--c-gold-30);
     border-radius: 20px;
     margin-bottom: 16px;
 }
@@ -520,7 +520,7 @@ const saveName = async () => {
 
 .ma-hero-subtitle {
     font-size: 14px;
-    color: rgba(255,255,255,0.7);
+    color: var(--c-white-70);
     margin: 0 0 24px;
     line-height: 1.5;
 }
@@ -538,12 +538,12 @@ const saveName = async () => {
     color: var(--navy);
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 4px 16px rgba(200,169,81,0.3);
+    box-shadow: 0 4px 16px var(--c-gold-30);
 }
 
 .ma-hero-cta:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(200,169,81,0.4);
+    box-shadow: 0 6px 20px var(--c-gold-40);
 }
 
 /* Stats */
@@ -556,7 +556,7 @@ const saveName = async () => {
     margin: -16px 32px 0;
     background: white;
     border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 20px var(--c-black-6);
     position: relative;
     z-index: 10;
 }
@@ -585,7 +585,7 @@ const saveName = async () => {
 .ma-stat-divider {
     width: 1px;
     height: 32px;
-    background: rgba(0,0,0,0.08);
+    background: var(--c-black-8);
 }
 
 /* Services Section */
@@ -642,14 +642,14 @@ const saveName = async () => {
     padding: 12px;
     background: white;
     border-radius: 16px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 12px var(--c-black-4);
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .ma-service-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 20px var(--c-black-8);
 }
 
 .ma-service-img {
@@ -740,8 +740,8 @@ const saveName = async () => {
     gap: 12px;
     padding: 16px;
     background: white;
-    border-top: 1px solid rgba(0,0,0,0.06);
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+    border-top: 1px solid var(--c-black-6);
+    box-shadow: 0 -4px 20px var(--c-black-6);
 }
 
 .ma-bottom-btn {
@@ -760,7 +760,7 @@ const saveName = async () => {
 
 .ma-bottom-orders {
     background: var(--cream);
-    border: 1px solid rgba(0,0,0,0.06);
+    border: 1px solid var(--c-black-6);
     color: var(--navy);
 }
 
@@ -772,7 +772,7 @@ const saveName = async () => {
     background: var(--gold);
     border: none;
     color: var(--navy);
-    box-shadow: 0 4px 16px rgba(200,169,81,0.3);
+    box-shadow: 0 4px 16px var(--c-gold-30);
 }
 
 .ma-bottom-book:hover {
@@ -783,7 +783,7 @@ const saveName = async () => {
 .name-modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(27, 43, 90, 0.9);
+    background: var(--c-forest-90);
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
@@ -902,8 +902,8 @@ const saveName = async () => {
     align-items: center;
     gap: 8px;
     padding: 16px 12px;
-    background: rgba(255,255,255,0.5);
-    border: 2px solid rgba(200,169,81,0.2);
+    background: var(--c-white-50);
+    border: 2px solid var(--c-gold-20);
     border-radius: 16px;
     color: var(--navy);
     font-size: 14px;
@@ -918,13 +918,13 @@ const saveName = async () => {
 
 .gender-btn:hover {
     border-color: var(--gold);
-    background: rgba(200,169,81,0.1);
+    background: var(--c-gold-10);
 }
 
 .gender-btn.selected {
-    background: rgba(200,169,81,0.2);
+    background: var(--c-gold-20);
     border-color: var(--gold);
-    box-shadow: 0 4px 12px rgba(200,169,81,0.2);
+    box-shadow: 0 4px 12px var(--c-gold-20);
 }
 
 .name-error {
@@ -946,7 +946,7 @@ const saveName = async () => {
     border-radius: 14px;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 4px 16px rgba(200,169,81,0.3);
+    box-shadow: 0 4px 16px var(--c-gold-30);
 }
 
 .name-submit-btn:hover:not(:disabled) {

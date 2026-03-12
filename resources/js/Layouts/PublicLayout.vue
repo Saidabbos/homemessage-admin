@@ -189,10 +189,10 @@ onUnmounted(() => {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--c-white-95);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid var(--c-black-5);
 }
 
 .nav-container {
@@ -212,7 +212,7 @@ onUnmounted(() => {
     font-family: 'Playfair Display', serif;
     font-size: 1.5rem;
     font-weight: 600;
-    color: #1a1a2e;
+    color: var(--c-forest);
 }
 
 .nav-links {
@@ -230,12 +230,12 @@ onUnmounted(() => {
 }
 
 .nav-link:hover {
-    color: #1a1a2e;
+    color: var(--c-forest);
 }
 
 .nav-link-cta {
     padding: 0.625rem 1.25rem;
-    background: linear-gradient(135deg, #C9A55C 0%, #D4B76A 100%);
+    background: linear-gradient(135deg, var(--c-gold) 0%, var(--c-sage) 100%);
     color: white !important;
     border-radius: 50px;
 }
@@ -249,7 +249,7 @@ onUnmounted(() => {
     display: flex;
     gap: 0.25rem;
     padding: 0.25rem;
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--c-black-5);
     border-radius: 8px;
 }
 
@@ -267,8 +267,8 @@ onUnmounted(() => {
 
 .lang-btn.active {
     background: white;
-    color: #1a1a2e;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: var(--c-forest);
+    box-shadow: 0 2px 4px var(--c-black-10);
 }
 
 /* Mobile Menu */
@@ -278,10 +278,10 @@ onUnmounted(() => {
     justify-content: center;
     width: 40px;
     height: 40px;
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--c-black-5);
     border: none;
     border-radius: 10px;
-    color: #1a1a2e;
+    color: var(--c-forest);
     cursor: pointer;
 }
 
@@ -290,7 +290,7 @@ onUnmounted(() => {
     flex-direction: column;
     gap: 0.5rem;
     padding: 1rem 1.5rem 1.5rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    border-top: 1px solid var(--c-black-5);
 }
 
 .mobile-link {
@@ -298,18 +298,18 @@ onUnmounted(() => {
     padding: 0.75rem 1rem;
     font-size: 1rem;
     font-weight: 500;
-    color: #1a1a2e;
+    color: var(--c-forest);
     text-decoration: none;
     border-radius: 10px;
     transition: background 0.2s ease;
 }
 
 .mobile-link:hover {
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--c-black-5);
 }
 
 .mobile-link-cta {
-    background: linear-gradient(135deg, #C9A55C 0%, #D4B76A 100%);
+    background: linear-gradient(135deg, var(--c-gold) 0%, var(--c-sage) 100%);
     color: white;
     text-align: center;
 }
@@ -336,7 +336,7 @@ onUnmounted(() => {
     align-items: center;
     gap: 0.5rem;
     padding: 0.375rem 0.75rem;
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--c-black-5);
     border: none;
     border-radius: 50px;
     cursor: pointer;
@@ -344,7 +344,7 @@ onUnmounted(() => {
 }
 
 .user-menu-btn:hover {
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--c-black-10);
 }
 
 .user-avatar {
@@ -353,7 +353,7 @@ onUnmounted(() => {
     justify-content: center;
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, #C9A55C 0%, #D4B76A 100%);
+    background: linear-gradient(135deg, var(--c-gold) 0%, var(--c-sage) 100%);
     color: white;
     font-size: 0.875rem;
     font-weight: 600;
@@ -376,20 +376,20 @@ onUnmounted(() => {
     min-width: 220px;
     background: white;
     border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 40px var(--c-black-15);
     overflow: hidden;
     z-index: 200;
 }
 
 .dropdown-header {
     padding: 1rem;
-    background: rgba(0, 0, 0, 0.02);
+    background: var(--c-black-2);
 }
 
 .dropdown-name {
     display: block;
     font-weight: 600;
-    color: #1a1a2e;
+    color: var(--c-forest);
 }
 
 .dropdown-phone {
@@ -401,7 +401,7 @@ onUnmounted(() => {
 
 .dropdown-divider {
     height: 1px;
-    background: rgba(0, 0, 0, 0.08);
+    background: var(--c-black-8);
 }
 
 .dropdown-item {
@@ -411,7 +411,7 @@ onUnmounted(() => {
     width: 100%;
     padding: 0.75rem 1rem;
     font-size: 0.9375rem;
-    color: #1a1a2e;
+    color: var(--c-forest);
     text-decoration: none;
     background: none;
     border: none;
@@ -420,7 +420,7 @@ onUnmounted(() => {
 }
 
 .dropdown-item:hover {
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--c-black-5);
 }
 
 .dropdown-item svg {
@@ -440,22 +440,22 @@ onUnmounted(() => {
     padding: 0.5rem 1rem;
     font-size: 0.9375rem;
     font-weight: 500;
-    color: #1a1a2e;
+    color: var(--c-forest);
     text-decoration: none;
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--c-black-5);
     border-radius: 8px;
     transition: background 0.2s ease;
 }
 
 .login-btn:hover {
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--c-black-10);
 }
 
 /* Mobile User Section */
 .mobile-user {
     margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid var(--c-black-8);
 }
 
 .mobile-user-info {
@@ -472,7 +472,7 @@ onUnmounted(() => {
     justify-content: center;
     width: 40px;
     height: 40px;
-    background: linear-gradient(135deg, #C9A55C 0%, #D4B76A 100%);
+    background: linear-gradient(135deg, var(--c-gold) 0%, var(--c-sage) 100%);
     color: white;
     font-size: 1rem;
     font-weight: 600;
@@ -481,7 +481,7 @@ onUnmounted(() => {
 
 .mobile-user-name {
     font-weight: 600;
-    color: #1a1a2e;
+    color: var(--c-forest);
 }
 
 .mobile-logout {
@@ -494,7 +494,7 @@ onUnmounted(() => {
 }
 
 .mobile-link-login {
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--c-black-5);
     text-align: center;
     margin-top: 1rem;
 }
@@ -524,7 +524,7 @@ onUnmounted(() => {
 
 /* Footer */
 .public-footer {
-    background: #1a1a2e;
+    background: var(--c-forest);
     color: white;
     padding: 3rem 1.5rem 1.5rem;
 }
@@ -582,7 +582,7 @@ onUnmounted(() => {
 
 .footer-bottom {
     padding-top: 1.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--c-white-10);
     text-align: center;
 }
 

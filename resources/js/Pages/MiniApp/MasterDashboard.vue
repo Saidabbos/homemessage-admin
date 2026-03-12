@@ -177,12 +177,12 @@ const logout = () => {
                     <span class="md-rating-number">{{ ratingSummary.average }}</span>
                     <div class="md-rating-stars">
                         <template v-for="i in renderStars(ratingSummary.average).full" :key="'f'+i">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#C8A951" stroke="#C8A951" stroke-width="1">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#C8A65E" stroke="#C8A65E" stroke-width="1">
                                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                             </svg>
                         </template>
                         <template v-if="renderStars(ratingSummary.average).half">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#C8A951" stroke="#C8A951" stroke-width="1" opacity="0.5">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="#C8A65E" stroke="#C8A65E" stroke-width="1" opacity="0.5">
                                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                             </svg>
                         </template>
@@ -251,7 +251,7 @@ const logout = () => {
                         <span class="md-rating-customer">{{ rating.customer_name }}</span>
                         <div class="md-rating-item-stars">
                             <template v-for="i in 5" :key="i">
-                                <svg width="14" height="14" viewBox="0 0 24 24" :fill="i <= rating.overall_rating ? '#C8A951' : 'none'" :stroke="i <= rating.overall_rating ? '#C8A951' : '#D1D5DB'" stroke-width="1">
+                                <svg width="14" height="14" viewBox="0 0 24 24" :fill="i <= rating.overall_rating ? '#C8A65E' : 'none'" :stroke="i <= rating.overall_rating ? '#C8A65E' : '#D1D5DB'" stroke-width="1">
                                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                                 </svg>
                             </template>
@@ -300,11 +300,11 @@ const logout = () => {
 
 <style scoped>
 .md-page {
-    --gold: #C8A951;
-    --gold-light: #D4B76A;
-    --navy: #1B2B5A;
+    --gold: var(--c-gold);
+    --gold-light: var(--c-sage);
+    --navy: var(--c-forest);
     --cream: #f9fafb;
-    --cream-dark: #EDE8DF;
+    --cream-dark: var(--c-ivory);
     --text-muted: #8B8680;
 
     min-height: 100vh;
@@ -336,7 +336,7 @@ const logout = () => {
     justify-content: center;
     border-radius: 12px;
     background: white;
-    border: 1px solid rgba(0,0,0,0.06);
+    border: 1px solid var(--c-black-6);
     color: var(--navy);
     cursor: pointer;
     transition: all 0.2s;
@@ -390,7 +390,7 @@ const logout = () => {
     right: -30%;
     width: 200px;
     height: 200px;
-    background: radial-gradient(circle, rgba(200,169,81,0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--c-gold-15) 0%, transparent 70%);
     border-radius: 50%;
 }
 
@@ -414,8 +414,8 @@ const logout = () => {
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    background: rgba(200,169,81,0.15);
-    border: 1px solid rgba(200,169,81,0.3);
+    background: var(--c-gold-15);
+    border: 1px solid var(--c-gold-30);
     border-radius: 20px;
     margin-bottom: 12px;
 }
@@ -443,7 +443,7 @@ const logout = () => {
 
 .md-hero-subtitle {
     font-size: 13px;
-    color: rgba(255,255,255,0.65);
+    color: var(--c-white-65);
     margin: 0;
     line-height: 1.4;
 }
@@ -458,7 +458,7 @@ const logout = () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 3px solid rgba(200,169,81,0.4);
+    border: 3px solid var(--c-gold-40);
 }
 
 .md-hero-avatar img {
@@ -494,7 +494,7 @@ const logout = () => {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 12px var(--c-black-4);
 }
 
 .md-stat-icon {
@@ -523,7 +523,7 @@ const logout = () => {
 }
 
 .md-stat-icon-gold {
-    background: rgba(200,169,81,0.15);
+    background: var(--c-gold-15);
     color: var(--gold);
 }
 
@@ -574,7 +574,7 @@ const logout = () => {
     background: white;
     border-radius: 16px;
     padding: 20px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 12px var(--c-black-4);
 }
 
 .md-rating-big {
@@ -609,7 +609,7 @@ const logout = () => {
     border-radius: 16px;
     padding: 32px 16px;
     text-align: center;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 12px var(--c-black-4);
     color: var(--text-muted);
 }
 
@@ -637,7 +637,7 @@ const logout = () => {
     padding: 14px;
     background: white;
     border-radius: 14px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 12px var(--c-black-4);
 }
 
 .md-order-time {
@@ -713,7 +713,7 @@ const logout = () => {
     background: white;
     border-radius: 14px;
     padding: 14px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 12px var(--c-black-4);
 }
 
 .md-rating-item-header {
@@ -754,8 +754,8 @@ const logout = () => {
     right: 0;
     display: flex;
     background: white;
-    border-top: 1px solid rgba(0,0,0,0.06);
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+    border-top: 1px solid var(--c-black-6);
+    box-shadow: 0 -4px 20px var(--c-black-6);
     z-index: 40;
 }
 

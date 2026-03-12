@@ -28,7 +28,7 @@
     margin: 0 auto 16px;
     border-radius: 50%;
     overflow: hidden;
-    border: 3px solid #E8E5E0;
+    border: 3px solid var(--c-sage-30);
 }
 
 .rf-avatar img {
@@ -49,19 +49,19 @@
 }
 
 .rf-avatar-customer {
-    border-color: #1B2B5A;
+    border-color: var(--c-forest);
 }
 
 .rf-avatar-customer .rf-avatar-placeholder {
-    background: linear-gradient(135deg, #1B2B5A, #2a3f7e);
+    background: linear-gradient(135deg, var(--c-forest), #2a3f7e);
 }
 
 .rf-avatar-master {
-    border-color: #2D6A4F;
+    border-color: var(--c-forest);
 }
 
 .rf-avatar-master .rf-avatar-placeholder {
-    background: linear-gradient(135deg, #2D6A4F, #3d8b6a);
+    background: linear-gradient(135deg, var(--c-forest), var(--c-sage-dark));
 }
 
 .rf-name {
@@ -90,11 +90,11 @@
 }
 
 .rf-badge-customer {
-    background: #1B2B5A;
+    background: var(--c-forest);
 }
 
 .rf-badge-master {
-    background: #2D6A4F;
+    background: var(--c-forest);
 }
 
 /* Card */
@@ -102,7 +102,7 @@
     background: #fff;
     border-radius: 14px;
     padding: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px var(--c-black-10);
 }
 
 /* Rating Section */
@@ -167,7 +167,7 @@
 
 .rf-star:hover,
 .rf-star.rf-star-filled {
-    color: #C8A951;
+    color: var(--c-gold);
     transform: scale(1.1);
 }
 
@@ -247,7 +247,7 @@
 
 .rf-textarea:focus {
     outline: none;
-    border-color: #C8A951;
+    border-color: var(--c-gold);
     background: #fff;
 }
 
@@ -297,20 +297,20 @@
 }
 
 .rf-submit-customer {
-    background: #1B2B5A;
+    background: var(--c-forest);
 }
 
 .rf-submit-customer:hover:not(:disabled) {
     background: #243670;
-    box-shadow: 0 4px 12px rgba(27, 43, 90, 0.3);
+    box-shadow: 0 4px 12px var(--c-forest-30);
 }
 
 .rf-submit-master {
-    background: #2D6A4F;
+    background: var(--c-forest);
 }
 
 .rf-submit-master:hover:not(:disabled) {
-    background: #3d8b6a;
+    background: var(--c-sage-dark);
     box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
 }
 

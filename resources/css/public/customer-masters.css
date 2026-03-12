@@ -13,7 +13,7 @@
 .cm-sidebar {
     width: 260px;
     min-height: 100vh;
-    background: linear-gradient(180deg, #1B2B5A, #152348);
+    background: linear-gradient(180deg, var(--c-forest), var(--c-forest-dark));
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -40,7 +40,7 @@
 }
 
 .cm-sidebar-logo svg {
-    color: #C8A951;
+    color: var(--c-gold);
     flex-shrink: 0;
 }
 
@@ -64,7 +64,7 @@
     gap: 12px;
     padding: 12px 16px;
     border-radius: 14px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--c-white-60);
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
@@ -73,17 +73,17 @@
 }
 
 .cm-nav-item:hover {
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(255, 255, 255, 0.06);
+    color: var(--c-white-90);
+    background: var(--c-white-6);
 }
 
 .cm-nav-item.active {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--c-white-8);
     color: #fff;
 }
 
 .cm-nav-item.active svg {
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 .cm-nav-item svg {
@@ -96,7 +96,7 @@
 
 .cm-sidebar-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--c-white-8);
     margin-bottom: 16px;
 }
 
@@ -120,14 +120,14 @@
 }
 
 .cm-user-link:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--c-white-6);
 }
 
 .cm-user-avatar {
     width: 40px;
     height: 40px;
     border-radius: 20px;
-    background: rgba(200, 169, 81, 0.19);
+    background: var(--c-gold-20);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -135,7 +135,7 @@
 }
 
 .cm-user-avatar svg {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--c-white-80);
 }
 
 .cm-user-info {
@@ -157,13 +157,13 @@
 
 .cm-user-phone {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--c-white-50);
 }
 
 .cm-logout-btn {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--c-white-40);
     cursor: pointer;
     padding: 4px;
     border-radius: 6px;
@@ -173,7 +173,7 @@
 
 .cm-logout-btn:hover {
     color: #ff6b6b;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--c-white-6);
 }
 
 /* ── Main Area ── */
@@ -190,20 +190,20 @@
     align-items: center;
     justify-content: space-between;
     padding: 20px 32px;
-    border-bottom: 1px solid rgba(27, 43, 90, 0.06);
+    border-bottom: 1px solid var(--c-forest-5);
 }
 
 .cm-page-title {
     font-family: 'Playfair Display', serif;
     font-size: 22px;
     font-weight: 400;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0;
 }
 
 .cm-page-subtitle {
     font-size: 13px;
-    color: rgba(27, 43, 90, 0.31);
+    color: var(--c-forest-30);
     margin-top: 2px;
 }
 
@@ -227,9 +227,9 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(27, 43, 90, 0.06);
+    border: 1px solid var(--c-forest-5);
     border-radius: 14px;
     padding: 10px 16px;
     flex: 1;
@@ -237,7 +237,7 @@
 }
 
 .cm-search-wrap svg {
-    color: rgba(27, 43, 90, 0.3);
+    color: var(--c-forest-30);
     flex-shrink: 0;
 }
 
@@ -247,12 +247,12 @@
     background: none;
     font-family: 'Manrope', sans-serif;
     font-size: 14px;
-    color: #1B2B5A;
+    color: var(--c-forest);
     width: 100%;
 }
 
 .cm-search-input::placeholder {
-    color: rgba(27, 43, 90, 0.3);
+    color: var(--c-forest-30);
 }
 
 .cm-filters {
@@ -263,26 +263,26 @@
 .cm-filter-btn {
     padding: 8px 20px;
     border-radius: 12px;
-    border: 1px solid rgba(27, 43, 90, 0.06);
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--c-forest-5);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
     backdrop-filter: blur(12px);
     font-family: 'Manrope', sans-serif;
     font-size: 13px;
-    color: rgba(27, 43, 90, 0.5);
+    color: var(--c-forest-50);
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
 }
 
 .cm-filter-btn:hover {
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    color: rgba(27, 43, 90, 0.7);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
+    color: var(--c-forest-70);
 }
 
 .cm-filter-btn.active {
-    background: #1B2B5A;
+    background: var(--c-forest);
     color: #fff;
-    border-color: #1B2B5A;
+    border-color: var(--c-forest);
 }
 
 /* ── Count ── */
@@ -291,11 +291,11 @@
     align-items: center;
     gap: 12px;
     font-size: 14px;
-    color: rgba(27, 43, 90, 0.5);
+    color: var(--c-forest-50);
 }
 
 .cm-count svg {
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 /* ── Masters Grid ── */
@@ -307,9 +307,9 @@
 
 /* ── Master Card ── */
 .cm-card {
-    background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fff; box-shadow: 0 1px 3px var(--c-black-8);
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.37);
+    border: 1px solid var(--c-white-37);
     backdrop-filter: blur(16px);
     overflow: hidden;
     display: flex;
@@ -321,7 +321,7 @@
 
 .cm-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(27, 43, 90, 0.08);
+    box-shadow: 0 8px 24px var(--c-forest-8);
 }
 
 .cm-card-img {
@@ -344,7 +344,7 @@
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--c-white-85);
     backdrop-filter: blur(8px);
     border: none;
     display: flex;
@@ -361,11 +361,11 @@
 }
 
 .cm-fav-btn svg {
-    color: rgba(27, 43, 90, 0.3);
+    color: var(--c-forest-30);
 }
 
 .cm-fav-btn.active svg {
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 .cm-card-body {
@@ -379,13 +379,13 @@
     font-family: 'Playfair Display', serif;
     font-size: 16px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0;
 }
 
 .cm-card-spec {
     font-size: 12px;
-    color: rgba(27, 43, 90, 0.37);
+    color: var(--c-forest-40);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -403,18 +403,18 @@
     align-items: center;
     gap: 4px;
     font-size: 12px;
-    color: rgba(27, 43, 90, 0.5);
+    color: var(--c-forest-50);
 }
 
 .cm-card-arrow {
     display: flex;
     justify-content: flex-end;
-    color: rgba(27, 43, 90, 0.15);
+    color: var(--c-forest-15);
     margin-top: 4px;
 }
 
 .cm-card:hover .cm-card-arrow {
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 /* ── Empty State ── */
@@ -428,13 +428,13 @@
 }
 
 .cm-empty svg {
-    color: rgba(27, 43, 90, 0.12);
+    color: var(--c-forest-10);
     margin-bottom: 20px;
 }
 
 .cm-empty p {
     font-size: 15px;
-    color: rgba(27, 43, 90, 0.4);
+    color: var(--c-forest-40);
     margin: 0;
 }
 

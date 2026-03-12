@@ -40,11 +40,11 @@
 }
 
 .rc-success-icon-customer {
-    background: linear-gradient(135deg, #1B2B5A, #2a3f7e);
+    background: linear-gradient(135deg, var(--c-forest), #2a3f7e);
 }
 
 .rc-success-icon-master {
-    background: linear-gradient(135deg, #2D6A4F, #3d8b6a);
+    background: linear-gradient(135deg, var(--c-forest), var(--c-sage-dark));
 }
 
 @keyframes rc-pop {
@@ -72,7 +72,7 @@
     background: #fff;
     border-radius: 14px;
     padding: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px var(--c-black-10);
     margin-bottom: 16px;
 }
 
@@ -113,11 +113,11 @@
 }
 
 .rc-avatar-placeholder-customer {
-    background: linear-gradient(135deg, #1B2B5A, #2a3f7e);
+    background: linear-gradient(135deg, var(--c-forest), #2a3f7e);
 }
 
 .rc-avatar-placeholder-master {
-    background: linear-gradient(135deg, #2D6A4F, #3d8b6a);
+    background: linear-gradient(135deg, var(--c-forest), var(--c-sage-dark));
 }
 
 .rc-person-info {
@@ -155,7 +155,7 @@
     font-family: 'Playfair Display', serif;
     font-size: 48px;
     font-weight: 700;
-    color: #C8A951;
+    color: var(--c-gold);
     line-height: 1;
 }
 
@@ -179,7 +179,7 @@
 }
 
 .rc-star-filled {
-    color: #C8A951;
+    color: var(--c-gold);
 }
 
 .rc-star-empty {
@@ -230,7 +230,7 @@
     border-radius: 10px;
     padding: 16px;
     margin-top: 20px;
-    border-left: 3px solid #C8A951;
+    border-left: 3px solid var(--c-gold);
 }
 
 .rc-feedback-label {
@@ -274,22 +274,22 @@
 }
 
 .rc-btn-primary-customer {
-    background: #1B2B5A;
+    background: var(--c-forest);
     color: #fff;
 }
 
 .rc-btn-primary-customer:hover {
     background: #243670;
-    box-shadow: 0 4px 12px rgba(27, 43, 90, 0.3);
+    box-shadow: 0 4px 12px var(--c-forest-30);
 }
 
 .rc-btn-primary-master {
-    background: #2D6A4F;
+    background: var(--c-forest);
     color: #fff;
 }
 
 .rc-btn-primary-master:hover {
-    background: #3d8b6a;
+    background: var(--c-sage-dark);
     box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
 }
 
@@ -301,7 +301,7 @@
 
 .rc-btn-secondary:hover {
     background: #FAFAF8;
-    border-color: #C8A951;
+    border-color: var(--c-gold);
 }
 
 .rc-btn svg {

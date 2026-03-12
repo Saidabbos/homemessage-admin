@@ -102,6 +102,6 @@ defineEmits(['update:modelValue', 'blur', 'focus']);
     --tw-ring-color: rgba(201, 165, 92, 0.2);
 }
 .focus\:border-gold:focus {
-    border-color: #C9A55C;
+    border-color: var(--c-gold);
 }
 </style>

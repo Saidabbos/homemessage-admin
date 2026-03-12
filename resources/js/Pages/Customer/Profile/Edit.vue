@@ -426,7 +426,7 @@ const savePin = async () => {
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #C8A951, #B8963E);
+    background: linear-gradient(135deg, var(--c-gold), #B8963E);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -444,7 +444,7 @@ const savePin = async () => {
     font-family: 'Playfair Display', serif;
     font-size: 20px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0 0 4px;
 }
 
@@ -470,7 +470,7 @@ const savePin = async () => {
 .cd-form-label {
     font-size: 14px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 .cd-form-input,
@@ -481,15 +481,15 @@ const savePin = async () => {
     border: 1px solid #E8E5E0;
     border-radius: 10px;
     font-size: 15px;
-    color: #1B2B5A;
+    color: var(--c-forest);
     transition: all 0.2s ease;
 }
 
 .cd-form-input:focus,
 .cd-form-select:focus {
     outline: none;
-    border-color: #C8A951;
-    box-shadow: 0 0 0 3px rgba(200, 169, 81, 0.1);
+    border-color: var(--c-gold);
+    box-shadow: 0 0 0 3px var(--c-gold-10);
 }
 
 .cd-form-input::placeholder {
@@ -531,7 +531,7 @@ const savePin = async () => {
 .cd-btn-primary {
     width: 100%;
     padding: 14px 24px;
-    background: linear-gradient(135deg, #C8A951, #B8963E);
+    background: linear-gradient(135deg, var(--c-gold), #B8963E);
     color: #fff;
     font-size: 15px;
     font-weight: 600;
@@ -614,7 +614,7 @@ const savePin = async () => {
 .cd-pin-title {
     font-size: 16px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0;
 }
 
@@ -637,17 +637,17 @@ const savePin = async () => {
     background: #F5F2ED;
     border: none;
     border-radius: 10px;
-    color: #1B2B5A;
+    color: var(--c-forest);
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .cd-pin-btn:hover {
-    background: #EDE8DF;
+    background: var(--c-ivory);
 }
 
 .cd-pin-btn-primary {
-    background: linear-gradient(135deg, #C8A951, #B8963E);
+    background: linear-gradient(135deg, var(--c-gold), #B8963E);
     color: white;
 }
 
@@ -667,7 +667,7 @@ const savePin = async () => {
 .cd-modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--c-black-50);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -695,7 +695,7 @@ const savePin = async () => {
     font-family: 'Playfair Display', serif;
     font-size: 20px;
     font-weight: 600;
-    color: #1B2B5A;
+    color: var(--c-forest);
     margin: 0;
 }
 
@@ -714,8 +714,8 @@ const savePin = async () => {
 }
 
 .cd-modal-close:hover {
-    background: #EDE8DF;
-    color: #1B2B5A;
+    background: var(--c-ivory);
+    color: var(--c-forest);
 }
 
 .cd-modal-body {
@@ -748,15 +748,15 @@ const savePin = async () => {
 
 .cd-modal-cancel {
     background: #F5F2ED;
-    color: #1B2B5A;
+    color: var(--c-forest);
 }
 
 .cd-modal-cancel:hover {
-    background: #EDE8DF;
+    background: var(--c-ivory);
 }
 
 .cd-modal-submit {
-    background: linear-gradient(135deg, #C8A951, #B8963E);
+    background: linear-gradient(135deg, var(--c-gold), #B8963E);
     color: white;
 }
 

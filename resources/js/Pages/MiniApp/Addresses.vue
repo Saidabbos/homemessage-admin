@@ -420,10 +420,10 @@ const detectLocation = async () => {
 
 <style scoped>
 .addresses-page {
-    --navy: #1B2B5A;
-    --gold: #C8A951;
+    --navy: var(--c-forest);
+    --gold: var(--c-gold);
     --cream: #f9fafb;
-    --cream-dark: #EDE8DF;
+    --cream-dark: var(--c-ivory);
     --text-muted: #8B8680;
 
     min-height: 100vh;
@@ -439,7 +439,7 @@ const detectLocation = async () => {
     justify-content: space-between;
     padding: 12px 16px;
     background: white;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
+    border-bottom: 1px solid var(--c-black-6);
     position: sticky;
     top: 0;
     z-index: 50;
@@ -519,7 +519,7 @@ const detectLocation = async () => {
     background: white;
     border-radius: 16px;
     padding: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 8px var(--c-black-4);
 }
 
 .address-card.is-default {
@@ -640,7 +640,7 @@ const detectLocation = async () => {
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--c-black-40);
     display: flex;
     align-items: flex-end;
     z-index: 100;
@@ -806,7 +806,7 @@ const detectLocation = async () => {
 }
 
 .detect-btn:hover:not(:disabled) {
-    background: rgba(200, 169, 81, 0.1);
+    background: var(--c-gold-10);
 }
 
 .detect-btn:disabled {
@@ -840,7 +840,7 @@ const detectLocation = async () => {
     justify-content: space-between;
     margin-top: 8px;
     padding: 10px 12px;
-    background: rgba(200, 169, 81, 0.1);
+    background: var(--c-gold-10);
     border-radius: 8px;
     font-size: 13px;
     color: var(--navy);
@@ -867,7 +867,7 @@ const detectLocation = async () => {
     border-radius: 10px;
     font-size: 14px;
     font-weight: 500;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px var(--c-black-15);
     z-index: 200;
     animation: slideUp 0.3s ease;
 }

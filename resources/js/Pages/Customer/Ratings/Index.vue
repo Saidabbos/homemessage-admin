@@ -110,7 +110,7 @@ const logout = () => {
                     <div class="cr-summary-rating">
                         <span class="cr-summary-num">{{ summary.average ?? '-' }}</span>
                         <div class="cr-summary-stars">
-                            <svg v-for="s in 5" :key="s" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" :fill="s <= Math.round(summary.average || 0) ? '#C8A951' : '#e5e7eb'" :stroke="s <= Math.round(summary.average || 0) ? '#C8A951' : '#e5e7eb'" stroke-width="1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg v-for="s in 5" :key="s" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" :fill="s <= Math.round(summary.average || 0) ? '#C8A65E' : '#e5e7eb'" :stroke="s <= Math.round(summary.average || 0) ? '#C8A65E' : '#e5e7eb'" stroke-width="1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         </div>
                         <span class="cr-summary-count">{{ summary.count }} {{ t('customer.ratings.totalReviews').toLowerCase() }}</span>
                     </div>
@@ -145,7 +145,7 @@ const logout = () => {
 
                         <div class="cr-stars-row">
                             <div class="cr-stars">
-                                <svg v-for="s in 5" :key="s" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" :fill="s <= rating.overall_rating ? '#C8A951' : '#e5e7eb'" :stroke="s <= rating.overall_rating ? '#C8A951' : '#e5e7eb'" stroke-width="1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg v-for="s in 5" :key="s" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" :fill="s <= rating.overall_rating ? '#C8A65E' : '#e5e7eb'" :stroke="s <= rating.overall_rating ? '#C8A65E' : '#e5e7eb'" stroke-width="1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                             </div>
                             <div v-if="rating.punctuality_rating" class="cr-sub-ratings">
                                 <span>{{ t('customer.ratings.punctuality') }}: {{ rating.punctuality_rating }}/5</span>

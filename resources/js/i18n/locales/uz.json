@@ -411,7 +411,9 @@
         "heroCtaText": "CTA tugmasi matni",
         "heroCtaTextHint": "Asosiy tugmaning matni (masalan 'Seansni Band Qiling')",
         "heroViewServicesText": "Xizmatlarga o'tish tugmasi",
-        "heroViewServicesTextHint": "Ikkinchi tugmaning matni"
+        "heroViewServicesTextHint": "Ikkinchi tugmaning matni",
+        "theme": "Tema",
+        "themeHint": "Tema faqat shu brauzerda saqlanadi. Har bir foydalanuvchi o'z temasini tanlashi mumkin."
     },
     "profile": {
         "title": "Profil",

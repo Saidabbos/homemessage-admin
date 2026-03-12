@@ -2,7 +2,7 @@
 /**
  * BaseChip - Reusable chip/badge component for slot statuses
  * 
- * @prop {String} color - Chip color: green | yellow | gray | red | gold
+ * @prop {String} color - Chip color: green | yellow | gray | red | gold | sage
  * @prop {String} size - Chip size: sm | md | lg
  * @prop {Boolean} selectable - Makes chip selectable/clickable
  * @prop {Boolean} selected - Shows selected state
@@ -11,7 +11,7 @@ defineProps({
     color: {
         type: String,
         default: 'gray',
-        validator: (value) => ['green', 'yellow', 'gray', 'red', 'gold'].includes(value),
+        validator: (value) => ['green', 'yellow', 'gray', 'red', 'gold', 'sage'].includes(value),
     },
     size: {
         type: String,
@@ -36,6 +36,7 @@ defineEmits(['click']);
 // gray = RESERVED (booked)
 // red = BLOCKED (unavailable)
 // gold = brand accent
+// sage = secondary accent
 
 const colorClasses = {
     green: {
@@ -57,6 +58,10 @@ const colorClasses = {
     gold: {
         base: 'bg-amber-100 text-amber-700 border-amber-200',
         selected: 'bg-gold text-white border-gold',
+    },
+    sage: {
+        base: 'chip-sage-base',
+        selected: 'chip-sage-selected',
     },
 };
 
@@ -83,9 +88,19 @@ const sizeClasses = {
 
 <style scoped>
 .bg-gold {
-    background-color: #C9A55C;
+    background-color: var(--c-gold);
 }
 .border-gold {
-    border-color: #C9A55C;
+    border-color: var(--c-gold);
+}
+.chip-sage-base {
+    background-color: var(--c-sage-10);
+    color: var(--c-sage-dark);
+    border-color: var(--c-sage-20);
+}
+.chip-sage-selected {
+    background-color: var(--c-sage);
+    color: #fff;
+    border-color: var(--c-sage);
 }
 </style>
