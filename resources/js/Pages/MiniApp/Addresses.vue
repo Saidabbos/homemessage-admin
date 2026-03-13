@@ -422,7 +422,7 @@ const detectLocation = async () => {
 .addresses-page {
     --navy: var(--c-forest);
     --gold: var(--c-gold);
-    --cream: #f9fafb;
+    --cream: var(--c-ivory);
     --cream-dark: var(--c-ivory);
     --text-muted: #8B8680;
 
@@ -549,7 +549,7 @@ const detectLocation = async () => {
     font-size: 11px;
     font-weight: 600;
     padding: 4px 10px;
-    background: linear-gradient(135deg, var(--gold), #D4B96A);
+    background: linear-gradient(135deg, var(--gold), var(--c-gold));
     color: white;
     border-radius: 20px;
 }

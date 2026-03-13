@@ -414,7 +414,7 @@ const savePin = async () => {
 .profile-page {
     --navy: var(--c-forest);
     --gold: var(--c-gold);
-    --cream: #f9fafb;
+    --cream: var(--c-ivory);
     --cream-dark: var(--c-ivory);
     --text-muted: #8B8680;
 
@@ -486,7 +486,7 @@ const savePin = async () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--gold), #D4B96A);
+    background: linear-gradient(135deg, var(--gold), var(--c-gold));
     color: white;
     font-size: 28px;
     font-weight: 600;
@@ -628,7 +628,7 @@ const savePin = async () => {
 }
 
 .submit-btn:hover:not(:disabled) {
-    background: #B8993F;
+    background: var(--c-gold-dark);
 }
 
 .submit-btn:disabled {
@@ -673,7 +673,7 @@ const savePin = async () => {
 }
 
 .quick-link-icon-gold {
-    background: linear-gradient(135deg, var(--c-gold) 0%, #B8993F 100%);
+    background: linear-gradient(135deg, var(--c-gold) 0%, var(--c-gold-dark) 100%);
     color: white;
 }
 
@@ -832,7 +832,7 @@ const savePin = async () => {
 }
 
 .pin-btn-primary:hover {
-    background: #B8993F;
+    background: var(--c-gold-dark);
 }
 
 .pin-btn-danger {
@@ -975,7 +975,7 @@ const savePin = async () => {
 }
 
 .pin-modal-submit:hover:not(:disabled) {
-    background: #B8993F;
+    background: var(--c-gold-dark);
 }
 
 .pin-modal-submit.danger {

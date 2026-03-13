@@ -342,7 +342,7 @@ const saveName = async () => {
     --gold: var(--c-gold);
     --gold-light: var(--c-sage);
     --navy: var(--c-forest);
-    --cream: #f9fafb;
+    --cream: var(--c-ivory);
     --cream-dark: var(--c-ivory);
     --text-muted: #8B8680;
 
@@ -463,7 +463,7 @@ const saveName = async () => {
 /* Hero */
 .ma-hero {
     padding: 24px 16px 32px;
-    background: linear-gradient(135deg, var(--navy) 0%, #253672 100%);
+    background: linear-gradient(135deg, var(--navy) 0%, var(--c-forest-dark) 100%);
     margin: 0 16px;
     border-radius: 20px;
     position: relative;

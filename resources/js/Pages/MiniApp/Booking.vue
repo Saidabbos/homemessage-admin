@@ -1263,12 +1263,12 @@ const pressureLevels = [
 .bk-page {
     --navy: var(--c-forest);
     --gold: var(--c-gold);
-    --cream: #f9fafb;
-    --cream-dark: #E8E5DF;
+    --cream: var(--c-ivory);
+    --cream-dark: var(--c-champagne);
     --text-muted: #8B8680;
 
     min-height: 100vh;
-    background: linear-gradient(160deg, var(--c-bg-warm-1) 0%, var(--c-bg-warm-2) 50%, #DDD8CF 100%);
+    background: linear-gradient(160deg, var(--c-bg-warm-1) 0%, var(--c-bg-warm-2) 50%, var(--c-bg-warm-3) 100%);
     font-family: 'Manrope', -apple-system, sans-serif;
     padding-bottom: 100px;
 }
@@ -2241,7 +2241,7 @@ const pressureLevels = [
 .bk-map-container {
     flex: 1;
     position: relative;
-    background: #f0f0f0;
+    background: var(--c-forest-5);
     min-height: 300px;
 }
 
@@ -2329,7 +2329,7 @@ const pressureLevels = [
 }
 
 .bk-save-address-btn:hover {
-    background: #b89841;
+    background: var(--c-gold-dark);
 }
 
 .bk-save-address-btn:disabled {
@@ -2516,7 +2516,7 @@ const pressureLevels = [
 }
 
 .bk-btn-primary:hover:not(:disabled) {
-    background: #B8993F;
+    background: var(--c-gold-dark);
 }
 
 .bk-btn-primary:disabled {

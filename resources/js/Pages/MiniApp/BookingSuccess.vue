@@ -198,7 +198,7 @@ const getStatusColor = (status) => {
 <style scoped>
 .success-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 50%, #1a2a3a 100%);
+    background: linear-gradient(135deg, var(--c-forest) 0%, var(--c-forest-dark) 100%);
     padding: 24px 16px;
     display: flex;
     flex-direction: column;
@@ -263,9 +263,9 @@ const getStatusColor = (status) => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #B8A369, #D4C89A);
+    background: linear-gradient(135deg, var(--c-gold), var(--c-gold-dark));
     border-radius: 50%;
-    color: #1a2a3a;
+    color: var(--c-forest);
     margin-bottom: 24px;
     box-shadow: 0 8px 40px rgba(184, 163, 105, 0.4);
     animation: scaleIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -294,7 +294,7 @@ const getStatusColor = (status) => {
 .order-number {
     font-size: 18px;
     font-weight: 600;
-    color: #B8A369;
+    color: var(--c-gold);
     margin: 0 0 8px;
     animation: fadeInUp 0.5s ease 0.3s both;
     position: relative;
@@ -390,7 +390,7 @@ const getStatusColor = (status) => {
 .total-price {
     font-size: 22px;
     font-weight: 700;
-    color: #B8A369;
+    color: var(--c-gold);
 }
 
 /* Payment Section */
@@ -502,7 +502,7 @@ const getStatusColor = (status) => {
     border-radius: 16px;
     font-size: 14px;
     font-weight: 600;
-    color: #B8A369;
+    color: var(--c-gold);
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -535,6 +535,6 @@ const getStatusColor = (status) => {
 }
 
 .contact-phone:hover {
-    color: #B8A369;
+    color: var(--c-gold);
 }
 </style>

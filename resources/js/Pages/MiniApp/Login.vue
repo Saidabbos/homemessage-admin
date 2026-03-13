@@ -498,7 +498,7 @@ const goBack = () => {
     padding: 24px;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(180deg, var(--c-ivory) 0%, #F5F2ED 50%, var(--c-ivory) 100%);
+    background: linear-gradient(180deg, var(--c-ivory) 0%, var(--c-bg-warm-1) 50%, var(--c-ivory) 100%);
     position: relative;
     overflow: hidden;
     font-family: 'Manrope', sans-serif;
@@ -561,7 +561,7 @@ const goBack = () => {
 .auto-login {
     position: fixed;
     inset: 0;
-    background: linear-gradient(180deg, var(--c-ivory) 0%, #F5F2ED 50%, var(--c-ivory) 100%);
+    background: linear-gradient(180deg, var(--c-ivory) 0%, var(--c-bg-warm-1) 50%, var(--c-ivory) 100%);
     display: flex;
     flex-direction: column;
     align-items: center;

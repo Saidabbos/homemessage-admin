@@ -170,7 +170,7 @@ const close = () => emit('close');
     align-items: center;
     justify-content: space-between;
     padding: 16px 20px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--c-forest-5);
 }
 
 .sidebar-logo {
@@ -194,7 +194,7 @@ const close = () => emit('close');
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f5f5f5;
+    background: var(--c-forest-5);
     border: none;
     border-radius: 10px;
     color: #666;
@@ -207,7 +207,7 @@ const close = () => emit('close');
     align-items: center;
     gap: 12px;
     padding: 20px;
-    background: linear-gradient(135deg, var(--c-forest) 0%, #253672 100%);
+    background: linear-gradient(135deg, var(--c-forest) 0%, var(--c-forest-dark) 100%);
 }
 
 .sidebar-avatar {
@@ -260,7 +260,7 @@ const close = () => emit('close');
 }
 
 .sidebar-link:hover {
-    background: #f8f5f0;
+    background: var(--c-bg-warm-1);
     color: var(--c-gold);
 }
 
@@ -276,7 +276,7 @@ const close = () => emit('close');
 /* Footer */
 .sidebar-footer {
     padding: 16px 20px;
-    border-top: 1px solid #f0f0f0;
+    border-top: 1px solid var(--c-forest-5);
 }
 
 .sidebar-logout {
